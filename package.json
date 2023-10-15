@@ -1,8 +1,43 @@
 {
-  "name": "pyosh-blog",
+  "name": "pyosh-blog-fe",
   "version": "0.1.0",
+  "repository": "https://github.com/pyo-sh/pyosh-blog-fe",
   "license": "MIT",
-  "repository": "https://github.com/pyo-sh/pyosh-blog-fe.git",
-  "author": "pyo-sh <pygosky@gmail.com>",
-  "packageManager": "yarn@3.6.4"
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx src",
+    "compile:types": "tsc --noEmit",
+    "initVscode": "yarn dlx @yarnpkg/sdks vscode"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.10.5",
+    "@emotion/styled": "^11.10.5",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1",
+    "next": "^13.1.6",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@emotion/babel-plugin": "^11.10.5",
+    "@next/eslint-plugin-next": "^13.1.6",
+    "@types/node": "^18.11.9",
+    "@types/react": "^18.0.24",
+    "@types/react-dom": "^18.0.8",
+    "@typescript-eslint/eslint-plugin": "^5.53.0",
+    "@typescript-eslint/parser": "^5.53.0",
+    "@yarnpkg/pnpify": "^4.0.0-rc.39",
+    "eslint": "^8.34.0",
+    "eslint-config-next": "^13.1.6",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-import-resolver-typescript": "^3.5.3",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.8.4",
+    "typescript": "^4.9.5"
+  },
+  "packageManager": "yarn@3.6.3"
 }
