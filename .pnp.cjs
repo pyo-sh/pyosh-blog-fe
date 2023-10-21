@@ -41,7 +41,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint", "npm:8.51.0"],\
             ["eslint-config-next", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:13.5.4"],\
             ["eslint-config-prettier", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:8.10.0"],\
-            ["eslint-config-pyosh", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:3.0.1"],\
+            ["eslint-config-pyosh", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:3.2.2"],\
             ["eslint-import-resolver-typescript", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:3.6.1"],\
             ["eslint-plugin-import", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:2.28.1"],\
             ["eslint-plugin-prettier", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:4.2.1"],\
@@ -2226,17 +2226,17 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["eslint-config-pyosh", [\
-        ["npm:3.0.1", {\
-          "packageLocation": "./.yarn/cache/eslint-config-pyosh-npm-3.0.1-bf48781565-277f8d3cd2.zip/node_modules/eslint-config-pyosh/",\
+        ["npm:3.2.2", {\
+          "packageLocation": "./.yarn/cache/eslint-config-pyosh-npm-3.2.2-411266dc1d-e71e59f70f.zip/node_modules/eslint-config-pyosh/",\
           "packageDependencies": [\
-            ["eslint-config-pyosh", "npm:3.0.1"]\
+            ["eslint-config-pyosh", "npm:3.2.2"]\
           ],\
           "linkType": "SOFT"\
         }],\
-        ["virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:3.0.1", {\
-          "packageLocation": "./.yarn/__virtual__/eslint-config-pyosh-virtual-bc44dab9dd/0/cache/eslint-config-pyosh-npm-3.0.1-bf48781565-277f8d3cd2.zip/node_modules/eslint-config-pyosh/",\
+        ["virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:3.2.2", {\
+          "packageLocation": "./.yarn/__virtual__/eslint-config-pyosh-virtual-6ebb71ffdf/0/cache/eslint-config-pyosh-npm-3.2.2-411266dc1d-e71e59f70f.zip/node_modules/eslint-config-pyosh/",\
           "packageDependencies": [\
-            ["eslint-config-pyosh", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:3.0.1"],\
+            ["eslint-config-pyosh", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:3.2.2"],\
             ["@types/eslint", null],\
             ["@types/eslint-config-prettier", null],\
             ["@types/eslint-import-resolver-typescript", null],\
@@ -4414,7 +4414,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint", "npm:8.51.0"],\
             ["eslint-config-next", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:13.5.4"],\
             ["eslint-config-prettier", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:8.10.0"],\
-            ["eslint-config-pyosh", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:3.0.1"],\
+            ["eslint-config-pyosh", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:3.2.2"],\
             ["eslint-import-resolver-typescript", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:3.6.1"],\
             ["eslint-plugin-import", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:2.28.1"],\
             ["eslint-plugin-prettier", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:4.2.1"],\

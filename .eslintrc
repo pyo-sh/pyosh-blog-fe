@@ -24,7 +24,13 @@
     }
   },
   "settings": {
-    "import/external-module-folders": [".yarn"]
+    "import/external-module-folders": [".yarn"],
+    "import/resolver": {
+      "typescript": {
+        "project": ["./tsconfig.json"],
+        "sourceType": "module"
+      }
+    }
   },
   "rules": {}
 }
