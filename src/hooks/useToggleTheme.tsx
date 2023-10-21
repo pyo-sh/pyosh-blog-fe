@@ -26,7 +26,7 @@ export function ToggleThemeProvider({ children }: PropsWithChildren) {
     setIsMounted(true);
 
     const isDefaultDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
+      "(prefers-color-scheme: dark)",
     ).matches;
     const bodyThemeData = document.body.dataset.theme;
 

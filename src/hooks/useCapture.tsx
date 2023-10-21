@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
+import JSPdf from "jspdf";
 
 function useCapture<T extends HTMLElement>() {
   const [image, setImage] = useState<HTMLImageElement | null>(null);
@@ -27,7 +27,7 @@ function useCapture<T extends HTMLElement>() {
       return;
     }
 
-    const pdf = new jsPDF();
+    const pdf = new JSPdf();
     const { width, height } = image;
     pdf.addImage(image.src, "PNG", 0, 0, width, height);
     pdf.save();

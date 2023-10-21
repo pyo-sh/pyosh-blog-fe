@@ -10,7 +10,7 @@ export const getPalette = (theme: Theme): Theme => {
 
   const palette = keys.reduce((palette, key) => {
     palette[key as keyof Theme] = convertToCSSVariable(
-      key
+      key,
     ) as Theme[keyof Theme];
 
     return palette;

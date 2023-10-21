@@ -1,6 +1,6 @@
 export default function throttle<T extends unknown[]>(
   fn: (...args: T) => unknown,
-  cycle?: number
+  cycle?: number,
 ) {
   let executed = false;
 

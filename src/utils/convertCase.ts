@@ -7,6 +7,6 @@ export const kebabToCamel = (kebabWord: string): string => {
 export const camelToKebab = (camelWord: string): string => {
   return camelWord.replace(
     /[A-Z]+(?![a-z])|[A-Z]/g,
-    ($, ofs) => (ofs ? "-" : "") + $.toLowerCase()
+    ($, ofs) => (ofs ? "-" : "") + $.toLowerCase(),
   );
 };
