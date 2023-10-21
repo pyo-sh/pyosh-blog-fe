@@ -1717,6 +1717,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"eslint-config-pyosh@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "eslint-config-pyosh@npm:3.0.1"
+  peerDependencies:
+    "@typescript-eslint/eslint-plugin": ">=6.8.0"
+    "@typescript-eslint/parser": ">=6.8.0"
+    eslint: ">=8.51.0"
+    eslint-config-prettier: ">=9.0.0"
+    eslint-import-resolver-typescript: ">=3.6.1"
+    eslint-plugin-import: ">=2.28.1"
+    eslint-plugin-prettier: ">=5.0.1"
+  checksum: 277f8d3cd28e716798b7eadb426e07b3eb487662d05b5a4167ca47fdfc5cb25ed95a0c2435e8c61de7f531bdb69e5da5ba42454c5b1bb4ffb0c19bfa0a26e3fe
+  languageName: node
+  linkType: hard
+
 "eslint-import-resolver-node@npm:^0.3.6, eslint-import-resolver-node@npm:^0.3.7":
   version: 0.3.9
   resolution: "eslint-import-resolver-node@npm:0.3.9"
@@ -3415,6 +3430,7 @@ __metadata:
     eslint: ^8.34.0
     eslint-config-next: ^13.1.6
     eslint-config-prettier: ^8.6.0
+    eslint-config-pyosh: ^3.0.1
     eslint-import-resolver-typescript: ^3.5.3
     eslint-plugin-import: ^2.27.5
     eslint-plugin-prettier: ^4.2.1

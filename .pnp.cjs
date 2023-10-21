@@ -41,6 +41,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint", "npm:8.51.0"],\
             ["eslint-config-next", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:13.5.4"],\
             ["eslint-config-prettier", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:8.10.0"],\
+            ["eslint-config-pyosh", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:3.0.1"],\
             ["eslint-import-resolver-typescript", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:3.6.1"],\
             ["eslint-plugin-import", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:2.28.1"],\
             ["eslint-plugin-prettier", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:4.2.1"],\
@@ -2224,6 +2225,52 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["eslint-config-pyosh", [\
+        ["npm:3.0.1", {\
+          "packageLocation": "./.yarn/cache/eslint-config-pyosh-npm-3.0.1-bf48781565-277f8d3cd2.zip/node_modules/eslint-config-pyosh/",\
+          "packageDependencies": [\
+            ["eslint-config-pyosh", "npm:3.0.1"]\
+          ],\
+          "linkType": "SOFT"\
+        }],\
+        ["virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:3.0.1", {\
+          "packageLocation": "./.yarn/__virtual__/eslint-config-pyosh-virtual-bc44dab9dd/0/cache/eslint-config-pyosh-npm-3.0.1-bf48781565-277f8d3cd2.zip/node_modules/eslint-config-pyosh/",\
+          "packageDependencies": [\
+            ["eslint-config-pyosh", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:3.0.1"],\
+            ["@types/eslint", null],\
+            ["@types/eslint-config-prettier", null],\
+            ["@types/eslint-import-resolver-typescript", null],\
+            ["@types/eslint-plugin-import", null],\
+            ["@types/eslint-plugin-prettier", null],\
+            ["@types/typescript-eslint__eslint-plugin", null],\
+            ["@types/typescript-eslint__parser", null],\
+            ["@typescript-eslint/eslint-plugin", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:5.62.0"],\
+            ["@typescript-eslint/parser", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:5.62.0"],\
+            ["eslint", "npm:8.51.0"],\
+            ["eslint-config-prettier", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:8.10.0"],\
+            ["eslint-import-resolver-typescript", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:3.6.1"],\
+            ["eslint-plugin-import", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:2.28.1"],\
+            ["eslint-plugin-prettier", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:4.2.1"]\
+          ],\
+          "packagePeers": [\
+            "@types/eslint-config-prettier",\
+            "@types/eslint-import-resolver-typescript",\
+            "@types/eslint-plugin-import",\
+            "@types/eslint-plugin-prettier",\
+            "@types/eslint",\
+            "@types/typescript-eslint__eslint-plugin",\
+            "@types/typescript-eslint__parser",\
+            "@typescript-eslint/eslint-plugin",\
+            "@typescript-eslint/parser",\
+            "eslint-config-prettier",\
+            "eslint-import-resolver-typescript",\
+            "eslint-plugin-import",\
+            "eslint-plugin-prettier",\
+            "eslint"\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["eslint-import-resolver-node", [\
         ["npm:0.3.9", {\
           "packageLocation": "./.yarn/cache/eslint-import-resolver-node-npm-0.3.9-2a426afc4b-439b912712.zip/node_modules/eslint-import-resolver-node/",\
@@ -4367,6 +4414,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint", "npm:8.51.0"],\
             ["eslint-config-next", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:13.5.4"],\
             ["eslint-config-prettier", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:8.10.0"],\
+            ["eslint-config-pyosh", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:3.0.1"],\
             ["eslint-import-resolver-typescript", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:3.6.1"],\
             ["eslint-plugin-import", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:2.28.1"],\
             ["eslint-plugin-prettier", "virtual:d28c010bd4989c70038cc0038e3595e208404de941384aee67fd65d551a6456dc31ee1af01574d838fa148ee6c2d03ec73ab859f34751181548a4a64b794175e#npm:4.2.1"],\
