@@ -9,8 +9,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx src",
-    "compile:types": "tsc --noEmit",
-    "initVscode": "yarn dlx @yarnpkg/sdks vscode"
+    "compile:types": "tsc --noEmit"
   },
   "dependencies": {
     "@emotion/react": "^11.10.5",
@@ -39,6 +38,5 @@
     "eslint-plugin-prettier": "^4.2.1",
     "prettier": "^2.8.4",
     "typescript": "^4.9.5"
-  },
-  "packageManager": "yarn@3.6.3"
+  }
 }
