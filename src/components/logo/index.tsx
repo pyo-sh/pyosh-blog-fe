@@ -1,6 +1,7 @@
 import React from "react";
 import { useTheme } from "@emotion/react";
 import styled from "@emotion/styled";
+import Link from "next/link";
 import LogoIcon from "./LogoIcon";
 import LogoText from "./LogoText";
 import { TRANSITION_SVG_BG_COLOR } from "@styles/transition";
@@ -36,7 +37,7 @@ const Logo: React.FC<TProps> = ({ color, showIcon = true, className }) => {
   );
 };
 
-const Wrapper = styled.a`
+const Wrapper = styled(Link)`
   display: flex;
   align-items: center;
 `;

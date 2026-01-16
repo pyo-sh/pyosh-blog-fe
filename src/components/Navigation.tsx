@@ -1,5 +1,6 @@
 import React, { PropsWithChildren } from "react";
 import { useTheme } from "@emotion/react";
+import Link from "next/link";
 import ListRow from "@components/libs/ListRow";
 import Text from "@components/libs/Text";
 
@@ -23,11 +24,11 @@ const NavItem: React.FC<TNavItemProps> = ({ path, children }) => {
 
   return (
     <li>
-      <a href={path}>
+      <Link href={path}>
         <Text color={color} fontWeight={"light"} fontSize="r4">
           {children}
         </Text>
-      </a>
+      </Link>
     </li>
   );
 };

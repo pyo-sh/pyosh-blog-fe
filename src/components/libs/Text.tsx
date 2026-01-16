@@ -34,7 +34,7 @@ type TProps = PropsWithChildren<{
   color?: string;
   hasColorTransition?: boolean;
 }> &
-  React.HTMLAttributes<HTMLOrSVGElement>;
+  Omit<React.HTMLAttributes<HTMLOrSVGElement>, "onToggle">;
 
 const Text: React.FC<TProps> = (props) => {
   const {

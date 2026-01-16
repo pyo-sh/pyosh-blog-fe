@@ -39,7 +39,10 @@ const Button = (props: TProps, ref: ForwardedRef<HTMLButtonElement>) => {
   } = props;
 
   const eTheme = useTheme();
-  let [color, backgroundColor] = [eTheme.text1, eTheme.positive1];
+  let [color, backgroundColor]: [string, string] = [
+    eTheme.text1,
+    eTheme.positive1,
+  ];
 
   // Theming
   if (theme === "primary") {
