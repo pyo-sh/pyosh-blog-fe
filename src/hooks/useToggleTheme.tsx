@@ -18,22 +18,35 @@ const ToggleThemeContext = createContext<{
   isMounted: boolean;
 } | null>(null);
 
-export function ToggleThemeProvider({ children }: PropsWithChildren) {
-  const [themeType, setThemeType] = useState<TThemeType>("default");
+type TProviderProps = PropsWithChildren<{
+  initialTheme?: string;
+}>;
+
+export function ToggleThemeProvider({
+  children,
+  initialTheme,
+}: TProviderProps) {
+  const [themeType, setThemeType] = useState<TThemeType>(
+    initialTheme === "dark" || initialTheme === "light"
+      ? initialTheme
+      : "default",
+  );
   const [isMounted, setIsMounted] = useState<boolean>(false);
 
   useEffect(() => {
     setIsMounted(true);
+
+    if (themeType !== "default") return;
 
     const isDefaultDark = window.matchMedia(
       "(prefers-color-scheme: dark)",
     ).matches;
     const bodyThemeData = document.body.dataset.theme;
 
-    if (isDefaultDark && !bodyThemeData) {
-      setThemeType("dark");
-    } else if (bodyThemeData && bodyThemeData.length !== 0) {
+    if (bodyThemeData && bodyThemeData.length !== 0) {
       setThemeType(bodyThemeData as TThemeType);
+    } else if (isDefaultDark) {
+      setThemeType("dark");
     }
   }, []);
 
