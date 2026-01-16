@@ -94,16 +94,20 @@ const DefaultButton = styled.button`
   &:hover {
     transform: translateY(-7px);
   }
-  transition: transform ${TRANSITION_DELAY_TRANSFORM},
+  transition:
+    transform ${TRANSITION_DELAY_TRANSFORM},
     color ${TRANSITION_DELAY_COLOR},
     background-color ${TRANSITION_DELAY_BG_COLOR};
-  -webkit-transition: transform ${TRANSITION_DELAY_TRANSFORM},
+  -webkit-transition:
+    transform ${TRANSITION_DELAY_TRANSFORM},
     color ${TRANSITION_DELAY_COLOR},
     background-color ${TRANSITION_DELAY_BG_COLOR};
-  -moz-transition: transform ${TRANSITION_DELAY_TRANSFORM},
+  -moz-transition:
+    transform ${TRANSITION_DELAY_TRANSFORM},
     color ${TRANSITION_DELAY_COLOR},
     background-color ${TRANSITION_DELAY_BG_COLOR};
-  -o-transition: transform ${TRANSITION_DELAY_TRANSFORM},
+  -o-transition:
+    transform ${TRANSITION_DELAY_TRANSFORM},
     color ${TRANSITION_DELAY_COLOR},
     background-color ${TRANSITION_DELAY_BG_COLOR};
   background-color: transparent;

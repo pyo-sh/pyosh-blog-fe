@@ -5,13 +5,17 @@ export const TRANSITION_DELAY_BG_COLOR = "0.4s";
 export const TRANSITION_DELAY_TRANSFORM = "0.3s";
 
 export const TRANSITION_THEME = css`
-  transition: color ${TRANSITION_DELAY_COLOR},
+  transition:
+    color ${TRANSITION_DELAY_COLOR},
     background-color ${TRANSITION_DELAY_BG_COLOR};
-  -webkit-transition: color ${TRANSITION_DELAY_COLOR},
+  -webkit-transition:
+    color ${TRANSITION_DELAY_COLOR},
     background-color ${TRANSITION_DELAY_BG_COLOR};
-  -moz-transition: color ${TRANSITION_DELAY_COLOR},
+  -moz-transition:
+    color ${TRANSITION_DELAY_COLOR},
     background-color ${TRANSITION_DELAY_BG_COLOR};
-  -o-transition: color ${TRANSITION_DELAY_COLOR},
+  -o-transition:
+    color ${TRANSITION_DELAY_COLOR},
     background-color ${TRANSITION_DELAY_BG_COLOR};
 `;
 
@@ -67,12 +71,20 @@ export const TRANSITION_BOX_SHADOW_COLOR = css`
 `;
 
 export const transitionWithColor = (target: string) => css`
-  transition: color ${TRANSITION_DELAY_COLOR},
-    background-color ${TRANSITION_DELAY_BG_COLOR}, ${target};
-  -webkit-transition: color ${TRANSITION_DELAY_COLOR},
-    background-color ${TRANSITION_DELAY_BG_COLOR}, ${target};
-  -moz-transition: color ${TRANSITION_DELAY_COLOR},
-    background-color ${TRANSITION_DELAY_BG_COLOR}, ${target};
-  -o-transition: color ${TRANSITION_DELAY_COLOR},
-    background-color ${TRANSITION_DELAY_BG_COLOR}, ${target};
+  transition:
+    color ${TRANSITION_DELAY_COLOR},
+    background-color ${TRANSITION_DELAY_BG_COLOR},
+    ${target};
+  -webkit-transition:
+    color ${TRANSITION_DELAY_COLOR},
+    background-color ${TRANSITION_DELAY_BG_COLOR},
+    ${target};
+  -moz-transition:
+    color ${TRANSITION_DELAY_COLOR},
+    background-color ${TRANSITION_DELAY_BG_COLOR},
+    ${target};
+  -o-transition:
+    color ${TRANSITION_DELAY_COLOR},
+    background-color ${TRANSITION_DELAY_BG_COLOR},
+    ${target};
 `;
