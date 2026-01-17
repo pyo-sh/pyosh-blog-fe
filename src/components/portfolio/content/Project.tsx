@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { css } from "@emotion/react";
 import Button from "@components/libs/Button";

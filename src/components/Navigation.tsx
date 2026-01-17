@@ -1,3 +1,5 @@
+"use client";
+
 import React, { PropsWithChildren } from "react";
 import { useTheme } from "@emotion/react";
 import Link from "next/link";

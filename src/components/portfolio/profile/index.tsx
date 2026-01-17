@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { css, useTheme } from "@emotion/react";
 import ImageBox from "@components/libs/ImageBox";

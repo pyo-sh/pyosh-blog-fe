@@ -1,3 +1,5 @@
+"use client";
+
 import React, { PropsWithChildren } from "react";
 import styled from "@emotion/styled";
 import { TRANSITION_BG_COLOR } from "@styles/transition";

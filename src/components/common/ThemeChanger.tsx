@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { IconProps, SunIcon, NightIcon } from "@components/icons";
 import Button from "@components/libs/Button";

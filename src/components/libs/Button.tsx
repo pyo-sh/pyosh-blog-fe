@@ -1,3 +1,5 @@
+"use client";
+
 import React, { ForwardedRef, forwardRef, PropsWithChildren } from "react";
 import { useTheme } from "@emotion/react";
 import styled from "@emotion/styled";

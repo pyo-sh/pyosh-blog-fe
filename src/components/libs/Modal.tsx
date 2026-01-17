@@ -1,3 +1,5 @@
+"use client";
+
 import React, { PropsWithChildren } from "react";
 import ReactDom from "react-dom";
 import styled from "@emotion/styled";
