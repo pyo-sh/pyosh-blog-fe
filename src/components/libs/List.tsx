@@ -4,7 +4,7 @@ import React, { PropsWithChildren } from "react";
 import { css } from "@emotion/react";
 
 type TProps = PropsWithChildren<{
-  as?: keyof JSX.IntrinsicElements;
+  as?: React.ElementType;
   className?: string;
   onClick?: () => void;
 }>;

@@ -32,12 +32,12 @@ export const metadata: Metadata = {
     "msapplication-TileColor": "#BB86FC",
     "msapplication-TileImage": "/mstile-150x150",
   },
-  themeColor: "#6200EE",
 };
 
 export const viewport = {
   width: "device-width",
   initialScale: 1,
+  themeColor: "#6200EE",
 };
 
 export default async function RootLayout({

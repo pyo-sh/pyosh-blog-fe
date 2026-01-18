@@ -1,6 +1,6 @@
 export default {
-  experimental: {
-    esmExternals: false,
+  compiler: {
+    emotion: true,
   },
   images: {
     remotePatterns: [

@@ -26,7 +26,7 @@ type TFontSize =
 type TFontWeight = "light" | "regular" | "medium" | "bold";
 
 type TProps = PropsWithChildren<{
-  as?: keyof JSX.IntrinsicElements;
+  as?: React.ElementType;
   className?: string;
   draggable?: boolean;
   ellipsis?: boolean;

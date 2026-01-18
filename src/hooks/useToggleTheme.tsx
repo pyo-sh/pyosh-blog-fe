@@ -1,10 +1,6 @@
-import {
-  useState,
-  useContext,
-  createContext,
-  PropsWithChildren,
-  useEffect,
-} from "react";
+"use client";
+
+import * as React from "react";
 import { ThemeProvider } from "@emotion/react";
 import { COOKIE_THEME_KEY } from "@constants/cookieKey";
 import { theme } from "@src/styles/theme";
@@ -12,13 +8,13 @@ import { setCookie } from "@utils/cookie";
 
 type TThemeType = "dark" | "light" | "default";
 
-const ToggleThemeContext = createContext<{
+const ToggleThemeContext = React.createContext<{
   themeType: TThemeType;
   toggleTheme: () => void;
   isMounted: boolean;
 } | null>(null);
 
-type TProviderProps = PropsWithChildren<{
+type TProviderProps = React.PropsWithChildren<{
   initialTheme?: string;
 }>;
 
@@ -26,14 +22,14 @@ export function ToggleThemeProvider({
   children,
   initialTheme,
 }: TProviderProps) {
-  const [themeType, setThemeType] = useState<TThemeType>(
+  const [themeType, setThemeType] = React.useState<TThemeType>(
     initialTheme === "dark" || initialTheme === "light"
       ? initialTheme
       : "default",
   );
-  const [isMounted, setIsMounted] = useState<boolean>(false);
+  const [isMounted, setIsMounted] = React.useState<boolean>(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     setIsMounted(true);
 
     if (themeType !== "default") return;
@@ -50,7 +46,7 @@ export function ToggleThemeProvider({
     }
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (themeType !== "default" && document.body.dataset.theme !== themeType) {
       document.body.dataset.theme = themeType;
       setCookie(COOKIE_THEME_KEY, themeType);
@@ -91,7 +87,7 @@ export function ToggleThemeProvider({
 }
 
 const useToggleTheme = () => {
-  const value = useContext(ToggleThemeContext);
+  const value = React.useContext(ToggleThemeContext);
   if (!value) {
     throw new Error("Cannot find Toggle Theme Context");
   }
