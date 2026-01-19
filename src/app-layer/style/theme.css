@@ -1,0 +1,320 @@
+:root {
+  /* ─── Dark 색상 팔레트 ─── */
+  --dark-background1: #131415;
+  --dark-background2: #1d1e20;
+  --dark-background3: #26282a;
+  --dark-background4: #303335;
+
+  --dark-text1: #e9eaeb;
+  --dark-text2: #c4c6c9;
+  --dark-text3: #999ea2;
+  --dark-text4: #656b70;
+
+  --dark-border1: #ced1d3;
+  --dark-border2: #a1a5aa;
+  --dark-border3: #54595d;
+  --dark-border4: #35383a;
+
+  --dark-primary1: #a591e8;
+  --dark-primary2: #c7bbf0;
+
+  --dark-secondary1: #8c72c5;
+  --dark-secondary2: #b9aadc;
+
+  --dark-tertiary1: #a5b2ff;
+  --dark-tertiary2: #c7d0ff;
+
+  --dark-quaternary1: #c7e6ff;
+  --dark-quaternary2: #ddf0ff;
+
+  --dark-positive1: #10c67d;
+  --dark-positive2: #78e2b8;
+
+  --dark-negative1: #f15966;
+  --dark-negative2: #feccd0;
+
+  --dark-grey1: #484c50;
+  --dark-grey2: #797f85;
+  --dark-grey3: #aeb2b6;
+  --dark-grey4: #dee0e1;
+
+  --dark-yellow1: #ffbb32;
+  --dark-yellow2: #ffd470;
+
+  /* ─── Light 색상 팔레트 ─── */
+  --light-background1: #f9f9fa;
+  --light-background2: #f1f2f3;
+  --light-background3: #e6e8e9;
+  --light-background4: #dbdde0;
+
+  --light-text1: #232629;
+  --light-text2: #4b5158;
+  --light-text3: #838c95;
+  --light-text4: #babfc4;
+
+  --light-border1: #33383c;
+  --light-border2: #a6adb3;
+  --light-border3: #dbdde0;
+  --light-border4: #f1f2f3;
+
+  --light-primary1: #8a6fe0;
+  --light-primary2: #b09ee9;
+
+  --light-secondary1: #6b49b5;
+  --light-secondary2: #9983cc;
+
+  --light-tertiary1: #8d9eff;
+  --light-tertiary2: #b0bcff;
+
+  --light-quaternary1: #b9e0ff;
+  --light-quaternary2: #cee9ff;
+
+  --light-positive1: #0da96b;
+  --light-positive2: #41d69b;
+
+  --light-negative1: #e21223;
+  --light-negative2: #f15966;
+
+  --light-grey1: #f1f2f3;
+  --light-grey2: #c7ccd0;
+  --light-grey3: #9099a1;
+  --light-grey4: #596068;
+
+  --light-yellow1: #ffbe3d;
+  --light-yellow2: #f2a116;
+}
+
+@theme {
+  /* Tailwind color tokens (hyphenated to match utility classes: bg-background-1, text-text-1, etc.) */
+  --color-background-1: var(--background1);
+  --color-background-2: var(--background2);
+  --color-background-3: var(--background3);
+  --color-background-4: var(--background4);
+
+  --color-text-1: var(--text1);
+  --color-text-2: var(--text2);
+  --color-text-3: var(--text3);
+  --color-text-4: var(--text4);
+
+  --color-border-1: var(--border1);
+  --color-border-2: var(--border2);
+  --color-border-3: var(--border3);
+  --color-border-4: var(--border4);
+
+  --color-primary-1: var(--primary1);
+  --color-primary-2: var(--primary2);
+
+  --color-secondary-1: var(--secondary1);
+  --color-secondary-2: var(--secondary2);
+
+  --color-tertiary-1: var(--tertiary1);
+  --color-tertiary-2: var(--tertiary2);
+
+  --color-quaternary-1: var(--quaternary1);
+  --color-quaternary-2: var(--quaternary2);
+
+  --color-positive-1: var(--positive1);
+  --color-positive-2: var(--positive2);
+
+  --color-negative-1: var(--negative1);
+  --color-negative-2: var(--negative2);
+
+  --color-grey-1: var(--grey1);
+  --color-grey-2: var(--grey2);
+  --color-grey-3: var(--grey3);
+  --color-grey-4: var(--grey4);
+
+  --color-yellow-1: var(--yellow1);
+  --color-yellow-2: var(--yellow2);
+
+  /* Transition durations */
+  --transition-timing-color: 0.25s;
+  --transition-timing-bg: 0.4s;
+  --transition-timing-transform: 0.3s;
+}
+
+/* ─── Light Theme (default) ─── */
+body {
+  /* Light 테마 색상 참조 */
+  --background1: var(--light-background1);
+  --background2: var(--light-background2);
+  --background3: var(--light-background3);
+  --background4: var(--light-background4);
+
+  --text1: var(--light-text1);
+  --text2: var(--light-text2);
+  --text3: var(--light-text3);
+  --text4: var(--light-text4);
+
+  --border1: var(--light-border1);
+  --border2: var(--light-border2);
+  --border3: var(--light-border3);
+  --border4: var(--light-border4);
+
+  --primary1: var(--light-primary1);
+  --primary2: var(--light-primary2);
+
+  --secondary1: var(--light-secondary1);
+  --secondary2: var(--light-secondary2);
+
+  --tertiary1: var(--light-tertiary1);
+  --tertiary2: var(--light-tertiary2);
+
+  --quaternary1: var(--light-quaternary1);
+  --quaternary2: var(--light-quaternary2);
+
+  --positive1: var(--light-positive1);
+  --positive2: var(--light-positive2);
+
+  --negative1: var(--light-negative1);
+  --negative2: var(--light-negative2);
+
+  --grey1: var(--light-grey1);
+  --grey2: var(--light-grey2);
+  --grey3: var(--light-grey3);
+  --grey4: var(--light-grey4);
+
+  --yellow1: var(--light-yellow1);
+  --yellow2: var(--light-yellow2);
+
+  color: var(--text1);
+  background-color: var(--background1);
+  transition:
+    color 0.25s,
+    background-color 0.4s;
+}
+
+/* ─── Dark Theme (시스템 설정) ─── */
+@media (prefers-color-scheme: dark) {
+  body {
+    /* Dark 테마 색상 참조 */
+    --background1: var(--dark-background1);
+    --background2: var(--dark-background2);
+    --background3: var(--dark-background3);
+    --background4: var(--dark-background4);
+
+    --text1: var(--dark-text1);
+    --text2: var(--dark-text2);
+    --text3: var(--dark-text3);
+    --text4: var(--dark-text4);
+
+    --border1: var(--dark-border1);
+    --border2: var(--dark-border2);
+    --border3: var(--dark-border3);
+    --border4: var(--dark-border4);
+
+    --primary1: var(--dark-primary1);
+    --primary2: var(--dark-primary2);
+
+    --secondary1: var(--dark-secondary1);
+    --secondary2: var(--dark-secondary2);
+
+    --tertiary1: var(--dark-tertiary1);
+    --tertiary2: var(--dark-tertiary2);
+
+    --quaternary1: var(--dark-quaternary1);
+    --quaternary2: var(--dark-quaternary2);
+
+    --positive1: var(--dark-positive1);
+    --positive2: var(--dark-positive2);
+
+    --negative1: var(--dark-negative1);
+    --negative2: var(--dark-negative2);
+
+    --grey1: var(--dark-grey1);
+    --grey2: var(--dark-grey2);
+    --grey3: var(--dark-grey3);
+    --grey4: var(--dark-grey4);
+
+    --yellow1: var(--dark-yellow1);
+    --yellow2: var(--dark-yellow2);
+  }
+}
+
+/* ─── Light Theme (명시적) ─── */
+body[data-theme="light"] {
+  --background1: var(--light-background1);
+  --background2: var(--light-background2);
+  --background3: var(--light-background3);
+  --background4: var(--light-background4);
+
+  --text1: var(--light-text1);
+  --text2: var(--light-text2);
+  --text3: var(--light-text3);
+  --text4: var(--light-text4);
+
+  --border1: var(--light-border1);
+  --border2: var(--light-border2);
+  --border3: var(--light-border3);
+  --border4: var(--light-border4);
+
+  --primary1: var(--light-primary1);
+  --primary2: var(--light-primary2);
+
+  --secondary1: var(--light-secondary1);
+  --secondary2: var(--light-secondary2);
+
+  --tertiary1: var(--light-tertiary1);
+  --tertiary2: var(--light-tertiary2);
+
+  --quaternary1: var(--light-quaternary1);
+  --quaternary2: var(--light-quaternary2);
+
+  --positive1: var(--light-positive1);
+  --positive2: var(--light-positive2);
+
+  --negative1: var(--light-negative1);
+  --negative2: var(--light-negative2);
+
+  --grey1: var(--light-grey1);
+  --grey2: var(--light-grey2);
+  --grey3: var(--light-grey3);
+  --grey4: var(--light-grey4);
+
+  --yellow1: var(--light-yellow1);
+  --yellow2: var(--light-yellow2);
+}
+
+/* ─── Dark Theme (명시적) ─── */
+body[data-theme="dark"] {
+  --background1: var(--dark-background1);
+  --background2: var(--dark-background2);
+  --background3: var(--dark-background3);
+  --background4: var(--dark-background4);
+
+  --text1: var(--dark-text1);
+  --text2: var(--dark-text2);
+  --text3: var(--dark-text3);
+  --text4: var(--dark-text4);
+
+  --border1: var(--dark-border1);
+  --border2: var(--dark-border2);
+  --border3: var(--dark-border3);
+  --border4: var(--dark-border4);
+
+  --primary1: var(--dark-primary1);
+  --primary2: var(--dark-primary2);
+
+  --secondary1: var(--dark-secondary1);
+  --secondary2: var(--dark-secondary2);
+
+  --tertiary1: var(--dark-tertiary1);
+  --tertiary2: var(--dark-tertiary2);
+
+  --quaternary1: var(--dark-quaternary1);
+  --quaternary2: var(--dark-quaternary2);
+
+  --positive1: var(--dark-positive1);
+  --positive2: var(--dark-positive2);
+
+  --negative1: var(--dark-negative1);
+  --negative2: var(--dark-negative2);
+
+  --grey1: var(--dark-grey1);
+  --grey2: var(--dark-grey2);
+  --grey3: var(--dark-grey3);
+  --grey4: var(--dark-grey4);
+
+  --yellow1: var(--dark-yellow1);
+  --yellow2: var(--dark-yellow2);
+}

@@ -1,7 +1,4 @@
 export default {
-  compiler: {
-    emotion: true,
-  },
   images: {
     remotePatterns: [
       {

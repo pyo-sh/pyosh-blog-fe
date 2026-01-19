@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import Providers from "./providers";
-import "@styles/globals.css";
+import "@app-layer/style/index.css";
+import Providers from "@app-layer/provider";
 
 export const metadata: Metadata = {
   title: "Pyosh Blog",
@@ -51,7 +51,9 @@ export default async function RootLayout({
   return (
     <html lang="ko">
       <body data-theme={themeType}>
-        <Providers initialTheme={themeType}>{children}</Providers>
+        <div className="w-full h-full">
+          <Providers initialTheme={themeType}>{children}</Providers>
+        </div>
       </body>
     </html>
   );

@@ -1,0 +1,9 @@
+@theme {
+  --animate-shine: shine 3s linear infinite;
+}
+
+@keyframes shine {
+  to {
+    background-position-x: -400%;
+  }
+}

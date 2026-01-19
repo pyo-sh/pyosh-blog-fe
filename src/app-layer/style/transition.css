@@ -1,0 +1,30 @@
+@layer utilities {
+  .transition-theme {
+    transition:
+      color var(--transition-timing-color),
+      background-color var(--transition-timing-bg);
+  }
+
+  .transition-color {
+    transition: color var(--transition-timing-color);
+  }
+
+  .transition-bg-color {
+    transition: background-color var(--transition-timing-bg);
+  }
+
+  .transition-svg-color > * {
+    transition-property: fill, stroke;
+    transition-duration: var(--transition-timing-color);
+  }
+
+  .transition-svg-bg-color > * {
+    transition-property: fill, stroke;
+    transition-duration: var(--transition-timing-bg);
+  }
+
+  .transition-box-shadow-color {
+    transition-property: box-shadow;
+    transition-duration: var(--transition-timing-color);
+  }
+}
