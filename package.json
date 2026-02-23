@@ -12,6 +12,7 @@
     "compile:types": "tsc --noEmit"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.90.21",
     "clsx": "^2.1.1",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.1.0",
