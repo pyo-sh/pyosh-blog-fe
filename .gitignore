@@ -39,3 +39,6 @@ build/
 *.sln
 *.sw?
 CLAUDE.md
+
+# AI agent worktrees
+.claude/worktrees/
