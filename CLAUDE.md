@@ -1,56 +1,62 @@
-# Client CLAUDE.md
+# Client — Next.js Frontend
 
-> Next.js App Router + TailwindCSS v4 작업 가이드
+Blog public pages + admin pages. FSD (Feature-Sliced Design) architecture.
 
-## 🏗️ 기술 스택
+## Tech Stack
 
-- Next.js 14.2.35 (App Router)
-- React 18.2.0
-- TypeScript 5.9.3
-- TailwindCSS 4.1.18
-- ESLint 9.39.2
+Next.js 14.2 (App Router) / React 18.2 / TypeScript 5.9 / TailwindCSS 4.1 / ESLint 9
 
-## 📂 주요 경로
-
-```
-client/
-├── src/
-│   ├── app/                # Next.js App Router
-│   ├── app-layer/          # 앱 진입점 & 글로벌 설정
-│   ├── entities/           # 비즈니스 엔티티
-│   ├── features/           # 사용자 인터랙션 기능
-│   ├── shared/             # UI, hooks, utils
-│   └── widgets/            # 독립적인 UI 블록 (헤더, 사이드바 등)
-└── eslint.config.js        # ESLint 9 Flat
-```
-
-## 💻 명령어
+## Commands
 
 ```bash
-pnpm dev          # http://localhost:3000
+pnpm dev              # http://localhost:3000
 pnpm build
 pnpm lint
-pnpm compile:types
+pnpm compile:types    # type check
 ```
 
-## 📝 코딩 규칙
+## Directory Structure (FSD)
 
-- **파일**: kebab-case
-- **컴포넌트**: PascalCase, export
-- **상호작용 필요 시**: `"use client"` 추가
-- **스타일**: TailwindCSS 클래스 사용
-- **유틸리티**: `cn()` 함수 사용 (clsx + twMerge)
-- **테마**: `useToggleTheme` 훅 사용
+```
+src/
+├── app/               # Next.js App Router (routing only)
+├── app-layer/         # Global config, providers, style entry point
+├── widgets/           # Independent UI blocks (header, sidebar, etc.)
+├── features/          # User interaction feature units
+├── entities/          # Business entities (post, category, etc.)
+└── shared/            # Common modules
+    ├── ui/            # Reusable UI components
+    ├── api/           # API client
+    ├── lib/           # Utilities (cn, etc.)
+    ├── hooks/         # Common hooks
+    └── constant/      # Constants
+```
 
-## 🎨 TailwindCSS v4
+Import direction: `app → widgets → features → entities → shared` (reverse forbidden)
 
-- **설정 파일**: `src/app-layer/style/index.css` (여러 css 파일의 진입점)
-- **토큰 네이밍**: kebab-case (예: `bg-background-1`)
-- **@apply**: 빌트인 유틸리티만 가능
+## Coding Patterns
 
----
+```typescript
+// Components: PascalCase, named export
+export function PostCard({ post }: PostCardProps) { ... }
 
-## 워크플로
+// Components requiring interactivity
+"use client";
 
-전역 `CLAUDE.md`의 작업 선택 규칙과 `/dev-build` 스킬을 따른다.
-기록은 모두 `docs/client/`에 저장된다.
+// Class merging
+import { cn } from '@/shared/lib/utils';
+<div className={cn('base-class', conditional && 'active')} />
+
+// Theme toggle
+const { toggleTheme } = useToggleTheme();
+```
+
+## TailwindCSS v4
+
+- Config entry point: `src/app-layer/style/index.css`
+- Custom tokens: kebab-case (`bg-background-1`, `text-foreground-2`)
+- `@apply`: built-in utilities only
+
+## Workflow
+
+Follow root `CLAUDE.md` task rules. Records go in `docs/client/`.
