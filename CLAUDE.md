@@ -59,4 +59,4 @@ const { toggleTheme } = useToggleTheme();
 
 ## Workflow
 
-Follow root `CLAUDE.md` task rules. Records go in `docs/client/`.
+`/dev-pipeline`이 전체 사이클을 관리. Records go in `docs/client/`.
