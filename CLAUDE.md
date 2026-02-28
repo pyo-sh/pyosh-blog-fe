@@ -59,4 +59,4 @@ const { toggleTheme } = useToggleTheme();
 
 ## Workflow
 
-`/dev-pipeline`이 전체 사이클을 관리. Records go in `docs/client/`.
+`/dev-pipeline` manages the full cycle. Records go in `docs/client/`.
