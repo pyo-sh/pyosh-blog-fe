@@ -8,10 +8,11 @@ export async function clientMutate<T>(
   const csrfToken = await getCsrfToken();
 
   return clientFetch<T>(path, {
+    method: "POST",
     ...options,
     headers: {
-      "x-csrf-token": csrfToken,
       ...options.headers,
+      "x-csrf-token": csrfToken,
     },
   });
 }

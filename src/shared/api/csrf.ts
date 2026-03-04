@@ -1,17 +1,17 @@
 import { clientFetch } from "./client";
 
-let cachedToken: string | null = null;
+let tokenPromise: Promise<string> | null = null;
 
 export async function getCsrfToken(): Promise<string> {
-  if (cachedToken !== null) {
-    return cachedToken;
+  if (!tokenPromise) {
+    tokenPromise = clientFetch<{ token: string }>("/api/auth/csrf-token").then(
+      (res) => res.token,
+    );
   }
 
-  const { token } = await clientFetch<{ token: string }>("/api/auth/csrf-token");
-  cachedToken = token;
-  return cachedToken;
+  return tokenPromise;
 }
 
 export function clearCsrfToken(): void {
-  cachedToken = null;
+  tokenPromise = null;
 }
