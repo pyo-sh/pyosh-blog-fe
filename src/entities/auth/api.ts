@@ -1,5 +1,5 @@
-import { clientFetch, serverFetch } from "@/shared/api";
 import type { AdminUser, LoginCredentials } from "./model";
+import { clientFetch, serverFetch } from "@shared/api";
 
 export async function login(credentials: LoginCredentials): Promise<AdminUser> {
   return clientFetch<AdminUser>("/api/auth/admin/login", {
