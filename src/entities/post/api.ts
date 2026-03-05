@@ -1,25 +1,35 @@
-import type { CreatePostBody, Post, UpdatePostBody } from "./model";
+import type { CreatePostBody, Post, PostDetailResponse, UpdatePostBody } from "./model";
 import { clientMutate, serverFetch } from "@shared/api";
 
 export async function fetchAdminPost(
-  id: string,
-  cookieHeader: string,
+  id: number,
+  cookieHeader?: string,
 ): Promise<Post> {
-  return serverFetch<Post>(`/api/admin/posts/${id}`, {}, cookieHeader);
+  const response = await serverFetch<PostDetailResponse>(
+    `/api/admin/posts/${id}`,
+    {},
+    cookieHeader,
+  );
+  return response.post;
 }
 
 export async function createPost(body: CreatePostBody): Promise<Post> {
-  return clientMutate<Post>("/api/admin/posts", {
+  const response = await clientMutate<PostDetailResponse>("/api/admin/posts", {
     body: JSON.stringify(body),
   });
+  return response.post;
 }
 
 export async function updatePost(
-  id: string,
+  id: number,
   body: UpdatePostBody,
 ): Promise<Post> {
-  return clientMutate<Post>(`/api/admin/posts/${id}`, {
-    method: "PATCH",
-    body: JSON.stringify(body),
-  });
+  const response = await clientMutate<PostDetailResponse>(
+    `/api/admin/posts/${id}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    },
+  );
+  return response.post;
 }

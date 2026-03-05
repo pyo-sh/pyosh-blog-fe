@@ -1,24 +1,43 @@
+export interface PostTag {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+export interface PostCategory {
+  id: number;
+  name: string;
+  slug: string;
+}
+
 export interface Post {
-  id: string;
+  id: number;
+  categoryId: number;
   title: string;
+  slug: string;
   contentMd: string;
-  categoryId: string;
   thumbnailUrl: string | null;
   visibility: "public" | "private";
-  status: "draft" | "published";
-  tags: string[];
+  status: "draft" | "published" | "archived";
   publishedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  deletedAt: string | null;
+  category: PostCategory;
+  tags: PostTag[];
+}
+
+export interface PostDetailResponse {
+  post: Post;
 }
 
 export interface CreatePostBody {
   title: string;
   contentMd: string;
-  categoryId: string;
-  thumbnailUrl?: string;
+  categoryId: number;
+  thumbnailUrl?: string | null;
   visibility?: "public" | "private";
-  status?: "draft" | "published";
+  status?: "draft" | "published" | "archived";
   tags?: string[];
   publishedAt?: string;
 }
