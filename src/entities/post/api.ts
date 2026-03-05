@@ -8,7 +8,7 @@ import { clientMutate, serverFetch } from "@shared/api";
 
 export async function fetchAdminPost(
   id: number,
-  cookieHeader?: string,
+  cookieHeader: string,
 ): Promise<Post> {
   const response = await serverFetch<PostDetailResponse>(
     `/api/admin/posts/${id}`,
