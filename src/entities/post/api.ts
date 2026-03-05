@@ -1,4 +1,9 @@
-import type { CreatePostBody, Post, PostDetailResponse, UpdatePostBody } from "./model";
+import type {
+  CreatePostBody,
+  Post,
+  PostDetailResponse,
+  UpdatePostBody,
+} from "./model";
 import { clientMutate, serverFetch } from "@shared/api";
 
 export async function fetchAdminPost(
@@ -10,6 +15,7 @@ export async function fetchAdminPost(
     {},
     cookieHeader,
   );
+
   return response.post;
 }
 
@@ -17,6 +23,7 @@ export async function createPost(body: CreatePostBody): Promise<Post> {
   const response = await clientMutate<PostDetailResponse>("/api/admin/posts", {
     body: JSON.stringify(body),
   });
+
   return response.post;
 }
 
@@ -31,5 +38,6 @@ export async function updatePost(
       body: JSON.stringify(body),
     },
   );
+
   return response.post;
 }
