@@ -27,6 +27,11 @@ export interface Post {
   tags: PostTag[];
 }
 
+export interface PostNavigation {
+  slug: string;
+  title: string;
+}
+
 export interface PostDetailResponse {
   post: Post;
 }

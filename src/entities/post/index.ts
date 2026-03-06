@@ -2,6 +2,7 @@ export type {
   Post,
   PostTag,
   PostCategory,
+  PostNavigation,
   PostDetailResponse,
   CreatePostBody,
   UpdatePostBody,
