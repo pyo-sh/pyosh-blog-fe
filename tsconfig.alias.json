@@ -8,7 +8,8 @@
       "@features/*": ["./features/*"],
       "@shared/*": ["./shared/*"],
       "@widgets/*": ["./widgets/*"],
-      "@src/*": ["./*"]
+      "@src/*": ["./*"],
+      "@/*": ["./*"]
     }
   }
 }
