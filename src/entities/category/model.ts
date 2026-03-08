@@ -7,5 +7,5 @@ export interface Category {
   isVisible: boolean;
   createdAt: string;
   updatedAt: string;
-  children: Category[];
+  children?: Category[];
 }
