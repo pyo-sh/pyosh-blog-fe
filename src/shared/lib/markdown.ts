@@ -5,6 +5,7 @@ import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
 import { unified } from "unified";
 
+// Allow shiki's inline style attributes for syntax highlighting colors
 const sanitizeSchema = {
   ...defaultSchema,
   attributes: {
@@ -15,14 +16,15 @@ const sanitizeSchema = {
   },
 };
 
-export async function renderMarkdown(md: string): Promise<string> {
-  const result = await unified()
-    .use(remarkParse)
-    .use(remarkRehype)
-    .use(rehypeShiki, { theme: "github-dark" })
-    .use(rehypeSanitize, sanitizeSchema)
-    .use(rehypeStringify)
-    .process(md);
+// Create once at module level so rehypeShiki's highlighter is not re-initialized per call
+const processor = unified()
+  .use(remarkParse)
+  .use(remarkRehype)
+  .use(rehypeShiki, { theme: "github-dark" })
+  .use(rehypeSanitize, sanitizeSchema)
+  .use(rehypeStringify)
+  .freeze();
 
-  return String(result);
+export async function renderMarkdown(md: string): Promise<string> {
+  return String(await processor.process(md));
 }
