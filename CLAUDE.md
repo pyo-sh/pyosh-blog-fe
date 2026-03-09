@@ -1,62 +1,42 @@
-# Client — Next.js Frontend
+# Client - Next.js frontend
 
-Blog public pages + admin pages. FSD (Feature-Sliced Design) architecture.
+Shared Claude Code instructions for the frontend repository.
 
-## Tech Stack
+Personal preferences belong in `CLAUDE.local.md` or `.claude/settings.local.json`, not in this file.
 
-Next.js 14.2 (App Router) / React 18.2 / TypeScript 5.9 / TailwindCSS 4.1 / ESLint 9
+## Purpose
+
+Blog public pages plus admin pages. FSD - Feature-Sliced Design architecture.
+
+## Tech stack
+
+Next.js 14.2 - App Router
+React 18.2
+TypeScript 5.9
+TailwindCSS 4.1
+ESLint 9
 
 ## Commands
 
 ```bash
-pnpm dev              # http://localhost:3000
+pnpm dev
 pnpm build
 pnpm lint
-pnpm compile:types    # type check
+pnpm compile:types
 ```
 
-## Directory Structure (FSD)
+## Architecture notes
 
-```
-src/
-├── app/               # Next.js App Router (routing only)
-├── app-layer/         # Global config, providers, style entry point
-├── widgets/           # Independent UI blocks (header, sidebar, etc.)
-├── features/          # User interaction feature units
-├── entities/          # Business entities (post, category, etc.)
-└── shared/            # Common modules
-    ├── ui/            # Reusable UI components
-    ├── api/           # API client
-    ├── lib/           # Utilities (cn, etc.)
-    ├── hooks/         # Common hooks
-    └── constant/      # Constants
-```
+- `src/app/` is for routing only.
+- Import direction is `app -> widgets -> features -> entities -> shared`. Reverse dependencies are forbidden.
+- Repo-specific coding rules live in `.claude/rules/`.
 
-Import direction: `app → widgets → features → entities → shared` (reverse forbidden)
+## Context sources
 
-## Coding Patterns
-
-```typescript
-// Components: PascalCase, named export
-export function PostCard({ post }: PostCardProps) { ... }
-
-// Components requiring interactivity
-"use client";
-
-// Class merging
-import { cn } from '@/shared/lib/utils';
-<div className={cn('base-class', conditional && 'active')} />
-
-// Theme toggle
-const { toggleTheme } = useToggleTheme();
-```
-
-## TailwindCSS v4
-
-- Config entry point: `src/app-layer/style/index.css`
-- Custom tokens: kebab-case (`bg-background-1`, `text-foreground-2`)
-- `@apply`: built-in utilities only
+- Before changing behavior, architecture, or conventions, read `../docs/client/progress.index.md`, `../docs/client/findings.index.md`, and `../docs/client/decisions.index.md`.
+- For workspace mappings and shell helpers, read `../.agents/references/monorepo-layout.md`.
 
 ## Workflow
 
-`/dev-pipeline` manages the full cycle. Records go in `docs/client/`.
+- `/dev-pipeline` manages the full cycle for issue-driven work.
+- Records go in `../docs/client/`.
