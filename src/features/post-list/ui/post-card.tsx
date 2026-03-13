@@ -14,11 +14,13 @@ const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
   year: "numeric",
   month: "2-digit",
   day: "2-digit",
+  timeZone: "UTC",
 });
 
 export function PostCard({ post, className }: PostCardProps) {
   const summary = createSummary(post.contentMd);
   const publishedDate = formatDate(post.publishedAt ?? post.createdAt);
+  const canUseNextImage = supportsNextImage(post.thumbnailUrl);
 
   return (
     <Link
@@ -30,13 +32,22 @@ export function PostCard({ post, className }: PostCardProps) {
     >
       {post.thumbnailUrl && (
         <div className="relative hidden w-48 shrink-0 overflow-hidden bg-background-3 md:block">
-          <Image
-            fill
-            src={post.thumbnailUrl}
-            alt={post.title}
-            sizes="192px"
-            className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-          />
+          {canUseNextImage ? (
+            <Image
+              fill
+              src={post.thumbnailUrl}
+              alt={post.title}
+              sizes="192px"
+              className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element -- next/image cannot safely render arbitrary remote hosts here
+            <img
+              src={post.thumbnailUrl}
+              alt={post.title}
+              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            />
+          )}
         </div>
       )}
       <article className="flex min-w-0 flex-1 flex-col gap-4 p-5 md:p-6">
@@ -75,6 +86,24 @@ export function PostCard({ post, className }: PostCardProps) {
 
 function formatDate(value: string) {
   return dateFormatter.format(new Date(value));
+}
+
+function supportsNextImage(src: string | null) {
+  if (!src) {
+    return false;
+  }
+
+  if (src.startsWith("/")) {
+    return true;
+  }
+
+  try {
+    const url = new URL(src);
+
+    return url.protocol === "https:" && url.hostname === "github.com";
+  } catch {
+    return false;
+  }
 }
 
 function createSummary(contentMd: string) {
