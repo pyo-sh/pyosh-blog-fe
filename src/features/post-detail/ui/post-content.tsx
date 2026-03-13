@@ -7,5 +7,10 @@ interface PostContentProps {
 export async function PostContent({ contentMd }: PostContentProps) {
   const html = await renderMarkdown(contentMd);
 
-  return <div className="prose" dangerouslySetInnerHTML={{ __html: html }} />;
+  return (
+    <div
+      className="markdown-content"
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
 }
