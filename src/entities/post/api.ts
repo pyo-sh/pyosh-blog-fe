@@ -8,7 +8,7 @@ import type {
   UpdatePostBody,
 } from "./model";
 import type { PaginatedResponse } from "@shared/api";
-import { clientMutate, serverFetch } from "@shared/api";
+import { clientFetch, clientMutate, serverFetch } from "@shared/api";
 
 function buildPostSearchParams(params: FetchPostsParams): string {
   return buildSearchParams(params);
@@ -89,13 +89,15 @@ export async function fetchPostBySlug(
 
 export async function fetchAdminPost(
   id: number,
-  cookieHeader: string,
+  cookieHeader?: string,
 ): Promise<Post> {
-  const response = await serverFetch<PostDetailResponse>(
-    `/api/admin/posts/${id}`,
-    {},
-    cookieHeader,
-  );
+  const response = cookieHeader
+    ? await serverFetch<PostDetailResponse>(
+        `/api/admin/posts/${id}`,
+        {},
+        cookieHeader,
+      )
+    : await clientFetch<PostDetailResponse>(`/api/admin/posts/${id}`);
 
   return response.post;
 }
@@ -109,7 +111,9 @@ export async function fetchAdminPosts(
     ? `/api/admin/posts?${queryString}`
     : "/api/admin/posts";
 
-  return serverFetch<PaginatedResponse<Post>>(path, {}, cookieHeader);
+  return cookieHeader
+    ? serverFetch<PaginatedResponse<Post>>(path, {}, cookieHeader)
+    : clientFetch<PaginatedResponse<Post>>(path);
 }
 
 export async function createPost(body: CreatePostBody): Promise<Post> {
