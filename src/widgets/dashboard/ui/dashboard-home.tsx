@@ -1,59 +1,30 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { fetchDashboardStats, type DashboardStats } from "@entities/stat";
 import { cn } from "@shared/lib/style-utils";
 
 const numberFormatter = new Intl.NumberFormat("ko-KR");
 
-const sampleRecentComments = [
-  {
-    id: "sample-1",
-    author: "김하늘",
-    postTitle: "Tailwind v4 전환 메모",
-    createdAt: "10분 전",
-    href: "/dashboard/comments",
-  },
-  {
-    id: "sample-2",
-    author: "박준호",
-    postTitle: "Next.js App Router 정리",
-    createdAt: "34분 전",
-    href: "/dashboard/comments",
-  },
-  {
-    id: "sample-3",
-    author: "이서연",
-    postTitle: "카테고리 구조 개선안",
-    createdAt: "1시간 전",
-    href: "/dashboard/comments",
-  },
-] as const;
-
 const quickActions = [
   {
     label: "게시글 관리",
     description: "게시글 목록을 열고 상태를 점검합니다.",
-    href: "/dashboard/posts",
     availability: "연결 예정",
   },
   {
     label: "댓글 관리",
     description: "최근 댓글을 확인하고 대응 흐름으로 이동합니다.",
-    href: "/dashboard/comments",
     availability: "연결 예정",
   },
   {
     label: "카테고리 관리",
     description: "카테고리 구조와 노출 상태를 정리합니다.",
-    href: "/dashboard/categories",
     availability: "연결 예정",
   },
   {
     label: "새 글 작성",
     description: "작성 화면 진입 경로를 위한 자리입니다.",
-    href: "/dashboard/posts",
     availability: "준비 중",
   },
 ] as const;
@@ -162,12 +133,9 @@ function DashboardStatsSection() {
           </div>
         </div>
 
-        <Link
-          href="/dashboard/stats"
-          className="inline-flex items-center justify-center rounded-[3px] border border-border-2 bg-background-2 px-4 py-2 text-body-sm font-medium text-text-1 transition-colors hover:border-primary-1 hover:text-primary-1"
-        >
-          상세 통계 보기
-        </Link>
+        <div className="inline-flex items-center justify-center rounded-[3px] border border-border-3 bg-background-1 px-4 py-2 text-body-sm font-medium text-text-4">
+          상세 통계 페이지 준비 중
+        </div>
       </div>
 
       {isLoading ? <DashboardStatsSkeleton /> : null}
@@ -204,32 +172,19 @@ function RecentCommentsSection() {
           <h2 className="mt-2 text-xl font-semibold text-text-1">최신 댓글</h2>
         </div>
         <span className="rounded-full border border-border-2 px-3 py-1 text-body-xs text-text-3">
-          샘플 데이터
+          준비 중
         </span>
       </div>
 
-      <ul className="mt-6 space-y-3">
-        {sampleRecentComments.map((comment) => (
-          <li key={comment.id}>
-            <Link
-              href={comment.href}
-              className="block rounded-[1rem] border border-border-3 bg-background-1 p-4 transition-colors hover:border-primary-1/40 hover:bg-background-2"
-            >
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-body-md font-medium text-text-1">
-                  {comment.author}
-                </p>
-                <span className="text-body-xs text-text-4">
-                  {comment.createdAt}
-                </span>
-              </div>
-              <p className="mt-2 text-body-sm text-text-3">
-                {comment.postTitle}
-              </p>
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <div className="mt-6 rounded-[1rem] border border-dashed border-border-3 bg-background-1 p-5">
+        <p className="text-body-md font-medium text-text-1">
+          아직 연결된 최신 댓글 데이터가 없습니다.
+        </p>
+        <p className="mt-2 text-body-sm text-text-3">
+          댓글 관리 API와 목록 화면이 준비되면 이 영역에 실제 최근 댓글이
+          표시됩니다.
+        </p>
+      </div>
     </section>
   );
 }
@@ -246,12 +201,11 @@ function QuickActionsSection() {
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         {quickActions.map((action) => (
-          <Link
+          <div
             key={action.label}
-            href={action.href}
             className={cn(
               "rounded-[1rem] border border-border-3 bg-background-1 p-4 transition-colors",
-              "hover:border-primary-1/40 hover:bg-background-2",
+              "cursor-not-allowed opacity-70",
             )}
           >
             <div className="flex items-start justify-between gap-3">
@@ -265,7 +219,7 @@ function QuickActionsSection() {
             <p className="mt-3 text-body-sm text-text-3">
               {action.description}
             </p>
-          </Link>
+          </div>
         ))}
       </div>
     </section>
