@@ -1,10 +1,18 @@
 export type {
+  FetchPostsParams,
   Post,
   PostTag,
   PostCategory,
   PostNavigation,
   PostDetailResponse,
+  PostDetailWithNavigationResponse,
   CreatePostBody,
   UpdatePostBody,
 } from "./model";
-export { fetchAdminPost, createPost, updatePost } from "./api";
+export {
+  fetchAdminPost,
+  fetchPostBySlug,
+  fetchPosts,
+  createPost,
+  updatePost,
+} from "./api";
