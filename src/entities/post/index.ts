@@ -1,4 +1,5 @@
 export type {
+  FetchAdminPostsParams,
   FetchPostsParams,
   Post,
   PostTag,
@@ -11,8 +12,12 @@ export type {
 } from "./model";
 export {
   fetchAdminPost,
+  fetchAdminPosts,
   fetchPostBySlug,
   fetchPosts,
   createPost,
+  deletePost,
+  hardDeletePost,
+  restorePost,
   updatePost,
 } from "./api";
