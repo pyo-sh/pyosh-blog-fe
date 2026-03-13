@@ -14,6 +14,7 @@ function buildHref(
   queryParams?: Record<string, string>,
 ): string {
   const params = new URLSearchParams({ ...queryParams, page: String(page) });
+
   return `${basePath}?${params.toString()}`;
 }
 
@@ -38,7 +39,7 @@ function Pagination({
           href={buildHref(basePath, currentPage - 1, queryParams)}
           className={cn(
             "inline-flex items-center justify-center px-3 py-1.5 rounded text-sm",
-            "text-foreground-1 hover:bg-background-2 transition-colors",
+            "text-text-1 hover:bg-background-2 transition-colors",
           )}
           aria-label="Previous page"
         >
@@ -46,7 +47,7 @@ function Pagination({
         </Link>
       ) : (
         <span
-          className="inline-flex items-center justify-center px-3 py-1.5 rounded text-sm text-foreground-3 cursor-not-allowed"
+          className="inline-flex items-center justify-center px-3 py-1.5 rounded text-sm text-text-3 cursor-not-allowed"
           aria-disabled="true"
           aria-label="Previous page"
         >
@@ -62,7 +63,7 @@ function Pagination({
             "inline-flex items-center justify-center px-3 py-1.5 rounded text-sm transition-colors",
             page === currentPage
               ? "bg-primary-1 text-text-1 font-semibold pointer-events-none"
-              : "text-foreground-1 hover:bg-background-2",
+              : "text-text-1 hover:bg-background-2",
           )}
           aria-current={page === currentPage ? "page" : undefined}
           aria-label={`Page ${page}`}
@@ -76,7 +77,7 @@ function Pagination({
           href={buildHref(basePath, currentPage + 1, queryParams)}
           className={cn(
             "inline-flex items-center justify-center px-3 py-1.5 rounded text-sm",
-            "text-foreground-1 hover:bg-background-2 transition-colors",
+            "text-text-1 hover:bg-background-2 transition-colors",
           )}
           aria-label="Next page"
         >
@@ -84,7 +85,7 @@ function Pagination({
         </Link>
       ) : (
         <span
-          className="inline-flex items-center justify-center px-3 py-1.5 rounded text-sm text-foreground-3 cursor-not-allowed"
+          className="inline-flex items-center justify-center px-3 py-1.5 rounded text-sm text-text-3 cursor-not-allowed"
           aria-disabled="true"
           aria-label="Next page"
         >
