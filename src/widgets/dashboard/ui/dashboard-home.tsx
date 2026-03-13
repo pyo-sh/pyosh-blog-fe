@@ -125,7 +125,7 @@ function DashboardStatsSection() {
             Admin overview
           </p>
           <div className="space-y-2">
-            <h1 className="text-heading-md text-text-1">대시보드</h1>
+            <h1 className="text-h2 text-text-1">대시보드</h1>
             <p className="max-w-3xl text-body-md text-text-3">
               핵심 지표를 먼저 확인하고, 최근 댓글과 주요 관리 경로로 바로
               이동할 수 있는 관리자 홈 화면입니다.
@@ -194,9 +194,14 @@ function QuickActionsSection() {
     <section className="rounded-[1.5rem] border border-border-3 bg-background-2 p-6 shadow-[0px_18px_60px_0px_rgba(0,0,0,0.05)]">
       <div>
         <p className="text-body-xs uppercase tracking-[0.2em] text-text-4">
-          Quick actions
+          Management areas
         </p>
-        <h2 className="mt-2 text-xl font-semibold text-text-1">빠른 이동</h2>
+        <h2 className="mt-2 text-xl font-semibold text-text-1">
+          관리 메뉴 준비 현황
+        </h2>
+        <p className="mt-2 text-body-sm text-text-3">
+          각 관리 화면이 연결되면 이 영역은 실제 바로가기 섹션으로 전환됩니다.
+        </p>
       </div>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -204,8 +209,7 @@ function QuickActionsSection() {
           <div
             key={action.label}
             className={cn(
-              "rounded-[1rem] border border-border-3 bg-background-1 p-4 transition-colors",
-              "cursor-not-allowed opacity-70",
+              "rounded-[1rem] border border-border-3 bg-background-1 p-4",
             )}
           >
             <div className="flex items-start justify-between gap-3">
