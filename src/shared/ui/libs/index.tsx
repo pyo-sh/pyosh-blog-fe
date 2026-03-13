@@ -3,4 +3,5 @@ export { ImageBox } from "./image-box";
 export { ListRow } from "./list-row";
 export { List } from "./list";
 export { Modal } from "./modal";
+export { Pagination } from "./pagination";
 export { Text } from "./text";
