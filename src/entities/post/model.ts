@@ -32,8 +32,22 @@ export interface PostNavigation {
   title: string;
 }
 
+export interface FetchPostsParams {
+  page?: number;
+  limit?: number;
+  categoryId?: number;
+  tagSlug?: string;
+  q?: string;
+}
+
 export interface PostDetailResponse {
   post: Post;
+}
+
+export interface PostDetailWithNavigationResponse {
+  post: Post;
+  prevPost: PostNavigation | null;
+  nextPost: PostNavigation | null;
 }
 
 export interface CreatePostBody {
