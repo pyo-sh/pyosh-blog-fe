@@ -61,13 +61,12 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
               {post.tags.length > 0 && (
                 <div className="flex flex-wrap gap-3">
                   {post.tags.map((tag) => (
-                    <Link
+                    <span
                       key={tag.id}
-                      href={`/tags/${tag.slug}`}
                       className="rounded-full border border-border-3 px-3 py-1.5 text-body-sm text-text-3 transition-colors hover:border-border-2 hover:text-text-2"
                     >
                       #{tag.name}
-                    </Link>
+                    </span>
                   ))}
                 </div>
               )}
