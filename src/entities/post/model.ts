@@ -40,6 +40,19 @@ export interface FetchPostsParams {
   q?: string;
 }
 
+export interface FetchAdminPostsParams {
+  page?: number;
+  limit?: number;
+  categoryId?: number;
+  tagSlug?: string;
+  q?: string;
+  status?: "draft" | "published" | "archived";
+  visibility?: "public" | "private";
+  sort?: "published_at" | "created_at";
+  order?: "asc" | "desc";
+  includeDeleted?: boolean;
+}
+
 export interface PostDetailResponse {
   post: Post;
 }

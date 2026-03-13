@@ -1,5 +1,6 @@
 import type {
   CreatePostBody,
+  FetchAdminPostsParams,
   FetchPostsParams,
   Post,
   PostDetailResponse,
@@ -10,6 +11,16 @@ import type { PaginatedResponse } from "@shared/api";
 import { clientMutate, serverFetch } from "@shared/api";
 
 function buildPostSearchParams(params: FetchPostsParams): string {
+  return buildSearchParams(params);
+}
+
+function buildAdminPostSearchParams(params: FetchAdminPostsParams): string {
+  return buildSearchParams(params);
+}
+
+function buildSearchParams(
+  params: FetchPostsParams | FetchAdminPostsParams,
+): string {
   const searchParams = new URLSearchParams();
 
   if (params.page !== undefined) {
@@ -30,6 +41,26 @@ function buildPostSearchParams(params: FetchPostsParams): string {
 
   if (params.q !== undefined) {
     searchParams.set("q", params.q);
+  }
+
+  if ("status" in params && params.status !== undefined) {
+    searchParams.set("status", params.status);
+  }
+
+  if ("visibility" in params && params.visibility !== undefined) {
+    searchParams.set("visibility", params.visibility);
+  }
+
+  if ("sort" in params && params.sort !== undefined) {
+    searchParams.set("sort", params.sort);
+  }
+
+  if ("order" in params && params.order !== undefined) {
+    searchParams.set("order", params.order);
+  }
+
+  if ("includeDeleted" in params && params.includeDeleted !== undefined) {
+    searchParams.set("includeDeleted", String(params.includeDeleted));
   }
 
   return searchParams.toString();
@@ -69,12 +100,47 @@ export async function fetchAdminPost(
   return response.post;
 }
 
+export async function fetchAdminPosts(
+  params: FetchAdminPostsParams = {},
+  cookieHeader?: string,
+): Promise<PaginatedResponse<Post>> {
+  const queryString = buildAdminPostSearchParams(params);
+  const path = queryString
+    ? `/api/admin/posts?${queryString}`
+    : "/api/admin/posts";
+
+  return serverFetch<PaginatedResponse<Post>>(path, {}, cookieHeader);
+}
+
 export async function createPost(body: CreatePostBody): Promise<Post> {
   const response = await clientMutate<PostDetailResponse>("/api/admin/posts", {
     body: JSON.stringify(body),
   });
 
   return response.post;
+}
+
+export async function deletePost(id: number): Promise<void> {
+  await clientMutate<void>(`/api/admin/posts/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export async function restorePost(id: number): Promise<Post> {
+  const response = await clientMutate<PostDetailResponse>(
+    `/api/admin/posts/${id}/restore`,
+    {
+      method: "PUT",
+    },
+  );
+
+  return response.post;
+}
+
+export async function hardDeletePost(id: number): Promise<void> {
+  await clientMutate<void>(`/api/admin/posts/${id}/hard`, {
+    method: "DELETE",
+  });
 }
 
 export async function updatePost(

@@ -12,6 +12,10 @@ async function handleResponse<T>(response: Response): Promise<T> {
     throw new ApiResponseError(error);
   }
 
+  if (response.status === 204 || response.status === 205) {
+    return undefined as T;
+  }
+
   return response.json() as Promise<T>;
 }
 
