@@ -2,7 +2,6 @@
 
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
 import {
   deletePost,
   fetchAdminPosts,
@@ -206,16 +205,14 @@ export default function DashboardPostsPage() {
           </p>
           <h1 className="mt-3 text-2xl font-semibold text-text-1">글 관리</h1>
           <p className="mt-2 text-sm text-text-3">
-            상태별 글을 조회하고 삭제 또는 복원할 수 있습니다.
+            상태별 글을 조회하고 삭제 또는 복원할 수 있습니다. 작성과 편집
+            화면은 다음 이슈에서 연결됩니다.
           </p>
         </div>
 
-        <Link
-          href="/dashboard/posts/new"
-          className="inline-flex items-center justify-center rounded-[0.9rem] bg-primary-1 px-4 py-3 text-sm font-semibold text-text-1 shadow-[0px_2px_7px_0px_rgba(0,0,0,0.26)] transition-transform hover:-translate-y-0.5"
-        >
-          새 글 작성
-        </Link>
+        <span className="inline-flex items-center justify-center rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm font-medium text-text-4">
+          새 글 작성 준비 중
+        </span>
       </header>
 
       <section className="rounded-[1.75rem] border border-border-3 bg-background-2 p-6">
@@ -308,12 +305,9 @@ export default function DashboardPostsPage() {
                           <tr key={post.id} className="align-top">
                             <td className="px-6 py-5">
                               <div className="flex flex-col gap-2">
-                                <Link
-                                  href={`/dashboard/posts/${post.id}`}
-                                  className="font-medium text-text-1 transition-colors hover:text-primary-1"
-                                >
+                                <span className="font-medium text-text-1">
                                   {post.title}
-                                </Link>
+                                </span>
                                 <div className="flex flex-wrap items-center gap-2 text-xs text-text-4">
                                   <span>{post.category.name}</span>
                                   {deleted ? (
