@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { Category } from "@entities/category";
@@ -64,10 +65,13 @@ function findCategoryBySlug(
 
 export const dynamic = "force-dynamic";
 
+const getCategories = cache(async () => fetchCategories());
+
 export async function generateMetadata({
   params,
+  searchParams,
 }: CategoryPageProps): Promise<Metadata> {
-  const categories = await fetchCategories();
+  const categories = await getCategories();
   const activeCategory = findCategoryBySlug(categories, params.slug);
 
   if (!activeCategory || !activeCategory.isVisible) {
@@ -76,7 +80,11 @@ export async function generateMetadata({
 
   const title = `${activeCategory.name} 카테고리`;
   const description = `${activeCategory.name} 카테고리에 등록된 글 모음입니다.`;
-  const url = `/categories/${activeCategory.slug}`;
+  const page = parsePage(getSingleValue(searchParams?.page));
+  const url =
+    page > 1
+      ? `/categories/${activeCategory.slug}?page=${page}`
+      : `/categories/${activeCategory.slug}`;
 
   return {
     title,
@@ -105,7 +113,7 @@ export default async function CategoryPage({
   searchParams,
 }: CategoryPageProps) {
   const page = parsePage(getSingleValue(searchParams?.page));
-  const categories = await fetchCategories();
+  const categories = await getCategories();
   const activeCategory = findCategoryBySlug(categories, params.slug);
 
   if (!activeCategory || !activeCategory.isVisible) {

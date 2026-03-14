@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import Image from "next/image";
@@ -77,11 +78,13 @@ async function getCurrentViewer(): Promise<CurrentViewer> {
   return { type: "guest" };
 }
 
+const getPostDetail = cache(async (slug: string) => fetchPostBySlug(slug));
+
 export async function generateMetadata({
   params,
 }: PostDetailPageProps): Promise<Metadata> {
   try {
-    const { post } = await fetchPostBySlug(params.slug);
+    const { post } = await getPostDetail(params.slug);
     const description =
       createMetadataSummary(post.contentMd) || getDefaultDescription();
     const url = `/posts/${post.slug}`;
@@ -131,7 +134,7 @@ export async function generateMetadata({
 
 export default async function PostDetailPage({ params }: PostDetailPageProps) {
   try {
-    const { post, prevPost, nextPost } = await fetchPostBySlug(params.slug);
+    const { post, prevPost, nextPost } = await getPostDetail(params.slug);
     let comments: Comment[] = [];
     let commentError: string | null = null;
     const cookieHeader = await toCookieHeader();
