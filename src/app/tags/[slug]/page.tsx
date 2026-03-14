@@ -31,6 +31,14 @@ function parsePage(value?: string): number {
   return page;
 }
 
+function isOutOfRangePage(page: number, totalPages: number) {
+  if (totalPages === 0) {
+    return page !== 1;
+  }
+
+  return page > totalPages;
+}
+
 export const dynamic = "force-dynamic";
 
 export default async function TagPostsPage({
@@ -50,6 +58,10 @@ export default async function TagPostsPage({
 
   const posts = response.data;
   const { meta } = response;
+
+  if (isOutOfRangePage(page, meta.totalPages)) {
+    notFound();
+  }
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-8 px-6 py-12">
