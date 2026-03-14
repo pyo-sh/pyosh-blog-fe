@@ -130,6 +130,24 @@
   }
 
   .markdown-content {
+    --tw-prose-body: var(--text2);
+    --tw-prose-headings: var(--text1);
+    --tw-prose-lead: var(--text2);
+    --tw-prose-links: var(--primary1);
+    --tw-prose-bold: var(--text1);
+    --tw-prose-counters: var(--text3);
+    --tw-prose-bullets: var(--border2);
+    --tw-prose-hr: var(--border3);
+    --tw-prose-quotes: var(--text2);
+    --tw-prose-quote-borders: var(--border2);
+    --tw-prose-captions: var(--text3);
+    --tw-prose-kbd: var(--text1);
+    --tw-prose-kbd-shadows: color-mix(in srgb, var(--border1) 15%, transparent);
+    --tw-prose-code: var(--text1);
+    --tw-prose-pre-code: var(--text1);
+    --tw-prose-pre-bg: var(--background2);
+    --tw-prose-th-borders: var(--border2);
+    --tw-prose-td-borders: var(--border3);
     color: var(--text2);
     font-size: 1rem;
     line-height: 1.75;
