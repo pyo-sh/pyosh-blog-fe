@@ -57,6 +57,7 @@ const SearchBar: React.FC = () => {
       onSubmit={handleSubmit}
     >
       <label
+        aria-hidden={!isOpen}
         className={cn(
           "overflow-hidden transition-all duration-300",
           isOpen
@@ -69,6 +70,8 @@ const SearchBar: React.FC = () => {
           id="header-search-input"
           ref={inputRef}
           type="search"
+          disabled={!isOpen}
+          tabIndex={isOpen ? 0 : -1}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="검색어 입력"
