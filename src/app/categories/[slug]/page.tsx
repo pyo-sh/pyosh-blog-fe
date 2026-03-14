@@ -5,7 +5,7 @@ import type { Category } from "@entities/category";
 import { fetchCategories } from "@entities/category";
 import { fetchPosts } from "@entities/post";
 import { PostCard } from "@features/post-list";
-import { getSiteName } from "@shared/lib/metadata";
+import { getSiteName, toAbsoluteUrl } from "@shared/lib/metadata";
 import { Pagination } from "@shared/ui/libs";
 import { CategoryNav } from "@widgets/category-nav";
 
@@ -66,6 +66,9 @@ function findCategoryBySlug(
 export const dynamic = "force-dynamic";
 
 const getCategories = cache(async () => fetchCategories());
+const getCategoryPosts = cache((categoryId: number, page: number) =>
+  fetchPosts({ categoryId, page }),
+);
 
 export async function generateMetadata({
   params,
@@ -81,24 +84,33 @@ export async function generateMetadata({
   const title = `${activeCategory.name} 카테고리`;
   const description = `${activeCategory.name} 카테고리에 등록된 글 모음입니다.`;
   const page = parsePage(getSingleValue(searchParams?.page));
+  const response = await getCategoryPosts(activeCategory.id, page);
+
+  if (isOutOfRangePage(page, response.meta.totalPages)) {
+    notFound();
+  }
+
   const url =
     page > 1
       ? `/categories/${activeCategory.slug}?page=${page}`
       : `/categories/${activeCategory.slug}`;
+  const canonicalUrl = toAbsoluteUrl(url);
 
   return {
     title,
     description,
-    alternates: {
-      canonical: url,
-    },
+    alternates: canonicalUrl
+      ? {
+          canonical: canonicalUrl,
+        }
+      : undefined,
     openGraph: {
       type: "website",
       locale: "ko_KR",
       siteName: getSiteName(),
       title,
       description,
-      url,
+      url: canonicalUrl,
     },
     twitter: {
       card: "summary",
@@ -120,7 +132,7 @@ export default async function CategoryPage({
     notFound();
   }
 
-  const response = await fetchPosts({ categoryId: activeCategory.id, page });
+  const response = await getCategoryPosts(activeCategory.id, page);
   const posts = response.data;
   const { meta } = response;
 

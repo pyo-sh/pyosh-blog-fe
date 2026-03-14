@@ -10,9 +10,10 @@ import {
 
 const siteName = getSiteName();
 const siteDescription = getDefaultDescription();
+const metadataBase = getMetadataBase();
 
 export const metadata: Metadata = {
-  metadataBase: getMetadataBase(),
+  metadataBase,
   title: {
     default: siteName,
     template: `%s | ${siteName}`,
@@ -30,7 +31,7 @@ export const metadata: Metadata = {
     siteName,
     title: siteName,
     description: siteDescription,
-    url: "/",
+    url: metadataBase ? "/" : undefined,
   },
   twitter: {
     card: "summary_large_image",

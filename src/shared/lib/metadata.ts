@@ -1,4 +1,3 @@
-const DEFAULT_SITE_URL = "http://localhost:3000";
 const DEFAULT_SITE_NAME = "Pyosh Blog";
 const DEFAULT_DESCRIPTION =
   "프론트엔드, 개발 메모, 그리고 만드는 과정을 기록하는 Pyosh Blog입니다.";
@@ -14,15 +13,15 @@ export function getSiteUrl() {
     process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim() ??
     process.env.VERCEL_URL?.trim();
 
-  if (!envSiteUrl) {
-    if (!vercelSiteUrl) {
-      return DEFAULT_SITE_URL;
-    }
+  if (envSiteUrl) {
+    return trimTrailingSlash(envSiteUrl);
+  }
 
+  if (vercelSiteUrl) {
     return trimTrailingSlash(`https://${vercelSiteUrl}`);
   }
 
-  return trimTrailingSlash(envSiteUrl);
+  return null;
 }
 
 export function getSiteName() {
@@ -34,11 +33,27 @@ export function getDefaultDescription() {
 }
 
 export function getMetadataBase() {
-  return new URL(getSiteUrl());
+  const siteUrl = getSiteUrl();
+
+  if (!siteUrl) {
+    return undefined;
+  }
+
+  return new URL(siteUrl);
 }
 
 export function toAbsoluteUrl(path: string) {
-  return new URL(path, getMetadataBase());
+  try {
+    return new URL(path);
+  } catch {
+    const metadataBase = getMetadataBase();
+
+    if (!metadataBase) {
+      return undefined;
+    }
+
+    return new URL(path, metadataBase);
+  }
 }
 
 export function createMetadataSummary(contentMd: string) {

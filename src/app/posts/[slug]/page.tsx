@@ -89,38 +89,44 @@ export async function generateMetadata({
       createMetadataSummary(post.contentMd) || getDefaultDescription();
     const url = `/posts/${post.slug}`;
     const siteName = getSiteName();
+    const canonicalUrl = toAbsoluteUrl(url);
+    const imageUrl = post.thumbnailUrl
+      ? toAbsoluteUrl(post.thumbnailUrl)
+      : null;
 
     return {
       title: post.title,
       description,
-      alternates: {
-        canonical: url,
-      },
+      alternates: canonicalUrl
+        ? {
+            canonical: canonicalUrl,
+          }
+        : undefined,
       openGraph: {
         type: "article",
         locale: "ko_KR",
         siteName,
         title: post.title,
         description,
-        url,
+        url: canonicalUrl,
         publishedTime: post.publishedAt ?? post.createdAt,
         modifiedTime: post.updatedAt,
         section: post.category.name,
         tags: post.tags.map((tag) => tag.name),
-        images: post.thumbnailUrl
+        images: imageUrl
           ? [
               {
-                url: toAbsoluteUrl(post.thumbnailUrl),
+                url: imageUrl,
                 alt: post.title,
               },
             ]
           : undefined,
       },
       twitter: {
-        card: post.thumbnailUrl ? "summary_large_image" : "summary",
+        card: imageUrl ? "summary_large_image" : "summary",
         title: post.title,
         description,
-        images: post.thumbnailUrl ? [toAbsoluteUrl(post.thumbnailUrl)] : [],
+        images: imageUrl ? [imageUrl] : [],
       },
     };
   } catch (error) {
