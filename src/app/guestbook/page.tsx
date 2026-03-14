@@ -48,9 +48,7 @@ async function toCookieHeader() {
   return `${sessionCookie.name}=${sessionCookie.value}`;
 }
 
-async function getCurrentViewer(): Promise<CurrentViewer> {
-  const cookieHeader = await toCookieHeader();
-
+async function getCurrentViewer(cookieHeader?: string): Promise<CurrentViewer> {
   if (!cookieHeader) {
     return { type: "guest" };
   }
@@ -63,6 +61,10 @@ async function getCurrentViewer(): Promise<CurrentViewer> {
         type: "oauth",
         id: viewer.id,
       };
+    }
+
+    if (viewer.type === "admin") {
+      return { type: "guest" };
     }
   } catch (error) {
     if (error instanceof ApiResponseError && error.statusCode === 401) {
@@ -83,8 +85,11 @@ export default async function GuestbookPage({
   searchParams,
 }: GuestbookPageProps) {
   const page = parsePage(getSingleValue(searchParams?.page));
-  const response = await fetchGuestbook(page, await toCookieHeader());
-  const viewer = await getCurrentViewer();
+  const cookieHeader = await toCookieHeader();
+  const [response, viewer] = await Promise.all([
+    fetchGuestbook(page, cookieHeader),
+    getCurrentViewer(cookieHeader),
+  ]);
 
   return (
     <GuestbookPageContent
