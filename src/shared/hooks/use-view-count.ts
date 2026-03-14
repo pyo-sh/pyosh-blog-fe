@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { clientMutate } from "@shared/api";
 
 const VIEWED_POSTS_KEY = "viewed_posts";
+const inFlightPostIds = new Set<number>();
 
 function readViewedPosts(): number[] {
   const storedValue = window.sessionStorage.getItem(VIEWED_POSTS_KEY);
@@ -35,28 +36,25 @@ export function useViewCount(postId: number): void {
   useEffect(() => {
     const viewedPosts = readViewedPosts();
 
-    if (viewedPosts.includes(postId)) {
+    if (viewedPosts.includes(postId) || inFlightPostIds.has(postId)) {
       return;
     }
 
-    let cancelled = false;
+    inFlightPostIds.add(postId);
+    writeViewedPosts([...viewedPosts, postId]);
 
     void clientMutate("/api/stats/view", {
       body: JSON.stringify({ postId }),
     })
       .then(() => {
-        if (cancelled) {
-          return;
-        }
-
-        writeViewedPosts([...viewedPosts, postId]);
+        inFlightPostIds.delete(postId);
       })
       .catch((error: unknown) => {
+        inFlightPostIds.delete(postId);
+        writeViewedPosts(
+          readViewedPosts().filter((viewedPostId) => viewedPostId !== postId),
+        );
         console.error(error);
       });
-
-    return () => {
-      cancelled = true;
-    };
   }, [postId]);
 }
