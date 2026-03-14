@@ -1,7 +1,11 @@
+import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { fetchMeServer } from "@entities/auth";
+import { fetchComments, type Comment } from "@entities/comment";
 import { fetchPostBySlug } from "@entities/post";
+import { CommentList } from "@features/comment-section";
 import { PostContent, PostNavigation } from "@features/post-detail";
 import { ApiResponseError } from "@shared/api";
 
@@ -9,6 +13,11 @@ interface PostDetailPageProps {
   params: {
     slug: string;
   };
+}
+
+interface CurrentViewer {
+  type: "guest" | "oauth";
+  id?: number;
 }
 
 const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
@@ -21,9 +30,60 @@ function formatDate(value: string | null, fallback: string): string {
   return dateFormatter.format(new Date(value ?? fallback));
 }
 
+async function toCookieHeader() {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get("sessionId");
+
+  if (!sessionCookie) {
+    return undefined;
+  }
+
+  return `${sessionCookie.name}=${sessionCookie.value}`;
+}
+
+async function getCurrentViewer(): Promise<CurrentViewer> {
+  const cookieHeader = await toCookieHeader();
+
+  if (!cookieHeader) {
+    return { type: "guest" };
+  }
+
+  try {
+    const viewer = await fetchMeServer(cookieHeader);
+
+    if (viewer.type === "oauth") {
+      return {
+        type: "oauth",
+        id: viewer.id,
+      };
+    }
+  } catch (error) {
+    if (error instanceof ApiResponseError && error.statusCode === 401) {
+      return { type: "guest" };
+    }
+  }
+
+  return { type: "guest" };
+}
+
 export default async function PostDetailPage({ params }: PostDetailPageProps) {
   try {
     const { post, prevPost, nextPost } = await fetchPostBySlug(params.slug);
+    let comments: Comment[] = [];
+    let commentError: string | null = null;
+    const cookieHeader = await toCookieHeader();
+
+    try {
+      comments = await fetchComments(post.id, cookieHeader);
+    } catch (error) {
+      if (error instanceof ApiResponseError && error.statusCode === 404) {
+        throw error;
+      }
+
+      commentError = "댓글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.";
+    }
+
+    const viewer = await getCurrentViewer();
 
     return (
       <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-8 px-6 py-12">
@@ -77,6 +137,12 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
         </article>
 
         <PostNavigation prevPost={prevPost} nextPost={nextPost} />
+        <CommentList
+          postId={post.id}
+          initialComments={comments}
+          viewer={viewer}
+          initialError={commentError}
+        />
       </main>
     );
   } catch (error) {

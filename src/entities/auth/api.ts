@@ -1,4 +1,4 @@
-import type { AdminUser, LoginCredentials } from "./model";
+import type { AdminUser, CurrentUser, LoginCredentials } from "./model";
 import { clientFetch, serverFetch } from "@shared/api";
 
 export async function login(credentials: LoginCredentials): Promise<AdminUser> {
@@ -14,10 +14,12 @@ export async function logout(): Promise<void> {
   });
 }
 
-export async function fetchMe(): Promise<AdminUser> {
-  return clientFetch<AdminUser>("/api/auth/me");
+export async function fetchMe(): Promise<CurrentUser> {
+  return clientFetch<CurrentUser>("/api/auth/me");
 }
 
-export async function fetchMeServer(cookieHeader: string): Promise<AdminUser> {
-  return serverFetch<AdminUser>("/api/auth/me", {}, cookieHeader);
+export async function fetchMeServer(
+  cookieHeader: string,
+): Promise<CurrentUser> {
+  return serverFetch<CurrentUser>("/api/auth/me", {}, cookieHeader);
 }
