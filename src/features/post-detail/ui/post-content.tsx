@@ -9,7 +9,7 @@ export async function PostContent({ contentMd }: PostContentProps) {
 
   return (
     <div
-      className="markdown-content prose prose-neutral max-w-none"
+      className="markdown-content prose max-w-none"
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
