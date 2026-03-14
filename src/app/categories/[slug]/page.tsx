@@ -1,8 +1,10 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { Category } from "@entities/category";
 import { fetchCategories } from "@entities/category";
 import { fetchPosts } from "@entities/post";
 import { PostCard } from "@features/post-list";
+import { getSiteName } from "@shared/lib/metadata";
 import { Pagination } from "@shared/ui/libs";
 import { CategoryNav } from "@widgets/category-nav";
 
@@ -61,6 +63,42 @@ function findCategoryBySlug(
 }
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: CategoryPageProps): Promise<Metadata> {
+  const categories = await fetchCategories();
+  const activeCategory = findCategoryBySlug(categories, params.slug);
+
+  if (!activeCategory || !activeCategory.isVisible) {
+    return {};
+  }
+
+  const title = `${activeCategory.name} 카테고리`;
+  const description = `${activeCategory.name} 카테고리에 등록된 글 모음입니다.`;
+  const url = `/categories/${activeCategory.slug}`;
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      type: "website",
+      locale: "ko_KR",
+      siteName: getSiteName(),
+      title,
+      description,
+      url,
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
+  };
+}
 
 export default async function CategoryPage({
   params,

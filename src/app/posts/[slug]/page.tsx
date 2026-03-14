@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
@@ -12,6 +13,12 @@ import {
   ViewCounter,
 } from "@features/post-detail";
 import { ApiResponseError } from "@shared/api";
+import {
+  createMetadataSummary,
+  getDefaultDescription,
+  getSiteName,
+  toAbsoluteUrl,
+} from "@shared/lib/metadata";
 
 interface PostDetailPageProps {
   params: {
@@ -68,6 +75,58 @@ async function getCurrentViewer(): Promise<CurrentViewer> {
   }
 
   return { type: "guest" };
+}
+
+export async function generateMetadata({
+  params,
+}: PostDetailPageProps): Promise<Metadata> {
+  try {
+    const { post } = await fetchPostBySlug(params.slug);
+    const description =
+      createMetadataSummary(post.contentMd) || getDefaultDescription();
+    const url = `/posts/${post.slug}`;
+    const siteName = getSiteName();
+
+    return {
+      title: post.title,
+      description,
+      alternates: {
+        canonical: url,
+      },
+      openGraph: {
+        type: "article",
+        locale: "ko_KR",
+        siteName,
+        title: post.title,
+        description,
+        url,
+        publishedTime: post.publishedAt ?? post.createdAt,
+        modifiedTime: post.updatedAt,
+        section: post.category.name,
+        tags: post.tags.map((tag) => tag.name),
+        images: post.thumbnailUrl
+          ? [
+              {
+                url: toAbsoluteUrl(post.thumbnailUrl),
+                alt: post.title,
+              },
+            ]
+          : undefined,
+      },
+      twitter: {
+        card: post.thumbnailUrl ? "summary_large_image" : "summary",
+        title: post.title,
+        description,
+        images: post.thumbnailUrl ? [toAbsoluteUrl(post.thumbnailUrl)] : [],
+      },
+    };
+  } catch (error) {
+    if (error instanceof ApiResponseError && error.statusCode === 404) {
+      return {};
+    }
+
+    throw error;
+  }
 }
 
 export default async function PostDetailPage({ params }: PostDetailPageProps) {
