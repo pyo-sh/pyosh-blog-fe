@@ -22,6 +22,7 @@ export interface Comment {
 }
 
 export interface CreateCommentGuestBody {
+  authorType: "guest";
   body: string;
   parentId?: number;
   replyToCommentId?: number;
@@ -32,6 +33,7 @@ export interface CreateCommentGuestBody {
 }
 
 export interface CreateCommentOAuthBody {
+  authorType: "oauth";
   body: string;
   parentId?: number;
   replyToCommentId?: number;
@@ -41,10 +43,13 @@ export interface CreateCommentOAuthBody {
 export type CreateCommentBody = CreateCommentGuestBody | CreateCommentOAuthBody;
 
 export interface DeleteCommentGuestBody {
+  authorType: "guest";
   guestPassword: string;
 }
 
-export type DeleteCommentOAuthBody = Record<string, never>;
+export interface DeleteCommentOAuthBody {
+  authorType: "oauth";
+}
 
 export type DeleteCommentBody = DeleteCommentGuestBody | DeleteCommentOAuthBody;
 

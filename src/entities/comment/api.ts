@@ -24,10 +24,11 @@ export async function createComment(
   postId: number,
   body: CreateCommentBody,
 ): Promise<Comment> {
+  const { authorType: _authorType, ...payload } = body;
   const response = await clientMutate<CommentResponse>(
     `/api/posts/${postId}/comments`,
     {
-      body: JSON.stringify(body),
+      body: JSON.stringify(payload),
     },
   );
 
@@ -36,10 +37,13 @@ export async function createComment(
 
 export async function deleteComment(
   commentId: number,
-  body: DeleteCommentBody = {},
+  body: DeleteCommentBody,
 ): Promise<void> {
+  const payload =
+    body.authorType === "guest" ? { guestPassword: body.guestPassword } : {};
+
   await clientMutate<void>(`/api/comments/${commentId}`, {
     method: "DELETE",
-    body: JSON.stringify(body),
+    body: JSON.stringify(payload),
   });
 }
