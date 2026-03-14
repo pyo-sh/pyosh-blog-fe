@@ -16,6 +16,7 @@ interface GuestbookPageProps {
 interface CurrentViewer {
   type: "guest" | "oauth";
   id?: number;
+  authErrorMessage?: string;
 }
 
 function getSingleValue(value?: string | string[]) {
@@ -68,7 +69,11 @@ async function getCurrentViewer(): Promise<CurrentViewer> {
       return { type: "guest" };
     }
 
-    throw error;
+    return {
+      type: "guest",
+      authErrorMessage:
+        "로그인 상태를 확인하지 못해 게스트 모드로 표시합니다. 잠시 후 다시 시도해 주세요.",
+    };
   }
 
   return { type: "guest" };

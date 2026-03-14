@@ -19,6 +19,7 @@ import { Modal, Pagination } from "@shared/ui/libs";
 interface GuestbookViewer {
   type: "guest" | "oauth";
   id?: number;
+  authErrorMessage?: string;
 }
 
 interface GuestbookPageContentProps {
@@ -288,6 +289,15 @@ export function GuestbookPageContent({
         onSubmit={handleCreate}
         submitLabel="방명록 작성"
       />
+
+      {viewer.authErrorMessage ? (
+        <div
+          role="status"
+          className="rounded-[1.5rem] border border-border-3 bg-background-2 px-5 py-4 text-body-sm text-text-3"
+        >
+          {viewer.authErrorMessage}
+        </div>
+      ) : null}
 
       {entries.length > 0 ? (
         <>
