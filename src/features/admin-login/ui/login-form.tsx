@@ -20,13 +20,16 @@ function getErrorMessage(error: unknown): string {
 export function LoginForm() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const busy = isLoading || isPending;
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErrorMessage(null);
+    setIsLoading(true);
 
     try {
       await login({
@@ -40,6 +43,8 @@ export function LoginForm() {
       });
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -52,7 +57,7 @@ export function LoginForm() {
         <p className="text-body-xs uppercase tracking-[0.24em] text-text-4">
           Admin access
         </p>
-        <h1 className="mt-3 text-h2 text-text-1">관리자 로그인</h1>
+        <h2 className="mt-3 text-h2 text-text-1">관리자 로그인</h2>
         <p className="mt-3 text-body-sm text-text-3">
           관리자 계정으로 로그인해 대시보드와 글 관리 기능에 접근합니다.
         </p>
@@ -67,7 +72,7 @@ export function LoginForm() {
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             placeholder="admin@example.com"
-            disabled={isPending}
+            disabled={busy}
             className="mt-2 w-full rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
             required
           />
@@ -81,7 +86,7 @@ export function LoginForm() {
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             placeholder="비밀번호를 입력하세요"
-            disabled={isPending}
+            disabled={busy}
             className="mt-2 w-full rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
             required
           />
@@ -96,10 +101,10 @@ export function LoginForm() {
 
       <button
         type="submit"
-        disabled={isPending}
+        disabled={busy}
         className="mt-8 inline-flex w-full items-center justify-center rounded-[1rem] bg-primary-1 px-4 py-3 text-body-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {isPending ? "로그인 중..." : "로그인"}
+        {busy ? "로그인 중..." : "로그인"}
       </button>
     </form>
   );
