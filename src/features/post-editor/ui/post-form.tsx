@@ -1,7 +1,7 @@
 "use client";
 
 import type { FormEvent, ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MarkdownEditor } from "./markdown-editor";
 import { MarkdownPreview } from "./markdown-preview";
@@ -149,14 +149,31 @@ export function PostForm({
   onSuccess,
 }: PostFormProps) {
   const queryClient = useQueryClient();
-  const [values, setValues] = useState<PostFormValues>(() =>
-    createInitialValues(initialValues),
-  );
+  const nextInitialValues = createInitialValues(initialValues);
+  const nextInitialSignature = JSON.stringify(nextInitialValues);
+  const hydrationRef = useRef({
+    postId,
+    signature: nextInitialSignature,
+  });
+  const [values, setValues] = useState<PostFormValues>(nextInitialValues);
+  const [isDirty, setIsDirty] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
-    setValues(createInitialValues(initialValues));
-  }, [initialValues]);
+    const recordChanged =
+      mode === "edit" && hydrationRef.current.postId !== postId;
+    const initialChanged =
+      hydrationRef.current.signature !== nextInitialSignature;
+
+    if (recordChanged || (!isDirty && initialChanged)) {
+      setValues(nextInitialValues);
+      setIsDirty(false);
+      hydrationRef.current = {
+        postId,
+        signature: nextInitialSignature,
+      };
+    }
+  }, [isDirty, mode, nextInitialSignature, nextInitialValues, postId]);
 
   const categoriesQuery = useQuery({
     queryKey: ["categories"],
@@ -179,6 +196,11 @@ export function PostForm({
     },
     onSuccess: async (post) => {
       setSubmitError(null);
+      setIsDirty(false);
+      hydrationRef.current = {
+        postId,
+        signature: JSON.stringify(values),
+      };
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["admin-posts"] }),
         queryClient.invalidateQueries({ queryKey: ["categories"] }),
@@ -198,6 +220,7 @@ export function PostForm({
     key: Key,
     value: PostFormValues[Key],
   ) => {
+    setIsDirty(true);
     setValues((currentValues) => ({
       ...currentValues,
       [key]: value,

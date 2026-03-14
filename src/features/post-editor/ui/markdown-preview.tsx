@@ -1,7 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { renderMarkdownPreview } from "../lib/render-markdown-preview";
+
+let renderMarkdownPromise: Promise<
+  typeof import("@shared/lib/markdown")
+> | null = null;
+
+async function renderPreviewMarkdown(value: string): Promise<string> {
+  if (renderMarkdownPromise === null) {
+    renderMarkdownPromise = import("@shared/lib/markdown");
+  }
+
+  const { renderMarkdown } = await renderMarkdownPromise;
+
+  return renderMarkdown(value);
+}
 
 interface MarkdownPreviewProps {
   value: string;
@@ -18,7 +31,7 @@ export function MarkdownPreview({ value }: MarkdownPreviewProps) {
     setIsRendering(true);
 
     const timeoutId = window.setTimeout(() => {
-      void renderMarkdownPreview(value)
+      void renderPreviewMarkdown(value)
         .then((nextHtml) => {
           if (!isActive) {
             return;
