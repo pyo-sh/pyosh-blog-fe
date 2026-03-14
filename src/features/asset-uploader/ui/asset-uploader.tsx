@@ -341,7 +341,9 @@ export function AssetUploader() {
           <AssetGrid
             assets={assets}
             selectedIds={selectedIds}
-            deletingIds={deleteMutation.variables ?? []}
+            deletingIds={
+              deleteMutation.isPending ? (deleteMutation.variables ?? []) : []
+            }
             copiedState={copiedState}
             isPending={deleteMutation.isPending}
             onToggleSelect={toggleSelect}
