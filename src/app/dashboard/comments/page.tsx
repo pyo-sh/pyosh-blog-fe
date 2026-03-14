@@ -42,11 +42,11 @@ function getBodyPreview(item: AdminCommentItem) {
     return "관리자에 의해 삭제된 댓글입니다.";
   }
 
-  if (item.status === "hidden") {
-    return "숨김 처리된 댓글입니다.";
-  }
-
   return item.body;
+}
+
+function canExpandBody(body: string) {
+  return body.length > 80 || body.includes("\n");
 }
 
 function Badge({
@@ -119,6 +119,9 @@ export default function DashboardCommentsPage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [expandedCommentId, setExpandedCommentId] = useState<number | null>(
+    null,
+  );
 
   const queryKey = getQueryKey(page);
   const { data, isPending, isError, error, refetch, isFetching } = useQuery({
@@ -151,6 +154,10 @@ export default function DashboardCommentsPage() {
       setPage(meta.totalPages);
     }
   }, [meta, page]);
+
+  useEffect(() => {
+    setExpandedCommentId(null);
+  }, [page]);
 
   const paginationLabel = useMemo(() => {
     if (!meta || rows.length === 0) {
@@ -246,6 +253,10 @@ export default function DashboardCommentsPage() {
                         const disabled =
                           isActionPending && activeActionId === item.id;
                         const isDeleted = item.status === "deleted";
+                        const bodyPreview = getBodyPreview(item);
+                        const expanded = expandedCommentId === item.id;
+                        const expandable =
+                          !isDeleted && canExpandBody(bodyPreview);
 
                         return (
                           <tr key={item.id} className="align-top">
@@ -264,13 +275,33 @@ export default function DashboardCommentsPage() {
                             </td>
                             <td className="px-6 py-5">
                               <div className="max-w-2xl space-y-2">
-                                <p className="truncate text-sm text-text-2">
-                                  {getBodyPreview(item)}
+                                <p
+                                  className={cn(
+                                    "text-sm text-text-2",
+                                    expanded
+                                      ? "whitespace-pre-wrap break-words"
+                                      : "truncate",
+                                  )}
+                                >
+                                  {bodyPreview}
                                 </p>
                                 {item.replyToName ? (
                                   <p className="text-xs text-text-4">
                                     @{item.replyToName} 에 대한 답글
                                   </p>
+                                ) : null}
+                                {expandable ? (
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setExpandedCommentId((current) =>
+                                        current === item.id ? null : item.id,
+                                      )
+                                    }
+                                    className="text-xs font-medium text-primary-1 transition-colors hover:text-primary-2"
+                                  >
+                                    {expanded ? "접기" : "전체 보기"}
+                                  </button>
                                 ) : null}
                               </div>
                             </td>
