@@ -64,8 +64,16 @@ export function CommentForm({
     setIsSubmitting(true);
 
     try {
+      const trimmedBody = body.trim();
+
+      if (!trimmedBody) {
+        setErrorMessage("본문을 입력해 주세요.");
+
+        return;
+      }
+
       const payloadBase = {
-        body: body.trim(),
+        body: trimmedBody,
         isSecret,
         ...(parentId ? { parentId } : {}),
         ...(replyToCommentId ? { replyToCommentId } : {}),

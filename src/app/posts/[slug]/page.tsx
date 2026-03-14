@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { fetchMeServer } from "@entities/auth";
-import { fetchComments } from "@entities/comment";
+import { fetchComments, type Comment } from "@entities/comment";
 import { fetchPostBySlug } from "@entities/post";
 import { CommentList } from "@features/comment-section";
 import { PostContent, PostNavigation } from "@features/post-detail";
@@ -69,7 +69,20 @@ async function getCurrentViewer(): Promise<CurrentViewer> {
 export default async function PostDetailPage({ params }: PostDetailPageProps) {
   try {
     const { post, prevPost, nextPost } = await fetchPostBySlug(params.slug);
-    const comments = await fetchComments(post.id, await toCookieHeader());
+    let comments: Comment[] = [];
+    let commentError: string | null = null;
+    const cookieHeader = await toCookieHeader();
+
+    try {
+      comments = await fetchComments(post.id, cookieHeader);
+    } catch (error) {
+      if (error instanceof ApiResponseError && error.statusCode === 404) {
+        throw error;
+      }
+
+      commentError = "댓글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.";
+    }
+
     const viewer = await getCurrentViewer();
 
     return (
@@ -128,6 +141,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
           postId={post.id}
           initialComments={comments}
           viewer={viewer}
+          initialError={commentError}
         />
       </main>
     );

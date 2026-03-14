@@ -20,6 +20,7 @@ interface CommentListProps {
   postId: number;
   initialComments: Comment[];
   viewer: CommentViewer;
+  initialError?: string | null;
 }
 
 function appendComment(comments: Comment[], nextComment: Comment): Comment[] {
@@ -63,8 +64,10 @@ export function CommentList({
   postId,
   initialComments,
   viewer,
+  initialError = null,
 }: CommentListProps) {
   const [comments, setComments] = useState(initialComments);
+  const [loadError, setLoadError] = useState<string | null>(initialError);
   const [replyTarget, setReplyTarget] = useState<Comment | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Comment | null>(null);
   const [deletePassword, setDeletePassword] = useState("");
@@ -79,6 +82,10 @@ export function CommentList({
   useEffect(() => {
     setComments(initialComments);
   }, [initialComments]);
+
+  useEffect(() => {
+    setLoadError(initialError);
+  }, [initialError]);
 
   function handleProfileChange(
     field: keyof GuestCommentProfile,
@@ -95,6 +102,7 @@ export function CommentList({
   ) {
     const nextComment = await createComment(postId, payload);
     setComments((current) => appendComment(current, nextComment));
+    setLoadError(null);
     setReplyTarget(null);
   }
 
@@ -131,6 +139,7 @@ export function CommentList({
       });
 
       setComments((current) => markCommentDeleted(current, deleteTarget.id));
+      setLoadError(null);
       setDeleteTarget(null);
       setDeletePassword("");
     } catch (error) {
@@ -164,6 +173,15 @@ export function CommentList({
       </div>
 
       <div className="mt-8">
+        {loadError ? (
+          <div
+            role="status"
+            className="mb-5 rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3 text-body-sm text-text-3"
+          >
+            {loadError}
+          </div>
+        ) : null}
+
         {comments.length > 0 ? (
           <ul className="grid gap-5">
             {comments.map((comment) => (
