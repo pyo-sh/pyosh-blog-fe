@@ -67,6 +67,8 @@ async function getCurrentViewer(): Promise<CurrentViewer> {
     if (error instanceof ApiResponseError && error.statusCode === 401) {
       return { type: "guest" };
     }
+
+    throw error;
   }
 
   return { type: "guest" };
