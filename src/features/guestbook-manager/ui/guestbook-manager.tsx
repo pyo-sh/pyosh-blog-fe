@@ -270,12 +270,18 @@ export function GuestbookManager() {
                               {formatDate(item.createdAt)}
                             </td>
                             <td className="px-6 py-5">
-                              <ActionButton
-                                disabled={disabled}
-                                onClick={() => deleteMutation.mutate(item.id)}
-                              >
-                                {disabled ? "삭제 중..." : "삭제"}
-                              </ActionButton>
+                              {item.status === "deleted" ? (
+                                <span className="inline-flex items-center rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm text-text-4">
+                                  삭제됨
+                                </span>
+                              ) : (
+                                <ActionButton
+                                  disabled={disabled}
+                                  onClick={() => deleteMutation.mutate(item.id)}
+                                >
+                                  {disabled ? "삭제 중..." : "삭제"}
+                                </ActionButton>
+                              )}
                             </td>
                           </tr>
                         );
