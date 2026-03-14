@@ -1,20 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-let renderMarkdownPromise: Promise<
-  typeof import("@shared/lib/markdown")
-> | null = null;
-
-async function renderPreviewMarkdown(value: string): Promise<string> {
-  if (renderMarkdownPromise === null) {
-    renderMarkdownPromise = import("@shared/lib/markdown");
-  }
-
-  const { renderMarkdown } = await renderMarkdownPromise;
-
-  return renderMarkdown(value);
-}
+import { useEffect, useRef, useState } from "react";
 
 interface MarkdownPreviewProps {
   value: string;
@@ -24,38 +10,53 @@ export function MarkdownPreview({ value }: MarkdownPreviewProps) {
   const [html, setHtml] = useState("");
   const [isRendering, setIsRendering] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const workerRef = useRef<Worker | null>(null);
+  const requestIdRef = useRef(0);
 
   useEffect(() => {
-    let isActive = true;
+    const worker = new Worker(
+      new URL("./markdown-preview.worker.ts", import.meta.url),
+    );
+
+    worker.onmessage = (
+      event: MessageEvent<{ id: number; html?: string; error?: string }>,
+    ) => {
+      if (event.data.id !== requestIdRef.current) {
+        return;
+      }
+
+      if (event.data.error) {
+        setError(event.data.error);
+      } else {
+        setHtml(event.data.html ?? "");
+        setError(null);
+      }
+
+      setIsRendering(false);
+    };
+
+    workerRef.current = worker;
+
+    return () => {
+      worker.terminate();
+      workerRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (workerRef.current === null) {
+      return;
+    }
 
     setIsRendering(true);
+    const requestId = requestIdRef.current + 1;
+    requestIdRef.current = requestId;
 
     const timeoutId = window.setTimeout(() => {
-      void renderPreviewMarkdown(value)
-        .then((nextHtml) => {
-          if (!isActive) {
-            return;
-          }
-
-          setHtml(nextHtml);
-          setError(null);
-        })
-        .catch(() => {
-          if (!isActive) {
-            return;
-          }
-
-          setError("미리보기를 렌더링할 수 없습니다.");
-        })
-        .finally(() => {
-          if (isActive) {
-            setIsRendering(false);
-          }
-        });
+      workerRef.current?.postMessage({ id: requestId, value });
     }, 300);
 
     return () => {
-      isActive = false;
       window.clearTimeout(timeoutId);
     };
   }, [value]);
