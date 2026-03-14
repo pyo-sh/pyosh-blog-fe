@@ -33,12 +33,12 @@ const Header: React.FC = () => {
   }, []);
 
   return (
-    <div className="pt-[5.625rem]">
+    <div className="pt-28 md:pt-[5.625rem]">
       <header
         ref={headerRef}
         className={cn(
           // Layout
-          "w-full h-[5.625rem]",
+          "w-full min-h-28 md:h-[5.625rem]",
           "fixed top-0 z-[1000]",
           "flex justify-center",
           // Colors
@@ -46,13 +46,13 @@ const Header: React.FC = () => {
           // Transition
           "transition-all duration-300",
           // Transform
-          isShown ? "translate-y-0" : "-translate-y-[5.625rem]",
+          isShown ? "translate-y-0" : "-translate-y-full",
         )}
       >
-        <div className="max-w-[67.5rem] w-full h-full mx-auto px-6 flex items-center justify-between">
+        <div className="max-w-[67.5rem] w-full mx-auto px-6 py-4 flex flex-col gap-3 md:h-full md:flex-row md:items-center md:justify-between md:py-0">
           <Logo />
 
-          <div className="flex items-center gap-8">
+          <div className="flex w-full items-center justify-between gap-4 md:w-auto md:justify-start md:gap-8">
             <Navigation />
             <ThemeButton />
           </div>

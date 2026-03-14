@@ -12,7 +12,7 @@ const navItems = [
 const Navigation: React.FC = () => {
   return (
     <nav>
-      <ListRow className="pt-4 gap-5">
+      <ListRow className="flex-wrap gap-x-4 gap-y-2 pt-0 md:gap-5 md:pt-4">
         {navItems.map((item) => (
           <NavItem key={item.path} path={item.path}>
             {item.label}

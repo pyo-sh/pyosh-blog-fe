@@ -21,8 +21,8 @@ export default async function TagsPage() {
         <h1 className="mt-3 text-heading-md text-text-1">태그</h1>
         <p className="mt-4 max-w-2xl text-body-md text-text-3">
           {sortedTags.length}개의 태그와{" "}
-          {totalTaggedPosts.toLocaleString("ko-KR")}
-          개의 연결된 글을 확인할 수 있습니다.
+          {totalTaggedPosts.toLocaleString("ko-KR")}건의 태그 연결을 확인할 수
+          있습니다.
         </p>
       </header>
 
