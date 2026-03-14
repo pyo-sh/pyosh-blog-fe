@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { fetchTags } from "@entities/tag";
 
 export const dynamic = "force-dynamic";
@@ -29,8 +30,9 @@ export default async function TagsPage() {
       {sortedTags.length > 0 ? (
         <section className="flex flex-wrap gap-3">
           {sortedTags.map((tag) => (
-            <article
+            <Link
               key={tag.id}
+              href={`/tags/${tag.slug}`}
               className="rounded-full border border-border-3 bg-background-1 px-5 py-3"
             >
               <div className="flex items-baseline gap-3">
@@ -41,7 +43,7 @@ export default async function TagsPage() {
                   {tag.postCount.toLocaleString("ko-KR")} posts
                 </p>
               </div>
-            </article>
+            </Link>
           ))}
         </section>
       ) : (
