@@ -1,13 +1,16 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 const DASHBOARD_LOGIN_PATH = "/dashboard/login";
-const API_URL =
-  process.env.API_URL ??
-  (process.env.NODE_ENV === "development"
-    ? "http://localhost:5500"
-    : (() => {
-        throw new Error("API_URL env var is required in production");
-      })());
+const DASHBOARD_HOME_PATH = "/dashboard";
+const API_URL = process.env.API_URL ?? "http://localhost:5500";
+
+function redirectToDashboard(request: NextRequest): NextResponse {
+  const dashboardUrl = request.nextUrl.clone();
+  dashboardUrl.pathname = DASHBOARD_HOME_PATH;
+  dashboardUrl.search = "";
+
+  return NextResponse.redirect(dashboardUrl);
+}
 
 function redirectToLogin(request: NextRequest): NextResponse {
   const loginUrl = request.nextUrl.clone();
@@ -23,6 +26,15 @@ function redirectToLogin(request: NextRequest): NextResponse {
 
 async function isAuthenticated(request: NextRequest): Promise<boolean> {
   const cookieHeader = request.headers.get("cookie");
+
+  if (
+    process.env.NODE_ENV === "production" &&
+    typeof process.env.API_URL === "undefined"
+  ) {
+    console.error("[middleware] API_URL is not set; denying dashboard access");
+
+    return false;
+  }
 
   if (!cookieHeader) {
     return false;
@@ -44,11 +56,15 @@ async function isAuthenticated(request: NextRequest): Promise<boolean> {
 }
 
 export async function middleware(request: NextRequest): Promise<NextResponse> {
+  const authenticated = await isAuthenticated(request);
+
   if (request.nextUrl.pathname === DASHBOARD_LOGIN_PATH) {
+    if (authenticated) {
+      return redirectToDashboard(request);
+    }
+
     return NextResponse.next();
   }
-
-  const authenticated = await isAuthenticated(request);
 
   if (!authenticated) {
     return redirectToLogin(request);
