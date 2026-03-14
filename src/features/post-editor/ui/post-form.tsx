@@ -1,7 +1,7 @@
 "use client";
 
 import type { FormEvent, ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MarkdownEditor } from "./markdown-editor";
 import { MarkdownPreview } from "./markdown-preview";
@@ -149,8 +149,14 @@ export function PostForm({
   onSuccess,
 }: PostFormProps) {
   const queryClient = useQueryClient();
-  const nextInitialValues = createInitialValues(initialValues);
-  const nextInitialSignature = JSON.stringify(nextInitialValues);
+  const nextInitialValues = useMemo(
+    () => createInitialValues(initialValues),
+    [initialValues],
+  );
+  const nextInitialSignature = useMemo(
+    () => JSON.stringify(nextInitialValues),
+    [nextInitialValues],
+  );
   const hydrationRef = useRef({
     postId,
     signature: nextInitialSignature,
@@ -399,16 +405,18 @@ export function PostForm({
       </div>
 
       <div className="flex flex-col-reverse gap-3 border-t border-border-3 pt-4 sm:flex-row sm:justify-end">
-        <button
-          type="button"
-          onClick={onCancel}
-          className={cn(
-            "inline-flex items-center justify-center rounded-[0.9rem] border border-border-3 px-5 py-3 text-sm font-medium text-text-2 transition-colors",
-            "hover:border-border-2 hover:text-text-1",
-          )}
-        >
-          {cancelLabel}
-        </button>
+        {onCancel ? (
+          <button
+            type="button"
+            onClick={onCancel}
+            className={cn(
+              "inline-flex items-center justify-center rounded-[0.9rem] border border-border-3 px-5 py-3 text-sm font-medium text-text-2 transition-colors",
+              "hover:border-border-2 hover:text-text-1",
+            )}
+          >
+            {cancelLabel}
+          </button>
+        ) : null}
 
         <button
           type="submit"
