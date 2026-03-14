@@ -1,13 +1,22 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
-const API_URL = process.env.API_URL ?? "http://localhost:5500";
 const DASHBOARD_LOGIN_PATH = "/dashboard/login";
+const API_URL =
+  process.env.API_URL ??
+  (process.env.NODE_ENV === "development"
+    ? "http://localhost:5500"
+    : (() => {
+        throw new Error("API_URL env var is required in production");
+      })());
 
 function redirectToLogin(request: NextRequest): NextResponse {
   const loginUrl = request.nextUrl.clone();
   loginUrl.pathname = DASHBOARD_LOGIN_PATH;
   loginUrl.search = "";
+  loginUrl.searchParams.set(
+    "returnTo",
+    `${request.nextUrl.pathname}${request.nextUrl.search}`,
+  );
 
   return NextResponse.redirect(loginUrl);
 }
@@ -25,6 +34,7 @@ async function isAuthenticated(request: NextRequest): Promise<boolean> {
         Cookie: cookieHeader,
       },
       cache: "no-store",
+      signal: AbortSignal.timeout(3000),
     });
 
     return response.ok;
