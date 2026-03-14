@@ -32,13 +32,21 @@ function appendComment(comments: Comment[], nextComment: Comment): Comment[] {
   });
 }
 
-function removeComment(comments: Comment[], commentId: number): Comment[] {
-  return comments
-    .filter((comment) => comment.id !== commentId)
-    .map((comment) => ({
+function markCommentDeleted(comments: Comment[], commentId: number): Comment[] {
+  return comments.map((comment) => {
+    if (comment.id === commentId) {
+      return {
+        ...comment,
+        status: "deleted",
+        body: "",
+      };
+    }
+
+    return {
       ...comment,
-      replies: removeComment(comment.replies, commentId),
-    }));
+      replies: markCommentDeleted(comment.replies, commentId),
+    };
+  });
 }
 
 export function CommentList({ postId, initialComments }: CommentListProps) {
@@ -88,7 +96,7 @@ export function CommentList({ postId, initialComments }: CommentListProps) {
         guestPassword: deletePassword,
       });
 
-      setComments((current) => removeComment(current, deleteTarget.id));
+      setComments((current) => markCommentDeleted(current, deleteTarget.id));
       setDeleteTarget(null);
       setDeletePassword("");
     } catch (error) {
@@ -152,16 +160,20 @@ export function CommentList({ postId, initialComments }: CommentListProps) {
                 {comment.replies.length > 0 ? (
                   <ul className="grid gap-4 md:ml-8">
                     {comment.replies.map((reply) => (
-                      <CommentItem
+                      <li
                         key={reply.id}
-                        comment={reply}
-                        onReply={setReplyTarget}
-                        onDelete={(target) => {
-                          setDeleteTarget(target);
-                          setDeletePassword("");
-                          setDeleteError(null);
-                        }}
-                      />
+                        className="border-l border-border-3 pl-5"
+                      >
+                        <CommentItem
+                          comment={reply}
+                          onReply={setReplyTarget}
+                          onDelete={(target) => {
+                            setDeleteTarget(target);
+                            setDeletePassword("");
+                            setDeleteError(null);
+                          }}
+                        />
+                      </li>
                     ))}
                   </ul>
                 ) : null}
