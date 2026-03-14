@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { cn } from "@shared/lib/style-utils";
 import { Button } from "@shared/ui/libs";
 
@@ -10,14 +10,9 @@ const ICON_HEIGHT = "1.5rem";
 
 const SearchBar: React.FC = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const [query, setQuery] = useState(searchParams.get("q") ?? "");
-
-  useEffect(() => {
-    setQuery(searchParams.get("q") ?? "");
-  }, [searchParams]);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     if (!isOpen) {
