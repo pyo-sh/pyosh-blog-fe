@@ -9,3 +9,21 @@ export interface Category {
   updatedAt: string;
   children?: Category[];
 }
+
+export interface CreateCategoryBody {
+  name: string;
+  parentId?: number | null;
+  isVisible?: boolean;
+}
+
+export interface UpdateCategoryBody {
+  name?: string;
+  isVisible?: boolean;
+}
+
+export interface UpdateCategoryOrderBody {
+  items: Array<{
+    id: number;
+    sortOrder: number;
+  }>;
+}
