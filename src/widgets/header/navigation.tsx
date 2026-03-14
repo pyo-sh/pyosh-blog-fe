@@ -2,11 +2,22 @@ import React from "react";
 import Link from "next/link";
 import { ListRow, Text } from "@shared/ui/libs";
 
+const navItems = [
+  { label: "홈", path: "/" },
+  { label: "인기", path: "/popular" },
+  { label: "태그", path: "/tags" },
+  { label: "방명록", path: "/guestbook" },
+] as const;
+
 const Navigation: React.FC = () => {
   return (
     <nav>
       <ListRow className="pt-4 gap-5">
-        <NavItem path="/">Main</NavItem>
+        {navItems.map((item) => (
+          <NavItem key={item.path} path={item.path}>
+            {item.label}
+          </NavItem>
+        ))}
       </ListRow>
     </nav>
   );
