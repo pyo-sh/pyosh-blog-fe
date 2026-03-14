@@ -18,14 +18,27 @@ export interface GuestbookEntry {
   updatedAt: string;
 }
 
-export interface CreateGuestbookBody {
+interface BaseCreateGuestbookBody {
   body: string;
   parentId?: number;
   isSecret?: boolean;
+}
+
+interface CreateGuestbookGuestBody extends BaseCreateGuestbookBody {
   guestName: string;
   guestEmail: string;
   guestPassword: string;
 }
+
+interface CreateGuestbookOAuthBody extends BaseCreateGuestbookBody {
+  guestName?: never;
+  guestEmail?: never;
+  guestPassword?: never;
+}
+
+export type CreateGuestbookBody =
+  | CreateGuestbookGuestBody
+  | CreateGuestbookOAuthBody;
 
 export interface DeleteGuestbookBody {
   guestPassword: string;
