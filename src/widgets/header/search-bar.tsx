@@ -23,8 +23,14 @@ const SearchBar: React.FC = () => {
     inputRef.current?.select();
   }, [isOpen]);
 
-  const handleToggle = () => {
-    setIsOpen((prev) => !prev);
+  const handleOpen = () => {
+    const currentUrl = new URL(window.location.href);
+
+    if (currentUrl.pathname === "/search") {
+      setQuery(currentUrl.searchParams.get("q") ?? "");
+    }
+
+    setIsOpen(true);
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -69,11 +75,11 @@ const SearchBar: React.FC = () => {
       </label>
 
       <Button
-        type="button"
-        onClick={handleToggle}
+        type={isOpen ? "submit" : "button"}
+        onClick={isOpen ? undefined : handleOpen}
         showShadow={false}
         fill="weak"
-        aria-label={isOpen ? "검색창 닫기" : "검색창 열기"}
+        aria-label={isOpen ? "검색 실행" : "검색창 열기"}
         aria-expanded={isOpen}
         aria-controls="header-search-input"
       >
