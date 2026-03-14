@@ -1,7 +1,11 @@
-import React from "react";
+import { HomePage } from "@widgets/home-page";
 
-const Home: React.FC = () => {
-  return <div className="w-full">Home</div>;
-};
+interface PageProps {
+  searchParams?: {
+    page?: string | string[];
+  };
+}
 
-export default Home;
+export default function Page({ searchParams }: PageProps) {
+  return <HomePage searchParams={searchParams} />;
+}
