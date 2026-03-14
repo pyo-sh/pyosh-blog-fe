@@ -1,3 +1,6 @@
+"use client";
+
+import { useSelectedLayoutSegment } from "next/navigation";
 import { AdminSidebar } from "@widgets/admin-sidebar";
 
 export default function DashboardLayout({
@@ -5,6 +8,12 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const segment = useSelectedLayoutSegment();
+
+  if (segment === "login") {
+    return <>{children}</>;
+  }
+
   return (
     <div className="flex min-h-screen">
       <AdminSidebar />
