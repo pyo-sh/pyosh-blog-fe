@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { fetchGuestbook, type GuestbookEntry } from "@entities/guestbook";
 import { Pagination } from "@shared/ui/libs";
@@ -44,15 +45,20 @@ function getEntryBody(entry: GuestbookEntry) {
     return "삭제된 방명록입니다.";
   }
 
-  if (entry.isSecret) {
-    return "비밀글입니다.";
-  }
-
   return entry.body;
 }
 
 function formatDate(value: string) {
   return dateFormatter.format(new Date(value));
+}
+
+async function toCookieHeader() {
+  const cookieStore = await cookies();
+
+  return cookieStore
+    .getAll()
+    .map((cookie) => `${cookie.name}=${cookie.value}`)
+    .join("; ");
 }
 
 function GuestbookEntryItem({
@@ -100,7 +106,7 @@ export default async function GuestbookPage({
   searchParams,
 }: GuestbookPageProps) {
   const page = parsePage(getSingleValue(searchParams?.page));
-  const response = await fetchGuestbook(page);
+  const response = await fetchGuestbook(page, await toCookieHeader());
   const entries = response.data;
   const { meta } = response;
 
