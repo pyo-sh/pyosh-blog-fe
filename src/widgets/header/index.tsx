@@ -9,6 +9,7 @@ import { Logo } from "@widgets/logo";
 
 const Header: React.FC = () => {
   const [isShown, setIsShown] = useState<boolean>(true);
+  const [headerHeight, setHeaderHeight] = useState<number>(0);
   const headerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -32,8 +33,31 @@ const Header: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!headerRef.current) return;
+
+    const updateHeight = () => {
+      setHeaderHeight(headerRef.current?.clientHeight ?? 0);
+    };
+
+    updateHeight();
+
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(headerRef.current);
+
+    window.addEventListener("resize", updateHeight);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateHeight);
+    };
+  }, []);
+
   return (
-    <div className="pt-28 md:pt-[5.625rem]">
+    <div
+      className="pt-28 md:pt-[5.625rem]"
+      style={headerHeight > 0 ? { paddingTop: `${headerHeight}px` } : undefined}
+    >
       <header
         ref={headerRef}
         className={cn(
