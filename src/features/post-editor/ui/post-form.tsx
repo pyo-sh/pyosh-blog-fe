@@ -197,10 +197,6 @@ export function PostForm({
     onSuccess: async (post) => {
       setSubmitError(null);
       setIsDirty(false);
-      hydrationRef.current = {
-        postId,
-        signature: JSON.stringify(values),
-      };
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["admin-posts"] }),
         queryClient.invalidateQueries({ queryKey: ["categories"] }),
