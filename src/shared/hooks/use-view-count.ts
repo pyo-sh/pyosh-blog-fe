@@ -4,8 +4,8 @@ import { useEffect } from "react";
 import { clientMutate } from "@shared/api";
 
 const PENDING_VIEW_TTL_MS = 5 * 60 * 1000;
-const RECORDED_VIEWS_KEY = "recorded_view_posts";
 const PENDING_VIEWS_KEY = "pending_viewed_posts";
+const VIEWED_POSTS_KEY = "viewed_posts";
 const inFlightPostIds = new Set<number>();
 
 function readTimestampMap(storageKey: string): Record<string, number> {
@@ -46,6 +46,35 @@ function writeTimestampMap(
   window.sessionStorage.setItem(storageKey, JSON.stringify(valueMap));
 }
 
+function readViewedPosts(): number[] {
+  const storedValue = window.sessionStorage.getItem(VIEWED_POSTS_KEY);
+
+  if (!storedValue) {
+    return [];
+  }
+
+  try {
+    const parsedValue: unknown = JSON.parse(storedValue);
+
+    if (!Array.isArray(parsedValue)) {
+      return [];
+    }
+
+    return parsedValue.filter(
+      (value): value is number => typeof value === "number",
+    );
+  } catch {
+    return [];
+  }
+}
+
+function writeViewedPosts(postIds: number[]): void {
+  window.sessionStorage.setItem(
+    VIEWED_POSTS_KEY,
+    JSON.stringify(Array.from(new Set(postIds))),
+  );
+}
+
 function clearTimestampEntry(storageKey: string, postId: number): void {
   const valueMap = readTimestampMap(storageKey);
 
@@ -56,11 +85,11 @@ function clearTimestampEntry(storageKey: string, postId: number): void {
 export function useViewCount(postId: number): void {
   useEffect(() => {
     const pendingViews = readTimestampMap(PENDING_VIEWS_KEY);
-    const recordedViews = readTimestampMap(RECORDED_VIEWS_KEY);
+    const viewedPosts = readViewedPosts();
 
     if (
       pendingViews[String(postId)] ||
-      recordedViews[String(postId)] ||
+      viewedPosts.includes(postId) ||
       inFlightPostIds.has(postId)
     ) {
       return;
@@ -79,10 +108,7 @@ export function useViewCount(postId: number): void {
       .then(() => {
         inFlightPostIds.delete(postId);
         clearTimestampEntry(PENDING_VIEWS_KEY, postId);
-        writeTimestampMap(RECORDED_VIEWS_KEY, {
-          ...readTimestampMap(RECORDED_VIEWS_KEY),
-          [postId]: Date.now(),
-        });
+        writeViewedPosts([...readViewedPosts(), postId]);
       })
       .catch((error: unknown) => {
         inFlightPostIds.delete(postId);
