@@ -1,3 +1,5 @@
+import { cache } from "react";
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
@@ -12,6 +14,12 @@ import {
   ViewCounter,
 } from "@features/post-detail";
 import { ApiResponseError } from "@shared/api";
+import {
+  createMetadataSummary,
+  getDefaultDescription,
+  getSiteName,
+  toAbsoluteUrl,
+} from "@shared/lib/metadata";
 
 interface PostDetailPageProps {
   params: {
@@ -70,9 +78,69 @@ async function getCurrentViewer(): Promise<CurrentViewer> {
   return { type: "guest" };
 }
 
+const getPostDetail = cache(async (slug: string) => fetchPostBySlug(slug));
+
+export async function generateMetadata({
+  params,
+}: PostDetailPageProps): Promise<Metadata> {
+  try {
+    const { post } = await getPostDetail(params.slug);
+    const description =
+      createMetadataSummary(post.contentMd) || getDefaultDescription();
+    const url = `/posts/${post.slug}`;
+    const siteName = getSiteName();
+    const canonicalUrl = toAbsoluteUrl(url);
+    const imageUrl = post.thumbnailUrl
+      ? toAbsoluteUrl(post.thumbnailUrl)
+      : null;
+
+    return {
+      title: post.title,
+      description,
+      alternates: canonicalUrl
+        ? {
+            canonical: canonicalUrl,
+          }
+        : undefined,
+      openGraph: {
+        type: "article",
+        locale: "ko_KR",
+        siteName,
+        title: post.title,
+        description,
+        url: canonicalUrl,
+        publishedTime: post.publishedAt ?? post.createdAt,
+        modifiedTime: post.updatedAt,
+        section: post.category.name,
+        tags: post.tags.map((tag) => tag.name),
+        images: imageUrl
+          ? [
+              {
+                url: imageUrl,
+                alt: post.title,
+              },
+            ]
+          : undefined,
+      },
+      twitter: {
+        card: imageUrl ? "summary_large_image" : "summary",
+        title: post.title,
+        description,
+        images: imageUrl ? [imageUrl] : [],
+      },
+    };
+  } catch (error) {
+    if (error instanceof ApiResponseError && error.statusCode === 404) {
+      return {};
+    }
+
+    throw error;
+  }
+}
+
 export default async function PostDetailPage({ params }: PostDetailPageProps) {
   try {
-    const { post, prevPost, nextPost } = await fetchPostBySlug(params.slug);
+    const { post, prevPost, nextPost } = await getPostDetail(params.slug);
     let comments: Comment[] = [];
     let commentError: string | null = null;
     const cookieHeader = await toCookieHeader();

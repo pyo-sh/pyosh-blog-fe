@@ -2,9 +2,42 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import "@app-layer/style/index.css";
 import Providers from "@app-layer/provider";
+import {
+  getDefaultDescription,
+  getMetadataBase,
+  getSiteName,
+} from "@shared/lib/metadata";
+
+const siteName = getSiteName();
+const siteDescription = getDefaultDescription();
+const metadataBase = getMetadataBase();
 
 export const metadata: Metadata = {
-  title: "Pyosh Blog",
+  metadataBase,
+  title: {
+    default: siteName,
+    template: `%s | ${siteName}`,
+  },
+  description: siteDescription,
+  applicationName: siteName,
+  alternates: {
+    types: {
+      "application/rss+xml": "/rss.xml",
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "ko_KR",
+    siteName,
+    title: siteName,
+    description: siteDescription,
+    url: metadataBase ? "/" : undefined,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteName,
+    description: siteDescription,
+  },
   icons: {
     icon: [
       { url: "/favicon.ico", type: "image/x-icon" },
