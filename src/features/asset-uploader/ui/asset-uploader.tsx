@@ -61,19 +61,43 @@ export function AssetUploader() {
 
   const deleteMutation = useMutation({
     mutationFn: async (ids: number[]) => {
-      await Promise.all(ids.map((id) => deleteAsset(id)));
-
-      return ids;
-    },
-    onSuccess: async (ids) => {
-      setErrorMessage(null);
-      setFeedbackMessage(
-        ids.length === 1
-          ? "에셋을 삭제했습니다."
-          : `${ids.length}개의 에셋을 삭제했습니다.`,
+      const results = await Promise.allSettled(
+        ids.map((id) => deleteAsset(id)),
       );
+      const deletedIds: number[] = [];
+      const failedIds: number[] = [];
+
+      results.forEach((result, index) => {
+        if (result.status === "fulfilled") {
+          deletedIds.push(ids[index]);
+        } else {
+          failedIds.push(ids[index]);
+        }
+      });
+
+      return { deletedIds, failedIds };
+    },
+    onSuccess: async ({ deletedIds, failedIds }) => {
+      setErrorMessage(
+        failedIds.length > 0
+          ? failedIds.length === 1
+            ? "일부 삭제에 실패했습니다. 목록을 새로고침했습니다."
+            : `${failedIds.length}개 에셋 삭제에 실패했습니다. 목록을 새로고침했습니다.`
+          : null,
+      );
+
+      if (deletedIds.length > 0) {
+        setFeedbackMessage(
+          deletedIds.length === 1
+            ? "에셋을 삭제했습니다."
+            : `${deletedIds.length}개의 에셋을 삭제했습니다.`,
+        );
+      }
+
       setDeleteTargetIds([]);
-      setSelectedIds((current) => current.filter((id) => !ids.includes(id)));
+      setSelectedIds((current) =>
+        current.filter((id) => !deletedIds.includes(id)),
+      );
       await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
     },
     onError: (error) => {
@@ -487,8 +511,13 @@ function AssetGridSkeleton() {
 function getFilename(url: string): string {
   const pathname = url.split("?")[0] ?? url;
   const parts = pathname.split("/");
+  const segment = parts[parts.length - 1] || "asset";
 
-  return decodeURIComponent(parts[parts.length - 1] || "asset");
+  try {
+    return decodeURIComponent(segment);
+  } catch {
+    return segment;
+  }
 }
 
 function getErrorMessage(error: unknown, fallback: string): string {

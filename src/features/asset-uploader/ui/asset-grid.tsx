@@ -107,8 +107,8 @@ export function AssetGrid({
                     sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
                     className="object-cover transition duration-300 group-hover:scale-[1.03]"
                   />
-                  <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/10 to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
-                  <div className="absolute inset-x-3 bottom-3 flex gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                  <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/10 to-transparent opacity-100 transition-opacity duration-200 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100" />
+                  <div className="absolute inset-x-3 bottom-3 flex gap-2 opacity-100 transition-opacity duration-200 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
                     <button
                       type="button"
                       onClick={() => onCopy(asset, "url")}
@@ -191,8 +191,13 @@ export function AssetGrid({
 function getFilename(url: string): string {
   const pathname = url.split("?")[0] ?? url;
   const parts = pathname.split("/");
+  const segment = parts[parts.length - 1] || "asset";
 
-  return decodeURIComponent(parts[parts.length - 1] || "asset");
+  try {
+    return decodeURIComponent(segment);
+  } catch {
+    return segment;
+  }
 }
 
 function formatFileSize(bytes: number): string {
