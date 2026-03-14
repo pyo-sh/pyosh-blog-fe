@@ -1,0 +1,81 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+
+interface MarkdownPreviewProps {
+  value: string;
+}
+
+export function MarkdownPreview({ value }: MarkdownPreviewProps) {
+  const [html, setHtml] = useState("");
+  const [isRendering, setIsRendering] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const workerRef = useRef<Worker | null>(null);
+  const requestIdRef = useRef(0);
+
+  useEffect(() => {
+    const worker = new Worker(
+      new URL("./markdown-preview.worker.ts", import.meta.url),
+    );
+
+    worker.onmessage = (
+      event: MessageEvent<{ id: number; html?: string; error?: string }>,
+    ) => {
+      if (event.data.id !== requestIdRef.current) {
+        return;
+      }
+
+      if (event.data.error) {
+        setError(event.data.error);
+      } else {
+        setHtml(event.data.html ?? "");
+        setError(null);
+      }
+
+      setIsRendering(false);
+    };
+
+    workerRef.current = worker;
+
+    return () => {
+      worker.terminate();
+      workerRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (workerRef.current === null) {
+      return;
+    }
+
+    setIsRendering(true);
+    const requestId = requestIdRef.current + 1;
+    requestIdRef.current = requestId;
+
+    const timeoutId = window.setTimeout(() => {
+      workerRef.current?.postMessage({ id: requestId, value });
+    }, 300);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [value]);
+
+  return (
+    <div className="relative min-h-[60vh] overflow-hidden rounded-[1.25rem] border border-border-3 bg-background-1">
+      <div className="flex items-center justify-between border-b border-border-3 px-4 py-3 text-xs uppercase tracking-[0.2em] text-text-4">
+        <span>Preview</span>
+        <span>{isRendering ? "렌더링 중" : "실시간 반영"}</span>
+      </div>
+
+      {error ? (
+        <div className="p-6 text-sm text-negative-1">{error}</div>
+      ) : (
+        <div
+          className="markdown-content prose max-w-none px-4 py-6"
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
+      )}
+    </div>
+  );
+}

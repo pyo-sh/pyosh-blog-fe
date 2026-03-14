@@ -1,2 +1,2 @@
 export type { Category } from "./model";
-export { fetchCategories } from "./api";
+export { fetchCategories, fetchCategoriesClient } from "./api";
