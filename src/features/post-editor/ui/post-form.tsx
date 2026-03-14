@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MarkdownEditor } from "./markdown-editor";
 import { MarkdownPreview } from "./markdown-preview";
-import { fetchCategories, type Category } from "@entities/category";
+import { fetchCategoriesClient, type Category } from "@entities/category";
 import {
   createPost,
   updatePost,
@@ -160,7 +160,7 @@ export function PostForm({
 
   const categoriesQuery = useQuery({
     queryKey: ["categories"],
-    queryFn: () => fetchCategories(),
+    queryFn: fetchCategoriesClient,
   });
 
   const mutation = useMutation({

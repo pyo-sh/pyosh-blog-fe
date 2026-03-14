@@ -4,7 +4,9 @@ import { clientFetch, serverFetch } from "@shared/api";
 export async function fetchCategories(
   cookieHeader?: string,
 ): Promise<Category[]> {
-  return cookieHeader
-    ? serverFetch<Category[]>("/api/categories", {}, cookieHeader)
-    : clientFetch<Category[]>("/api/categories");
+  return serverFetch<Category[]>("/api/categories", {}, cookieHeader);
+}
+
+export async function fetchCategoriesClient(): Promise<Category[]> {
+  return clientFetch<Category[]>("/api/categories");
 }

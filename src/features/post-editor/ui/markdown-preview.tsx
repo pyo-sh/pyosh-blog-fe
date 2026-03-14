@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { renderMarkdown } from "@shared/lib/markdown";
+import { renderMarkdownPreview } from "../lib/render-markdown-preview";
 
 interface MarkdownPreviewProps {
   value: string;
@@ -18,7 +18,7 @@ export function MarkdownPreview({ value }: MarkdownPreviewProps) {
     setIsRendering(true);
 
     const timeoutId = window.setTimeout(() => {
-      void renderMarkdown(value)
+      void renderMarkdownPreview(value)
         .then((nextHtml) => {
           if (!isActive) {
             return;
