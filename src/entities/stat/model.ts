@@ -5,3 +5,11 @@ export interface DashboardStats {
   totalPosts: number;
   totalComments: number;
 }
+
+export interface PopularPost {
+  postId: number;
+  slug: string;
+  title: string;
+  pageviews: number;
+  uniques: number;
+}
