@@ -6,12 +6,22 @@ import { fetchComments } from "@entities/comment";
 import { fetchPostBySlug } from "@entities/post";
 import { CommentList } from "@features/comment-section";
 import { PostContent, PostNavigation } from "@features/post-detail";
-import { ApiResponseError } from "@shared/api";
+import { ApiResponseError, serverFetch } from "@shared/api";
 
 interface PostDetailPageProps {
   params: {
     slug: string;
   };
+}
+
+interface CurrentViewer {
+  type: "guest" | "oauth";
+  id?: number;
+}
+
+interface AuthMeResponse {
+  type: "admin" | "oauth";
+  id: number;
 }
 
 const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
@@ -35,10 +45,40 @@ async function toCookieHeader() {
   return `${sessionCookie.name}=${sessionCookie.value}`;
 }
 
+async function getCurrentViewer(): Promise<CurrentViewer> {
+  const cookieHeader = await toCookieHeader();
+
+  if (!cookieHeader) {
+    return { type: "guest" };
+  }
+
+  try {
+    const viewer = await serverFetch<AuthMeResponse>(
+      "/api/auth/me",
+      {},
+      cookieHeader,
+    );
+
+    if (viewer.type === "oauth") {
+      return {
+        type: "oauth",
+        id: viewer.id,
+      };
+    }
+  } catch (error) {
+    if (error instanceof ApiResponseError && error.statusCode === 401) {
+      return { type: "guest" };
+    }
+  }
+
+  return { type: "guest" };
+}
+
 export default async function PostDetailPage({ params }: PostDetailPageProps) {
   try {
     const { post, prevPost, nextPost } = await fetchPostBySlug(params.slug);
     const comments = await fetchComments(post.id, await toCookieHeader());
+    const viewer = await getCurrentViewer();
 
     return (
       <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-8 px-6 py-12">
@@ -92,7 +132,11 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
         </article>
 
         <PostNavigation prevPost={prevPost} nextPost={nextPost} />
-        <CommentList postId={post.id} initialComments={comments} />
+        <CommentList
+          postId={post.id}
+          initialComments={comments}
+          viewer={viewer}
+        />
       </main>
     );
   } catch (error) {

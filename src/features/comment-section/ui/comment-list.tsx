@@ -3,13 +3,23 @@
 import { useEffect, useState } from "react";
 import { CommentForm, type GuestCommentProfile } from "./comment-form";
 import { CommentItem } from "./comment-item";
-import type { Comment, CreateCommentGuestBody } from "@entities/comment";
+import type {
+  Comment,
+  CreateCommentGuestBody,
+  CreateCommentOAuthBody,
+} from "@entities/comment";
 import { createComment, deleteComment } from "@entities/comment";
 import { Modal } from "@shared/ui/libs";
+
+interface CommentViewer {
+  type: "guest" | "oauth";
+  id?: number;
+}
 
 interface CommentListProps {
   postId: number;
   initialComments: Comment[];
+  viewer: CommentViewer;
 }
 
 function appendComment(comments: Comment[], nextComment: Comment): Comment[] {
@@ -49,7 +59,11 @@ function markCommentDeleted(comments: Comment[], commentId: number): Comment[] {
   });
 }
 
-export function CommentList({ postId, initialComments }: CommentListProps) {
+export function CommentList({
+  postId,
+  initialComments,
+  viewer,
+}: CommentListProps) {
   const [comments, setComments] = useState(initialComments);
   const [replyTarget, setReplyTarget] = useState<Comment | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Comment | null>(null);
@@ -76,10 +90,24 @@ export function CommentList({ postId, initialComments }: CommentListProps) {
     }));
   }
 
-  async function handleCreate(payload: CreateCommentGuestBody) {
+  async function handleCreate(
+    payload: CreateCommentGuestBody | CreateCommentOAuthBody,
+  ) {
     const nextComment = await createComment(postId, payload);
     setComments((current) => appendComment(current, nextComment));
     setReplyTarget(null);
+  }
+
+  function canDeleteComment(comment: Comment) {
+    if (comment.status === "deleted") {
+      return false;
+    }
+
+    if (comment.author.type === "guest") {
+      return true;
+    }
+
+    return viewer.type === "oauth" && viewer.id === comment.author.id;
   }
 
   async function handleDelete() {
@@ -92,8 +120,14 @@ export function CommentList({ postId, initialComments }: CommentListProps) {
 
     try {
       await deleteComment(deleteTarget.id, {
-        authorType: "guest",
-        guestPassword: deletePassword,
+        ...(deleteTarget.author.type === "oauth" &&
+        viewer.type === "oauth" &&
+        viewer.id === deleteTarget.author.id
+          ? { authorType: "oauth" as const }
+          : {
+              authorType: "guest" as const,
+              guestPassword: deletePassword,
+            }),
       });
 
       setComments((current) => markCommentDeleted(current, deleteTarget.id));
@@ -122,6 +156,7 @@ export function CommentList({ postId, initialComments }: CommentListProps) {
 
       <div className="mt-8">
         <CommentForm
+          viewerType={viewer.type}
           profile={profile}
           onProfileChange={handleProfileChange}
           onSubmit={handleCreate}
@@ -136,6 +171,7 @@ export function CommentList({ postId, initialComments }: CommentListProps) {
                 <CommentItem
                   comment={comment}
                   onReply={setReplyTarget}
+                  canDelete={canDeleteComment(comment)}
                   onDelete={(target) => {
                     setDeleteTarget(target);
                     setDeletePassword("");
@@ -145,6 +181,7 @@ export function CommentList({ postId, initialComments }: CommentListProps) {
 
                 {replyTarget?.id === comment.id ? (
                   <CommentForm
+                    viewerType={viewer.type}
                     profile={profile}
                     onProfileChange={handleProfileChange}
                     onSubmit={handleCreate}
@@ -167,6 +204,7 @@ export function CommentList({ postId, initialComments }: CommentListProps) {
                         <CommentItem
                           comment={reply}
                           onReply={setReplyTarget}
+                          canDelete={canDeleteComment(reply)}
                           onDelete={(target) => {
                             setDeleteTarget(target);
                             setDeletePassword("");
@@ -208,23 +246,31 @@ export function CommentList({ postId, initialComments }: CommentListProps) {
             댓글 삭제
           </h3>
           <p className="mt-3 text-body-sm text-text-3">
-            작성 시 사용한 비밀번호를 입력하면 댓글을 삭제할 수 있습니다.
+            {deleteTarget?.author.type === "oauth" &&
+            viewer.type === "oauth" &&
+            viewer.id === deleteTarget.author.id
+              ? "로그인된 계정으로 작성한 댓글을 삭제합니다."
+              : "작성 시 사용한 비밀번호를 입력하면 댓글을 삭제할 수 있습니다."}
           </p>
 
-          <label className="mt-5 block">
-            <span className="text-body-sm font-medium text-text-1">
-              비밀번호
-            </span>
-            <input
-              type="password"
-              value={deletePassword}
-              onChange={(event) => setDeletePassword(event.target.value)}
-              disabled={deleteBusy}
-              className="mt-2 w-full rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
-              minLength={4}
-              required
-            />
-          </label>
+          {deleteTarget?.author.type === "oauth" &&
+          viewer.type === "oauth" &&
+          viewer.id === deleteTarget.author.id ? null : (
+            <label className="mt-5 block">
+              <span className="text-body-sm font-medium text-text-1">
+                비밀번호
+              </span>
+              <input
+                type="password"
+                value={deletePassword}
+                onChange={(event) => setDeletePassword(event.target.value)}
+                disabled={deleteBusy}
+                className="mt-2 w-full rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+                minLength={4}
+                required
+              />
+            </label>
+          )}
 
           {deleteError ? (
             <div
@@ -239,7 +285,11 @@ export function CommentList({ postId, initialComments }: CommentListProps) {
             <button
               type="button"
               onClick={handleDelete}
-              disabled={deleteBusy || deletePassword.trim().length < 4}
+              disabled={
+                deleteBusy ||
+                (deleteTarget?.author.type !== "oauth" &&
+                  deletePassword.trim().length < 4)
+              }
               className="inline-flex items-center justify-center rounded-[1rem] bg-negative-1 px-5 py-3 text-body-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {deleteBusy ? "삭제 중..." : "삭제"}

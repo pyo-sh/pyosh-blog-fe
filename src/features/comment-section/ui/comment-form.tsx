@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import type { CreateCommentGuestBody } from "@entities/comment";
+import type {
+  CreateCommentGuestBody,
+  CreateCommentOAuthBody,
+} from "@entities/comment";
 import { ApiResponseError } from "@shared/api";
 import { cn } from "@shared/lib/style-utils";
 
@@ -12,9 +15,12 @@ export interface GuestCommentProfile {
 }
 
 interface CommentFormProps {
+  viewerType: "guest" | "oauth";
   profile: GuestCommentProfile;
   onProfileChange: (field: keyof GuestCommentProfile, value: string) => void;
-  onSubmit: (payload: CreateCommentGuestBody) => Promise<void>;
+  onSubmit: (
+    payload: CreateCommentGuestBody | CreateCommentOAuthBody,
+  ) => Promise<void>;
   parentId?: number;
   replyToCommentId?: number;
   replyToName?: string | null;
@@ -36,6 +42,7 @@ function getErrorMessage(error: unknown) {
 }
 
 export function CommentForm({
+  viewerType,
   profile,
   onProfileChange,
   onSubmit,
@@ -57,16 +64,27 @@ export function CommentForm({
     setIsSubmitting(true);
 
     try {
-      await onSubmit({
-        authorType: "guest",
-        guestName: profile.guestName.trim(),
-        guestEmail: profile.guestEmail.trim(),
-        guestPassword: profile.guestPassword,
+      const payloadBase = {
         body: body.trim(),
         isSecret,
         ...(parentId ? { parentId } : {}),
         ...(replyToCommentId ? { replyToCommentId } : {}),
-      });
+      };
+
+      if (viewerType === "oauth") {
+        await onSubmit({
+          authorType: "oauth",
+          ...payloadBase,
+        });
+      } else {
+        await onSubmit({
+          authorType: "guest",
+          guestName: profile.guestName.trim(),
+          guestEmail: profile.guestEmail.trim(),
+          guestPassword: profile.guestPassword,
+          ...payloadBase,
+        });
+      }
 
       setBody("");
       setIsSecret(false);
@@ -93,57 +111,63 @@ export function CommentForm({
           {replyToName ? `${replyToName}님에게 답글 남기기` : "댓글 남기기"}
         </h3>
         <p className="text-body-sm text-text-3">
-          이름, 이메일, 비밀번호를 입력하면 게스트 댓글을 작성할 수 있습니다.
+          {viewerType === "oauth"
+            ? "로그인된 계정으로 댓글을 작성합니다."
+            : "이름, 이메일, 비밀번호를 입력하면 게스트 댓글을 작성할 수 있습니다."}
         </p>
       </div>
 
-      <div className="mt-6 grid gap-4 md:grid-cols-3">
-        <label className="block">
-          <span className="text-body-sm font-medium text-text-1">이름</span>
-          <input
-            type="text"
-            value={profile.guestName}
-            onChange={(event) =>
-              onProfileChange("guestName", event.target.value)
-            }
-            disabled={isSubmitting}
-            className="mt-2 w-full rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
-            placeholder="홍길동"
-            required
-          />
-        </label>
+      {viewerType === "guest" ? (
+        <div className="mt-6 grid gap-4 md:grid-cols-3">
+          <label className="block">
+            <span className="text-body-sm font-medium text-text-1">이름</span>
+            <input
+              type="text"
+              value={profile.guestName}
+              onChange={(event) =>
+                onProfileChange("guestName", event.target.value)
+              }
+              disabled={isSubmitting}
+              className="mt-2 w-full rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+              placeholder="홍길동"
+              required
+            />
+          </label>
 
-        <label className="block">
-          <span className="text-body-sm font-medium text-text-1">이메일</span>
-          <input
-            type="email"
-            value={profile.guestEmail}
-            onChange={(event) =>
-              onProfileChange("guestEmail", event.target.value)
-            }
-            disabled={isSubmitting}
-            className="mt-2 w-full rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
-            placeholder="guest@example.com"
-            required
-          />
-        </label>
+          <label className="block">
+            <span className="text-body-sm font-medium text-text-1">이메일</span>
+            <input
+              type="email"
+              value={profile.guestEmail}
+              onChange={(event) =>
+                onProfileChange("guestEmail", event.target.value)
+              }
+              disabled={isSubmitting}
+              className="mt-2 w-full rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+              placeholder="guest@example.com"
+              required
+            />
+          </label>
 
-        <label className="block">
-          <span className="text-body-sm font-medium text-text-1">비밀번호</span>
-          <input
-            type="password"
-            value={profile.guestPassword}
-            onChange={(event) =>
-              onProfileChange("guestPassword", event.target.value)
-            }
-            disabled={isSubmitting}
-            className="mt-2 w-full rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
-            placeholder="삭제 시 필요합니다"
-            minLength={4}
-            required
-          />
-        </label>
-      </div>
+          <label className="block">
+            <span className="text-body-sm font-medium text-text-1">
+              비밀번호
+            </span>
+            <input
+              type="password"
+              value={profile.guestPassword}
+              onChange={(event) =>
+                onProfileChange("guestPassword", event.target.value)
+              }
+              disabled={isSubmitting}
+              className="mt-2 w-full rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+              placeholder="삭제 시 필요합니다"
+              minLength={4}
+              required
+            />
+          </label>
+        </div>
+      ) : null}
 
       <label className="mt-4 block">
         <span className="text-body-sm font-medium text-text-1">본문</span>

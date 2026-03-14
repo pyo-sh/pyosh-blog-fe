@@ -6,6 +6,7 @@ interface CommentItemProps {
   comment: Comment;
   onReply: (comment: Comment) => void;
   onDelete: (comment: Comment) => void;
+  canDelete?: boolean;
 }
 
 const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
@@ -27,8 +28,14 @@ function getBody(comment: Comment) {
   return comment.body;
 }
 
-export function CommentItem({ comment, onReply, onDelete }: CommentItemProps) {
-  const canReply = comment.depth === 0;
+export function CommentItem({
+  comment,
+  onReply,
+  onDelete,
+  canDelete = true,
+}: CommentItemProps) {
+  const canReply = comment.depth === 0 && comment.status !== "deleted";
+  const showDelete = canDelete && comment.status !== "deleted";
 
   return (
     <article className="rounded-[1.5rem] border border-border-3 bg-background-1 p-5">
@@ -64,13 +71,15 @@ export function CommentItem({ comment, onReply, onDelete }: CommentItemProps) {
           </button>
         ) : null}
 
-        <button
-          type="button"
-          onClick={() => onDelete(comment)}
-          className="text-body-sm font-medium text-text-3 transition-opacity hover:opacity-80"
-        >
-          삭제
-        </button>
+        {showDelete ? (
+          <button
+            type="button"
+            onClick={() => onDelete(comment)}
+            className="text-body-sm font-medium text-text-3 transition-opacity hover:opacity-80"
+          >
+            삭제
+          </button>
+        ) : null}
       </div>
     </article>
   );
