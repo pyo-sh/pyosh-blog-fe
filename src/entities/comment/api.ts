@@ -2,8 +2,8 @@ import type {
   Comment,
   CommentResponse,
   CommentsResponse,
-  CreateCommentGuestBody,
-  DeleteCommentGuestBody,
+  CreateCommentBody,
+  DeleteCommentBody,
 } from "./model";
 import { clientMutate, serverFetch } from "@shared/api";
 
@@ -22,7 +22,7 @@ export async function fetchComments(
 
 export async function createComment(
   postId: number,
-  body: CreateCommentGuestBody,
+  body: CreateCommentBody,
 ): Promise<Comment> {
   const response = await clientMutate<CommentResponse>(
     `/api/posts/${postId}/comments`,
@@ -36,7 +36,7 @@ export async function createComment(
 
 export async function deleteComment(
   commentId: number,
-  body: DeleteCommentGuestBody,
+  body: DeleteCommentBody = {},
 ): Promise<void> {
   await clientMutate<void>(`/api/comments/${commentId}`, {
     method: "DELETE",

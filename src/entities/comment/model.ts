@@ -31,9 +31,22 @@ export interface CreateCommentGuestBody {
   guestPassword: string;
 }
 
+export interface CreateCommentOAuthBody {
+  body: string;
+  parentId?: number;
+  replyToCommentId?: number;
+  isSecret?: boolean;
+}
+
+export type CreateCommentBody = CreateCommentGuestBody | CreateCommentOAuthBody;
+
 export interface DeleteCommentGuestBody {
   guestPassword: string;
 }
+
+export type DeleteCommentOAuthBody = Record<string, never>;
+
+export type DeleteCommentBody = DeleteCommentGuestBody | DeleteCommentOAuthBody;
 
 export interface CommentsResponse {
   data: Comment[];
