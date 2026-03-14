@@ -1,2 +1,2 @@
-export type { DashboardStats } from "./model";
-export { fetchDashboardStats } from "./api";
+export type { DashboardStats, PopularPost } from "./model";
+export { fetchDashboardStats, fetchPopularPosts } from "./api";
