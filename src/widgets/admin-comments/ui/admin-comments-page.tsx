@@ -137,6 +137,9 @@ export function AdminCommentsPage() {
     mutationFn: adminDeleteComment,
     onSuccess: async () => {
       setActionError(null);
+      setPage((currentPage) =>
+        currentPage > 1 && rows.length === 1 ? currentPage - 1 : currentPage,
+      );
       await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
     },
     onError: (mutationError) => {
