@@ -28,6 +28,8 @@ const SearchBar: React.FC = () => {
 
     if (currentUrl.pathname === "/search") {
       setQuery(currentUrl.searchParams.get("q") ?? "");
+    } else {
+      setQuery("");
     }
 
     setIsOpen(true);
