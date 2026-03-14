@@ -33,6 +33,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const posts = response.data;
   const { meta } = response;
 
+  if (meta.totalPages > 0 && page > meta.totalPages) {
+    notFound();
+  }
+
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-8 px-6 py-12">
       <header className="rounded-[2rem] border border-border-3 bg-background-2 p-8 md:p-10">
