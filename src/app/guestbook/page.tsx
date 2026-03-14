@@ -54,11 +54,13 @@ function formatDate(value: string) {
 
 async function toCookieHeader() {
   const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get("sessionId");
 
-  return cookieStore
-    .getAll()
-    .map((cookie) => `${cookie.name}=${cookie.value}`)
-    .join("; ");
+  if (!sessionCookie) {
+    return undefined;
+  }
+
+  return `${sessionCookie.name}=${sessionCookie.value}`;
 }
 
 function GuestbookEntryItem({
