@@ -8,4 +8,11 @@ export type {
   DeleteCommentGuestBody,
   DeleteCommentOAuthBody,
 } from "./model";
-export { fetchComments, createComment, deleteComment } from "./api";
+export type { AdminCommentItem, FetchAdminCommentsParams } from "./api";
+export {
+  adminDeleteComment,
+  createComment,
+  deleteComment,
+  fetchAdminComments,
+  fetchComments,
+} from "./api";
