@@ -2,6 +2,7 @@
 
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 import {
   deletePost,
   fetchAdminPosts,
@@ -205,14 +206,17 @@ export default function DashboardPostsPage() {
           </p>
           <h1 className="mt-3 text-2xl font-semibold text-text-1">글 관리</h1>
           <p className="mt-2 text-sm text-text-3">
-            상태별 글을 조회하고 삭제 또는 복원할 수 있습니다. 작성과 편집
-            화면은 다음 이슈에서 연결됩니다.
+            상태별 글을 조회하고 새 글 작성, 수정, 삭제 또는 복원을 진행할 수
+            있습니다.
           </p>
         </div>
 
-        <span className="inline-flex items-center justify-center rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm font-medium text-text-4">
-          새 글 작성 준비 중
-        </span>
+        <Link
+          href="/dashboard/posts/new"
+          className="inline-flex items-center justify-center rounded-[0.9rem] bg-primary-1 px-4 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+        >
+          새 글 작성
+        </Link>
       </header>
 
       <section className="rounded-[1.75rem] border border-border-3 bg-background-2 p-6">
@@ -344,24 +348,37 @@ export default function DashboardPostsPage() {
                               {formatDate(post.createdAt)}
                             </td>
                             <td className="px-6 py-5">
-                              {deleted ? (
-                                <ActionButton
-                                  disabled={disabled}
-                                  onClick={() =>
-                                    restoreMutation.mutate(post.id)
-                                  }
-                                >
-                                  {disabled ? "복원 중..." : "복원"}
-                                </ActionButton>
-                              ) : (
-                                <ActionButton
-                                  disabled={disabled}
-                                  onClick={() => deleteMutation.mutate(post.id)}
-                                  tone="danger"
-                                >
-                                  {disabled ? "삭제 중..." : "삭제"}
-                                </ActionButton>
-                              )}
+                              <div className="flex flex-wrap gap-2">
+                                {!deleted ? (
+                                  <Link
+                                    href={`/dashboard/posts/${post.id}/edit`}
+                                    className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+                                  >
+                                    수정
+                                  </Link>
+                                ) : null}
+
+                                {deleted ? (
+                                  <ActionButton
+                                    disabled={disabled}
+                                    onClick={() =>
+                                      restoreMutation.mutate(post.id)
+                                    }
+                                  >
+                                    {disabled ? "복원 중..." : "복원"}
+                                  </ActionButton>
+                                ) : (
+                                  <ActionButton
+                                    disabled={disabled}
+                                    onClick={() =>
+                                      deleteMutation.mutate(post.id)
+                                    }
+                                    tone="danger"
+                                  >
+                                    {disabled ? "삭제 중..." : "삭제"}
+                                  </ActionButton>
+                                )}
+                              </div>
                             </td>
                           </tr>
                         );
