@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { cn } from "@shared/lib/style-utils";
 import throttle from "@shared/lib/throttle";
 import { Navigation } from "@widgets/header/navigation";
+import { SearchBar } from "@widgets/header/search-bar";
 import { ThemeButton } from "@widgets/header/theme-button";
 import { Logo } from "@widgets/logo";
 
@@ -78,7 +79,10 @@ const Header: React.FC = () => {
 
           <div className="flex w-full items-center justify-between gap-4 md:w-auto md:justify-start md:gap-8">
             <Navigation />
-            <ThemeButton />
+            <div className="flex items-center gap-2">
+              <SearchBar />
+              <ThemeButton />
+            </div>
           </div>
         </div>
       </header>
