@@ -1,10 +1,17 @@
-export interface CommentAuthor {
-  type: "oauth" | "guest";
-  id?: number;
+export interface OAuthCommentAuthor {
+  type: "oauth";
+  id: number;
   name: string;
-  email?: string;
   avatarUrl?: string;
 }
+
+export interface GuestCommentAuthor {
+  type: "guest";
+  name: string;
+  email?: string;
+}
+
+export type CommentAuthor = OAuthCommentAuthor | GuestCommentAuthor;
 
 export interface GuestbookEntry {
   id: number;
@@ -25,24 +32,29 @@ interface BaseCreateGuestbookBody {
 }
 
 interface CreateGuestbookGuestBody extends BaseCreateGuestbookBody {
+  authorType: "guest";
   guestName: string;
   guestEmail: string;
   guestPassword: string;
 }
 
 interface CreateGuestbookOAuthBody extends BaseCreateGuestbookBody {
-  guestName?: never;
-  guestEmail?: never;
-  guestPassword?: never;
+  authorType: "oauth";
 }
 
 export type CreateGuestbookBody =
   | CreateGuestbookGuestBody
   | CreateGuestbookOAuthBody;
 
-export interface DeleteGuestbookBody {
+interface DeleteGuestbookGuestBody {
   guestPassword: string;
 }
+
+type DeleteGuestbookOAuthBody = Record<string, never>;
+
+export type DeleteGuestbookBody =
+  | DeleteGuestbookGuestBody
+  | DeleteGuestbookOAuthBody;
 
 export interface GuestbookEntryResponse {
   data: GuestbookEntry;

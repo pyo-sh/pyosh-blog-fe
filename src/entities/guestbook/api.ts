@@ -21,10 +21,11 @@ export async function fetchGuestbook(
 export async function createGuestbookEntry(
   body: CreateGuestbookBody,
 ): Promise<GuestbookEntry> {
+  const { authorType: _authorType, ...payload } = body;
   const response = await clientMutate<GuestbookEntryResponse>(
     "/api/guestbook",
     {
-      body: JSON.stringify(body),
+      body: JSON.stringify(payload),
     },
   );
 
