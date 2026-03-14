@@ -25,8 +25,13 @@ async function handleUploadResponse(
   return response.json() as Promise<UploadAssetsResponse>;
 }
 
-export async function fetchAssets(page = 1): Promise<PaginatedResponse<Asset>> {
-  return clientFetch<PaginatedResponse<Asset>>(`/api/assets?page=${page}`);
+export async function fetchAssets(
+  page = 1,
+  limit = 20,
+): Promise<PaginatedResponse<Asset>> {
+  return clientFetch<PaginatedResponse<Asset>>(
+    `/api/assets?page=${page}&limit=${limit}`,
+  );
 }
 
 export async function uploadAssets(files: File[]): Promise<UploadedAsset[]> {
