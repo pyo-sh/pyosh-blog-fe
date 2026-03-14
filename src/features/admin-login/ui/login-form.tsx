@@ -94,7 +94,10 @@ export function LoginForm() {
       </div>
 
       {errorMessage ? (
-        <div className="mt-5 rounded-[1rem] border border-negative-1/30 bg-negative-1/5 px-4 py-3 text-body-sm text-negative-1">
+        <div
+          role="alert"
+          className="mt-5 rounded-[1rem] border border-negative-1/30 bg-negative-1/5 px-4 py-3 text-body-sm text-negative-1"
+        >
           {errorMessage}
         </div>
       ) : null}
