@@ -4,41 +4,12 @@ import { useEffect } from "react";
 import { clientMutate } from "@shared/api";
 
 const PENDING_VIEW_TTL_MS = 5 * 60 * 1000;
+const RECORDED_VIEWS_KEY = "recorded_view_posts";
 const PENDING_VIEWS_KEY = "pending_viewed_posts";
-const VIEWED_POSTS_KEY = "viewed_posts";
 const inFlightPostIds = new Set<number>();
 
-function readViewedPosts(): number[] {
-  const storedValue = window.sessionStorage.getItem(VIEWED_POSTS_KEY);
-
-  if (!storedValue) {
-    return [];
-  }
-
-  try {
-    const parsedValue: unknown = JSON.parse(storedValue);
-
-    if (!Array.isArray(parsedValue)) {
-      return [];
-    }
-
-    return parsedValue.filter(
-      (value): value is number => typeof value === "number",
-    );
-  } catch {
-    return [];
-  }
-}
-
-function writeViewedPosts(postIds: number[]): void {
-  window.sessionStorage.setItem(
-    VIEWED_POSTS_KEY,
-    JSON.stringify(Array.from(new Set(postIds))),
-  );
-}
-
-function readPendingViews(): Record<string, number> {
-  const storedValue = window.sessionStorage.getItem(PENDING_VIEWS_KEY);
+function readTimestampMap(storageKey: string): Record<string, number> {
+  const storedValue = window.sessionStorage.getItem(storageKey);
 
   if (!storedValue) {
     return {};
@@ -68,35 +39,35 @@ function readPendingViews(): Record<string, number> {
   }
 }
 
-function writePendingViews(pendingViews: Record<string, number>): void {
-  window.sessionStorage.setItem(
-    PENDING_VIEWS_KEY,
-    JSON.stringify(pendingViews),
-  );
+function writeTimestampMap(
+  storageKey: string,
+  valueMap: Record<string, number>,
+): void {
+  window.sessionStorage.setItem(storageKey, JSON.stringify(valueMap));
 }
 
-function clearPendingView(postId: number): void {
-  const pendingViews = readPendingViews();
+function clearTimestampEntry(storageKey: string, postId: number): void {
+  const valueMap = readTimestampMap(storageKey);
 
-  delete pendingViews[String(postId)];
-  writePendingViews(pendingViews);
+  delete valueMap[String(postId)];
+  writeTimestampMap(storageKey, valueMap);
 }
 
 export function useViewCount(postId: number): void {
   useEffect(() => {
-    const viewedPosts = readViewedPosts();
-    const pendingViews = readPendingViews();
+    const pendingViews = readTimestampMap(PENDING_VIEWS_KEY);
+    const recordedViews = readTimestampMap(RECORDED_VIEWS_KEY);
 
     if (
-      viewedPosts.includes(postId) ||
       pendingViews[String(postId)] ||
+      recordedViews[String(postId)] ||
       inFlightPostIds.has(postId)
     ) {
       return;
     }
 
     inFlightPostIds.add(postId);
-    writePendingViews({
+    writeTimestampMap(PENDING_VIEWS_KEY, {
       ...pendingViews,
       [postId]: Date.now(),
     });
@@ -107,12 +78,15 @@ export function useViewCount(postId: number): void {
     })
       .then(() => {
         inFlightPostIds.delete(postId);
-        clearPendingView(postId);
-        writeViewedPosts([...readViewedPosts(), postId]);
+        clearTimestampEntry(PENDING_VIEWS_KEY, postId);
+        writeTimestampMap(RECORDED_VIEWS_KEY, {
+          ...readTimestampMap(RECORDED_VIEWS_KEY),
+          [postId]: Date.now(),
+        });
       })
       .catch((error: unknown) => {
         inFlightPostIds.delete(postId);
-        clearPendingView(postId);
+        clearTimestampEntry(PENDING_VIEWS_KEY, postId);
         console.error(error);
       });
   }, [postId]);
