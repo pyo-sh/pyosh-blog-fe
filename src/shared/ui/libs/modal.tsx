@@ -58,7 +58,7 @@ const Modal: React.FC<ModalProps> = ({
         "text-center",
         "transition-colors duration-[400ms]",
         // Background overlay
-        withBackground && "bg-grey-2 opacity-50",
+        withBackground && "bg-grey-2/50",
       )}
       onClick={onClose}
       role="dialog"

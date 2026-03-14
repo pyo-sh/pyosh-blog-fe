@@ -2,11 +2,12 @@ import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { fetchMeServer } from "@entities/auth";
 import { fetchComments } from "@entities/comment";
 import { fetchPostBySlug } from "@entities/post";
 import { CommentList } from "@features/comment-section";
 import { PostContent, PostNavigation } from "@features/post-detail";
-import { ApiResponseError, serverFetch } from "@shared/api";
+import { ApiResponseError } from "@shared/api";
 
 interface PostDetailPageProps {
   params: {
@@ -17,11 +18,6 @@ interface PostDetailPageProps {
 interface CurrentViewer {
   type: "guest" | "oauth";
   id?: number;
-}
-
-interface AuthMeResponse {
-  type: "admin" | "oauth";
-  id: number;
 }
 
 const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
@@ -53,11 +49,7 @@ async function getCurrentViewer(): Promise<CurrentViewer> {
   }
 
   try {
-    const viewer = await serverFetch<AuthMeResponse>(
-      "/api/auth/me",
-      {},
-      cookieHeader,
-    );
+    const viewer = await fetchMeServer(cookieHeader);
 
     if (viewer.type === "oauth") {
       return {
