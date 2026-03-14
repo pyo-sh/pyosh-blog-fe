@@ -5,6 +5,7 @@ import type {
   CreateCommentGuestBody,
   CreateCommentOAuthBody,
 } from "@entities/comment";
+import type { CreateGuestbookBody } from "@entities/guestbook";
 import { ApiResponseError } from "@shared/api";
 import { cn } from "@shared/lib/style-utils";
 
@@ -14,13 +15,17 @@ export interface GuestCommentProfile {
   guestPassword: string;
 }
 
-interface CommentFormProps {
+type CommentFormPayload =
+  | CreateCommentGuestBody
+  | CreateCommentOAuthBody
+  | CreateGuestbookBody;
+
+interface CommentFormProps<TPayload extends CommentFormPayload> {
+  variant?: "comment" | "guestbook";
   viewerType: "guest" | "oauth";
   profile: GuestCommentProfile;
   onProfileChange: (field: keyof GuestCommentProfile, value: string) => void;
-  onSubmit: (
-    payload: CreateCommentGuestBody | CreateCommentOAuthBody,
-  ) => Promise<void>;
+  onSubmit: (payload: TPayload) => Promise<void>;
   parentId?: number;
   replyToCommentId?: number;
   replyToName?: string | null;
@@ -29,7 +34,7 @@ interface CommentFormProps {
   className?: string;
 }
 
-function getErrorMessage(error: unknown) {
+function getErrorMessage(error: unknown, variant: "comment" | "guestbook") {
   if (error instanceof ApiResponseError) {
     return error.message;
   }
@@ -38,10 +43,67 @@ function getErrorMessage(error: unknown) {
     return error.message;
   }
 
-  return "댓글을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.";
+  return variant === "guestbook"
+    ? "방명록을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요."
+    : "댓글을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.";
 }
 
-export function CommentForm({
+function getEyebrowLabel(
+  variant: "comment" | "guestbook",
+  replyToName?: string | null,
+) {
+  if (replyToName) {
+    return "Reply";
+  }
+
+  return variant === "guestbook" ? "Guestbook" : "Comment";
+}
+
+function getTitleLabel(
+  variant: "comment" | "guestbook",
+  replyToName?: string | null,
+) {
+  if (replyToName) {
+    return `${replyToName}님에게 답글 남기기`;
+  }
+
+  return variant === "guestbook" ? "방명록 남기기" : "댓글 남기기";
+}
+
+function getDescriptionLabel(
+  variant: "comment" | "guestbook",
+  viewerType: "guest" | "oauth",
+) {
+  if (viewerType === "oauth") {
+    return variant === "guestbook"
+      ? "로그인된 계정으로 방명록을 작성합니다."
+      : "로그인된 계정으로 댓글을 작성합니다.";
+  }
+
+  return variant === "guestbook"
+    ? "이름, 이메일, 비밀번호를 입력하면 방명록을 남길 수 있습니다."
+    : "이름, 이메일, 비밀번호를 입력하면 게스트 댓글을 작성할 수 있습니다.";
+}
+
+function getBodyPlaceholder(
+  variant: "comment" | "guestbook",
+  replyToName?: string | null,
+) {
+  if (replyToName) {
+    return "답글 내용을 입력해 주세요";
+  }
+
+  return variant === "guestbook"
+    ? "방문 메시지를 남겨 주세요"
+    : "이 글에 대한 의견을 남겨 주세요";
+}
+
+function getSecretLabel(variant: "comment" | "guestbook") {
+  return variant === "guestbook" ? "비밀 방명록으로 작성" : "비밀 댓글로 작성";
+}
+
+export function CommentForm<TPayload extends CommentFormPayload>({
+  variant = "comment",
   viewerType,
   profile,
   onProfileChange,
@@ -52,7 +114,7 @@ export function CommentForm({
   submitLabel = "댓글 작성",
   onCancel,
   className,
-}: CommentFormProps) {
+}: CommentFormProps<TPayload>) {
   const [body, setBody] = useState("");
   const [isSecret, setIsSecret] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -83,7 +145,7 @@ export function CommentForm({
         await onSubmit({
           authorType: "oauth",
           ...payloadBase,
-        });
+        } as TPayload);
       } else {
         await onSubmit({
           authorType: "guest",
@@ -91,13 +153,13 @@ export function CommentForm({
           guestEmail: profile.guestEmail.trim(),
           guestPassword: profile.guestPassword,
           ...payloadBase,
-        });
+        } as TPayload);
       }
 
       setBody("");
       setIsSecret(false);
     } catch (error) {
-      setErrorMessage(getErrorMessage(error));
+      setErrorMessage(getErrorMessage(error, variant));
     } finally {
       setIsSubmitting(false);
     }
@@ -113,15 +175,13 @@ export function CommentForm({
     >
       <div className="flex flex-col gap-2">
         <p className="text-body-xs uppercase tracking-[0.2em] text-text-4">
-          {replyToName ? "Reply" : "Comment"}
+          {getEyebrowLabel(variant, replyToName)}
         </p>
         <h3 className="text-body-lg font-semibold text-text-1">
-          {replyToName ? `${replyToName}님에게 답글 남기기` : "댓글 남기기"}
+          {getTitleLabel(variant, replyToName)}
         </h3>
         <p className="text-body-sm text-text-3">
-          {viewerType === "oauth"
-            ? "로그인된 계정으로 댓글을 작성합니다."
-            : "이름, 이메일, 비밀번호를 입력하면 게스트 댓글을 작성할 수 있습니다."}
+          {getDescriptionLabel(variant, viewerType)}
         </p>
       </div>
 
@@ -184,11 +244,7 @@ export function CommentForm({
           onChange={(event) => setBody(event.target.value)}
           disabled={isSubmitting}
           className="mt-2 min-h-32 w-full rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
-          placeholder={
-            replyToName
-              ? "답글 내용을 입력해 주세요"
-              : "이 글에 대한 의견을 남겨 주세요"
-          }
+          placeholder={getBodyPlaceholder(variant, replyToName)}
           maxLength={2000}
           required
         />
@@ -202,7 +258,7 @@ export function CommentForm({
           disabled={isSubmitting}
           className="h-4 w-4 rounded border-border-3 text-primary-1 focus:ring-primary-1"
         />
-        비밀 댓글로 작성
+        {getSecretLabel(variant)}
       </label>
 
       {errorMessage ? (
