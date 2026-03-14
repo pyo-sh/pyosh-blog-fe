@@ -6,7 +6,11 @@ import { fetchMeServer } from "@entities/auth";
 import { fetchComments, type Comment } from "@entities/comment";
 import { fetchPostBySlug } from "@entities/post";
 import { CommentList } from "@features/comment-section";
-import { PostContent, PostNavigation } from "@features/post-detail";
+import {
+  PostContent,
+  PostNavigation,
+  ViewCounter,
+} from "@features/post-detail";
 import { ApiResponseError } from "@shared/api";
 
 interface PostDetailPageProps {
@@ -87,6 +91,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
 
     return (
       <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-8 px-6 py-12">
+        <ViewCounter postId={post.id} />
         <article className="overflow-hidden rounded-[2rem] border border-border-3 bg-background-2">
           {post.thumbnailUrl && (
             <div className="relative aspect-[16/9] w-full overflow-hidden bg-background-3">
