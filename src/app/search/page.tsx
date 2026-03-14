@@ -31,7 +31,6 @@ function parsePage(value?: string): number {
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const rawQuery = getSingleValue(searchParams?.q);
   const query = rawQuery?.trim() ?? "";
-  const page = parsePage(getSingleValue(searchParams?.page));
 
   if (!query) {
     return (
@@ -51,6 +50,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     );
   }
 
+  const page = parsePage(getSingleValue(searchParams?.page));
   const response = await fetchPosts({ q: query, page });
   const posts = response.data;
   const { meta } = response;
