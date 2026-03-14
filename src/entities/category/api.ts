@@ -32,10 +32,18 @@ export async function fetchCategoriesClient(): Promise<Category[]> {
   return response.categories;
 }
 
-export async function fetchCategoriesAdmin(): Promise<Category[]> {
-  const response = await clientFetch<CategoriesResponse>(
-    "/api/categories?include_hidden=true",
-  );
+export async function fetchCategoriesAdmin(
+  cookieHeader?: string,
+): Promise<Category[]> {
+  const response = cookieHeader
+    ? await serverFetch<CategoriesResponse>(
+        "/api/categories?include_hidden=true",
+        {},
+        cookieHeader,
+      )
+    : await clientFetch<CategoriesResponse>(
+        "/api/categories?include_hidden=true",
+      );
 
   return response.categories;
 }

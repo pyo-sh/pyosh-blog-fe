@@ -18,6 +18,7 @@ export interface CreateCategoryBody {
 
 export interface UpdateCategoryBody {
   name?: string;
+  parentId?: number | null;
   isVisible?: boolean;
 }
 
