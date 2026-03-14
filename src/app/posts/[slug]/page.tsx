@@ -1,7 +1,10 @@
+import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { fetchComments } from "@entities/comment";
 import { fetchPostBySlug } from "@entities/post";
+import { CommentList } from "@features/comment-section";
 import { PostContent, PostNavigation } from "@features/post-detail";
 import { ApiResponseError } from "@shared/api";
 
@@ -21,9 +24,21 @@ function formatDate(value: string | null, fallback: string): string {
   return dateFormatter.format(new Date(value ?? fallback));
 }
 
+async function toCookieHeader() {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get("sessionId");
+
+  if (!sessionCookie) {
+    return undefined;
+  }
+
+  return `${sessionCookie.name}=${sessionCookie.value}`;
+}
+
 export default async function PostDetailPage({ params }: PostDetailPageProps) {
   try {
     const { post, prevPost, nextPost } = await fetchPostBySlug(params.slug);
+    const comments = await fetchComments(post.id, await toCookieHeader());
 
     return (
       <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-8 px-6 py-12">
@@ -77,6 +92,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
         </article>
 
         <PostNavigation prevPost={prevPost} nextPost={nextPost} />
+        <CommentList postId={post.id} initialComments={comments} />
       </main>
     );
   } catch (error) {
