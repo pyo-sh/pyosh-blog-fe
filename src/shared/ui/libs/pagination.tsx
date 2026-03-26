@@ -120,6 +120,7 @@ function Pagination({
           <Link
             key={page}
             href={buildHref(basePath, page, queryParams)}
+            tabIndex={page === currentPage ? -1 : undefined}
             className={cn(
               navBtnBase,
               "min-w-[2rem]",

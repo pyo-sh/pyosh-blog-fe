@@ -38,7 +38,7 @@ function PostListInner({
   const page = Math.max(1, Number(pageParam) || 1);
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["posts", page],
+    queryKey: ["posts", basePath, page],
     queryFn: () => fetchPosts({ page }),
     initialData: page === initialPage ? initialData : undefined,
     staleTime: 30_000,
