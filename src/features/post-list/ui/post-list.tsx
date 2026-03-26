@@ -13,6 +13,7 @@ import { Pagination } from "@shared/ui/libs";
 interface PostListProps {
   initialData: PaginatedResponse<Post>;
   initialPage: number;
+  basePath?: string;
 }
 
 const SKELETON_COUNT = 10;
@@ -27,7 +28,11 @@ function PostListSkeleton() {
   );
 }
 
-function PostListInner({ initialData, initialPage }: PostListProps) {
+function PostListInner({
+  initialData,
+  initialPage,
+  basePath = "/",
+}: PostListProps) {
   const searchParams = useSearchParams();
   const pageParam = searchParams.get("page");
   const page = Math.max(1, Number(pageParam) || 1);
@@ -36,6 +41,7 @@ function PostListInner({ initialData, initialPage }: PostListProps) {
     queryKey: ["posts", page],
     queryFn: () => fetchPosts({ page }),
     initialData: page === initialPage ? initialData : undefined,
+    staleTime: 30_000,
   });
 
   if (isLoading) {
@@ -86,7 +92,7 @@ function PostListInner({ initialData, initialPage }: PostListProps) {
         <Pagination
           currentPage={page}
           totalPages={meta.totalPages}
-          basePath="/"
+          basePath={basePath}
         />
       )}
     </>

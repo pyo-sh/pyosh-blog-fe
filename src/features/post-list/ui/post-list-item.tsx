@@ -123,6 +123,7 @@ function PinIcon({ className, ...props }: React.SVGProps<SVGSVGElement>) {
       fill="currentColor"
       width="14"
       height="14"
+      role="img"
       className={className}
       {...props}
     >
