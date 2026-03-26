@@ -37,6 +37,9 @@ const fallbackDateFormatter = new Intl.DateTimeFormat("ko-KR", {
 
 function formatRelativeTime(value: string): string {
   const diffMs = Date.now() - new Date(value).getTime();
+
+  if (diffMs < 0) return "방금 전";
+
   const diffSec = Math.floor(diffMs / 1000);
   const diffMin = Math.floor(diffSec / 60);
   const diffHour = Math.floor(diffMin / 60);
@@ -189,7 +192,7 @@ export function GuestbookPageContent({
       });
       setNewEntryId(null);
     }
-  }, [newEntryId, entries]);
+  }, [newEntryId]);
 
   function handleProfileChange(
     field: keyof GuestCommentProfile,
