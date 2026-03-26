@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { PaginatedResponse } from "@shared/api";
 import {
@@ -28,50 +28,45 @@ interface GuestbookPageContentProps {
   viewer: GuestbookViewer;
 }
 
-const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
+const fallbackDateFormatter = new Intl.DateTimeFormat("ko-KR", {
   year: "numeric",
   month: "2-digit",
   day: "2-digit",
   timeZone: "UTC",
 });
 
+function formatRelativeTime(value: string): string {
+  const diffMs = Date.now() - new Date(value).getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHour = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHour / 24);
+
+  if (diffSec < 60) return "방금 전";
+  if (diffMin < 60) return `${diffMin}분 전`;
+  if (diffHour < 24) return `${diffHour}시간 전`;
+  if (diffDay < 30) return `${diffDay}일 전`;
+
+  return fallbackDateFormatter.format(new Date(value));
+}
+
 function getAuthorName(entry: GuestbookEntry) {
   return entry.author.name;
 }
 
-function getEntryBody(entry: GuestbookEntry) {
+function getEntryBody(entry: GuestbookEntry): {
+  text: string;
+  masked: boolean;
+} {
   if (entry.status === "deleted") {
-    return "삭제된 방명록입니다.";
+    return { text: "삭제된 방명록입니다.", masked: true };
   }
 
-  return entry.body;
-}
-
-function formatDate(value: string) {
-  return dateFormatter.format(new Date(value));
-}
-
-function appendGuestbookEntry(
-  entries: GuestbookEntry[],
-  nextEntry: GuestbookEntry,
-): GuestbookEntry[] {
-  if (nextEntry.parentId === null) {
-    return [nextEntry, ...entries];
+  if (entry.isSecret && !entry.body) {
+    return { text: "비밀 방명록입니다.", masked: true };
   }
 
-  return entries.map((entry) => {
-    if (entry.id === nextEntry.parentId) {
-      return {
-        ...entry,
-        replies: [...entry.replies, nextEntry],
-      };
-    }
-
-    return {
-      ...entry,
-      replies: appendGuestbookEntry(entry.replies, nextEntry),
-    };
-  });
+  return { text: entry.body, masked: false };
 }
 
 function markGuestbookDeleted(
@@ -80,17 +75,10 @@ function markGuestbookDeleted(
 ): GuestbookEntry[] {
   return entries.map((entry) => {
     if (entry.id === entryId) {
-      return {
-        ...entry,
-        status: "deleted",
-        body: "",
-      };
+      return { ...entry, status: "deleted", body: "" };
     }
 
-    return {
-      ...entry,
-      replies: markGuestbookDeleted(entry.replies, entryId),
-    };
+    return entry;
   });
 }
 
@@ -110,21 +98,30 @@ function GuestbookEntryItem({
   entry,
   onDelete,
   canDeleteEntry,
-  depth = 0,
+  entryRef,
 }: {
   entry: GuestbookEntry;
   onDelete: (entry: GuestbookEntry) => void;
   canDeleteEntry: (entry: GuestbookEntry) => boolean;
-  depth?: number;
+  entryRef?: React.Ref<HTMLLIElement>;
 }) {
+  const body = getEntryBody(entry);
+
   return (
-    <li className={depth > 0 ? "mt-4 border-l border-border-3 pl-5" : ""}>
+    <li ref={entryRef}>
       <article className="rounded-[1.5rem] border border-border-3 bg-background-1 p-5">
         <div className="flex flex-wrap items-center gap-3 text-body-sm text-text-3">
           <span className="font-semibold text-text-1">
             {getAuthorName(entry)}
           </span>
-          <time dateTime={entry.createdAt}>{formatDate(entry.createdAt)}</time>
+          {entry.author.type === "oauth" ? (
+            <span className="rounded-full bg-background-2 px-3 py-1 text-body-xs text-text-4">
+              OAuth
+            </span>
+          ) : null}
+          <time dateTime={entry.createdAt}>
+            {formatRelativeTime(entry.createdAt)}
+          </time>
           {entry.isSecret && entry.status !== "deleted" ? (
             <span className="rounded-full bg-background-2 px-3 py-1 text-body-xs text-text-4">
               Secret
@@ -132,8 +129,14 @@ function GuestbookEntryItem({
           ) : null}
         </div>
 
-        <p className="mt-4 whitespace-pre-wrap break-words text-body-md text-text-2">
-          {getEntryBody(entry)}
+        <p
+          className={
+            body.masked
+              ? "mt-4 whitespace-pre-wrap break-words text-body-md italic text-text-4"
+              : "mt-4 whitespace-pre-wrap break-words text-body-md text-text-2"
+          }
+        >
+          {body.text}
         </p>
 
         {canDeleteEntry(entry) ? (
@@ -146,20 +149,6 @@ function GuestbookEntryItem({
           </button>
         ) : null}
       </article>
-
-      {entry.replies.length > 0 ? (
-        <ul className="mt-4">
-          {entry.replies.map((reply) => (
-            <GuestbookEntryItem
-              key={reply.id}
-              entry={reply}
-              onDelete={onDelete}
-              canDeleteEntry={canDeleteEntry}
-              depth={depth + 1}
-            />
-          ))}
-        </ul>
-      ) : null}
     </li>
   );
 }
@@ -172,6 +161,8 @@ export function GuestbookPageContent({
   const router = useRouter();
   const [entries, setEntries] = useState(initialEntries);
   const [meta, setMeta] = useState(initialMeta);
+  const [newEntryId, setNewEntryId] = useState<number | null>(null);
+  const newEntryRef = useRef<HTMLLIElement>(null);
   const [deleteTarget, setDeleteTarget] = useState<GuestbookEntry | null>(null);
   const [deletePassword, setDeletePassword] = useState("");
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -189,6 +180,16 @@ export function GuestbookPageContent({
   useEffect(() => {
     setMeta(initialMeta);
   }, [initialMeta]);
+
+  useEffect(() => {
+    if (newEntryId !== null && newEntryRef.current) {
+      newEntryRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+      setNewEntryId(null);
+    }
+  }, [newEntryId, entries]);
 
   function handleProfileChange(
     field: keyof GuestCommentProfile,
@@ -221,11 +222,7 @@ export function GuestbookPageContent({
       return;
     }
 
-    setEntries((current) => {
-      const nextEntries = appendGuestbookEntry(current, nextEntry);
-
-      return nextEntries.slice(0, meta.limit);
-    });
+    setEntries((current) => [nextEntry, ...current].slice(0, meta.limit));
     setMeta((current) => {
       const total = current.total + 1;
 
@@ -235,7 +232,14 @@ export function GuestbookPageContent({
         totalPages: Math.max(1, Math.ceil(total / current.limit)),
       };
     });
+    setNewEntryId(nextEntry.id);
   }
+
+  const handleOpenDelete = useCallback((target: GuestbookEntry) => {
+    setDeleteTarget(target);
+    setDeletePassword("");
+    setDeleteError(null);
+  }, []);
 
   async function handleDelete() {
     if (!deleteTarget) {
@@ -274,10 +278,14 @@ export function GuestbookPageContent({
         <p className="text-body-xs uppercase tracking-[0.24em] text-text-4">
           Guestbook
         </p>
-        <h1 className="mt-3 text-heading-md text-text-1">방명록</h1>
+        <div className="mt-3 flex flex-wrap items-baseline justify-between gap-3">
+          <h1 className="text-heading-md text-text-1">방명록</h1>
+          <span className="text-body-sm text-text-4">
+            총 {meta.total.toLocaleString("ko-KR")}개 방명록
+          </span>
+        </div>
         <p className="mt-4 max-w-2xl text-body-md text-text-3">
-          방문자들이 남긴 메시지 {meta.total.toLocaleString("ko-KR")}개를
-          확인하고 직접 인사를 남길 수 있습니다.
+          방문자들이 남긴 메시지를 확인하고 직접 인사를 남길 수 있습니다.
         </p>
       </header>
 
@@ -306,12 +314,9 @@ export function GuestbookPageContent({
               <GuestbookEntryItem
                 key={entry.id}
                 entry={entry}
-                onDelete={(target) => {
-                  setDeleteTarget(target);
-                  setDeletePassword("");
-                  setDeleteError(null);
-                }}
+                onDelete={handleOpenDelete}
                 canDeleteEntry={canDeleteEntry}
+                entryRef={entry.id === newEntryId ? newEntryRef : undefined}
               />
             ))}
           </ul>

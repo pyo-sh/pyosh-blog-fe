@@ -27,7 +27,6 @@ export interface GuestbookEntry {
 
 interface BaseCreateGuestbookBody {
   body: string;
-  parentId?: number;
   isSecret?: boolean;
 }
 
