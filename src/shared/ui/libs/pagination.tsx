@@ -28,8 +28,6 @@ function generatePageNumbers(
   const windowEnd = Math.min(totalPages - 1, currentPage + 3);
   const pages: Array<number | "..."> = [1];
 
-  if (totalPages === 1) return pages;
-
   if (windowStart > 2) pages.push("...");
 
   for (let i = windowStart; i <= windowEnd; i++) {

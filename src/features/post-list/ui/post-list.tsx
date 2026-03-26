@@ -32,7 +32,7 @@ function PostListInner({ initialData, initialPage }: PostListProps) {
   const pageParam = searchParams.get("page");
   const page = Math.max(1, Number(pageParam) || 1);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["posts", page],
     queryFn: () => fetchPosts({ page }),
     initialData: page === initialPage ? initialData : undefined,
@@ -40,6 +40,14 @@ function PostListInner({ initialData, initialPage }: PostListProps) {
 
   if (isLoading) {
     return <PostListSkeleton />;
+  }
+
+  if (isError) {
+    return (
+      <section className="rounded-2xl border border-dashed border-border-3 bg-background-2 p-8 text-sm text-text-3 md:p-10">
+        게시글을 불러오는 중 오류가 발생했습니다
+      </section>
+    );
   }
 
   const posts = data?.data ?? [];
