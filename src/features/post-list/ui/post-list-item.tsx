@@ -110,6 +110,20 @@ export function PostListItem({ post }: PostListItemProps) {
             {post.commentCount.toLocaleString()}
           </span>
         </div>
+
+        {/* Tag badges — text only, no link */}
+        {post.tags.length > 0 && (
+          <ul className="flex flex-wrap gap-2" aria-label="태그">
+            {post.tags.map((tag) => (
+              <li
+                key={tag.id}
+                className="rounded-full border border-border-3 px-3 py-1 text-body-xs text-text-4"
+              >
+                #{tag.name}
+              </li>
+            ))}
+          </ul>
+        )}
       </article>
     </Link>
   );
