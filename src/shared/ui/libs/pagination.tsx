@@ -18,6 +18,34 @@ function buildHref(
   return `${basePath}?${params.toString()}`;
 }
 
+function generatePageNumbers(
+  currentPage: number,
+  totalPages: number,
+): Array<number | "..."> {
+  if (totalPages <= 1) return [];
+
+  const windowStart = Math.max(2, currentPage - 3);
+  const windowEnd = Math.min(totalPages - 1, currentPage + 3);
+  const pages: Array<number | "..."> = [1];
+
+  if (totalPages === 1) return pages;
+
+  if (windowStart > 2) pages.push("...");
+
+  for (let i = windowStart; i <= windowEnd; i++) {
+    pages.push(i);
+  }
+
+  if (windowEnd < totalPages - 1) pages.push("...");
+
+  pages.push(totalPages);
+
+  return pages;
+}
+
+const navBtnBase =
+  "inline-flex items-center justify-center px-2.5 py-1.5 rounded text-sm transition-colors";
+
 function Pagination({
   currentPage,
   totalPages,
@@ -26,68 +54,122 @@ function Pagination({
 }: IPaginationProps) {
   if (totalPages <= 1) return null;
 
+  const jumpFive = 5;
+  const prevFivePage = Math.max(1, currentPage - jumpFive);
+  const nextFivePage = Math.min(totalPages, currentPage + jumpFive);
+
+  const hasPrevFive = currentPage > jumpFive;
   const hasPrev = currentPage > 1;
   const hasNext = currentPage < totalPages;
+  const hasNextFive = currentPage + jumpFive <= totalPages;
+
+  const pages = generatePageNumbers(currentPage, totalPages);
 
   return (
     <nav
       aria-label="Pagination"
-      className="flex items-center justify-center gap-1"
+      className="flex items-center justify-center gap-0.5"
     >
-      {hasPrev ? (
+      {/* << −5 */}
+      {hasPrevFive ? (
         <Link
-          href={buildHref(basePath, currentPage - 1, queryParams)}
-          className={cn(
-            "inline-flex items-center justify-center px-3 py-1.5 rounded text-sm",
-            "text-text-1 hover:bg-background-2 transition-colors",
-          )}
-          aria-label="Previous page"
+          href={buildHref(basePath, prevFivePage, queryParams)}
+          className={cn(navBtnBase, "text-text-1 hover:bg-background-2")}
+          aria-label="5 pages back"
         >
           &laquo;
         </Link>
       ) : (
         <span
-          className="inline-flex items-center justify-center px-3 py-1.5 rounded text-sm text-text-3 cursor-not-allowed"
+          className={cn(navBtnBase, "text-text-4 cursor-not-allowed")}
           aria-disabled="true"
-          aria-label="Previous page"
+          aria-label="5 pages back"
         >
           &laquo;
         </span>
       )}
 
-      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+      {/* < −1 */}
+      {hasPrev ? (
         <Link
-          key={page}
-          href={buildHref(basePath, page, queryParams)}
-          className={cn(
-            "inline-flex items-center justify-center px-3 py-1.5 rounded text-sm transition-colors",
-            page === currentPage
-              ? "bg-primary-1 text-text-1 font-semibold pointer-events-none"
-              : "text-text-1 hover:bg-background-2",
-          )}
-          aria-current={page === currentPage ? "page" : undefined}
-          aria-label={`Page ${page}`}
+          href={buildHref(basePath, currentPage - 1, queryParams)}
+          className={cn(navBtnBase, "text-text-1 hover:bg-background-2")}
+          aria-label="Previous page"
         >
-          {page}
+          &lsaquo;
         </Link>
-      ))}
+      ) : (
+        <span
+          className={cn(navBtnBase, "text-text-4 cursor-not-allowed")}
+          aria-disabled="true"
+          aria-label="Previous page"
+        >
+          &lsaquo;
+        </span>
+      )}
 
+      {/* Page numbers with ellipsis */}
+      {pages.map((page, idx) =>
+        page === "..." ? (
+          <span
+            key={`ellipsis-${idx}`}
+            className={cn(navBtnBase, "text-text-4 select-none")}
+            aria-hidden="true"
+          >
+            &hellip;
+          </span>
+        ) : (
+          <Link
+            key={page}
+            href={buildHref(basePath, page, queryParams)}
+            className={cn(
+              navBtnBase,
+              "min-w-[2rem]",
+              page === currentPage
+                ? "bg-primary-1 text-white font-semibold pointer-events-none"
+                : "text-text-1 hover:bg-background-2",
+            )}
+            aria-current={page === currentPage ? "page" : undefined}
+            aria-label={`Page ${page}`}
+          >
+            {page}
+          </Link>
+        ),
+      )}
+
+      {/* > +1 */}
       {hasNext ? (
         <Link
           href={buildHref(basePath, currentPage + 1, queryParams)}
-          className={cn(
-            "inline-flex items-center justify-center px-3 py-1.5 rounded text-sm",
-            "text-text-1 hover:bg-background-2 transition-colors",
-          )}
+          className={cn(navBtnBase, "text-text-1 hover:bg-background-2")}
           aria-label="Next page"
+        >
+          &rsaquo;
+        </Link>
+      ) : (
+        <span
+          className={cn(navBtnBase, "text-text-4 cursor-not-allowed")}
+          aria-disabled="true"
+          aria-label="Next page"
+        >
+          &rsaquo;
+        </span>
+      )}
+
+      {/* >> +5 */}
+      {hasNextFive ? (
+        <Link
+          href={buildHref(basePath, nextFivePage, queryParams)}
+          className={cn(navBtnBase, "text-text-1 hover:bg-background-2")}
+          aria-label="5 pages forward"
         >
           &raquo;
         </Link>
       ) : (
         <span
-          className="inline-flex items-center justify-center px-3 py-1.5 rounded text-sm text-text-3 cursor-not-allowed"
+          className={cn(navBtnBase, "text-text-4 cursor-not-allowed")}
           aria-disabled="true"
-          aria-label="Next page"
+          aria-label="5 pages forward"
         >
           &raquo;
         </span>

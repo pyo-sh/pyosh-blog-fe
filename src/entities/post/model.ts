@@ -23,6 +23,11 @@ export interface Post {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+  summary: string | null;
+  isPinned: boolean;
+  totalPageviews: number;
+  commentCount: number;
+  contentModifiedAt: string | null;
   category: PostCategory;
   tags: PostTag[];
 }
