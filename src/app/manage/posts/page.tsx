@@ -30,6 +30,17 @@ import {
 
 const PAGE_SIZE = 10;
 
+function hasBulkDetails(
+  err: unknown,
+): err is { details: BulkPostErrorDetail[] } {
+  return (
+    typeof err === "object" &&
+    err !== null &&
+    "details" in err &&
+    Array.isArray((err as { details: unknown }).details)
+  );
+}
+
 function getQueryKey(
   tab: AdminPostTab,
   page: number,
@@ -284,9 +295,8 @@ export default function ManagePostsPage() {
       await invalidatePostQueries();
       toast.success(`${ids.length}개 글이 삭제되었습니다.`);
     } catch (err) {
-      const apiErr = err as { details?: BulkPostErrorDetail[] };
-      if (apiErr.details?.length) {
-        const detail = apiErr.details
+      if (hasBulkDetails(err) && err.details.length) {
+        const detail = err.details
           .map((d) => `#${d.id}: ${d.reason}`)
           .join(", ");
         toast.error(`삭제 실패: ${detail}`);
@@ -314,9 +324,8 @@ export default function ManagePostsPage() {
       await invalidatePostQueries();
       toast.success(`${ids.length}개 글이 영구 삭제되었습니다.`);
     } catch (err) {
-      const apiErr = err as { details?: BulkPostErrorDetail[] };
-      if (apiErr.details?.length) {
-        const detail = apiErr.details
+      if (hasBulkDetails(err) && err.details.length) {
+        const detail = err.details
           .map((d) => `#${d.id}: ${d.reason}`)
           .join(", ");
         toast.error(`영구 삭제 실패: ${detail}`);
@@ -342,9 +351,8 @@ export default function ManagePostsPage() {
       await invalidatePostQueries();
       toast.success(`${ids.length}개 글이 업데이트되었습니다.`);
     } catch (err) {
-      const apiErr = err as { details?: BulkPostErrorDetail[] };
-      if (apiErr.details?.length) {
-        const detail = apiErr.details
+      if (hasBulkDetails(err) && err.details.length) {
+        const detail = err.details
           .map((d) => `#${d.id}: ${d.reason}`)
           .join(", ");
         toast.error(`업데이트 실패: ${detail}`);

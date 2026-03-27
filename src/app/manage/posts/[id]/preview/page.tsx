@@ -6,9 +6,8 @@ import { renderMarkdown } from "@shared/lib/markdown";
 import { PostPreview } from "@widgets/admin-post-preview";
 
 interface PostPreviewPageProps {
-  params: {
-    id: string;
-  };
+  // Next.js 15: params is a Promise. await is a no-op in Next.js 14.
+  params: Promise<{ id: string }>;
 }
 
 async function toCookieHeader(): Promise<string | undefined> {
@@ -26,7 +25,8 @@ async function toCookieHeader(): Promise<string | undefined> {
 export default async function PostPreviewPage({
   params,
 }: PostPreviewPageProps) {
-  const id = Number(params.id);
+  const { id: rawId } = await params;
+  const id = Number(rawId);
 
   if (!Number.isFinite(id) || id <= 0) {
     notFound();

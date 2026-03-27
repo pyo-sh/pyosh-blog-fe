@@ -12,6 +12,12 @@ import { cn } from "@shared/lib/style-utils";
 import { ConfirmDialog } from "@shared/ui/confirm-dialog";
 import { ToggleSwitch } from "@shared/ui/toggle-switch";
 
+const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
 interface PostPreviewProps {
   post: Post;
   renderedContent: string;
@@ -173,11 +179,7 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
           ) : null}
           {currentPost.publishedAt ? (
             <span>
-              {new Intl.DateTimeFormat("ko-KR", {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-              }).format(new Date(currentPost.publishedAt))}
+              {dateFormatter.format(new Date(currentPost.publishedAt))}
             </span>
           ) : null}
           <span>조회 {currentPost.totalPageviews}</span>
