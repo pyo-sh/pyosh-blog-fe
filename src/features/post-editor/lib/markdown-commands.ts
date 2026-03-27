@@ -102,10 +102,11 @@ export function insertHorizontalRule(view: EditorView): void {
   const { from } = view.state.selection.main;
   const line = view.state.doc.lineAt(from);
   const prefix = line.length > 0 ? "\n" : "";
+  const insert = `${prefix}---\n`;
 
   view.dispatch({
-    changes: { from: line.to, insert: `${prefix}\n---\n` },
-    selection: EditorSelection.cursor(line.to + prefix.length + 5),
+    changes: { from: line.to, insert },
+    selection: EditorSelection.cursor(line.to + insert.length),
   });
 
   view.focus();
@@ -169,7 +170,7 @@ export function insertTable(view: EditorView): void {
   const { from } = view.state.selection.main;
   const line = view.state.doc.lineAt(from);
   const prefix = line.length > 0 ? "\n" : "";
-  const template = `${prefix}\n| 제목 | 제목 |\n|---|---|\n| 내용 | 내용 |\n`;
+  const template = `${prefix}| 제목 | 제목 |\n|---|---|\n| 내용 | 내용 |\n`;
 
   view.dispatch({
     changes: { from: line.to, insert: template },
