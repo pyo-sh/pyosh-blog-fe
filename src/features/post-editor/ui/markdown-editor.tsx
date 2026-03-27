@@ -104,6 +104,10 @@ export function MarkdownEditor({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
+  // Capture mount-time values in refs so the init effect has no closure deps.
+  const initialValueRef = useRef(value);
+  const initialIdRef = useRef(id);
+  const initialPlaceholderRef = useRef(placeholderText);
 
   const [editorView, setEditorView] = useState<EditorView | null>(null);
 
@@ -130,14 +134,14 @@ export function MarkdownEditor({
       EditorView.lineWrapping,
       search(),
       editorTheme,
-      placeholder(placeholderText),
+      placeholder(initialPlaceholderRef.current),
       EditorView.updateListener.of((update) => {
         if (update.docChanged) {
           onChangeRef.current(update.state.doc.toString());
         }
       }),
       EditorView.contentAttributes.of({
-        id,
+        id: initialIdRef.current,
         role: "textbox",
         "aria-multiline": "true",
         "aria-label": "마크다운 편집기",
@@ -145,7 +149,7 @@ export function MarkdownEditor({
     ];
 
     const state = EditorState.create({
-      doc: value,
+      doc: initialValueRef.current,
       extensions,
     });
 
@@ -160,7 +164,7 @@ export function MarkdownEditor({
       view.destroy();
       setEditorView(null);
     };
-  }, []); // intentionally empty: editor initializes once on mount
+  }, []);
 
   // Sync value when changed externally (e.g. form reset, edit-mode hydration)
   useEffect(() => {

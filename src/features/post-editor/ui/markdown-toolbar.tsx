@@ -19,12 +19,17 @@ interface ButtonDef {
   italic?: boolean;
   strikethrough?: boolean;
   action: (view: EditorView) => void;
+  buttonIndex: number;
 }
 
 type ToolbarItem = ButtonDef | "separator";
 
 function buildToolbarItems(): ToolbarItem[] {
-  const btn = (def: ButtonDef): ButtonDef => def;
+  let idx = 0;
+  const btn = (def: Omit<ButtonDef, "buttonIndex">): ButtonDef => ({
+    ...def,
+    buttonIndex: idx++,
+  });
 
   return [
     btn({
@@ -139,8 +144,6 @@ export function MarkdownToolbar({ editorView }: MarkdownToolbarProps) {
     buttonRefs.current[next]?.focus();
   };
 
-  let buttonIndex = -1;
-
   return (
     <div
       role="toolbar"
@@ -159,8 +162,7 @@ export function MarkdownToolbar({ editorView }: MarkdownToolbarProps) {
           );
         }
 
-        buttonIndex += 1;
-        const idx = buttonIndex;
+        const idx = item.buttonIndex;
 
         return (
           <button

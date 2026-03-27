@@ -3,6 +3,7 @@ import { type EditorView } from "@codemirror/view";
 import { type KeyBinding } from "@codemirror/view";
 
 // Shared toggle-wrap helper used by both toolbar and keyboard handlers.
+// Operates on selection.main only; multi-cursor support is deferred.
 function applyToggleWrap(
   state: EditorState,
   dispatch: EditorView["dispatch"],
