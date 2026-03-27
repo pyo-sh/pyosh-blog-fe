@@ -76,9 +76,10 @@ export function CodeBlockEnhancer({ children }: PropsWithChildren) {
 
       // pre를 wrapper로 감싸서 헤더가 가로 스크롤 밖에 고정되도록 함
       // 시각 스타일(bg/border/radius)은 typography.css의 [data-code-wrapper]에서 관리
+      if (!pre.parentNode) return;
       const wrapper = document.createElement("div");
       wrapper.setAttribute("data-code-wrapper", "true");
-      pre.parentNode?.insertBefore(wrapper, pre);
+      pre.parentNode.insertBefore(wrapper, pre);
       wrapper.appendChild(header);
       wrapper.appendChild(pre);
     });
