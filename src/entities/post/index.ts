@@ -1,12 +1,14 @@
 export type {
   FetchAdminPostsParams,
   FetchPostsParams,
+  MatchedComment,
   Post,
   PostTag,
   PostCategory,
   PostNavigation,
   PostDetailResponse,
   PostDetailWithNavigationResponse,
+  SearchFilter,
   CreatePostBody,
   UpdatePostBody,
 } from "./model";

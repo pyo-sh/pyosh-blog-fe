@@ -11,6 +11,7 @@ const ICON_HEIGHT = "1.5rem";
 const SearchBar: React.FC = () => {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLFormElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
 
@@ -21,6 +22,25 @@ const SearchBar: React.FC = () => {
 
     inputRef.current?.focus();
     inputRef.current?.select();
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
   const handleOpen = () => {
@@ -35,24 +55,45 @@ const SearchBar: React.FC = () => {
     setIsOpen(true);
   };
 
+  const handleClose = () => {
+    setIsOpen(false);
+    setQuery("");
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Escape") {
+      handleClose();
+    }
+  };
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const trimmedQuery = query.trim();
 
     if (!trimmedQuery) {
-      setIsOpen(false);
+      handleClose();
 
       return;
     }
 
-    const params = new URLSearchParams({ q: trimmedQuery });
+    const currentUrl = new URL(window.location.href);
+    const currentFilter =
+      currentUrl.pathname === "/search"
+        ? (currentUrl.searchParams.get("filter") ?? "title_content")
+        : "title_content";
+
+    const params = new URLSearchParams({
+      q: trimmedQuery,
+      filter: currentFilter,
+    });
     router.push(`/search?${params.toString()}`);
-    setIsOpen(false);
+    handleClose();
   };
 
   return (
     <form
+      ref={containerRef}
       className="flex items-center justify-end gap-2"
       onSubmit={handleSubmit}
     >
@@ -61,7 +102,7 @@ const SearchBar: React.FC = () => {
         className={cn(
           "overflow-hidden transition-all duration-300",
           isOpen
-            ? "w-40 opacity-100 md:w-56"
+            ? "min-w-[120px] max-w-[320px] opacity-100 md:min-w-[200px]"
             : "w-0 opacity-0 pointer-events-none",
         )}
       >
@@ -70,11 +111,15 @@ const SearchBar: React.FC = () => {
           id="header-search-input"
           ref={inputRef}
           type="search"
+          role="searchbox"
           disabled={!isOpen}
           tabIndex={isOpen ? 0 : -1}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder="검색어 입력"
+          maxLength={200}
+          aria-label="검색어 입력"
           className="h-10 w-full rounded-full border border-border-3 bg-background-2 px-4 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
         />
       </label>
@@ -84,7 +129,7 @@ const SearchBar: React.FC = () => {
         onClick={isOpen ? undefined : handleOpen}
         showShadow={false}
         fill="weak"
-        aria-label={isOpen ? "검색 실행" : "검색창 열기"}
+        aria-label="검색"
         aria-expanded={isOpen}
         aria-controls="header-search-input"
       >
