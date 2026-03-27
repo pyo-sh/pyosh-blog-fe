@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CommentDetailModal } from "./comment-detail-modal";
 import { CommentFilters } from "./comment-filters";
 import { CommentTable } from "./comment-table";
@@ -9,7 +9,11 @@ import type {
   CommentStatusFilter,
   CommentAuthorTypeFilter,
 } from "./comment-filters";
-import { fetchAdminComments, type AdminCommentItem } from "@entities/comment";
+import {
+  adminDeleteComment,
+  fetchAdminComments,
+  type AdminCommentItem,
+} from "@entities/comment";
 import { getErrorMessage } from "@shared/lib/get-error-message";
 import { EmptyState, Skeleton } from "@shared/ui/libs";
 
@@ -27,6 +31,7 @@ interface FilterState {
 export function AdminCommentsPage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterState>({
     status: "all",
     authorType: "all",
@@ -65,6 +70,28 @@ export function AdminCommentsPage() {
 
   const rows = data?.data ?? [];
   const meta = data?.meta;
+
+  const deleteMutation = useMutation({
+    mutationFn: adminDeleteComment,
+    onSuccess: async (_, deletedId) => {
+      setActionError(null);
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(deletedId);
+
+        return next;
+      });
+      setPage((currentPage) =>
+        currentPage > 1 && rows.length === 1 ? currentPage - 1 : currentPage,
+      );
+      await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+    },
+    onError: (mutationError) => {
+      setActionError(
+        getErrorMessage(mutationError, "댓글 삭제에 실패했습니다."),
+      );
+    },
+  });
 
   useEffect(() => {
     if (meta && meta.totalPages > 0 && page > meta.totalPages) {
@@ -144,6 +171,18 @@ export function AdminCommentsPage() {
     setSelectedIds(new Set());
   }
 
+  const handleDeleteComment = useCallback(
+    (id: number) => {
+      setActionError(null);
+      deleteMutation.mutate(id);
+    },
+    [deleteMutation.mutate],
+  );
+
+  const handleCloseModal = useCallback(() => {
+    setOpenedComment(null);
+  }, []);
+
   return (
     <div className="space-y-6">
       <header className="flex flex-col gap-4 rounded-[1.75rem] border border-border-3 bg-background-2 p-6 shadow-[0px_18px_60px_0px_rgba(0,0,0,0.06)] md:flex-row md:items-end md:justify-between">
@@ -208,6 +247,12 @@ export function AdminCommentsPage() {
           </div>
         ) : null}
 
+        {actionError ? (
+          <div className="mb-4 rounded-[1rem] border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-sm text-negative-1">
+            {actionError}
+          </div>
+        ) : null}
+
         {/* Table header */}
         <div className="flex flex-col gap-3 pb-4 md:flex-row md:items-center md:justify-between">
           <div>
@@ -268,9 +313,13 @@ export function AdminCommentsPage() {
             <CommentTable
               rows={rows}
               selectedIds={selectedIds}
+              deletingId={
+                deleteMutation.isPending ? deleteMutation.variables : null
+              }
               onToggleSelect={handleToggleSelect}
               onToggleSelectPage={handleToggleSelectPage}
               onClickComment={setOpenedComment}
+              onDelete={handleDeleteComment}
             />
           ) : (
             <EmptyState message="현재 등록된 댓글이 없습니다." />
@@ -316,7 +365,7 @@ export function AdminCommentsPage() {
       <CommentDetailModal
         comment={openedComment}
         isOpen={openedComment !== null}
-        onClose={() => setOpenedComment(null)}
+        onClose={handleCloseModal}
       />
     </div>
   );
