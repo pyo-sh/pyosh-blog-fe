@@ -73,7 +73,7 @@ const processor = unified()
     rel: ["noopener", "noreferrer"],
   })
   .use(rehypeLazyImages)
-  .use(rehypeSlug)
+  .use(rehypeSlug, { prefix: HEADING_ID_PREFIX })
   .use(rehypeSanitize, sanitizeSchema)
   .use(rehypeStringify)
   .freeze();
