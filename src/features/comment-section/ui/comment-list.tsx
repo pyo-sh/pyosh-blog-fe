@@ -428,6 +428,10 @@ export function CommentList({
 
       if (isRootComment) {
         const nextComments = markCommentDeleted(comments, target.id);
+        const removedCommentCount = Math.max(
+          0,
+          countVisibleComments(comments) - countVisibleComments(nextComments),
+        );
         const rootStillVisible = nextComments.some(
           (comment) => comment.id === target.id,
         );
@@ -436,7 +440,6 @@ export function CommentList({
           : Math.max(0, meta.totalRootComments - 1);
         const nextTotalPages = Math.max(1, Math.ceil(nextRootTotal / pageSize));
         const targetPage = Math.min(currentPage, nextTotalPages);
-        const nextTotalCount = countVisibleComments(nextComments);
 
         if (!rootStillVisible) {
           didRefreshFail = !(await loadPage(targetPage, {
@@ -447,7 +450,7 @@ export function CommentList({
             setComments(nextComments);
             setMeta((current) => ({
               ...current,
-              totalCount: nextTotalCount,
+              totalCount: Math.max(0, current.totalCount - removedCommentCount),
               totalRootComments: nextRootTotal,
               totalPages: nextTotalPages,
               page: targetPage,
@@ -457,7 +460,7 @@ export function CommentList({
           setComments(nextComments);
           setMeta((current) => ({
             ...current,
-            totalCount: nextTotalCount,
+            totalCount: Math.max(0, current.totalCount - removedCommentCount),
             totalRootComments: nextRootTotal,
             totalPages: nextTotalPages,
             page: targetPage,
@@ -465,6 +468,10 @@ export function CommentList({
         }
       } else {
         const nextComments = markCommentDeleted(comments, target.id);
+        const removedCommentCount = Math.max(
+          0,
+          countVisibleComments(comments) - countVisibleComments(nextComments),
+        );
         const removedRootCount = Math.max(
           0,
           comments.length - nextComments.length,
@@ -475,7 +482,6 @@ export function CommentList({
         );
         const nextTotalPages = Math.max(1, Math.ceil(nextRootTotal / pageSize));
         const targetPage = Math.min(currentPage, nextTotalPages);
-        const nextTotalCount = countVisibleComments(nextComments);
 
         if (removedRootCount > 0) {
           didRefreshFail = !(await loadPage(targetPage, {
@@ -486,7 +492,7 @@ export function CommentList({
             setComments(nextComments);
             setMeta((current) => ({
               ...current,
-              totalCount: nextTotalCount,
+              totalCount: Math.max(0, current.totalCount - removedCommentCount),
               totalRootComments: nextRootTotal,
               totalPages: nextTotalPages,
               page: targetPage,
@@ -496,7 +502,7 @@ export function CommentList({
           setComments(nextComments);
           setMeta((current) => ({
             ...current,
-            totalCount: nextTotalCount,
+            totalCount: Math.max(0, current.totalCount - removedCommentCount),
             totalRootComments: nextRootTotal,
             totalPages: nextTotalPages,
             page: targetPage,
