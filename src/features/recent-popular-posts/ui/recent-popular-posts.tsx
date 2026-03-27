@@ -4,11 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import type { Post } from "@entities/post";
 import type { PopularPost } from "@entities/stat";
+import { PopularPostList } from "@features/popular-posts";
 import { cn } from "@shared/lib/style-utils";
 
 interface RecentPopularPostsProps {
   recentPosts: Post[];
   popularPosts: PopularPost[];
+  onItemClick?: () => void;
 }
 
 const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
@@ -27,23 +29,9 @@ function formatDate(value: string | null) {
 export function RecentPopularPosts({
   recentPosts,
   popularPosts,
+  onItemClick,
 }: RecentPopularPostsProps) {
   const [activeTab, setActiveTab] = useState<"recent" | "popular">("recent");
-
-  const items =
-    activeTab === "recent"
-      ? recentPosts.map((p) => ({
-          id: p.id,
-          title: p.title,
-          href: `/posts/${p.slug}`,
-          date: formatDate(p.publishedAt ?? p.createdAt),
-        }))
-      : popularPosts.map((p) => ({
-          id: p.postId,
-          title: p.title,
-          href: `/posts/${p.slug}`,
-          date: `조회 ${p.pageviews.toLocaleString()}`,
-        }));
 
   return (
     <div>
@@ -68,27 +56,36 @@ export function RecentPopularPosts({
         ))}
       </div>
 
-      {/* List */}
-      {items.length === 0 ? (
-        <p className="py-3 text-center text-body-sm text-text-4">
-          글이 없습니다.
-        </p>
+      {activeTab === "recent" ? (
+        recentPosts.length === 0 ? (
+          <p className="py-3 text-center text-body-sm text-text-4">
+            글이 없습니다.
+          </p>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {recentPosts.map((post) => (
+              <li key={post.id}>
+                <Link
+                  href={`/posts/${post.slug}`}
+                  onClick={onItemClick}
+                  className="group flex flex-col gap-0.5 rounded-lg px-1 py-1 transition-colors hover:bg-background-2"
+                >
+                  <span className="line-clamp-2 text-body-sm text-text-1 transition-colors group-hover:text-primary-1">
+                    {post.title}
+                  </span>
+                  <span className="text-body-xs text-text-4">
+                    {formatDate(post.publishedAt ?? post.createdAt)}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )
       ) : (
-        <ul className="flex flex-col gap-2">
-          {items.map((item) => (
-            <li key={item.id}>
-              <Link
-                href={item.href}
-                className="group flex flex-col gap-0.5 rounded-lg px-1 py-1 transition-colors hover:bg-background-2"
-              >
-                <span className="line-clamp-2 text-body-sm text-text-1 transition-colors group-hover:text-primary-1">
-                  {item.title}
-                </span>
-                <span className="text-body-xs text-text-4">{item.date}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <PopularPostList
+          initialPosts={popularPosts}
+          onItemClick={onItemClick}
+        />
       )}
     </div>
   );

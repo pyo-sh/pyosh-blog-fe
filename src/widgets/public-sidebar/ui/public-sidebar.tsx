@@ -56,6 +56,7 @@ export function PublicSidebarContent({
         <RecentPopularPosts
           recentPosts={recentPosts}
           popularPosts={popularPosts}
+          onItemClick={onItemClick}
         />
       </SidebarSection>
 
