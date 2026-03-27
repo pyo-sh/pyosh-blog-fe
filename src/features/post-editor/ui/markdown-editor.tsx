@@ -102,7 +102,6 @@ export function MarkdownEditor({
   className,
 }: MarkdownEditorProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const viewRef = useRef<EditorView | null>(null);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
 
@@ -154,28 +153,25 @@ export function MarkdownEditor({
       parent: containerRef.current,
     });
 
-    viewRef.current = view;
     setEditorView(view);
 
     return () => {
       view.destroy();
-      viewRef.current = null;
       setEditorView(null);
     };
   }, []); // intentionally empty: editor initializes once on mount
 
   // Sync value when changed externally (e.g. form reset, edit-mode hydration)
   useEffect(() => {
-    const view = viewRef.current;
-    if (!view) return;
+    if (!editorView) return;
 
-    const current = view.state.doc.toString();
+    const current = editorView.state.doc.toString();
     if (current === value) return;
 
-    view.dispatch({
+    editorView.dispatch({
       changes: { from: 0, to: current.length, insert: value },
     });
-  }, [value]);
+  }, [editorView, value]);
 
   return (
     <div className={cn("flex flex-col", className)}>

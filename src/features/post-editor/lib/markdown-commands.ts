@@ -2,59 +2,95 @@ import { EditorSelection, type EditorState } from "@codemirror/state";
 import { type EditorView } from "@codemirror/view";
 import { type KeyBinding } from "@codemirror/view";
 
+// Shared toggle-wrap helper used by both toolbar and keyboard handlers.
+function applyToggleWrap(
+  state: EditorState,
+  dispatch: EditorView["dispatch"],
+  before: string,
+  after: string,
+): void {
+  const { from, to } = state.selection.main;
+  const outerFrom = from - before.length;
+  const outerTo = to + after.length;
+
+  const alreadyWrapped =
+    outerFrom >= 0 &&
+    outerTo <= state.doc.length &&
+    state.sliceDoc(outerFrom, from) === before &&
+    state.sliceDoc(to, outerTo) === after;
+
+  if (alreadyWrapped) {
+    dispatch(
+      state.update({
+        changes: [
+          { from: outerFrom, to: from, insert: "" },
+          { from: to, to: outerTo, insert: "" },
+        ],
+        selection: EditorSelection.range(outerFrom, outerFrom + (to - from)),
+      }),
+    );
+
+    return;
+  }
+
+  if (from !== to) {
+    dispatch(
+      state.update({
+        changes: {
+          from,
+          to,
+          insert: `${before}${state.sliceDoc(from, to)}${after}`,
+        },
+        selection: EditorSelection.range(
+          from + before.length,
+          to + before.length,
+        ),
+      }),
+    );
+  } else {
+    dispatch(
+      state.update({
+        changes: { from, insert: `${before}${after}` },
+        selection: EditorSelection.cursor(from + before.length),
+      }),
+    );
+  }
+}
+
 export function wrapSelection(
   view: EditorView,
   before: string,
   after: string,
 ): void {
-  const { from, to } = view.state.selection.main;
-  const selected = view.state.sliceDoc(from, to);
-
-  if (selected) {
-    view.dispatch({
-      changes: { from, to, insert: `${before}${selected}${after}` },
-      selection: EditorSelection.range(
-        from + before.length,
-        to + before.length,
-      ),
-    });
-  } else {
-    view.dispatch({
-      changes: { from, insert: `${before}${after}` },
-      selection: EditorSelection.cursor(from + before.length),
-    });
-  }
-
+  applyToggleWrap(view.state, view.dispatch.bind(view), before, after);
   view.focus();
 }
 
 export function toggleLinePrefix(view: EditorView, prefix: string): void {
   const line = view.state.doc.lineAt(view.state.selection.main.from);
-  const hasPrefix = line.text.startsWith(prefix);
+  const isOrderedList = prefix === "1. ";
+
+  const hasPrefix = isOrderedList
+    ? /^\d+\.\s/.test(line.text)
+    : line.text.startsWith(prefix);
 
   if (hasPrefix) {
+    const removeLen = isOrderedList
+      ? (line.text.match(/^\d+\.\s/)?.[0].length ?? prefix.length)
+      : prefix.length;
+
     view.dispatch({
-      changes: { from: line.from, to: line.from + prefix.length, insert: "" },
+      changes: { from: line.from, to: line.from + removeLen, insert: "" },
     });
   } else {
     const cleaned = line.text
       .replace(/^#{1,6}\s/, "")
       .replace(/^(>\s+|\d+\.\s|-\s)/, "");
+
     view.dispatch({
       changes: { from: line.from, to: line.to, insert: `${prefix}${cleaned}` },
     });
   }
-
-  view.focus();
-}
-
-export function insertAtCursor(view: EditorView, text: string): void {
-  const { from } = view.state.selection.main;
-
-  view.dispatch({
-    changes: { from, insert: text },
-    selection: EditorSelection.cursor(from + text.length),
-  });
 
   view.focus();
 }
@@ -83,6 +119,7 @@ export function insertCodeBlock(view: EditorView): void {
     });
   } else {
     const template = "```\n\n```";
+
     view.dispatch({
       changes: { from, insert: template },
       selection: EditorSelection.cursor(from + 4),
@@ -154,18 +191,7 @@ function wrapBold({
   state: EditorState;
   dispatch: EditorView["dispatch"];
 }): boolean {
-  const { from, to } = state.selection.main;
-  const selected = state.sliceDoc(from, to);
-  dispatch(
-    state.update({
-      changes: selected
-        ? { from, to, insert: `**${selected}**` }
-        : { from, insert: "****" },
-      selection: selected
-        ? EditorSelection.range(from + 2, to + 2)
-        : EditorSelection.cursor(from + 2),
-    }),
-  );
+  applyToggleWrap(state, dispatch, "**", "**");
 
   return true;
 }
@@ -177,18 +203,7 @@ function wrapItalic({
   state: EditorState;
   dispatch: EditorView["dispatch"];
 }): boolean {
-  const { from, to } = state.selection.main;
-  const selected = state.sliceDoc(from, to);
-  dispatch(
-    state.update({
-      changes: selected
-        ? { from, to, insert: `*${selected}*` }
-        : { from, insert: "**" },
-      selection: selected
-        ? EditorSelection.range(from + 1, to + 1)
-        : EditorSelection.cursor(from + 1),
-    }),
-  );
+  applyToggleWrap(state, dispatch, "*", "*");
 
   return true;
 }
