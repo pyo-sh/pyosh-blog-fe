@@ -107,6 +107,7 @@ function getContentAttributes(
 interface MarkdownEditorProps {
   value: string;
   onChange: (value: string) => void;
+  onBlur?: () => void;
   /**
    * Sets the `id` attribute on the CM6 content element. Read once at mount;
    * changes after initial render are ignored.
@@ -126,6 +127,7 @@ interface MarkdownEditorProps {
 export function MarkdownEditor({
   value,
   onChange,
+  onBlur,
   id = "contentMd",
   name = "contentMd",
   labelId,
@@ -179,6 +181,11 @@ export function MarkdownEditor({
         ) {
           onChangeRef.current(update.state.doc.toString());
         }
+      }),
+      EditorView.domEventHandlers({
+        blur: () => {
+          onBlur?.();
+        },
       }),
       contentAttributesCompartmentRef.current.of(
         EditorView.contentAttributes.of(getContentAttributes(id, labelId)),

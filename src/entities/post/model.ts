@@ -30,6 +30,7 @@ export interface Post {
   updatedAt: string;
   deletedAt: string | null;
   summary: string | null;
+  description: string | null;
   isPinned: boolean;
   totalPageviews: number;
   commentCount: number;
@@ -112,7 +113,10 @@ export interface CreatePostBody {
   thumbnailUrl?: string | null;
   visibility?: "public" | "private";
   status?: "draft" | "published" | "archived";
+  commentStatus?: "open" | "locked" | "disabled";
   tags?: string[];
+  summary?: string | null;
+  description?: string | null;
   publishedAt?: string;
 }
 
