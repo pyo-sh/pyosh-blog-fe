@@ -64,7 +64,7 @@ export function CategoryFormModal({
 
   const title = mode === "create" ? "카테고리 추가" : "카테고리 수정";
   const submitLabel = mode === "create" ? "추가" : "저장";
-  const submitingLabel = mode === "create" ? "추가 중" : "저장 중";
+  const submittingLabel = mode === "create" ? "추가 중" : "저장 중";
 
   const handleSubmit = () => {
     if (!values.name.trim()) {
@@ -182,7 +182,7 @@ export function CategoryFormModal({
           disabled={isSubmitting}
           className="inline-flex items-center justify-center rounded-[0.75rem] bg-primary-1 px-4 py-2 text-sm font-medium text-text-1 transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? <><Spinner size="sm" /> {submitingLabel}</> : submitLabel}
+          {isSubmitting ? <><Spinner size="sm" /> {submittingLabel}</> : submitLabel}
         </button>
       </div>
     </Modal>
