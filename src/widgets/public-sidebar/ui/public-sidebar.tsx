@@ -15,7 +15,7 @@ import { TotalViewCount } from "@features/total-view-count";
 
 interface PublicSidebarContentProps {
   recentPosts: Post[];
-  popularPosts: PopularPost[];
+  popularPosts: PopularPost[] | null;
   categories: Category[];
   tags: Tag[];
   totalViews: TotalViewsStats | null;
@@ -93,6 +93,7 @@ export function PublicSidebarContent({
         <RecentPopularPosts
           recentPosts={recentPosts}
           popularPosts={popularPosts}
+          onItemClick={onItemClick}
         />
       </SidebarSection>
 

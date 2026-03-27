@@ -37,6 +37,7 @@ export function PostListItem({ post }: PostListItemProps) {
     ? formatDate(post.contentModifiedAt)
     : null;
   const canUseNextImage = supportsNextImage(post.thumbnailUrl);
+  const formattedPageviews = post.totalPageviews.toLocaleString("ko-KR");
 
   return (
     <Link
@@ -71,19 +72,22 @@ export function PostListItem({ post }: PostListItemProps) {
           {post.isPinned && (
             <PinIcon className="shrink-0 text-primary-1" aria-label="Pinned" />
           )}
-          <span
-            className={cn(
-              "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-              "bg-[color-mix(in_srgb,var(--color-primary-1)_12%,transparent)] text-primary-1",
-            )}
-          >
+          <span className={cn("font-medium text-primary-1")}>
             {post.category.name}
           </span>
+          <span aria-hidden="true">·</span>
           <time dateTime={post.publishedAt ?? post.createdAt}>
             {publishedDate}
           </time>
+          <span aria-hidden="true">·</span>
+          <span aria-label={`조회수 ${formattedPageviews}회`}>
+            조회 {formattedPageviews}
+          </span>
           {modifiedDate && (
-            <span className="text-text-4">수정: {modifiedDate}</span>
+            <>
+              <span aria-hidden="true">·</span>
+              <span className="text-text-4">수정: {modifiedDate}</span>
+            </>
           )}
         </div>
 
@@ -101,10 +105,6 @@ export function PostListItem({ post }: PostListItemProps) {
 
         {/* Stats */}
         <div className="mt-auto flex items-center gap-3 text-xs text-text-4">
-          <span className="flex items-center gap-1">
-            <EyeIcon className="h-3.5 w-3.5" aria-hidden="true" />
-            {post.totalPageviews.toLocaleString()}
-          </span>
           <span className="flex items-center gap-1">
             <CommentIcon className="h-3.5 w-3.5" aria-hidden="true" />
             {post.commentCount.toLocaleString()}
@@ -142,25 +142,6 @@ function PinIcon({ className, ...props }: React.SVGProps<SVGSVGElement>) {
       {...props}
     >
       <path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z" />
-    </svg>
-  );
-}
-
-function EyeIcon({ className, ...props }: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      {...props}
-    >
-      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-      <circle cx="12" cy="12" r="3" />
     </svg>
   );
 }

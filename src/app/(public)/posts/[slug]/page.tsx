@@ -148,8 +148,10 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
                   </>
                 )}
                 <span aria-hidden="true">•</span>
-                <span>
-                  {(post.totalPageviews ?? 0).toLocaleString("ko-KR")} 조회
+                <span
+                  aria-label={`조회수 ${(post.totalPageviews ?? 0).toLocaleString("ko-KR")}회`}
+                >
+                  조회 {(post.totalPageviews ?? 0).toLocaleString("ko-KR")}
                 </span>
               </div>
 
