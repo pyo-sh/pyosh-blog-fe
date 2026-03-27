@@ -23,6 +23,7 @@ export function TagChipInput({ value, onChange }: TagChipInputProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [inputValue, setInputValue] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isFocused, setIsFocused] = useState(false);
 
   const tagsQuery = useQuery({
     queryKey: ["tags"],
@@ -39,12 +40,14 @@ export function TagChipInput({ value, onChange }: TagChipInputProps) {
   );
   const suggestions = useMemo(() => {
     const keyword = inputValue.trim().toLowerCase();
+
+    if (!isFocused || keyword.length === 0) {
+      return [];
+    }
+
     const matches = (tagsQuery.data ?? [])
       .filter((tag) => !selectedNames.has(tag.name.toLowerCase()))
-      .filter(
-        (tag) =>
-          keyword.length === 0 || tag.name.toLowerCase().includes(keyword),
-      )
+      .filter((tag) => tag.name.toLowerCase().includes(keyword))
       .slice(0, 6)
       .map((tag) => ({ label: tag.name, isNew: false }));
 
@@ -58,7 +61,7 @@ export function TagChipInput({ value, onChange }: TagChipInputProps) {
     }
 
     return matches;
-  }, [existingNames, inputValue, selectedNames, tagsQuery.data]);
+  }, [existingNames, inputValue, isFocused, selectedNames, tagsQuery.data]);
 
   useEffect(() => {
     setActiveIndex(0);
@@ -108,7 +111,10 @@ export function TagChipInput({ value, onChange }: TagChipInputProps) {
 
     if (event.key === "Enter") {
       event.preventDefault();
-      commitTag(suggestions[activeIndex]?.label ?? inputValue);
+      const nextValue =
+        suggestions.length > 0 ? suggestions[activeIndex]?.label : inputValue;
+
+      commitTag(nextValue ?? inputValue);
 
       return;
     }
@@ -162,7 +168,11 @@ export function TagChipInput({ value, onChange }: TagChipInputProps) {
             onChange={(event) =>
               setInputValue(event.target.value.slice(0, MAX_TAG_LENGTH))
             }
-            onBlur={() => commitTag(inputValue)}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => {
+              setIsFocused(false);
+              commitTag(inputValue);
+            }}
             onKeyDown={handleKeyDown}
             placeholder={
               value.length === 0 ? "태그 입력 후 Enter" : "태그 추가"
