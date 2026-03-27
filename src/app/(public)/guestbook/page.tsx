@@ -100,7 +100,7 @@ export default async function GuestbookPage({
   } catch {
     return (
       <section className="py-16">
-        <EmptyState message="현재 방명록 기능이 비활성화되어 있습니다." />
+        <EmptyState message="방명록 설정을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요." />
       </section>
     );
   }
