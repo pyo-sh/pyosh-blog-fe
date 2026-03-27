@@ -60,6 +60,7 @@ export default async function TagPostsPage({
 
   const posts = response.data;
   const { meta } = response;
+  const siteUrl = getSiteUrl();
   const breadcrumbItems = [
     { name: "홈", href: "/" },
     { name: "태그", href: "/tags" },
@@ -72,7 +73,9 @@ export default async function TagPostsPage({
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col gap-8 px-4 py-12 md:px-6">
-      <JsonLd data={buildBreadcrumbJsonLd(breadcrumbItems, getSiteUrl())} />
+      {siteUrl ? (
+        <JsonLd data={buildBreadcrumbJsonLd(breadcrumbItems, siteUrl)} />
+      ) : null}
       <header className="rounded-[2rem] border border-border-3 bg-background-2 p-8 md:p-10">
         <p className="text-body-xs uppercase tracking-[0.24em] text-text-4">
           Tag Archive

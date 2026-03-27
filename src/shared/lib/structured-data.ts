@@ -84,8 +84,14 @@ interface StructuredDataPost {
   category: StructuredDataCategory;
 }
 
-export function getSiteUrl(): string {
-  const value = process.env.NEXT_PUBLIC_SITE_URL?.trim() || FALLBACK_SITE_URL;
+export function getSiteUrl(): string | null {
+  const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+
+  if (!configuredSiteUrl) {
+    return process.env.NODE_ENV === "development" ? FALLBACK_SITE_URL : null;
+  }
+
+  const value = configuredSiteUrl;
 
   return value.endsWith("/") ? value.slice(0, -1) : value;
 }

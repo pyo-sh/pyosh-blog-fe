@@ -9,9 +9,11 @@ interface PageProps {
 }
 
 export default function Page({ searchParams }: PageProps) {
+  const siteUrl = getSiteUrl();
+
   return (
     <>
-      <JsonLd data={buildWebSiteJsonLd(getSiteUrl())} />
+      {siteUrl ? <JsonLd data={buildWebSiteJsonLd(siteUrl)} /> : null}
       <HomePage searchParams={searchParams} />
     </>
   );

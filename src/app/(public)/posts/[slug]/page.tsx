@@ -85,33 +85,35 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
     let comments: Comment[] = [];
     let commentError: string | null = null;
     const cookieHeader = await toCookieHeader();
+    const siteUrl = getSiteUrl();
 
-    const [relatedPostsData, fetchedComments] = await Promise.all([
-      post.category
-        ? fetchPosts({ categoryId: post.category.id, limit: 7 }).catch(
-            () => null,
-          )
-        : Promise.resolve(null),
-      fetchComments(post.id, cookieHeader).catch((error: unknown) => {
-        if (error instanceof ApiResponseError && error.statusCode === 404) {
-          throw error;
-        }
-        commentError =
-          "댓글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.";
+    const [relatedPostsData, fetchedComments, categoryAncestors] =
+      await Promise.all([
+        post.category
+          ? fetchPosts({ categoryId: post.category.id, limit: 7 }).catch(
+              () => null,
+            )
+          : Promise.resolve(null),
+        fetchComments(post.id, cookieHeader).catch((error: unknown) => {
+          if (error instanceof ApiResponseError && error.statusCode === 404) {
+            throw error;
+          }
+          commentError =
+            "댓글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.";
 
-        return null;
-      }),
-    ]);
+          return null;
+        }),
+        post.category.ancestors
+          ? Promise.resolve(post.category.ancestors)
+          : fetchCategories()
+              .then((categories) =>
+                getCategoryAncestors(categories, post.category.id),
+              )
+              .catch(() => []),
+      ]);
     if (fetchedComments) comments = fetchedComments;
     const relatedPosts =
       relatedPostsData?.data.filter((p) => p.id !== post.id).slice(0, 5) ?? [];
-    const siteUrl = getSiteUrl();
-    const categoryAncestors =
-      post.category.ancestors ??
-      getCategoryAncestors(
-        await fetchCategories().catch(() => []),
-        post.category.id,
-      );
     const breadcrumbItems = [
       { name: "홈", href: "/" },
       ...categoryAncestors.map((ancestor) => ({
@@ -129,8 +131,12 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
 
     return (
       <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col gap-8 px-4 py-12 md:px-6">
-        <JsonLd data={buildBlogPostingJsonLd(post, siteUrl)} />
-        <JsonLd data={buildBreadcrumbJsonLd(breadcrumbItems, siteUrl)} />
+        {siteUrl ? (
+          <JsonLd data={buildBlogPostingJsonLd(post, siteUrl)} />
+        ) : null}
+        {siteUrl ? (
+          <JsonLd data={buildBreadcrumbJsonLd(breadcrumbItems, siteUrl)} />
+        ) : null}
         <ViewCounter postId={post.id} />
         <article className="overflow-hidden rounded-[2rem] border border-border-3 bg-background-2">
           {post.thumbnailUrl && (
