@@ -48,7 +48,7 @@ export default async function TagsPage() {
           ))}
         </section>
       ) : (
-        <EmptyState message="등록된 태그가 없습니다." />
+        <EmptyState variant="page" message="등록된 태그가 없습니다." />
       )}
     </main>
   );

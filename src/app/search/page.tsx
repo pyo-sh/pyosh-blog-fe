@@ -85,7 +85,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           />
         </>
       ) : (
-        <EmptyState message="검색 결과가 없습니다. 다른 키워드로 다시 시도해 주세요." />
+        <EmptyState variant="page" message="검색 결과가 없습니다. 다른 키워드로 다시 시도해 주세요." />
       )}
     </main>
   );

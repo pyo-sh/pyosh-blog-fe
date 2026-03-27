@@ -91,7 +91,7 @@ export default async function TagPostsPage({
           />
         </>
       ) : (
-        <EmptyState message="아직 이 태그에 연결된 공개 글이 없습니다." />
+        <EmptyState variant="page" message="아직 이 태그에 연결된 공개 글이 없습니다." />
       )}
     </main>
   );

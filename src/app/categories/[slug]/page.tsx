@@ -116,7 +116,7 @@ export default async function CategoryPage({
           )}
         </>
       ) : (
-        <EmptyState message="아직 이 카테고리에 등록된 공개 글이 없습니다." />
+        <EmptyState variant="page" message="아직 이 카테고리에 등록된 공개 글이 없습니다." />
       )}
     </main>
   );

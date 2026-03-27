@@ -331,7 +331,7 @@ export function GuestbookPageContent({
           />
         </>
       ) : (
-        <EmptyState message="아직 등록된 방명록이 없습니다. 첫 메시지를 남겨 보세요." />
+        <EmptyState variant="page" message="아직 등록된 방명록이 없습니다. 첫 메시지를 남겨 보세요." />
       )}
 
       <Modal

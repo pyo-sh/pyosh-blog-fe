@@ -95,7 +95,7 @@ export function PopularPageContent({ days, posts }: PopularPageContentProps) {
           ))}
         </ol>
       ) : (
-        <EmptyState message="아직 집계된 인기 글이 없습니다." />
+        <EmptyState variant="page" message="아직 집계된 인기 글이 없습니다." />
       )}
     </main>
   );

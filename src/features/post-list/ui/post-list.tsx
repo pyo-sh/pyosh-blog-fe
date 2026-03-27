@@ -62,7 +62,7 @@ function PostListInner({
   const regularPosts = posts.filter((p) => !p.isPinned);
 
   if (posts.length === 0) {
-    return <EmptyState message="찾으시는 게시물은 없습니다." />;
+    return <EmptyState variant="page" message="찾으시는 게시물은 없습니다." />;
   }
 
   return (
