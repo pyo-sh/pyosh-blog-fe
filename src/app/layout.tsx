@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
 import "@app-layer/style/index.css";
 import Providers from "@app-layer/provider";
-import { ErrorBoundary } from "@shared/ui/error-boundary";
+import { ErrorBoundaryWithReset } from "@shared/ui/error-boundary";
 
 export const metadata: Metadata = {
   title: "Pyosh Blog",
@@ -53,9 +53,9 @@ export default async function RootLayout({
     <html lang="ko">
       <body data-theme={themeType}>
         <div className="w-full h-full">
-          <ErrorBoundary>
+          <ErrorBoundaryWithReset>
             <Providers initialTheme={themeType}>{children}</Providers>
-          </ErrorBoundary>
+          </ErrorBoundaryWithReset>
         </div>
       </body>
     </html>

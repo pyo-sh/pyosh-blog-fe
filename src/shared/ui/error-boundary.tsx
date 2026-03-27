@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { ErrorContent } from "@shared/ui/libs";
 
 type Props = { children: React.ReactNode };
@@ -12,7 +13,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
     this.state = { hasError: false, retryKey: 0 };
   }
 
-  static getDerivedStateFromError(): Partial<State> {
+  static getDerivedStateFromError(_error: Error): Partial<State> {
     return { hasError: true };
   }
 
@@ -55,4 +56,19 @@ export class ErrorBoundary extends React.Component<Props, State> {
       </React.Fragment>
     );
   }
+}
+
+export function ErrorBoundaryWithReset({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const pathname = usePathname();
+  const ref = useRef<ErrorBoundary>(null);
+
+  useEffect(() => {
+    ref.current?.setState({ hasError: false });
+  }, [pathname]);
+
+  return <ErrorBoundary ref={ref}>{children}</ErrorBoundary>;
 }
