@@ -7,6 +7,7 @@ interface CommentItemProps {
   body: string;
   onReply: (comment: Comment) => void;
   onDelete: (comment: Comment) => void;
+  allowReply?: boolean;
   canDelete?: boolean;
   showReplyToggle?: boolean;
   repliesExpanded?: boolean;
@@ -63,6 +64,7 @@ export function CommentItem({
   body,
   onReply,
   onDelete,
+  allowReply = true,
   canDelete = true,
   showReplyToggle = false,
   repliesExpanded = true,
@@ -70,7 +72,7 @@ export function CommentItem({
   onToggleReplies,
 }: CommentItemProps) {
   const isDeleted = comment.status === "deleted";
-  const canReply = !isDeleted;
+  const canReply = allowReply && !isDeleted;
   const showDelete = canDelete && !isDeleted;
 
   if (isDeleted) {

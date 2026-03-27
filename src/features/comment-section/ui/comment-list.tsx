@@ -171,7 +171,6 @@ export function CommentList({
   const commentRefs = useRef<Record<number, HTMLLIElement | null>>({});
 
   const currentPage = meta.page;
-  const totalPages = meta.totalPages;
   const isLocked = commentStatus === "locked";
 
   const resolvedComments = useMemo(
@@ -267,6 +266,12 @@ export function CommentList({
   async function handleCreate(
     payload: CreateCommentGuestBody | CreateCommentOAuthBody,
   ) {
+    if (isLocked) {
+      setLoadError("댓글이 잠겨 있어 새 댓글이나 답글을 작성할 수 없습니다.");
+
+      return;
+    }
+
     const nextComment = await createComment(postId, payload);
     const isRootComment = nextComment.parentId === null;
 
@@ -280,19 +285,21 @@ export function CommentList({
         1,
         Math.ceil(nextRootTotal / COMMENTS_PER_PAGE),
       );
+      const targetPage = 1;
 
       setMeta((current) => ({
         ...current,
         totalCount: current.totalCount + 1,
         totalRootComments: nextRootTotal,
         totalPages: nextTotalPages,
+        page: targetPage,
       }));
 
-      if (currentPage === totalPages) {
+      if (currentPage === targetPage) {
         setComments((current) => appendComment(current, nextComment));
         setPendingScrollCommentId(nextComment.id);
       } else {
-        await loadPage(nextTotalPages, { scrollToTop: false });
+        await loadPage(targetPage, { scrollToTop: false });
         setPendingScrollCommentId(nextComment.id);
       }
     } else {
@@ -333,6 +340,7 @@ export function CommentList({
     setDeleteError(null);
 
     try {
+      const isRootComment = deleteTarget.parentId === null;
       await deleteComment(deleteTarget.id, {
         ...(deleteTarget.author.type === "oauth" &&
         viewer.type === "oauth" &&
@@ -344,15 +352,23 @@ export function CommentList({
             }),
       });
 
-      setComments((current) => markCommentDeleted(current, deleteTarget.id));
-      setMeta((current) => ({
-        ...current,
-        totalCount: Math.max(0, current.totalCount - 1),
-        totalRootComments:
-          deleteTarget.parentId === null
-            ? Math.max(0, current.totalRootComments - 1)
-            : current.totalRootComments,
-      }));
+      if (isRootComment) {
+        const nextRootTotal = Math.max(0, meta.totalRootComments - 1);
+        const nextTotalPages = Math.max(
+          1,
+          Math.ceil(nextRootTotal / COMMENTS_PER_PAGE),
+        );
+        const nextPage = Math.min(currentPage, nextTotalPages);
+
+        await loadPage(nextPage, { scrollToTop: false });
+      } else {
+        setComments((current) => markCommentDeleted(current, deleteTarget.id));
+        setMeta((current) => ({
+          ...current,
+          totalCount: Math.max(0, current.totalCount - 1),
+        }));
+      }
+
       setLoadError(null);
       setDeleteTarget(null);
       setDeletePassword("");
@@ -366,6 +382,10 @@ export function CommentList({
   }
 
   function handleReply(comment: Comment) {
+    if (isLocked) {
+      return;
+    }
+
     const target = buildReplyTarget(comment);
 
     setExpandedRoots((current) => ({
@@ -442,6 +462,7 @@ export function CommentList({
                     comment={comment}
                     body={getDisplayBody(comment)}
                     onReply={handleReply}
+                    allowReply={!isLocked}
                     canDelete={canDeleteComment(comment)}
                     onDelete={(target) => {
                       setDeleteTarget(target);
@@ -459,7 +480,7 @@ export function CommentList({
                     }
                   />
 
-                  {replyTarget?.commentId === comment.id ? (
+                  {!isLocked && replyTarget?.commentId === comment.id ? (
                     <CommentForm
                       viewerType={viewer.type}
                       profile={profile}
@@ -486,6 +507,7 @@ export function CommentList({
                             comment={reply}
                             body={getDisplayBody(reply)}
                             onReply={handleReply}
+                            allowReply={!isLocked}
                             canDelete={canDeleteComment(reply)}
                             onDelete={(target) => {
                               setDeleteTarget(target);
@@ -494,7 +516,7 @@ export function CommentList({
                             }}
                           />
 
-                          {replyTarget?.commentId === reply.id ? (
+                          {!isLocked && replyTarget?.commentId === reply.id ? (
                             <CommentForm
                               viewerType={viewer.type}
                               profile={profile}
