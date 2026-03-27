@@ -35,7 +35,8 @@ function createCodeHeader(
         await navigator.clipboard.writeText(text);
         if (resetTimer !== null) {
           clearTimeout(resetTimer);
-          timers.splice(timers.indexOf(resetTimer), 1);
+          const idx = timers.indexOf(resetTimer);
+          if (idx !== -1) timers.splice(idx, 1);
         }
         copyBtn.textContent = "복사됨";
         resetTimer = setTimeout(() => {

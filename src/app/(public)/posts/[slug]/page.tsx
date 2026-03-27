@@ -81,7 +81,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
 
     const [relatedPostsData, fetchedComments] = await Promise.all([
       post.category
-        ? fetchPosts({ categoryId: post.category.id, limit: 6 }).catch(
+        ? fetchPosts({ categoryId: post.category.id, limit: 7 }).catch(
             () => null,
           )
         : Promise.resolve(null),
