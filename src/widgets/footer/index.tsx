@@ -1,19 +1,10 @@
-"use client";
-
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { URLS } from "@shared/constant/url";
 import { GithubIcon, MailIcon } from "@shared/ui/icons";
 import { Text } from "@shared/ui/libs";
 
 const Footer: React.FC = () => {
-  const pathname = usePathname();
-
-  if (pathname.startsWith("/manage")) {
-    return null;
-  }
-
   return (
     <footer className="w-full flex flex-col justify-center items-center border-t border-border-3 bg-background-1 py-8">
       <nav aria-label="소셜 링크">
