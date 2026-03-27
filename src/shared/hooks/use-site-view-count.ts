@@ -44,6 +44,7 @@ export function useSiteViewCount(): void {
     siteViewRequestInFlight = true;
     window.sessionStorage.setItem(PENDING_SITE_VIEW_KEY, String(Date.now()));
 
+    // The empty payload tells the backend to record a site-wide visit (postId: null).
     void clientMutate("/api/stats/view", {
       body: JSON.stringify({}),
       keepalive: true,

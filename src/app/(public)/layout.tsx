@@ -24,6 +24,7 @@ export default async function PublicLayout({
 
   return (
     <>
+      {/* Public routes always record a site-wide visit separately from any per-post view. */}
       <SiteViewCounter />
       <PublicLayoutShell
         recentPosts={postsResponse.data}
