@@ -12,11 +12,7 @@ import { ConfirmDialog } from "@shared/ui/confirm-dialog";
 import { EmptyState, Skeleton } from "@shared/ui/libs";
 import { ToggleSwitch } from "@shared/ui/toggle-switch";
 
-export type SortField =
-  | "totalPageviews"
-  | "commentCount"
-  | "created_at"
-  | "published_at";
+export type SortField = NonNullable<FetchAdminPostsParams["sort"]>;
 export type SortOrder = "asc" | "desc";
 
 interface PostTableProps {
@@ -205,6 +201,8 @@ export function PostTable({
     try {
       await onDelete(singleDeleteTarget.id);
       setSingleDeleteTarget(null);
+    } catch {
+      // error already toasted by mutation onError
     } finally {
       setIsDeletePending(false);
     }
@@ -216,6 +214,8 @@ export function PostTable({
     try {
       await onHardDelete(hardDeleteTarget.id);
       setHardDeleteTarget(null);
+    } catch {
+      // error already toasted by mutation onError
     } finally {
       setIsHardDeletePending(false);
     }
