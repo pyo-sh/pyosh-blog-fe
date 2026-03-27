@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { fetchTags } from "@entities/tag";
-import { EmptyState } from "@shared/ui/libs";
+import { EmptyState, ScrollToTop } from "@shared/ui/libs";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +50,7 @@ export default async function TagsPage() {
       ) : (
         <EmptyState variant="page" message="등록된 태그가 없습니다." />
       )}
+      <ScrollToTop />
     </main>
   );
 }

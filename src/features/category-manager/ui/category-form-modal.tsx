@@ -14,7 +14,6 @@ interface CategoryFormModalProps {
   category: Category | null;
   parentOptions: CategoryOption[];
   isSubmitting: boolean;
-  errorMessage: string | null;
   onClose: () => void;
   onSubmit: (values: CategoryFormValues) => void;
 }
@@ -44,7 +43,6 @@ export function CategoryFormModal({
   category,
   parentOptions,
   isSubmitting,
-  errorMessage,
   onClose,
   onSubmit,
 }: CategoryFormModalProps) {
@@ -157,12 +155,6 @@ export function CategoryFormModal({
         {validationError ? (
           <div className="rounded-[1rem] border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-sm text-negative-1">
             {validationError}
-          </div>
-        ) : null}
-
-        {errorMessage ? (
-          <div className="rounded-[1rem] border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-sm text-negative-1">
-            {errorMessage}
           </div>
         ) : null}
       </div>

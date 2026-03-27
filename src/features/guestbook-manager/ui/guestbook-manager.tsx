@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   adminDeleteGuestbookEntry,
   fetchAdminGuestbook,
   type AdminGuestbookItem,
 } from "@entities/guestbook";
-import { ApiResponseError } from "@shared/api";
+import { getErrorMessage } from "@shared/lib/get-error-message";
 import { cn } from "@shared/lib/style-utils";
 import { EmptyState, Skeleton, Spinner } from "@shared/ui/libs";
 
@@ -90,7 +91,6 @@ function ActionButton({
 export function GuestbookManager() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
-  const [actionError, setActionError] = useState<string | null>(null);
 
   const queryKey = getQueryKey(page);
   const { data, isPending, isError, error, refetch, isFetching } = useQuery({
@@ -105,11 +105,10 @@ export function GuestbookManager() {
   const deleteMutation = useMutation({
     mutationFn: adminDeleteGuestbookEntry,
     onSuccess: async () => {
-      setActionError(null);
       await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
     },
     onError: (mutationError) => {
-      setActionError(
+      toast.error(
         getErrorMessage(mutationError, "방명록 삭제에 실패했습니다."),
       );
     },
@@ -174,12 +173,6 @@ export function GuestbookManager() {
               : paginationLabel}
           </p>
         </div>
-
-        {actionError ? (
-          <div className="mt-4 rounded-[1rem] border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-sm text-negative-1">
-            {actionError}
-          </div>
-        ) : null}
 
         <div className="mt-6">
           {isPending ? (
@@ -325,16 +318,4 @@ export function GuestbookManager() {
       </section>
     </div>
   );
-}
-
-function getErrorMessage(error: unknown, fallback: string): string {
-  if (error instanceof ApiResponseError) {
-    return error.message;
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return fallback;
 }

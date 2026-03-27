@@ -14,7 +14,7 @@ import {
   type GuestCommentProfile,
 } from "@features/comment-section";
 import { ApiResponseError } from "@shared/api";
-import { EmptyState, Modal, Pagination, Spinner } from "@shared/ui/libs";
+import { EmptyState, Modal, Pagination, ScrollToTop, Spinner } from "@shared/ui/libs";
 
 interface GuestbookViewer {
   type: "guest" | "oauth";
@@ -334,6 +334,7 @@ export function GuestbookPageContent({
         <EmptyState variant="page" message="아직 등록된 방명록이 없습니다. 첫 메시지를 남겨 보세요." />
       )}
 
+      <ScrollToTop />
       <Modal
         isOpen={deleteTarget !== null}
         onClose={() => {

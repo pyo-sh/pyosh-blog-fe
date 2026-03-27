@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { fetchPosts } from "@entities/post";
 import { fetchTags } from "@entities/tag";
 import { PostCard } from "@features/post-list";
-import { EmptyState, Pagination } from "@shared/ui/libs";
+import { EmptyState, Pagination, ScrollToTop } from "@shared/ui/libs";
 
 interface TagPostsPageProps {
   params: {
@@ -93,6 +93,7 @@ export default async function TagPostsPage({
       ) : (
         <EmptyState variant="page" message="아직 이 태그에 연결된 공개 글이 없습니다." />
       )}
+      <ScrollToTop />
     </main>
   );
 }

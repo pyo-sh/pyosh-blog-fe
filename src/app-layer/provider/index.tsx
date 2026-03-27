@@ -2,6 +2,7 @@
 
 import { PropsWithChildren } from "react";
 import { QueryProvider } from "@app-layer/provider/query-provider";
+import { ToastProvider } from "@app-layer/provider/toast-provider";
 import { ThemeProvider } from "@app-layer/theme";
 import { Footer } from "@widgets/footer";
 import { Header } from "@widgets/header";
@@ -17,6 +18,7 @@ export default function Providers({ children, initialTheme }: IProps) {
         <Header />
         {children}
         <Footer />
+        <ToastProvider />
       </ThemeProvider>
     </QueryProvider>
   );

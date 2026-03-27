@@ -17,7 +17,12 @@ const ThemeButton: React.FC = () => {
 
   if (themeType === "light") {
     return (
-      <Button onClick={toggleTheme} showShadow={false} fill={"weak"}>
+      <Button
+        onClick={toggleTheme}
+        showShadow={false}
+        fill={"weak"}
+        aria-label="다크 모드로 전환"
+      >
         <SunIcon
           className="text-text-1"
           width={ICON_WIDTH}
@@ -29,7 +34,12 @@ const ThemeButton: React.FC = () => {
 
   if (themeType === "dark") {
     return (
-      <Button onClick={toggleTheme} showShadow={false} fill={"weak"}>
+      <Button
+        onClick={toggleTheme}
+        showShadow={false}
+        fill={"weak"}
+        aria-label="라이트 모드로 전환"
+      >
         <NightIcon
           className="text-text-1"
           width={ICON_WIDTH}
