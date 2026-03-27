@@ -100,27 +100,23 @@ export default async function CategoryPage({
       </header>
 
       {posts.length > 0 ? (
-        <>
-          <section className="grid gap-5">
-            {posts.map((post) => (
-              <PostCard key={post.id} post={post} />
-            ))}
-          </section>
-
-          {meta.totalPages > 1 && (
-            <Pagination
-              currentPage={meta.page}
-              totalPages={meta.totalPages}
-              basePath={`/categories/${activeCategory.slug}`}
-            />
-          )}
-        </>
+        <section className="grid gap-5">
+          {posts.map((post) => (
+            <PostCard key={post.id} post={post} />
+          ))}
+        </section>
       ) : (
         <EmptyState
           variant="page"
           message="아직 이 카테고리에 등록된 공개 글이 없습니다."
         />
       )}
+
+      <Pagination
+        currentPage={meta.page}
+        totalPages={meta.totalPages}
+        basePath={`/categories/${activeCategory.slug}`}
+      />
     </main>
   );
 }
