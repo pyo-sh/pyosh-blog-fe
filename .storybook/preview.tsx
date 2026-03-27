@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Preview } from "@storybook/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { withThemeByDataAttribute } from "@storybook/addon-themes";
@@ -9,11 +10,14 @@ initialize({ onUnhandledRequest: "bypass" });
 const preview: Preview = {
   decorators: [
     (Story) => {
-      const queryClient = new QueryClient({
-        defaultOptions: {
-          queries: { retry: false, staleTime: Infinity },
-        },
-      });
+      const [queryClient] = useState(
+        () =>
+          new QueryClient({
+            defaultOptions: {
+              queries: { retry: false, staleTime: Infinity },
+            },
+          }),
+      );
       return (
         <QueryClientProvider client={queryClient}>
           <Story />
