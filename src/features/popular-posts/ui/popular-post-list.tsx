@@ -8,7 +8,7 @@ import { cn } from "@shared/lib/style-utils";
 type PopularPeriod = 7 | 30;
 
 interface PopularPostListProps {
-  initialPosts: PopularPost[];
+  initialPosts: PopularPost[] | null;
   initialDays?: PopularPeriod;
   onItemClick?: () => void;
 }
@@ -30,21 +30,30 @@ export function PopularPostList({
   const [selectedDays, setSelectedDays] = useState<PopularPeriod>(initialDays);
   const [postsByDays, setPostsByDays] = useState<
     Partial<Record<PopularPeriod, PopularPost[]>>
-  >({
-    [initialDays]: initialPosts,
-  });
+  >(() => (initialPosts === null ? {} : { [initialDays]: initialPosts }));
+  const [failedDays, setFailedDays] = useState<
+    Partial<Record<PopularPeriod, true>>
+  >(() => (initialPosts === null ? { [initialDays]: true } : {}));
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(
+    initialPosts === null ? FETCH_ERROR_MESSAGE : null,
+  );
 
-  const posts = postsByDays[selectedDays] ?? [];
+  const posts = postsByDays[selectedDays];
 
   async function handlePeriodChange(nextDays: PopularPeriod) {
-    if (nextDays === selectedDays || isLoading) {
+    const isRetryingFailedSelection =
+      nextDays === selectedDays && failedDays[nextDays];
+
+    if (
+      (nextDays === selectedDays && !isRetryingFailedSelection) ||
+      isLoading
+    ) {
       return;
     }
 
     const cachedPosts = postsByDays[nextDays];
-    if (cachedPosts) {
+    if (cachedPosts !== undefined) {
       setSelectedDays(nextDays);
       setErrorMessage(null);
 
@@ -60,8 +69,15 @@ export function PopularPostList({
         POPULAR_POST_LIMIT,
       );
       setPostsByDays((current) => ({ ...current, [nextDays]: nextPosts }));
+      setFailedDays((current) => {
+        const next = { ...current };
+        delete next[nextDays];
+
+        return next;
+      });
       setSelectedDays(nextDays);
     } catch {
+      setFailedDays((current) => ({ ...current, [nextDays]: true }));
       setErrorMessage(FETCH_ERROR_MESSAGE);
     } finally {
       setIsLoading(false);
@@ -106,7 +122,7 @@ export function PopularPostList({
         </p>
       ) : null}
 
-      {posts.length === 0 ? (
+      {posts === undefined ? null : posts.length === 0 ? (
         <p className="py-3 text-center text-body-sm text-text-4">
           아직 집계된 인기 글이 없습니다.
         </p>

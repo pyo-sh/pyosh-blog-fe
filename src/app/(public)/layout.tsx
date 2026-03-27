@@ -15,7 +15,7 @@ export default async function PublicLayout({
   const [postsResponse, popularPosts, categories, tags, totalViews] =
     await Promise.all([
       fetchPosts({ limit: SIDEBAR_POST_LIMIT }).catch(() => ({ data: [] })),
-      fetchPopularPosts(7, undefined, SIDEBAR_POST_LIMIT).catch(() => []),
+      fetchPopularPosts(7, undefined, SIDEBAR_POST_LIMIT).catch(() => null),
       fetchCategories().catch(() => []),
       fetchTags().catch(() => []),
       fetchTotalViews().catch(() => null),

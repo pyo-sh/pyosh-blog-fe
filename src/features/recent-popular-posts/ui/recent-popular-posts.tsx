@@ -9,7 +9,7 @@ import { cn } from "@shared/lib/style-utils";
 
 interface RecentPopularPostsProps {
   recentPosts: Post[];
-  popularPosts: PopularPost[];
+  popularPosts: PopularPost[] | null;
   onItemClick?: () => void;
 }
 

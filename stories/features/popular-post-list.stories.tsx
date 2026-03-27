@@ -97,6 +97,12 @@ export const Empty: Story = {
   },
 };
 
+export const InitialLoadError: Story = {
+  args: {
+    initialPosts: null,
+  },
+};
+
 export const DarkMode: Story = {
   parameters: {
     themes: { themeOverride: "dark" },
