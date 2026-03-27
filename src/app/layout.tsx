@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
 import "@app-layer/style/index.css";
 import Providers from "@app-layer/provider";
-import { SiteViewCounter } from "@features/site-view-counter";
 import { ErrorBoundaryWithReset } from "@shared/ui/error-boundary";
 
 export const metadata: Metadata = {
@@ -55,10 +54,7 @@ export default async function RootLayout({
       <body data-theme={themeType}>
         <div className="w-full h-full">
           <ErrorBoundaryWithReset>
-            <Providers initialTheme={themeType}>
-              <SiteViewCounter />
-              {children}
-            </Providers>
+            <Providers initialTheme={themeType}>{children}</Providers>
           </ErrorBoundaryWithReset>
         </div>
       </body>
