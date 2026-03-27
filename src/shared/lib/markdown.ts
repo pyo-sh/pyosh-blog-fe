@@ -18,6 +18,8 @@ export interface TocItem {
   level: 1 | 2 | 3;
 }
 
+const HEADING_ID_PREFIX = "user-content-";
+
 // <img> 노드에 loading="lazy" decoding="async" 속성 추가
 function rehypeLazyImages() {
   return (tree: Root) => {
@@ -99,7 +101,7 @@ export function extractHeadings(markdown: string): TocItem[] {
     }
 
     headings.push({
-      id: slugger.slug(text),
+      id: `${HEADING_ID_PREFIX}${slugger.slug(text)}`,
       text,
       level: heading.depth as TocItem["level"],
     });
