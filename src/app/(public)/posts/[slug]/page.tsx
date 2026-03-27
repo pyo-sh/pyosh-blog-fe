@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
@@ -26,6 +27,8 @@ interface CurrentViewer {
   id?: number;
 }
 
+const DESCRIPTION_LIMIT = 300;
+
 const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
   year: "numeric",
   month: "2-digit",
@@ -34,6 +37,27 @@ const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
 
 function formatDate(value: string | null, fallback: string): string {
   return dateFormatter.format(new Date(value ?? fallback));
+}
+
+function createDescription(contentMd: string): string {
+  const plainText = contentMd
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/!\[([^\]]*)\]\([^)]+\)/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/^\s*[-*+]\s+/gm, "")
+    .replace(/^\s*\d+\.\s+/gm, "")
+    .replace(/[>*_~]/g, "")
+    .replace(/\n+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (plainText.length <= DESCRIPTION_LIMIT) {
+    return plainText;
+  }
+
+  return `${plainText.slice(0, DESCRIPTION_LIMIT - 3).trimEnd()}...`;
 }
 
 async function toCookieHeader() {
@@ -70,6 +94,36 @@ async function getCurrentViewer(): Promise<CurrentViewer> {
   }
 
   return { type: "guest" };
+}
+
+export async function generateMetadata({
+  params,
+}: PostDetailPageProps): Promise<Metadata> {
+  try {
+    const { post } = await fetchPostBySlug(params.slug);
+    const description =
+      post.description?.trim() ||
+      post.summary?.trim() ||
+      createDescription(post.contentMd);
+
+    return {
+      title: post.title,
+      description,
+      openGraph: {
+        title: post.title,
+        description,
+        images: post.thumbnailUrl ? [{ url: post.thumbnailUrl }] : undefined,
+      },
+      twitter: {
+        card: post.thumbnailUrl ? "summary_large_image" : "summary",
+        title: post.title,
+        description,
+        images: post.thumbnailUrl ? [post.thumbnailUrl] : undefined,
+      },
+    };
+  } catch {
+    return {};
+  }
 }
 
 export default async function PostDetailPage({ params }: PostDetailPageProps) {
