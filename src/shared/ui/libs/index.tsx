@@ -10,3 +10,4 @@ export { Pagination } from "./pagination";
 export { Skeleton } from "./skeleton";
 export { Spinner } from "./spinner";
 export { Text } from "./text";
+export { SlideInPanel } from "./slide-in-panel";

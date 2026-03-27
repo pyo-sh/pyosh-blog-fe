@@ -1,9 +1,19 @@
 @theme {
   --animate-shine: shine 3s linear infinite;
+  --animate-slide-in-right: slide-in-right 0.3s ease-out;
 }
 
 @keyframes shine {
   to {
     background-position-x: -400%;
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
   }
 }
