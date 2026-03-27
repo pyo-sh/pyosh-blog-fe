@@ -52,12 +52,7 @@ export function PostStatusSection() {
     {
       label: "전체",
       href: "/manage/posts",
-      getValue: () =>
-        data
-          ? data.postsByStatus.draft +
-            data.postsByStatus.published +
-            data.postsByStatus.archived
-          : 0,
+      getValue: () => data?.totalPosts ?? 0,
     },
     {
       label: "초안",
