@@ -414,17 +414,17 @@ export function CommentList({
         );
         const targetPage = Math.min(currentPage, nextTotalPages);
 
-        setComments(nextComments);
-        setMeta((current) => ({
-          ...current,
-          totalCount: Math.max(0, current.totalCount - 1),
-          totalRootComments: nextRootTotal,
-          totalPages: nextTotalPages,
-          page: targetPage,
-        }));
-
-        if (removedRootCount > 0 && currentPage > nextTotalPages) {
+        if (removedRootCount > 0) {
           await loadPage(targetPage, { scrollToTop: false });
+        } else {
+          setComments(nextComments);
+          setMeta((current) => ({
+            ...current,
+            totalCount: Math.max(0, current.totalCount - 1),
+            totalRootComments: nextRootTotal,
+            totalPages: nextTotalPages,
+            page: targetPage,
+          }));
         }
       }
 
