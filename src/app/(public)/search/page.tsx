@@ -1,12 +1,15 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { fetchPosts } from "@entities/post";
-import { PostCard } from "@features/post-list";
+import type { SearchFilter } from "@entities/post";
+import { SEARCH_FILTERS, fetchPosts } from "@entities/post";
+import { SearchFilterDropdown, SearchResultItem } from "@features/search";
 import { EmptyState, Pagination, ScrollToTop } from "@shared/ui/libs";
 
 interface SearchPageProps {
   searchParams?: {
     q?: string | string[];
     page?: string | string[];
+    filter?: string | string[];
   };
 }
 
@@ -28,14 +31,28 @@ function parsePage(value?: string): number {
   return page;
 }
 
+function parseFilter(value?: string): SearchFilter {
+  if (value && (SEARCH_FILTERS as string[]).includes(value)) {
+    return value as SearchFilter;
+  }
+
+  return "title_content";
+}
+
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const rawQuery = getSingleValue(searchParams?.q);
   const query = rawQuery?.trim() ?? "";
+  const filter = parseFilter(getSingleValue(searchParams?.filter));
 
   if (!query) {
     return (
       <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col gap-8 px-4 py-12 md:px-6">
         <section className="rounded-[2rem] border border-border-3 bg-background-2 p-8 md:p-10">
+          <div className="mb-6 flex flex-wrap items-center gap-3">
+            <Suspense>
+              <SearchFilterDropdown currentFilter={filter} query="" />
+            </Suspense>
+          </div>
           <p className="text-body-xs uppercase tracking-[0.24em] text-text-4">
             Search
           </p>
@@ -51,29 +68,35 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   }
 
   const page = parsePage(getSingleValue(searchParams?.page));
-  const response = await fetchPosts({ q: query, page });
+  const response = await fetchPosts({ q: query, filter, page });
   const posts = response.data;
   const { meta } = response;
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col gap-8 px-4 py-12 md:px-6">
+      {/* Filter + search header */}
       <header className="rounded-[2rem] border border-border-3 bg-background-2 p-8 md:p-10">
+        <div className="mb-6 flex flex-wrap items-center gap-3">
+          <Suspense>
+            <SearchFilterDropdown currentFilter={filter} query={query} />
+          </Suspense>
+        </div>
         <p className="text-body-xs uppercase tracking-[0.24em] text-text-4">
           Search Results
         </p>
         <h1 className="mt-3 text-heading-md text-text-1">
-          &quot;{query}&quot; 검색 결과
+          <span className="font-medium text-primary-1">
+            &quot;{query}&quot;
+          </span>{" "}
+          <span className="text-text-3">검색 결과 ({meta.total}건)</span>
         </h1>
-        <p className="mt-4 text-body-md text-text-3">
-          총 {meta.total}개의 글을 찾았습니다.
-        </p>
       </header>
 
       {posts.length > 0 ? (
         <>
-          <section className="grid gap-5">
+          <section className="flex flex-col gap-5">
             {posts.map((post) => (
-              <PostCard key={post.id} post={post} />
+              <SearchResultItem key={post.id} post={post} query={query} />
             ))}
           </section>
 
@@ -81,7 +104,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             currentPage={meta.page}
             totalPages={meta.totalPages}
             basePath="/search"
-            queryParams={{ q: query }}
+            queryParams={{ q: query, filter }}
           />
         </>
       ) : (

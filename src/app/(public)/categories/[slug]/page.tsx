@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import type { Category } from "@entities/category";
 import { fetchCategories } from "@entities/category";
 import { fetchPosts } from "@entities/post";
-import { PostCard } from "@features/post-list";
+import { PostListItem } from "@features/post-list";
 import { EmptyState, Pagination } from "@shared/ui/libs";
 import { CategoryNav } from "@widgets/category-nav";
 
@@ -100,27 +100,23 @@ export default async function CategoryPage({
       </header>
 
       {posts.length > 0 ? (
-        <>
-          <section className="grid gap-5">
-            {posts.map((post) => (
-              <PostCard key={post.id} post={post} />
-            ))}
-          </section>
-
-          {meta.totalPages > 1 && (
-            <Pagination
-              currentPage={meta.page}
-              totalPages={meta.totalPages}
-              basePath={`/categories/${activeCategory.slug}`}
-            />
-          )}
-        </>
+        <section className="grid gap-5">
+          {posts.map((post) => (
+            <PostListItem key={post.id} post={post} />
+          ))}
+        </section>
       ) : (
         <EmptyState
           variant="page"
           message="아직 이 카테고리에 등록된 공개 글이 없습니다."
         />
       )}
+
+      <Pagination
+        currentPage={meta.page}
+        totalPages={meta.totalPages}
+        basePath={`/categories/${activeCategory.slug}`}
+      />
     </main>
   );
 }

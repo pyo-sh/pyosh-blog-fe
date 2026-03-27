@@ -61,30 +61,30 @@ function PostListInner({
   const pinnedPosts = posts.filter((p) => p.isPinned);
   const regularPosts = posts.filter((p) => !p.isPinned);
 
-  if (posts.length === 0) {
-    return <EmptyState variant="page" message="찾으시는 게시물은 없습니다." />;
-  }
-
   return (
     <>
-      <section className="grid gap-3">
-        {/* Pinned posts */}
-        {pinnedPosts.map((post) => (
-          <PostListItem key={post.id} post={post} />
-        ))}
+      {posts.length === 0 ? (
+        <EmptyState variant="page" message="찾으시는 게시물은 없습니다." />
+      ) : (
+        <section className="grid gap-3">
+          {/* Pinned posts */}
+          {pinnedPosts.map((post) => (
+            <PostListItem key={post.id} post={post} />
+          ))}
 
-        {/* Divider between pinned and regular */}
-        {pinnedPosts.length > 0 && regularPosts.length > 0 && (
-          <hr className="border-border-3" />
-        )}
+          {/* Divider between pinned and regular */}
+          {pinnedPosts.length > 0 && regularPosts.length > 0 && (
+            <hr className="border-border-3" />
+          )}
 
-        {/* Regular posts */}
-        {regularPosts.map((post) => (
-          <PostListItem key={post.id} post={post} />
-        ))}
-      </section>
+          {/* Regular posts */}
+          {regularPosts.map((post) => (
+            <PostListItem key={post.id} post={post} />
+          ))}
+        </section>
+      )}
 
-      {meta && meta.totalPages > 1 && (
+      {meta && (
         <Pagination
           currentPage={page}
           totalPages={meta.totalPages}

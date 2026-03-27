@@ -4,13 +4,28 @@ const PUBLIC_API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5500";
 const INTERNAL_API_URL = process.env.API_URL ?? PUBLIC_API_URL;
 
-async function handleResponse<T>(response: Response): Promise<T> {
+async function handleResponse<T>(
+  response: Response,
+  context?: { url: string; method: string },
+): Promise<T> {
   if (!response.ok) {
     const fallback: ApiError = {
       statusCode: response.status,
       message: response.statusText,
     };
     const error: ApiError = await response.json().catch(() => fallback);
+    const logPayload = {
+      url: context?.url,
+      method: context?.method,
+      status: response.status,
+      error: error.message,
+      timestamp: new Date().toISOString(),
+    };
+    if (response.status >= 500) {
+      console.error("[API Error]", logPayload);
+    } else {
+      console.warn("[API Warning]", logPayload);
+    }
     throw new ApiResponseError(error);
   }
 
@@ -23,6 +38,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
 
 /**
  * Server Components (RSC) 용 fetch. 쿠키를 headers에서 직접 전달.
+ * context는 전달하지 않음 — 서버 사이드 에러 로깅은 이 이슈 범위 밖 (클라이언트 전용).
  */
 export async function serverFetch<T>(
   path: string,
@@ -74,5 +90,8 @@ export async function clientFetch<T>(
     });
   }
 
-  return handleResponse<T>(response);
+  return handleResponse<T>(response, {
+    url: `${PUBLIC_API_URL}${path}`,
+    method: options.method ?? "GET",
+  });
 }
