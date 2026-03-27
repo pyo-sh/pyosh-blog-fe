@@ -293,6 +293,7 @@ export default function ManagePostsPage() {
       } else {
         toast.error(getErrorMessage(err, "일괄 삭제에 실패했습니다."));
       }
+      throw err;
     }
   }
 
@@ -303,6 +304,7 @@ export default function ManagePostsPage() {
       toast.success(`${ids.length}개 글이 복원되었습니다.`);
     } catch (err) {
       toast.error(getErrorMessage(err, "일괄 복원에 실패했습니다."));
+      throw err;
     }
   }
 
@@ -321,6 +323,7 @@ export default function ManagePostsPage() {
       } else {
         toast.error(getErrorMessage(err, "일괄 영구 삭제에 실패했습니다."));
       }
+      throw err;
     }
   }
 
@@ -336,7 +339,7 @@ export default function ManagePostsPage() {
         categoryId,
         commentStatus,
       });
-      await queryClient.invalidateQueries({ queryKey: ["admin-posts"] });
+      await invalidatePostQueries();
       toast.success(`${ids.length}개 글이 업데이트되었습니다.`);
     } catch (err) {
       const apiErr = err as { details?: BulkPostErrorDetail[] };
@@ -348,6 +351,7 @@ export default function ManagePostsPage() {
       } else {
         toast.error(getErrorMessage(err, "일괄 업데이트에 실패했습니다."));
       }
+      throw err;
     }
   }
 

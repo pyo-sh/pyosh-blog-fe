@@ -89,6 +89,8 @@ export function BulkActions({
       setCommentStatus(undefined);
       setShowApplyDialog(false);
       onClearSelection();
+    } catch {
+      // Parent already toasted; keep dialog open so user can retry.
     } finally {
       setIsPending(false);
     }
@@ -100,6 +102,8 @@ export function BulkActions({
       await onBulkDelete(selectedIds);
       setShowDeleteDialog(false);
       onClearSelection();
+    } catch {
+      // Parent already toasted; keep dialog open so user can retry.
     } finally {
       setIsPending(false);
     }
@@ -111,6 +115,8 @@ export function BulkActions({
       await onBulkRestore(selectedIds);
       setShowRestoreDialog(false);
       onClearSelection();
+    } catch {
+      // Parent already toasted; keep dialog open so user can retry.
     } finally {
       setIsPending(false);
     }
@@ -122,6 +128,8 @@ export function BulkActions({
       await onBulkHardDelete(selectedIds);
       setShowHardDeleteDialog(false);
       onClearSelection();
+    } catch {
+      // Parent already toasted; keep dialog open so user can retry.
     } finally {
       setIsPending(false);
     }

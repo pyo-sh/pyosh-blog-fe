@@ -12,6 +12,7 @@ interface PostPreviewPageProps {
 }
 
 async function toCookieHeader(): Promise<string | undefined> {
+  // await is a no-op in Next.js 14 but required in Next.js 15 where cookies() returns a Promise.
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get("sessionId");
 
@@ -19,7 +20,7 @@ async function toCookieHeader(): Promise<string | undefined> {
     return undefined;
   }
 
-  return `${sessionCookie.name}=${sessionCookie.value}`;
+  return `${sessionCookie.name}=${encodeURIComponent(sessionCookie.value)}`;
 }
 
 export default async function PostPreviewPage({
