@@ -23,7 +23,7 @@ export function setCookie(
     return false;
   }
 
-  let cookieString = `${key}=${value}; path=/; SameSite=Lax`;
+  let cookieString = `${key}=${value}; path=/; SameSite=Lax; Secure`;
   if (options?.maxAge !== undefined) {
     cookieString += `; Max-Age=${options.maxAge}`;
   }
