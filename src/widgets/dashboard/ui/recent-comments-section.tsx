@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import {
@@ -62,6 +63,7 @@ function SecretIcon() {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
+      role="img"
       aria-label="비밀 댓글"
       className="inline-block text-text-4"
     >
@@ -141,6 +143,7 @@ const QUERY_KEY = ["dashboard", "recentComments"] as const;
 
 export function RecentCommentsSection() {
   const queryClient = useQueryClient();
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: QUERY_KEY,
@@ -150,10 +153,11 @@ export function RecentCommentsSection() {
   const deleteMutation = useMutation({
     mutationFn: adminDeleteComment,
     onSuccess: async () => {
+      setDeleteError(null);
       await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
     },
     onError: (err) => {
-      console.error(getErrorMessage(err, "댓글 삭제에 실패했습니다."));
+      setDeleteError(getErrorMessage(err, "댓글 삭제에 실패했습니다."));
     },
   });
 
@@ -230,6 +234,10 @@ export function RecentCommentsSection() {
           )
         ) : null}
       </div>
+
+      {deleteError ? (
+        <p className="mt-3 text-sm text-negative-1">{deleteError}</p>
+      ) : null}
 
       <div className="mt-5 flex justify-end border-t border-border-3 pt-4">
         <Link

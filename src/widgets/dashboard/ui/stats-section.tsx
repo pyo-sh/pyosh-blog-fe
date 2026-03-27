@@ -54,19 +54,16 @@ function StatsError({ onRetry }: { onRetry: () => void }) {
 const STAT_CARDS = [
   {
     key: "todayPageviews" as const,
-    label: "오늘 조회수",
     description: "오늘 발생한 페이지 조회수",
     sublabel: "오늘",
   },
   {
     key: "weekPageviews" as const,
-    label: "주간 조회수",
     description: "최근 7일 누적 페이지 조회수",
     sublabel: "최근 7일",
   },
   {
     key: "monthPageviews" as const,
-    label: "월간 조회수",
     description: "최근 30일 누적 페이지 조회수",
     sublabel: "최근 30일",
   },
