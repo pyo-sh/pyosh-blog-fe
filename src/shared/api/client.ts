@@ -44,6 +44,7 @@ export async function serverFetch<T>(
 
 /**
  * Client Components 용 fetch. 브라우저 쿠키를 자동으로 포함.
+ * 403 응답 시 Toast 미구현 fallback: alert + /dashboard/login 리다이렉트.
  */
 export async function clientFetch<T>(
   path: string,
@@ -59,6 +60,15 @@ export async function clientFetch<T>(
     headers,
     credentials: "include",
   });
+
+  if (response.status === 403) {
+    window.alert("접근 권한이 없습니다");
+    window.location.href = "/dashboard/login";
+    throw new ApiResponseError({
+      statusCode: 403,
+      message: "접근 권한이 없습니다",
+    });
+  }
 
   return handleResponse<T>(response);
 }
