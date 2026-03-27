@@ -8,7 +8,7 @@ import { mockPosts, mockMeta } from "../../mocks/data/posts";
 import { PostList } from "@features/post-list";
 
 const meta: Meta<typeof PostList> = {
-  title: "Widgets/Admin/PostList",
+  title: "Features/PostList",
   component: PostList,
   parameters: {
     layout: "padded",

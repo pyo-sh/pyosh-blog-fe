@@ -42,20 +42,20 @@ export const handlers = [
     return HttpResponse.json({ data: mockComments });
   }),
   http.get("/api/admin/comments", () => {
-    return HttpResponse.json({ data: mockComments, meta: mockMeta });
+    return HttpResponse.json({ data: mockComments, meta: { total: mockComments.length, page: 1, limit: 10, totalPages: 1 } });
   }),
 
   // Guestbook
   http.get("/api/guestbook", () => {
-    return HttpResponse.json({ data: mockGuestbookEntries, meta: mockMeta });
+    return HttpResponse.json({ data: mockGuestbookEntries, meta: { total: mockGuestbookEntries.length, page: 1, limit: 10, totalPages: 1 } });
   }),
   http.get("/api/admin/guestbook", () => {
-    return HttpResponse.json({ data: mockGuestbookEntries, meta: mockMeta });
+    return HttpResponse.json({ data: mockGuestbookEntries, meta: { total: mockGuestbookEntries.length, page: 1, limit: 10, totalPages: 1 } });
   }),
 
   // Assets
   http.get("/api/admin/assets", () => {
-    return HttpResponse.json({ data: mockAssets, meta: mockMeta });
+    return HttpResponse.json({ data: mockAssets, meta: { total: mockAssets.length, page: 1, limit: 10, totalPages: 1 } });
   }),
 
   // Stats
