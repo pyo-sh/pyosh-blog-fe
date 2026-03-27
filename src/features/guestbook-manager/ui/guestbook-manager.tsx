@@ -23,7 +23,7 @@ import {
   updateGuestbookSettings,
 } from "@entities/guestbook";
 import { getErrorMessage } from "@shared/lib/get-error-message";
-import { EmptyState, Skeleton, Spinner } from "@shared/ui/libs";
+import { Skeleton, Spinner } from "@shared/ui/libs";
 import { ToggleSwitch } from "@shared/ui/toggle-switch";
 
 const PAGE_SIZE = 10;

@@ -165,13 +165,15 @@ export async function adminBulkPatchGuestbookEntries(
 export async function fetchGuestbookSettings(
   cookieHeader?: string,
 ): Promise<GuestbookSettingsResponse> {
-  return cookieHeader
-    ? serverFetch<GuestbookSettingsResponse>(
-        "/api/settings/guestbook",
-        {},
-        cookieHeader,
-      )
-    : clientFetch<GuestbookSettingsResponse>("/api/settings/guestbook");
+  if (typeof window === "undefined") {
+    return serverFetch<GuestbookSettingsResponse>(
+      "/api/settings/guestbook",
+      {},
+      cookieHeader,
+    );
+  }
+
+  return clientFetch<GuestbookSettingsResponse>("/api/settings/guestbook");
 }
 
 export async function updateGuestbookSettings(
