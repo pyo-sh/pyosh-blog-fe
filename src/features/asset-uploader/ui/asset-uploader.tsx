@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { AssetGrid } from "./asset-grid";
 import { type PendingUploadFile, UploadZone } from "./upload-zone";
 import {
@@ -10,7 +11,7 @@ import {
   uploadAssets,
   type Asset,
 } from "@entities/asset";
-import { ApiResponseError } from "@shared/api";
+import { getErrorMessage } from "@shared/lib/get-error-message";
 import { Modal } from "@shared/ui/libs";
 
 const PAGE_SIZE = 18;
@@ -31,7 +32,6 @@ export function AssetUploader() {
   const [pendingFiles, setPendingFiles] = useState<PendingUploadFile[]>([]);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [deleteTargetIds, setDeleteTargetIds] = useState<number[]>([]);
-  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [copiedState, setCopiedState] = useState<{
     id: number;
@@ -46,8 +46,7 @@ export function AssetUploader() {
   const uploadMutation = useMutation({
     mutationFn: (files: File[]) => uploadAssets(files),
     onSuccess: async () => {
-      setErrorMessage(null);
-      setFeedbackMessage(
+      toast.success(
         "업로드가 완료되었습니다. 최신 에셋을 맨 위에서 확인하세요.",
       );
       setPage(1);
@@ -55,7 +54,7 @@ export function AssetUploader() {
       await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
     },
     onError: (error) => {
-      setErrorMessage(getErrorMessage(error, "에셋 업로드에 실패했습니다."));
+      toast.error(getErrorMessage(error, "에셋 업로드에 실패했습니다."));
     },
   });
 
@@ -78,16 +77,16 @@ export function AssetUploader() {
       return { deletedIds, failedIds };
     },
     onSuccess: async ({ deletedIds, failedIds }) => {
-      setErrorMessage(
-        failedIds.length > 0
-          ? failedIds.length === 1
+      if (failedIds.length > 0) {
+        toast.error(
+          failedIds.length === 1
             ? "일부 삭제에 실패했습니다. 목록을 새로고침했습니다."
-            : `${failedIds.length}개 에셋 삭제에 실패했습니다. 목록을 새로고침했습니다.`
-          : null,
-      );
+            : `${failedIds.length}개 에셋 삭제에 실패했습니다. 목록을 새로고침했습니다.`,
+        );
+      }
 
       if (deletedIds.length > 0) {
-        setFeedbackMessage(
+        toast.success(
           deletedIds.length === 1
             ? "에셋을 삭제했습니다."
             : `${deletedIds.length}개의 에셋을 삭제했습니다.`,
@@ -101,7 +100,7 @@ export function AssetUploader() {
       await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
     },
     onError: (error) => {
-      setErrorMessage(getErrorMessage(error, "에셋 삭제에 실패했습니다."));
+      toast.error(getErrorMessage(error, "에셋 삭제에 실패했습니다."));
     },
   });
 
@@ -119,18 +118,6 @@ export function AssetUploader() {
       current.filter((id) => assets.some((asset) => asset.id === id)),
     );
   }, [assets]);
-
-  useEffect(() => {
-    if (!feedbackMessage) {
-      return;
-    }
-
-    const timeout = window.setTimeout(() => {
-      setFeedbackMessage(null);
-    }, 3000);
-
-    return () => window.clearTimeout(timeout);
-  }, [feedbackMessage]);
 
   useEffect(() => {
     if (!copiedState) {
@@ -255,7 +242,7 @@ export function AssetUploader() {
     try {
       await navigator.clipboard.writeText(text);
       setCopiedState({ id: asset.id, type });
-      setFeedbackMessage(
+      toast.info(
         type === "url" ? "URL을 복사했습니다." : "마크다운을 복사했습니다.",
       );
     } catch {
@@ -285,12 +272,6 @@ export function AssetUploader() {
             : paginationLabel}
         </div>
       </header>
-
-      {feedbackMessage ? (
-        <div className="rounded-[1rem] border border-primary-1/20 bg-primary-1/10 px-4 py-3 text-sm text-primary-1">
-          {feedbackMessage}
-        </div>
-      ) : null}
 
       {errorMessage ? (
         <div className="rounded-[1rem] border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-sm text-negative-1">
@@ -520,16 +501,4 @@ function getFilename(url: string): string {
   } catch {
     return segment;
   }
-}
-
-function getErrorMessage(error: unknown, fallback: string): string {
-  if (error instanceof ApiResponseError) {
-    return error.message;
-  }
-
-  if (error instanceof Error && error.message) {
-    return error.message;
-  }
-
-  return fallback;
 }

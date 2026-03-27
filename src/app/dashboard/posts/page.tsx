@@ -3,13 +3,14 @@
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
+import { toast } from "sonner";
 import {
   deletePost,
   fetchAdminPosts,
   restorePost,
   type Post,
 } from "@entities/post";
-import { ApiResponseError } from "@shared/api";
+import { getErrorMessage } from "@shared/lib/get-error-message";
 import { cn } from "@shared/lib/style-utils";
 
 const PAGE_SIZE = 10;
@@ -135,7 +136,6 @@ export default function DashboardPostsPage() {
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState<AdminPostStatusFilter>("all");
   const [includeDeleted, setIncludeDeleted] = useState(false);
-  const [actionError, setActionError] = useState<string | null>(null);
 
   const queryKey = getQueryKey(page, status, includeDeleted);
 
@@ -153,22 +153,20 @@ export default function DashboardPostsPage() {
   const deleteMutation = useMutation({
     mutationFn: deletePost,
     onSuccess: async () => {
-      setActionError(null);
       await queryClient.invalidateQueries({ queryKey: ["admin-posts"] });
     },
     onError: (mutationError) => {
-      setActionError(getErrorMessage(mutationError, "글 삭제에 실패했습니다."));
+      toast.error(getErrorMessage(mutationError, "글 삭제에 실패했습니다."));
     },
   });
 
   const restoreMutation = useMutation({
     mutationFn: restorePost,
     onSuccess: async () => {
-      setActionError(null);
       await queryClient.invalidateQueries({ queryKey: ["admin-posts"] });
     },
     onError: (mutationError) => {
-      setActionError(getErrorMessage(mutationError, "글 복원에 실패했습니다."));
+      toast.error(getErrorMessage(mutationError, "글 복원에 실패했습니다."));
     },
   });
 
@@ -260,12 +258,6 @@ export default function DashboardPostsPage() {
               : paginationLabel}
           </p>
         </div>
-
-        {actionError ? (
-          <div className="mt-4 rounded-[1rem] border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-sm text-negative-1">
-            {actionError}
-          </div>
-        ) : null}
 
         <div className="mt-6">
           {isPending ? <TableSkeleton /> : null}
@@ -434,16 +426,4 @@ export default function DashboardPostsPage() {
       </section>
     </div>
   );
-}
-
-function getErrorMessage(error: unknown, fallback: string): string {
-  if (error instanceof ApiResponseError) {
-    return error.message;
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return fallback;
 }

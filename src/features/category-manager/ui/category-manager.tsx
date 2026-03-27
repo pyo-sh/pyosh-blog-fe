@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   CategoryFormModal,
   type CategoryFormValues,
@@ -16,7 +17,7 @@ import {
   updateCategory,
   type Category,
 } from "@entities/category";
-import { ApiResponseError } from "@shared/api";
+import { getErrorMessage } from "@shared/lib/get-error-message";
 import { Modal } from "@shared/ui/libs";
 
 const QUERY_KEY = ["admin-categories"] as const;
@@ -54,12 +55,11 @@ export function CategoryManager() {
     mutationFn: (values: CategoryFormValues) =>
       createCategory(toCreateCategoryBody(values)),
     onSuccess: async () => {
-      setActionError(null);
       setFormState({ open: false, mode: "create", category: null });
       await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
     },
     onError: (error) => {
-      setActionError(getErrorMessage(error, "카테고리 추가에 실패했습니다."));
+      toast.error(getErrorMessage(error, "카테고리 추가에 실패했습니다."));
     },
   });
 
@@ -67,29 +67,24 @@ export function CategoryManager() {
     mutationFn: ({ id, values }: { id: number; values: CategoryFormValues }) =>
       updateCategory(id, toUpdateCategoryBody(values)),
     onSuccess: async () => {
-      setActionError(null);
       setFormState({ open: false, mode: "create", category: null });
       await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
     },
     onError: (error) => {
-      setActionError(getErrorMessage(error, "카테고리 수정에 실패했습니다."));
+      toast.error(getErrorMessage(error, "카테고리 수정에 실패했습니다."));
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: deleteCategory,
     onSuccess: async () => {
-      setActionError(null);
       setCategoryToDelete(null);
       await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
     },
     onError: (error) => {
-      setActionError(getErrorMessage(error, "카테고리 삭제에 실패했습니다."));
+      toast.error(getErrorMessage(error, "카테고리 삭제에 실패했습니다."));
     },
   });
-
-  const formError =
-    createMutation.isError || updateMutation.isError ? actionError : null;
 
   const handleCreate = () => {
     setActionError(null);
@@ -210,7 +205,7 @@ export function CategoryManager() {
         category={formState.category}
         parentOptions={parentOptions}
         isSubmitting={createMutation.isPending || updateMutation.isPending}
-        errorMessage={formError}
+        errorMessage={null}
         onClose={() =>
           setFormState({ open: false, mode: "create", category: null })
         }
@@ -311,18 +306,6 @@ function countCategories(categories: Category[]): number {
   return categories.reduce((total, category) => {
     return total + 1 + countCategories(category.children ?? []);
   }, 0);
-}
-
-function getErrorMessage(error: unknown, fallback: string): string {
-  if (error instanceof ApiResponseError) {
-    return error.message;
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return fallback;
 }
 
 function getParentOptions(

@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import type {
   CreateCommentGuestBody,
   CreateCommentOAuthBody,
 } from "@entities/comment";
 import type { CreateGuestbookBody } from "@entities/guestbook";
-import { ApiResponseError } from "@shared/api";
+import { getErrorMessage } from "@shared/lib/get-error-message";
 import { cn } from "@shared/lib/style-utils";
 
 export interface GuestCommentProfile {
@@ -32,20 +33,6 @@ interface CommentFormProps<TPayload extends CommentFormPayload> {
   submitLabel?: string;
   onCancel?: () => void;
   className?: string;
-}
-
-function getErrorMessage(error: unknown, variant: "comment" | "guestbook") {
-  if (error instanceof ApiResponseError) {
-    return error.message;
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return variant === "guestbook"
-    ? "방명록을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요."
-    : "댓글을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.";
 }
 
 function getEyebrowLabel(
@@ -159,7 +146,14 @@ export function CommentForm<TPayload extends CommentFormPayload>({
       setBody("");
       setIsSecret(false);
     } catch (error) {
-      setErrorMessage(getErrorMessage(error, variant));
+      toast.error(
+        getErrorMessage(
+          error,
+          variant === "guestbook"
+            ? "방명록을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요."
+            : "댓글을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+        ),
+      );
     } finally {
       setIsSubmitting(false);
     }
