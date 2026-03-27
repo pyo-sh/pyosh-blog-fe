@@ -14,20 +14,18 @@ export function getCookieValue(cookie: string | undefined, key: string) {
   return value ?? null;
 }
 
-export function setCookie(key: string, value: string) {
+export function setCookie(
+  key: string,
+  value: string,
+  options?: { maxAge?: number },
+) {
   if (!document) {
     return false;
   }
 
-  const { cookie } = document;
-  const cookiePairs = cookie
-    .split(";")
-    .filter((pair) => pair.length !== 0 && !pair.trim().startsWith(key));
-
-  const hasValue = value.length !== 0;
-  if (hasValue) {
-    const targetKeyValue = hasValue ? `${key}=${value}` : "";
-    cookiePairs.push(targetKeyValue);
+  let cookieString = `${key}=${value}; path=/; SameSite=Lax`;
+  if (options?.maxAge !== undefined) {
+    cookieString += `; Max-Age=${options.maxAge}`;
   }
-  document.cookie = `${cookiePairs.join(";")}`;
+  document.cookie = cookieString;
 }
