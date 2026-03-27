@@ -33,6 +33,7 @@ async function handleResponse<T>(
 
 /**
  * Server Components (RSC) 용 fetch. 쿠키를 headers에서 직접 전달.
+ * context는 전달하지 않음 — 서버 사이드 에러 로깅은 이 이슈 범위 밖 (클라이언트 전용).
  */
 export async function serverFetch<T>(
   path: string,
