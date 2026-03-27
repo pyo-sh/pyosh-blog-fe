@@ -147,7 +147,9 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
                   </>
                 )}
                 <span aria-hidden="true">•</span>
-                <span>{post.totalPageviews.toLocaleString("ko-KR")} 조회</span>
+                <span>
+                  {(post.totalPageviews ?? 0).toLocaleString("ko-KR")} 조회
+                </span>
               </div>
 
               <h1 className="text-heading-lg text-text-1">{post.title}</h1>
