@@ -4,11 +4,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { fetchMeServer } from "@entities/auth";
 import { fetchComments, type Comment } from "@entities/comment";
-import { fetchPostBySlug } from "@entities/post";
+import { fetchPosts, fetchPostBySlug } from "@entities/post";
 import { CommentList } from "@features/comment-section";
 import {
   PostContent,
   PostNavigation,
+  RelatedPosts,
   ViewCounter,
 } from "@features/post-detail";
 import { ApiResponseError } from "@shared/api";
@@ -78,15 +79,25 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
     let commentError: string | null = null;
     const cookieHeader = await toCookieHeader();
 
-    try {
-      comments = await fetchComments(post.id, cookieHeader);
-    } catch (error) {
-      if (error instanceof ApiResponseError && error.statusCode === 404) {
-        throw error;
-      }
+    const [relatedPostsData, fetchedComments] = await Promise.all([
+      post.category
+        ? fetchPosts({ categoryId: post.category.id, limit: 7 }).catch(
+            () => null,
+          )
+        : Promise.resolve(null),
+      fetchComments(post.id, cookieHeader).catch((error: unknown) => {
+        if (error instanceof ApiResponseError && error.statusCode === 404) {
+          throw error;
+        }
+        commentError =
+          "댓글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.";
 
-      commentError = "댓글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.";
-    }
+        return null;
+      }),
+    ]);
+    if (fetchedComments) comments = fetchedComments;
+    const relatedPosts =
+      relatedPostsData?.data.filter((p) => p.id !== post.id).slice(0, 5) ?? [];
 
     const viewer = await getCurrentViewer();
 
@@ -120,6 +131,24 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
                 <time dateTime={post.publishedAt ?? post.createdAt}>
                   {formatDate(post.publishedAt, post.createdAt)}
                 </time>
+                {post.contentModifiedAt && (
+                  <>
+                    <span aria-hidden="true">•</span>
+                    <span>
+                      수정:{" "}
+                      <time dateTime={post.contentModifiedAt}>
+                        {formatDate(
+                          post.contentModifiedAt,
+                          post.contentModifiedAt,
+                        )}
+                      </time>
+                    </span>
+                  </>
+                )}
+                <span aria-hidden="true">•</span>
+                <span>
+                  {(post.totalPageviews ?? 0).toLocaleString("ko-KR")} 조회
+                </span>
               </div>
 
               <h1 className="text-heading-lg text-text-1">{post.title}</h1>
@@ -139,6 +168,8 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
             </header>
 
             <PostContent contentMd={post.contentMd} />
+
+            {relatedPosts.length > 0 && <RelatedPosts posts={relatedPosts} />}
           </div>
         </article>
 

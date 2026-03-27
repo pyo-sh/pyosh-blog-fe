@@ -19,6 +19,7 @@ export interface AdminCommentItem {
   status: "active" | "deleted" | "hidden";
   author: CommentAuthor;
   replyToName: string | null;
+  post: { id: number; title: string };
   createdAt: string;
   updatedAt: string;
 }
