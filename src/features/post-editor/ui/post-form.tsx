@@ -366,17 +366,18 @@ export function PostForm({
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <label
+            <span
+              id="contentMdLabel"
               className="text-sm font-medium text-text-1"
-              htmlFor="contentMd"
             >
               본문
-            </label>
+            </span>
             <span className="text-xs uppercase tracking-[0.2em] text-text-4">
               Markdown
             </span>
           </div>
           <MarkdownEditor
+            labelId="contentMdLabel"
             value={values.contentMd}
             onChange={(value) => handleFieldChange("contentMd", value)}
           />

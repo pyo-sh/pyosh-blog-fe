@@ -19,7 +19,7 @@ import {
   highlightActiveLineGutter,
   keymap,
   lineNumbers,
-  placeholder,
+  placeholder as editorPlaceholder,
 } from "@codemirror/view";
 import { MarkdownToolbar } from "./markdown-toolbar";
 import { markdownKeymap } from "../lib/markdown-commands";
@@ -88,10 +88,13 @@ interface MarkdownEditorProps {
    * changes after initial render are ignored.
    */
   id?: string;
+  name?: string;
+  labelId?: string;
   /**
    * Placeholder text shown when the editor is empty. Read once at mount;
    * changes after initial render are ignored.
    */
+  placeholder?: string;
   placeholderText?: string;
   className?: string;
 }
@@ -100,7 +103,10 @@ export function MarkdownEditor({
   value,
   onChange,
   id = "contentMd",
-  placeholderText = "# 글 내용을 작성하세요",
+  name = "contentMd",
+  labelId,
+  placeholder: legacyPlaceholder,
+  placeholderText,
   className,
 }: MarkdownEditorProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -109,7 +115,10 @@ export function MarkdownEditor({
   // Capture mount-time values in refs so the init effect has no closure deps.
   const initialValueRef = useRef(value);
   const initialIdRef = useRef(id);
-  const initialPlaceholderRef = useRef(placeholderText);
+  const initialPlaceholderRef = useRef(
+    placeholderText ?? legacyPlaceholder ?? "# 글 내용을 작성하세요",
+  );
+  const initialLabelIdRef = useRef(labelId);
 
   const [editorView, setEditorView] = useState<EditorView | null>(null);
 
@@ -136,7 +145,7 @@ export function MarkdownEditor({
       EditorView.lineWrapping,
       search(),
       editorTheme,
-      placeholder(initialPlaceholderRef.current),
+      editorPlaceholder(initialPlaceholderRef.current),
       EditorView.updateListener.of((update) => {
         if (
           update.docChanged &&
@@ -147,12 +156,21 @@ export function MarkdownEditor({
           onChangeRef.current(update.state.doc.toString());
         }
       }),
-      EditorView.contentAttributes.of({
-        id: initialIdRef.current,
-        role: "textbox",
-        "aria-multiline": "true",
-        "aria-label": "마크다운 편집기",
-      }),
+      EditorView.contentAttributes.of(
+        initialLabelIdRef.current
+          ? {
+              id: initialIdRef.current,
+              "aria-labelledby": initialLabelIdRef.current,
+              role: "textbox",
+              "aria-multiline": "true",
+            }
+          : {
+              id: initialIdRef.current,
+              role: "textbox",
+              "aria-multiline": "true",
+              "aria-label": "마크다운 편집기",
+            },
+      ),
     ];
 
     const state = EditorState.create({
@@ -188,6 +206,14 @@ export function MarkdownEditor({
 
   return (
     <div className={cn("flex flex-col", className)}>
+      <textarea
+        aria-hidden="true"
+        className="sr-only"
+        name={name}
+        readOnly
+        tabIndex={-1}
+        value={value}
+      />
       <MarkdownToolbar editorView={editorView} />
       <div
         ref={containerRef}
