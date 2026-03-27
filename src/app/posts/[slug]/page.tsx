@@ -91,7 +91,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
     const viewer = await getCurrentViewer();
 
     return (
-      <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-8 px-6 py-12">
+      <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col gap-8 px-4 py-12 md:px-6">
         <ViewCounter postId={post.id} />
         <article className="overflow-hidden rounded-[2rem] border border-border-3 bg-background-2">
           {post.thumbnailUrl && (

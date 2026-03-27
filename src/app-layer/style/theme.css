@@ -85,6 +85,10 @@
 }
 
 @theme {
+  /* Breakpoints: sm=480px, md=768px (default), lg=1080px */
+  --breakpoint-sm: 30rem;
+  --breakpoint-lg: 67.5rem;
+
   /* Tailwind color tokens (hyphenated to match utility classes: bg-background-1, text-text-1, etc.) */
   --color-background-1: var(--background1);
   --color-background-2: var(--background2);

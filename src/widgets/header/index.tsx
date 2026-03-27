@@ -74,7 +74,7 @@ const Header: React.FC = () => {
           isShown ? "translate-y-0" : "-translate-y-full",
         )}
       >
-        <div className="max-w-[67.5rem] w-full mx-auto px-6 py-4 flex flex-col gap-3 md:h-full md:flex-row md:items-center md:justify-between md:py-0">
+        <div className="max-w-[67.5rem] w-full mx-auto px-4 py-4 flex flex-col gap-3 md:h-full md:flex-row md:items-center md:justify-between md:px-6 md:py-0">
           <Logo />
 
           <div className="flex w-full items-center justify-between gap-4 md:w-auto md:justify-start md:gap-8">

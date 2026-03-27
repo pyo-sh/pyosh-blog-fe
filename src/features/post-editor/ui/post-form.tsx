@@ -241,7 +241,7 @@ export function PostForm({
       onSubmit={handleSubmit}
       className="space-y-6 rounded-[1.75rem] border border-border-3 bg-background-2 p-6 shadow-[0px_18px_60px_0px_rgba(0,0,0,0.06)]"
     >
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <FormField label="제목" htmlFor="title">
           <input
             id="title"
@@ -362,7 +362,7 @@ export function PostForm({
         </div>
       ) : null}
 
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <label

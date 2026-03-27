@@ -43,7 +43,7 @@ export async function HomePage({ searchParams }: HomePageProps) {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 pb-16 pt-8 sm:px-6 lg:px-8">
+    <main className="mx-auto flex w-full max-w-[67.5rem] flex-col gap-8 px-4 pb-16 pt-8 md:px-6">
       <header>
         <p className="text-xs uppercase tracking-[0.24em] text-text-4">
           Latest Posts
