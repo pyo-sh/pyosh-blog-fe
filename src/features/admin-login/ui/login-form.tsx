@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { login } from "@entities/auth";
 import { getErrorMessage } from "@shared/lib/get-error-message";
+import { Spinner } from "@shared/ui/libs";
 
 export function LoginForm() {
   const router = useRouter();
@@ -90,7 +91,7 @@ export function LoginForm() {
         disabled={busy}
         className="mt-8 inline-flex w-full items-center justify-center rounded-[1rem] bg-primary-1 px-4 py-3 text-body-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {busy ? "로그인 중..." : "로그인"}
+        {busy ? <><Spinner size="sm" /> 로그인 중</> : "로그인"}
       </button>
     </form>
   );

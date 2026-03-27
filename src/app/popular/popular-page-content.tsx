@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { PopularPost } from "@entities/stat";
+import { EmptyState } from "@shared/ui/libs";
 
 interface PopularPageContentProps {
   days: 7 | 30;
@@ -94,9 +95,7 @@ export function PopularPageContent({ days, posts }: PopularPageContentProps) {
           ))}
         </ol>
       ) : (
-        <section className="rounded-[2rem] border border-dashed border-border-3 bg-background-2 p-8 text-body-md text-text-3 md:p-10">
-          아직 집계된 인기 글이 없습니다.
-        </section>
+        <EmptyState variant="page" message="아직 집계된 인기 글이 없습니다." />
       )}
     </main>
   );
