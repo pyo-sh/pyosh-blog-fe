@@ -134,9 +134,10 @@ export async function adminDeleteComment(id: number): Promise<void> {
 export async function fetchAdminCommentThread(
   id: number,
 ): Promise<AdminCommentItem[]> {
-  const response = await clientFetch<{ data: AdminCommentItem[] }>(
-    `/api/admin/comments/${id}/thread`,
-  );
+  const response = await clientFetch<{
+    parent: AdminCommentItem;
+    replies: AdminCommentItem[];
+  }>(`/api/admin/comments/${id}/thread`);
 
-  return response.data;
+  return [response.parent, ...response.replies];
 }

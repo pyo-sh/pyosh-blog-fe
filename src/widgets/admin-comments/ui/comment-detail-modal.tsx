@@ -77,6 +77,10 @@ export function CommentDetailModal({
     }
   }, [comment]);
 
+  useEffect(() => {
+    activeCommentIdRef.current = currentComment?.id ?? null;
+  }, [currentComment]);
+
   // ESC key close
   useEffect(() => {
     if (!isOpen) return;
@@ -181,6 +185,7 @@ export function CommentDetailModal({
   function handleClickThreadComment(item: AdminCommentItem) {
     setCurrentComment(item);
     setParentExpanded(false);
+    setThreadError(null);
     setMode("detail");
   }
 
