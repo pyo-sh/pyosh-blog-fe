@@ -172,7 +172,7 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
       </div>
 
       {showUrlInput ? (
-        <div className="flex gap-2">
+        <div className="space-y-2">
           <input
             type="url"
             value={urlDraft}
@@ -186,13 +186,9 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
             aria-label="썸네일 URL"
             className="flex-1 rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
           />
-          <button
-            type="button"
-            onClick={() => onChange(urlDraft.trim())}
-            className="rounded-[0.9rem] bg-background-3 px-4 py-3 text-sm font-medium text-text-2 transition-colors hover:text-text-1"
-          >
-            적용
-          </button>
+          <p className="text-xs text-text-4">
+            URL 입력은 실시간으로 반영됩니다.
+          </p>
         </div>
       ) : null}
 

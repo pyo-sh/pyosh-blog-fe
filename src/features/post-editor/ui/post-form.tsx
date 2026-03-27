@@ -647,11 +647,11 @@ export function PostForm({
                 labelId="contentMdLabel"
                 value={values.contentMd}
                 onChange={(value) => handleFieldChange("contentMd", value)}
-                onBlur={() => {
+                onBlur={(contentMd) => {
                   if (!values.summary.trim()) {
                     handleFieldChange(
                       "summary",
-                      extractPlainText(values.contentMd, 200),
+                      extractPlainText(contentMd, 200),
                     );
                   }
                 }}
