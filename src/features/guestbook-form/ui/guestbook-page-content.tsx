@@ -14,7 +14,7 @@ import {
   type GuestCommentProfile,
 } from "@features/comment-section";
 import { ApiResponseError } from "@shared/api";
-import { Modal, Pagination } from "@shared/ui/libs";
+import { Modal, Pagination, ScrollToTop } from "@shared/ui/libs";
 
 interface GuestbookViewer {
   type: "guest" | "oauth";
@@ -336,6 +336,7 @@ export function GuestbookPageContent({
         </section>
       )}
 
+      <ScrollToTop />
       <Modal
         isOpen={deleteTarget !== null}
         onClose={() => {
