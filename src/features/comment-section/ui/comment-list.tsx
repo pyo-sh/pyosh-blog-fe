@@ -57,7 +57,7 @@ function sortCommentsDesc(comments: Comment[]) {
 
 function appendComment(comments: Comment[], nextComment: Comment): Comment[] {
   if (nextComment.parentId === null) {
-    return [nextComment, ...comments];
+    return [...comments, nextComment];
   }
 
   return comments.map((comment) => {
@@ -399,11 +399,33 @@ export function CommentList({
           await loadPage(targetPage, { scrollToTop: false });
         }
       } else {
-        setComments((current) => markCommentDeleted(current, deleteTarget.id));
+        const nextComments = markCommentDeleted(comments, deleteTarget.id);
+        const removedRootCount = Math.max(
+          0,
+          comments.length - nextComments.length,
+        );
+        const nextRootTotal = Math.max(
+          0,
+          meta.totalRootComments - removedRootCount,
+        );
+        const nextTotalPages = Math.max(
+          1,
+          Math.ceil(nextRootTotal / COMMENTS_PER_PAGE),
+        );
+        const targetPage = Math.min(currentPage, nextTotalPages);
+
+        setComments(nextComments);
         setMeta((current) => ({
           ...current,
           totalCount: Math.max(0, current.totalCount - 1),
+          totalRootComments: nextRootTotal,
+          totalPages: nextTotalPages,
+          page: targetPage,
         }));
+
+        if (removedRootCount > 0 && currentPage > nextTotalPages) {
+          await loadPage(targetPage, { scrollToTop: false });
+        }
       }
 
       setLoadError(null);
