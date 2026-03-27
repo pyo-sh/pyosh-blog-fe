@@ -17,12 +17,19 @@ function applyToggleWrap(
   const { from, to } = state.selection.main;
   const outerFrom = from - before.length;
   const outerTo = to + after.length;
+  const beforeRunContinues =
+    outerFrom > 0 && state.sliceDoc(outerFrom - 1, outerFrom) === before;
+  const afterRunContinues =
+    outerTo < state.doc.length &&
+    state.sliceDoc(outerTo, outerTo + 1) === after;
 
   const alreadyWrapped =
     outerFrom >= 0 &&
     outerTo <= state.doc.length &&
     state.sliceDoc(outerFrom, from) === before &&
-    state.sliceDoc(to, outerTo) === after;
+    state.sliceDoc(to, outerTo) === after &&
+    !beforeRunContinues &&
+    !afterRunContinues;
 
   if (alreadyWrapped) {
     dispatch(
