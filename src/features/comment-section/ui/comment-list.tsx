@@ -408,7 +408,9 @@ export function CommentList({
         setComments(nextComments);
         setMeta((current) => ({
           ...current,
-          totalCount: Math.max(0, current.totalCount - 1),
+          totalCount: rootStillVisible
+            ? current.totalCount
+            : Math.max(0, current.totalCount - 1),
           totalRootComments: nextRootTotal,
           totalPages: nextTotalPages,
           page: targetPage,
