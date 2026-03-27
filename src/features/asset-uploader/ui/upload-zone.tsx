@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { cn } from "@shared/lib/style-utils";
 import { Spinner } from "@shared/ui/libs";
 
@@ -13,6 +13,7 @@ export interface PendingUploadFile {
 interface UploadZoneProps {
   files: PendingUploadFile[];
   isUploading: boolean;
+  uploadProgress: number | null;
   errorMessage: string | null;
   onFilesAdded: (files: FileList | File[]) => void;
   onRemoveFile: (id: string) => void;
@@ -23,6 +24,7 @@ interface UploadZoneProps {
 export function UploadZone({
   files,
   isUploading,
+  uploadProgress,
   errorMessage,
   onFilesAdded,
   onRemoveFile,
@@ -100,6 +102,21 @@ export function UploadZone({
       {errorMessage ? (
         <div className="mt-5 rounded-[1rem] border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-sm text-negative-1">
           {errorMessage}
+        </div>
+      ) : null}
+
+      {isUploading && uploadProgress !== null ? (
+        <div className="mt-5">
+          <div className="mb-1.5 flex items-center justify-between text-xs text-text-4">
+            <span>업로드 중...</span>
+            <span>{uploadProgress}%</span>
+          </div>
+          <div className="h-2 overflow-hidden rounded-full bg-background-3">
+            <div
+              className="h-full rounded-full bg-primary-1 transition-all duration-150"
+              style={{ width: `${uploadProgress}%` }}
+            />
+          </div>
         </div>
       ) : null}
 
@@ -182,18 +199,46 @@ function DropArea({
   onFilesAdded: (files: FileList | File[]) => void;
   onPick: () => void;
 }) {
+  const [isDragging, setIsDragging] = useState(false);
+  const dragCounterRef = useRef(0);
+
   return (
     <div
+      role="button"
+      tabIndex={disabled ? -1 : 0}
+      aria-label="파일을 드래그하거나 클릭하여 대기열에 추가"
       className={cn(
         "mt-6 rounded-[1.5rem] border border-dashed border-border-3 bg-[radial-gradient(circle_at_top,rgba(0,0,0,0.04),transparent_55%)] px-6 py-10 text-center transition-colors",
-        !disabled && "hover:border-primary-1/60 hover:bg-background-1",
+        !disabled && !isDragging && "hover:border-primary-1/60 hover:bg-background-1",
         disabled && "cursor-not-allowed opacity-60",
+        isDragging && !disabled && "border-primary-1 bg-primary-2/10",
       )}
+      onKeyDown={(event) => {
+        if (!disabled && (event.key === "Enter" || event.key === " ")) {
+          event.preventDefault();
+          onPick();
+        }
+      }}
+      onDragEnter={(event) => {
+        event.preventDefault();
+        if (disabled) return;
+        dragCounterRef.current += 1;
+        setIsDragging(true);
+      }}
+      onDragLeave={() => {
+        if (disabled) return;
+        dragCounterRef.current -= 1;
+        if (dragCounterRef.current === 0) {
+          setIsDragging(false);
+        }
+      }}
       onDragOver={(event) => {
         event.preventDefault();
       }}
       onDrop={(event) => {
         event.preventDefault();
+        dragCounterRef.current = 0;
+        setIsDragging(false);
         if (disabled || event.dataTransfer.files.length === 0) {
           return;
         }
@@ -204,9 +249,15 @@ function DropArea({
       <p className="text-body-xs uppercase tracking-[0.24em] text-text-4">
         Drag and drop
       </p>
-      <h3 className="mt-3 text-lg font-semibold text-text-1">
-        파일을 여기에 놓거나 선택해서 대기열에 추가하세요
-      </h3>
+      {isDragging ? (
+        <h3 className="mt-3 text-lg font-semibold text-primary-1">
+          놓으면 추가됩니다
+        </h3>
+      ) : (
+        <h3 className="mt-3 text-lg font-semibold text-text-1">
+          파일을 여기에 놓거나 선택해서 대기열에 추가하세요
+        </h3>
+      )}
       <p className="mt-2 text-sm text-text-3">
         업로드 버튼을 누르기 전까지 서버에는 전송되지 않습니다.
       </p>
