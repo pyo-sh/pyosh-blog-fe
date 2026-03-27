@@ -12,11 +12,7 @@ const sizeClasses: Record<NonNullable<SpinnerProps["size"]>, string> = {
 
 export function Spinner({ size = "sm", className }: SpinnerProps) {
   return (
-    <span
-      role="status"
-      aria-label="로딩 중"
-      className={cn("inline-flex items-center justify-center", className)}
-    >
+    <span className={cn("inline-flex items-center justify-center", className)}>
       <svg
         className={cn("animate-spin", sizeClasses[size])}
         xmlns="http://www.w3.org/2000/svg"
@@ -38,7 +34,6 @@ export function Spinner({ size = "sm", className }: SpinnerProps) {
           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
         />
       </svg>
-      <span className="sr-only">로딩 중</span>
     </span>
   );
 }

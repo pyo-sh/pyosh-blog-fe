@@ -10,10 +10,10 @@ interface SkeletonProps {
 
 const variantDefaults: Record<
   NonNullable<SkeletonProps["variant"]>,
-  { rounded: string; height: string }
+  { rounded: string; height: string; width?: string }
 > = {
   text: { rounded: "rounded-full", height: "h-4" },
-  circle: { rounded: "rounded-full", height: "h-8" },
+  circle: { rounded: "rounded-full", height: "h-8", width: "2rem" },
   rect: { rounded: "rounded-lg", height: "h-16" },
 };
 
@@ -34,7 +34,7 @@ function SkeletonItem({
         className,
       )}
       style={{
-        width: width ?? "100%",
+        width: width ?? defaults.width ?? "100%",
         ...(height ? { height } : {}),
       }}
     />
