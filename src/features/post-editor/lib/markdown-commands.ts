@@ -111,23 +111,56 @@ export function insertHorizontalRule(view: EditorView): void {
   view.focus();
 }
 
-export function insertCodeBlock(view: EditorView): void {
-  const { from, to } = view.state.selection.main;
-  const selected = view.state.sliceDoc(from, to);
+function getFenceInsertion(state: EditorState): {
+  from: number;
+  to: number;
+  insert: string;
+  selectionFrom: number;
+  selectionTo: number;
+} {
+  const { from, to } = state.selection.main;
+  const selected = state.sliceDoc(from, to);
+  const before = state.sliceDoc(Math.max(0, from - 1), from);
+  const after = state.sliceDoc(to, Math.min(state.doc.length, to + 1));
+  const needsLeadingBreak = from > 0 && before !== "\n";
+  const needsTrailingBreak = to < state.doc.length && after !== "\n";
+  const prefix = needsLeadingBreak ? "\n" : "";
+  const suffix = needsTrailingBreak ? "\n" : "";
 
   if (selected) {
-    view.dispatch({
-      changes: { from, to, insert: `\`\`\`\n${selected}\n\`\`\`` },
-      selection: EditorSelection.range(from + 4, from + 4 + selected.length),
-    });
-  } else {
-    const template = "```\n\n```";
+    const insert = `${prefix}\`\`\`\n${selected}\n\`\`\`${suffix}`;
+    const selectionFrom = from + prefix.length + 4;
 
-    view.dispatch({
-      changes: { from, insert: template },
-      selection: EditorSelection.cursor(from + 4),
-    });
+    return {
+      from,
+      to,
+      insert,
+      selectionFrom,
+      selectionTo: selectionFrom + selected.length,
+    };
   }
+
+  const insert = `${prefix}\`\`\`\n\n\`\`\`${suffix}`;
+  const selectionFrom = from + prefix.length + 4;
+
+  return {
+    from,
+    to,
+    insert,
+    selectionFrom,
+    selectionTo: selectionFrom,
+  };
+}
+
+export function insertCodeBlock(view: EditorView): void {
+  const { from, to, insert, selectionFrom, selectionTo } = getFenceInsertion(
+    view.state,
+  );
+
+  view.dispatch({
+    changes: { from, to, insert },
+    selection: EditorSelection.range(selectionFrom, selectionTo),
+  });
 
   view.focus();
 }

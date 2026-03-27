@@ -10,7 +10,6 @@ import {
   indentOnInput,
   syntaxHighlighting,
 } from "@codemirror/language";
-import { languages } from "@codemirror/language-data";
 import { search, searchKeymap } from "@codemirror/search";
 import { Annotation, EditorState } from "@codemirror/state";
 import {
@@ -134,7 +133,7 @@ export function MarkdownEditor({
       history(),
       indentOnInput(),
       syntaxHighlighting(defaultHighlightStyle),
-      markdown({ base: markdownLanguage, codeLanguages: languages }),
+      markdown({ base: markdownLanguage }),
       keymap.of([
         ...closeBracketsKeymap,
         ...defaultKeymap,
