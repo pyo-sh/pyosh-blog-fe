@@ -27,6 +27,7 @@ export interface CommentListMeta {
   totalCount: number;
   totalRootComments: number;
   totalPages: number;
+  isLegacy?: boolean;
 }
 
 export interface CreateCommentGuestBody {

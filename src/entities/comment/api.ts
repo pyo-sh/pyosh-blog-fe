@@ -90,6 +90,9 @@ function buildCommentListMeta(
   comments: Comment[],
   fallbackPage = 1,
   fallbackLimit = 10,
+  options?: {
+    isLegacy?: boolean;
+  },
 ): CommentListMeta {
   const totalRootComments = comments.length;
 
@@ -101,7 +104,10 @@ function buildCommentListMeta(
       0,
     ),
     totalRootComments,
-    totalPages: Math.max(1, Math.ceil(totalRootComments / fallbackLimit)),
+    totalPages: options?.isLegacy
+      ? 1
+      : Math.max(1, Math.ceil(totalRootComments / fallbackLimit)),
+    isLegacy: options?.isLegacy,
   };
 }
 
@@ -116,7 +122,9 @@ function normalizeCommentsResponse(
 
   return {
     data: response.data,
-    meta: buildCommentListMeta(response.data, page ?? 1, limit),
+    meta: buildCommentListMeta(response.data, page ?? 1, limit, {
+      isLegacy: true,
+    }),
   };
 }
 

@@ -118,13 +118,30 @@ function createFallbackMeta(comments: Comment[]): CommentListMeta {
   };
 }
 
-function getDisplayBody(comment: Comment) {
+function getGuestIdentity(profile: GuestCommentProfile): {
+  guestName: string;
+  guestEmail: string;
+} | null {
+  if (!profile.guestName.trim() || !profile.guestEmail.trim()) {
+    return null;
+  }
+
+  return {
+    guestName: profile.guestName,
+    guestEmail: profile.guestEmail,
+  };
+}
+
+function getDisplayBody(comment: Comment, profile: GuestCommentProfile) {
   if (comment.status === "deleted") {
     return "삭제된 댓글입니다.";
   }
 
   if (comment.isSecret && comment.body === SECRET_MASK) {
-    return readGuestSecretComment(comment.id) ?? comment.body;
+    return (
+      readGuestSecretComment(comment.id, getGuestIdentity(profile)) ??
+      comment.body
+    );
   }
 
   return comment.body;
@@ -276,7 +293,10 @@ export function CommentList({
     const isRootComment = nextComment.parentId === null;
 
     if (payload.authorType === "guest" && nextComment.isSecret) {
-      rememberGuestSecretComment(nextComment.id, nextComment.body);
+      rememberGuestSecretComment(nextComment.id, nextComment.body, {
+        guestName: payload.guestName,
+        guestEmail: payload.guestEmail,
+      });
     }
 
     if (isRootComment) {
@@ -353,14 +373,7 @@ export function CommentList({
       });
 
       if (isRootComment) {
-        const nextRootTotal = Math.max(0, meta.totalRootComments - 1);
-        const nextTotalPages = Math.max(
-          1,
-          Math.ceil(nextRootTotal / COMMENTS_PER_PAGE),
-        );
-        const nextPage = Math.min(currentPage, nextTotalPages);
-
-        await loadPage(nextPage, { scrollToTop: false });
+        await loadPage(currentPage, { scrollToTop: false });
       } else {
         setComments((current) => markCommentDeleted(current, deleteTarget.id));
         setMeta((current) => ({
@@ -460,7 +473,7 @@ export function CommentList({
                 >
                   <CommentItem
                     comment={comment}
-                    body={getDisplayBody(comment)}
+                    body={getDisplayBody(comment, profile)}
                     onReply={handleReply}
                     allowReply={!isLocked}
                     canDelete={canDeleteComment(comment)}
@@ -505,7 +518,7 @@ export function CommentList({
                         >
                           <CommentItem
                             comment={reply}
-                            body={getDisplayBody(reply)}
+                            body={getDisplayBody(reply, profile)}
                             onReply={handleReply}
                             allowReply={!isLocked}
                             canDelete={canDeleteComment(reply)}
@@ -545,7 +558,7 @@ export function CommentList({
         )}
       </div>
 
-      {safeMeta.totalPages > 1 ? (
+      {!safeMeta.isLegacy && safeMeta.totalPages > 1 ? (
         <nav
           aria-label="댓글 페이지네이션"
           className="mt-8 flex flex-wrap items-center justify-center gap-2"

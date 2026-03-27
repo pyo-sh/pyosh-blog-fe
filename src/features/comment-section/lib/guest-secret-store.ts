@@ -1,9 +1,40 @@
 const STORAGE_KEY = "pyosh:guest-secret-comments";
 
-type GuestSecretMap = Record<string, string>;
+interface GuestSecretEntry {
+  body: string;
+  guestName: string;
+  guestEmail: string;
+}
+
+type GuestSecretMap = Record<string, GuestSecretEntry>;
+
+interface GuestIdentity {
+  guestName: string;
+  guestEmail: string;
+}
 
 function isBrowser() {
   return typeof window !== "undefined";
+}
+
+function normalizeIdentity(identity: GuestIdentity) {
+  return {
+    guestName: identity.guestName.trim().toLowerCase(),
+    guestEmail: identity.guestEmail.trim().toLowerCase(),
+  };
+}
+
+function isGuestSecretEntry(value: unknown): value is GuestSecretEntry {
+  return (
+    value !== null &&
+    typeof value === "object" &&
+    "body" in value &&
+    "guestName" in value &&
+    "guestEmail" in value &&
+    typeof value.body === "string" &&
+    typeof value.guestName === "string" &&
+    typeof value.guestEmail === "string"
+  );
 }
 
 function readStore(): GuestSecretMap {
@@ -26,7 +57,8 @@ function readStore(): GuestSecretMap {
 
     return Object.fromEntries(
       Object.entries(parsed).filter(
-        (entry): entry is [string, string] => typeof entry[1] === "string",
+        (entry): entry is [string, GuestSecretEntry] =>
+          isGuestSecretEntry(entry[1]),
       ),
     );
   } catch {
@@ -46,18 +78,54 @@ function writeStore(nextStore: GuestSecretMap) {
   }
 }
 
-export function rememberGuestSecretComment(commentId: number, body: string) {
-  if (!body.trim()) {
+export function rememberGuestSecretComment(
+  commentId: number,
+  body: string,
+  identity: GuestIdentity,
+) {
+  const normalizedIdentity = normalizeIdentity(identity);
+
+  if (
+    !body.trim() ||
+    !normalizedIdentity.guestName ||
+    !normalizedIdentity.guestEmail
+  ) {
     return;
   }
 
   const currentStore = readStore();
   writeStore({
     ...currentStore,
-    [String(commentId)]: body,
+    [String(commentId)]: {
+      body,
+      guestName: normalizedIdentity.guestName,
+      guestEmail: normalizedIdentity.guestEmail,
+    },
   });
 }
 
-export function readGuestSecretComment(commentId: number) {
-  return readStore()[String(commentId)] ?? null;
+export function readGuestSecretComment(
+  commentId: number,
+  identity: GuestIdentity | null,
+) {
+  if (!identity) {
+    return null;
+  }
+
+  const entry = readStore()[String(commentId)];
+
+  if (!entry) {
+    return null;
+  }
+
+  const normalizedIdentity = normalizeIdentity(identity);
+
+  if (
+    entry.guestName !== normalizedIdentity.guestName ||
+    entry.guestEmail !== normalizedIdentity.guestEmail
+  ) {
+    return null;
+  }
+
+  return entry.body;
 }
