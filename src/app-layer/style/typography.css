@@ -153,6 +153,22 @@
     font-weight: 900;
   }
 
+  .text-ui-base {
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 400;
+  }
+  .text-ui-sm {
+    font-size: 0.813rem;
+    line-height: 1.125rem;
+    font-weight: 400;
+  }
+  .text-ui-xs {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 400;
+  }
+
   .markdown-content {
     overflow-wrap: break-word;
     --tw-prose-body: var(--text2);

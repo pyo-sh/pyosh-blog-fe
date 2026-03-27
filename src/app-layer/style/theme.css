@@ -7,13 +7,13 @@
 
   --dark-text1: #e9eaeb;
   --dark-text2: #c4c6c9;
-  --dark-text3: #999ea2;
-  --dark-text4: #656b70;
+  --dark-text3: #a8adb1;
+  --dark-text4: #919799;
 
-  --dark-border1: #ced1d3;
+  --dark-border1: #a6abb0;
   --dark-border2: #a1a5aa;
   --dark-border3: #54595d;
-  --dark-border4: #35383a;
+  --dark-border4: #3e4245;
 
   --dark-primary1: #a591e8;
   --dark-primary2: #c7bbf0;
@@ -21,17 +21,17 @@
   --dark-secondary1: #8c72c5;
   --dark-secondary2: #b9aadc;
 
-  --dark-tertiary1: #a5b2ff;
-  --dark-tertiary2: #c7d0ff;
-
-  --dark-quaternary1: #c7e6ff;
-  --dark-quaternary2: #ddf0ff;
+  --dark-info1: #a5b2ff;
+  --dark-info2: #c7d0ff;
 
   --dark-positive1: #10c67d;
   --dark-positive2: #78e2b8;
 
   --dark-negative1: #f15966;
   --dark-negative2: #feccd0;
+
+  --dark-warning1: #f0a030;
+  --dark-warning2: #3d2e18;
 
   --dark-grey1: #484c50;
   --dark-grey2: #797f85;
@@ -41,6 +41,8 @@
   --dark-yellow1: #ffbb32;
   --dark-yellow2: #ffd470;
 
+  --dark-overlay1: #000000;
+
   /* ─── Light 색상 팔레트 ─── */
   --light-background1: #f9f9fa;
   --light-background2: #f1f2f3;
@@ -49,13 +51,13 @@
 
   --light-text1: #232629;
   --light-text2: #4b5158;
-  --light-text3: #838c95;
-  --light-text4: #babfc4;
+  --light-text3: #6b7780;
+  --light-text4: #a3aab1;
 
   --light-border1: #33383c;
   --light-border2: #a6adb3;
   --light-border3: #dbdde0;
-  --light-border4: #f1f2f3;
+  --light-border4: #eaebed;
 
   --light-primary1: #8a6fe0;
   --light-primary2: #b09ee9;
@@ -63,17 +65,17 @@
   --light-secondary1: #6b49b5;
   --light-secondary2: #9983cc;
 
-  --light-tertiary1: #8d9eff;
-  --light-tertiary2: #b0bcff;
+  --light-info1: #8d9eff;
+  --light-info2: #b0bcff;
 
-  --light-quaternary1: #b9e0ff;
-  --light-quaternary2: #cee9ff;
-
-  --light-positive1: #0da96b;
+  --light-positive1: #078556;
   --light-positive2: #41d69b;
 
   --light-negative1: #e21223;
   --light-negative2: #f15966;
+
+  --light-warning1: #c67a0a;
+  --light-warning2: #fef3e0;
 
   --light-grey1: #f1f2f3;
   --light-grey2: #c7ccd0;
@@ -82,6 +84,11 @@
 
   --light-yellow1: #ffbe3d;
   --light-yellow2: #f2a116;
+
+  --light-overlay1: #131415;
+
+  /* ─── Special ─── */
+  --special-code-surface: #0d1117;
 }
 
 @theme {
@@ -111,17 +118,17 @@
   --color-secondary-1: var(--secondary1);
   --color-secondary-2: var(--secondary2);
 
-  --color-tertiary-1: var(--tertiary1);
-  --color-tertiary-2: var(--tertiary2);
-
-  --color-quaternary-1: var(--quaternary1);
-  --color-quaternary-2: var(--quaternary2);
+  --color-info-1: var(--info1);
+  --color-info-2: var(--info2);
 
   --color-positive-1: var(--positive1);
   --color-positive-2: var(--positive2);
 
   --color-negative-1: var(--negative1);
   --color-negative-2: var(--negative2);
+
+  --color-warning-1: var(--warning1);
+  --color-warning-2: var(--warning2);
 
   --color-grey-1: var(--grey1);
   --color-grey-2: var(--grey2);
@@ -130,6 +137,10 @@
 
   --color-yellow-1: var(--yellow1);
   --color-yellow-2: var(--yellow2);
+
+  --color-overlay-1: var(--overlay1);
+
+  --color-special-code-surface: var(--special-code-surface);
 
   /* Transition durations */
   --transition-timing-color: 0.25s;
@@ -161,17 +172,17 @@ body {
   --secondary1: var(--light-secondary1);
   --secondary2: var(--light-secondary2);
 
-  --tertiary1: var(--light-tertiary1);
-  --tertiary2: var(--light-tertiary2);
-
-  --quaternary1: var(--light-quaternary1);
-  --quaternary2: var(--light-quaternary2);
+  --info1: var(--light-info1);
+  --info2: var(--light-info2);
 
   --positive1: var(--light-positive1);
   --positive2: var(--light-positive2);
 
   --negative1: var(--light-negative1);
   --negative2: var(--light-negative2);
+
+  --warning1: var(--light-warning1);
+  --warning2: var(--light-warning2);
 
   --grey1: var(--light-grey1);
   --grey2: var(--light-grey2);
@@ -180,6 +191,8 @@ body {
 
   --yellow1: var(--light-yellow1);
   --yellow2: var(--light-yellow2);
+
+  --overlay1: var(--light-overlay1);
 
   color: var(--text1);
   background-color: var(--background1);
@@ -213,17 +226,17 @@ body {
     --secondary1: var(--dark-secondary1);
     --secondary2: var(--dark-secondary2);
 
-    --tertiary1: var(--dark-tertiary1);
-    --tertiary2: var(--dark-tertiary2);
-
-    --quaternary1: var(--dark-quaternary1);
-    --quaternary2: var(--dark-quaternary2);
+    --info1: var(--dark-info1);
+    --info2: var(--dark-info2);
 
     --positive1: var(--dark-positive1);
     --positive2: var(--dark-positive2);
 
     --negative1: var(--dark-negative1);
     --negative2: var(--dark-negative2);
+
+    --warning1: var(--dark-warning1);
+    --warning2: var(--dark-warning2);
 
     --grey1: var(--dark-grey1);
     --grey2: var(--dark-grey2);
@@ -232,6 +245,8 @@ body {
 
     --yellow1: var(--dark-yellow1);
     --yellow2: var(--dark-yellow2);
+
+    --overlay1: var(--dark-overlay1);
   }
 }
 
@@ -258,17 +273,17 @@ body[data-theme="light"] {
   --secondary1: var(--light-secondary1);
   --secondary2: var(--light-secondary2);
 
-  --tertiary1: var(--light-tertiary1);
-  --tertiary2: var(--light-tertiary2);
-
-  --quaternary1: var(--light-quaternary1);
-  --quaternary2: var(--light-quaternary2);
+  --info1: var(--light-info1);
+  --info2: var(--light-info2);
 
   --positive1: var(--light-positive1);
   --positive2: var(--light-positive2);
 
   --negative1: var(--light-negative1);
   --negative2: var(--light-negative2);
+
+  --warning1: var(--light-warning1);
+  --warning2: var(--light-warning2);
 
   --grey1: var(--light-grey1);
   --grey2: var(--light-grey2);
@@ -277,6 +292,8 @@ body[data-theme="light"] {
 
   --yellow1: var(--light-yellow1);
   --yellow2: var(--light-yellow2);
+
+  --overlay1: var(--light-overlay1);
 }
 
 /* ─── Dark Theme (명시적) ─── */
@@ -302,17 +319,17 @@ body[data-theme="dark"] {
   --secondary1: var(--dark-secondary1);
   --secondary2: var(--dark-secondary2);
 
-  --tertiary1: var(--dark-tertiary1);
-  --tertiary2: var(--dark-tertiary2);
-
-  --quaternary1: var(--dark-quaternary1);
-  --quaternary2: var(--dark-quaternary2);
+  --info1: var(--dark-info1);
+  --info2: var(--dark-info2);
 
   --positive1: var(--dark-positive1);
   --positive2: var(--dark-positive2);
 
   --negative1: var(--dark-negative1);
   --negative2: var(--dark-negative2);
+
+  --warning1: var(--dark-warning1);
+  --warning2: var(--dark-warning2);
 
   --grey1: var(--dark-grey1);
   --grey2: var(--dark-grey2);
@@ -321,4 +338,6 @@ body[data-theme="dark"] {
 
   --yellow1: var(--dark-yellow1);
   --yellow2: var(--dark-yellow2);
+
+  --overlay1: var(--dark-overlay1);
 }
