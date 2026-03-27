@@ -42,7 +42,7 @@ export function DashboardLayoutShell({
             onClick={() => setSidebarOpen(true)}
             aria-label="메뉴 열기"
             aria-expanded={sidebarOpen}
-            aria-controls="admin-nav-overlay"
+            aria-controls={sidebarOpen ? "admin-nav-overlay" : undefined}
             className="p-2 rounded-md text-text-3 hover:bg-background-2 hover:text-text-1 transition-colors"
           >
             <HamburgerIcon />
