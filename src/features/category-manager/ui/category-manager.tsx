@@ -195,7 +195,6 @@ export function CategoryManager() {
         category={formState.category}
         parentOptions={parentOptions}
         isSubmitting={createMutation.isPending || updateMutation.isPending}
-        errorMessage={null}
         onClose={() =>
           setFormState({ open: false, mode: "create", category: null })
         }
