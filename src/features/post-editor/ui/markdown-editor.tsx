@@ -11,7 +11,12 @@ import {
   syntaxHighlighting,
 } from "@codemirror/language";
 import { search, searchKeymap } from "@codemirror/search";
-import { Annotation, Compartment, EditorState } from "@codemirror/state";
+import {
+  Annotation,
+  Compartment,
+  EditorState,
+  Transaction,
+} from "@codemirror/state";
 import {
   EditorView,
   highlightActiveLine,
@@ -226,7 +231,10 @@ export function MarkdownEditor({
 
     editorView.dispatch({
       changes: { from: 0, to: current.length, insert: value },
-      annotations: externalSyncAnnotation.of(true),
+      annotations: [
+        externalSyncAnnotation.of(true),
+        Transaction.addToHistory.of(false),
+      ],
     });
   }, [editorView, value]);
 

@@ -1,4 +1,8 @@
-import { EditorSelection, type EditorState } from "@codemirror/state";
+import {
+  ChangeSpec,
+  EditorSelection,
+  type EditorState,
+} from "@codemirror/state";
 import { type EditorView } from "@codemirror/view";
 import { type KeyBinding } from "@codemirror/view";
 
@@ -67,33 +71,49 @@ export function wrapSelection(
   view.focus();
 }
 
-// Currently only affects the cursor line. Multi-line selection support
-// (apply prefix to all intersecting lines) is deferred to a future iteration.
+function getSelectedLines(state: EditorState) {
+  const { from, to } = state.selection.main;
+  const rangeEnd =
+    to > from && state.sliceDoc(Math.max(from, to - 1), to) === "\n"
+      ? to - 1
+      : to;
+  const lines = [];
+  let line = state.doc.lineAt(from);
+  const endLine = state.doc.lineAt(rangeEnd);
+
+  while (true) {
+    lines.push(line);
+    if (line.number >= endLine.number) break;
+    line = state.doc.line(line.number + 1);
+  }
+
+  return lines;
+}
+
 export function toggleLinePrefix(view: EditorView, prefix: string): void {
-  const line = view.state.doc.lineAt(view.state.selection.main.from);
+  const lines = getSelectedLines(view.state);
   const isOrderedList = prefix === "1. ";
+  const everyLineHasPrefix = lines.every((line) =>
+    isOrderedList ? /^\d+\.\s/.test(line.text) : line.text.startsWith(prefix),
+  );
+  const changes: ChangeSpec[] = lines.map((line, index) => {
+    if (everyLineHasPrefix) {
+      const removeLen = isOrderedList
+        ? (line.text.match(/^\d+\.\s/)?.[0].length ?? prefix.length)
+        : prefix.length;
 
-  const hasPrefix = isOrderedList
-    ? /^\d+\.\s/.test(line.text)
-    : line.text.startsWith(prefix);
+      return { from: line.from, to: line.from + removeLen, insert: "" };
+    }
 
-  if (hasPrefix) {
-    const removeLen = isOrderedList
-      ? (line.text.match(/^\d+\.\s/)?.[0].length ?? prefix.length)
-      : prefix.length;
-
-    view.dispatch({
-      changes: { from: line.from, to: line.from + removeLen, insert: "" },
-    });
-  } else {
     const cleaned = line.text
       .replace(/^#{1,6}\s/, "")
       .replace(/^(>\s+|\d+\.\s|-\s)/, "");
+    const nextPrefix = isOrderedList ? `${index + 1}. ` : prefix;
 
-    view.dispatch({
-      changes: { from: line.from, to: line.to, insert: `${prefix}${cleaned}` },
-    });
-  }
+    return { from: line.from, to: line.to, insert: `${nextPrefix}${cleaned}` };
+  });
+
+  view.dispatch({ changes });
 
   view.focus();
 }
