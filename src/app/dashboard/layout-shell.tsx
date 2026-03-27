@@ -12,10 +12,13 @@ export function DashboardLayoutShell({
   const segment = useSelectedLayoutSegment();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
+  const didOpenRef = useRef(false);
 
-  // Return focus to hamburger button when sidebar closes
+  // Return focus to hamburger button when sidebar closes (not on initial mount)
   useEffect(() => {
-    if (!sidebarOpen) {
+    if (sidebarOpen) {
+      didOpenRef.current = true;
+    } else if (didOpenRef.current) {
       hamburgerRef.current?.focus();
     }
   }, [sidebarOpen]);
@@ -39,6 +42,7 @@ export function DashboardLayoutShell({
             onClick={() => setSidebarOpen(true)}
             aria-label="메뉴 열기"
             aria-expanded={sidebarOpen}
+            aria-controls="admin-nav-overlay"
             className="p-2 rounded-md text-text-3 hover:bg-background-2 hover:text-text-1 transition-colors"
           >
             <HamburgerIcon />

@@ -178,6 +178,7 @@ export function AdminSidebar({ isOpen = false, onClose }: AdminSidebarProps) {
           />
           {/* Overlay sidebar */}
           <aside
+            id="admin-nav-overlay"
             ref={overlayRef}
             role="dialog"
             aria-modal="true"
