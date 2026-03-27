@@ -8,6 +8,13 @@ const config: StorybookConfig = {
     name: "@storybook/nextjs",
     options: {},
   },
+  typescript: {
+    check: false,
+    reactDocgen: "react-docgen-typescript",
+    reactDocgenTypescriptOptions: {
+      tsconfigPath: "../tsconfig.storybook.json",
+    },
+  },
   staticDirs: ["../public"],
   webpackFinal: async (config) => {
     if (config.resolve) {

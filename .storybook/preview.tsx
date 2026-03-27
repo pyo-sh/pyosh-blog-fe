@@ -4,21 +4,22 @@ import { withThemeByDataAttribute } from "@storybook/addon-themes";
 import { initialize, mswLoader } from "msw-storybook-addon";
 import "../src/app-layer/style/index.css";
 
-initialize();
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: { retry: false, staleTime: Infinity },
-  },
-});
+initialize({ onUnhandledRequest: "bypass" });
 
 const preview: Preview = {
   decorators: [
-    (Story) => (
-      <QueryClientProvider client={queryClient}>
-        <Story />
-      </QueryClientProvider>
-    ),
+    (Story) => {
+      const queryClient = new QueryClient({
+        defaultOptions: {
+          queries: { retry: false, staleTime: Infinity },
+        },
+      });
+      return (
+        <QueryClientProvider client={queryClient}>
+          <Story />
+        </QueryClientProvider>
+      );
+    },
     withThemeByDataAttribute({
       themes: {
         light: "light",
