@@ -4,7 +4,8 @@ const ACTIVE_IDENTITY_KEY = "pyosh:guest-secret-comments:identity";
 interface GuestSecretEntry {
   body: string;
   guestName: string;
-  guestEmail: string;
+  guestNameKey: string;
+  guestEmailKey: string;
 }
 
 type GuestSecretMap = Record<string, GuestSecretEntry>;
@@ -31,10 +32,12 @@ function isGuestSecretEntry(value: unknown): value is GuestSecretEntry {
     typeof value === "object" &&
     "body" in value &&
     "guestName" in value &&
-    "guestEmail" in value &&
+    "guestNameKey" in value &&
+    "guestEmailKey" in value &&
     typeof value.body === "string" &&
     typeof value.guestName === "string" &&
-    typeof value.guestEmail === "string"
+    typeof value.guestNameKey === "string" &&
+    typeof value.guestEmailKey === "string"
   );
 }
 
@@ -121,7 +124,10 @@ function writeActiveIdentity(identity: GuestIdentity) {
   try {
     window.sessionStorage.setItem(
       ACTIVE_IDENTITY_KEY,
-      JSON.stringify(normalizeIdentity(identity)),
+      JSON.stringify({
+        guestName: identity.guestName.trim(),
+        guestEmail: identity.guestEmail.trim().toLowerCase(),
+      }),
     );
   } catch {
     // Ignore storage failures so comment UX degrades gracefully.
@@ -149,8 +155,9 @@ export function rememberGuestSecretComment(
     ...currentStore,
     [String(commentId)]: {
       body,
-      guestName: normalizedIdentity.guestName,
-      guestEmail: normalizedIdentity.guestEmail,
+      guestName: identity.guestName.trim(),
+      guestNameKey: normalizedIdentity.guestName,
+      guestEmailKey: normalizedIdentity.guestEmail,
     },
   });
 }
@@ -172,8 +179,8 @@ export function readGuestSecretComment(
   const normalizedIdentity = normalizeIdentity(identity);
 
   if (
-    entry.guestName !== normalizedIdentity.guestName ||
-    entry.guestEmail !== normalizedIdentity.guestEmail
+    entry.guestNameKey !== normalizedIdentity.guestName ||
+    entry.guestEmailKey !== normalizedIdentity.guestEmail
   ) {
     return null;
   }

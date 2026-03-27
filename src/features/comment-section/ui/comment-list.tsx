@@ -355,6 +355,10 @@ export function CommentList({
   }
 
   function canDeleteComment(comment: Comment) {
+    if (isLocked) {
+      return false;
+    }
+
     if (comment.status === "deleted") {
       return false;
     }
@@ -367,7 +371,7 @@ export function CommentList({
   }
 
   async function handleDelete() {
-    if (!deleteTarget) {
+    if (!deleteTarget || isLocked) {
       return;
     }
 
