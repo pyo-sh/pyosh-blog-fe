@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { AdminCommentItem } from "@entities/comment";
 import { fetchAdminCommentThread } from "@entities/comment";
@@ -30,6 +30,7 @@ function formatDetailDate(value: string) {
 type ModalMode = "detail" | "thread";
 
 interface ThreadState {
+  commentId: number | null;
   items: AdminCommentItem[];
   isLoading: boolean;
 }
@@ -53,20 +54,25 @@ export function CommentDetailModal({
     null,
   );
   const [thread, setThread] = useState<ThreadState>({
+    commentId: null,
     items: [],
     isLoading: false,
   });
   const [parentExpanded, setParentExpanded] = useState(false);
   const [threadError, setThreadError] = useState<string | null>(null);
+  const activeCommentIdRef = useRef<number | null>(comment?.id ?? null);
+  const threadRequestSeqRef = useRef(0);
 
   // Reset state when comment changes
   useEffect(() => {
+    activeCommentIdRef.current = comment?.id ?? null;
+
     if (comment) {
       setCurrentComment(comment);
       setOriginComment(comment);
       setMode("detail");
       setParentExpanded(false);
-      setThread({ items: [], isLoading: false });
+      setThread({ commentId: null, items: [], isLoading: false });
       setThreadError(null);
     }
   }, [comment]);
@@ -99,19 +105,47 @@ export function CommentDetailModal({
 
   const loadThread = useCallback(
     async (commentId: number) => {
-      if (thread.items.length > 0) return;
+      if (thread.commentId === commentId && thread.items.length > 0) {
+        return true;
+      }
 
-      setThread((prev) => ({ ...prev, isLoading: true }));
+      const requestSeq = ++threadRequestSeqRef.current;
+
+      setThread((prev) => ({
+        commentId: prev.commentId === commentId ? prev.commentId : null,
+        items: prev.commentId === commentId ? prev.items : [],
+        isLoading: true,
+      }));
       setThreadError(null);
+
       try {
         const items = await fetchAdminCommentThread(commentId);
-        setThread({ items, isLoading: false });
+
+        if (
+          activeCommentIdRef.current !== commentId ||
+          threadRequestSeqRef.current !== requestSeq
+        ) {
+          return false;
+        }
+
+        setThread({ commentId, items, isLoading: false });
+
+        return true;
       } catch {
-        setThread({ items: [], isLoading: false });
+        if (
+          activeCommentIdRef.current !== commentId ||
+          threadRequestSeqRef.current !== requestSeq
+        ) {
+          return false;
+        }
+
+        setThread({ commentId: null, items: [], isLoading: false });
         setThreadError("스레드를 불러오지 못했습니다.");
+
+        return false;
       }
     },
-    [thread.items.length],
+    [thread.commentId, thread.items],
   );
 
   async function handleToggleParent() {
@@ -127,8 +161,12 @@ export function CommentDetailModal({
   async function handleOpenThread() {
     if (!currentComment) return;
 
-    if (thread.items.length === 0) {
-      await loadThread(currentComment.id);
+    const hasThread =
+      thread.commentId === currentComment.id && thread.items.length > 0;
+    const didLoadSucceed = hasThread || (await loadThread(currentComment.id));
+
+    if (!didLoadSucceed) {
+      return;
     }
 
     setOriginComment(currentComment);
