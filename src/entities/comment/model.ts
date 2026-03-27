@@ -21,6 +21,15 @@ export interface Comment {
   updatedAt: string;
 }
 
+export interface CommentListMeta {
+  page: number;
+  limit: number;
+  totalCount: number;
+  totalRootComments: number;
+  totalPages: number;
+  isLegacy?: boolean;
+}
+
 export interface CreateCommentGuestBody {
   authorType: "guest";
   body: string;
@@ -53,8 +62,13 @@ export interface DeleteCommentOAuthBody {
 
 export type DeleteCommentBody = DeleteCommentGuestBody | DeleteCommentOAuthBody;
 
+export interface CommentsResponseLegacy {
+  data: Comment[];
+}
+
 export interface CommentsResponse {
   data: Comment[];
+  meta: CommentListMeta;
 }
 
 export interface CommentResponse {

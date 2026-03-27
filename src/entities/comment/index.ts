@@ -1,6 +1,7 @@
 export type {
   CommentAuthor,
   Comment,
+  CommentListMeta,
   CreateCommentBody,
   CreateCommentGuestBody,
   CreateCommentOAuthBody,
@@ -15,5 +16,6 @@ export {
   deleteComment,
   fetchAdminCommentThread,
   fetchAdminComments,
+  fetchCommentsClient,
   fetchComments,
 } from "./api";

@@ -1,4 +1,4 @@
-import type { Comment } from "@entities/comment";
+import type { Comment, CommentListMeta } from "@entities/comment";
 
 export const mockComments: Comment[] = [
   {
@@ -36,6 +36,43 @@ export const mockComments: Comment[] = [
         createdAt: "2026-01-16T10:00:00.000Z",
         updatedAt: "2026-01-16T10:00:00.000Z",
       },
+      {
+        id: 4,
+        postId: 1,
+        parentId: 1,
+        depth: 1,
+        body: "비공개 메시지입니다",
+        isSecret: true,
+        status: "active",
+        author: {
+          type: "guest",
+          name: "익명",
+          email: "private@example.com",
+        },
+        replyToName: "김철수",
+        replies: [],
+        createdAt: "2026-01-16T11:00:00.000Z",
+        updatedAt: "2026-01-16T11:00:00.000Z",
+      },
+      {
+        id: 5,
+        postId: 1,
+        parentId: 1,
+        depth: 1,
+        body: "저도 같은 방향이 좋다고 생각합니다.",
+        isSecret: false,
+        status: "active",
+        author: {
+          type: "oauth",
+          id: 3,
+          name: "박서준",
+          avatarUrl: undefined,
+        },
+        replyToName: "Admin",
+        replies: [],
+        createdAt: "2026-01-16T12:00:00.000Z",
+        updatedAt: "2026-01-16T12:00:00.000Z",
+      },
     ],
     createdAt: "2026-01-15T15:00:00.000Z",
     updatedAt: "2026-01-15T15:00:00.000Z",
@@ -58,4 +95,48 @@ export const mockComments: Comment[] = [
     createdAt: "2026-01-17T09:00:00.000Z",
     updatedAt: "2026-01-17T09:00:00.000Z",
   },
+  {
+    id: 6,
+    postId: 1,
+    parentId: null,
+    depth: 0,
+    body: "",
+    isSecret: false,
+    status: "deleted",
+    author: {
+      type: "guest",
+      name: "삭제된 사용자",
+    },
+    replyToName: null,
+    replies: [
+      {
+        id: 7,
+        postId: 1,
+        parentId: 6,
+        depth: 1,
+        body: "원댓글은 삭제됐지만 맥락은 남아 있네요.",
+        isSecret: false,
+        status: "active",
+        author: {
+          type: "oauth",
+          id: 4,
+          name: "이영희",
+        },
+        replyToName: null,
+        replies: [],
+        createdAt: "2026-01-18T10:00:00.000Z",
+        updatedAt: "2026-01-18T10:00:00.000Z",
+      },
+    ],
+    createdAt: "2026-01-18T08:00:00.000Z",
+    updatedAt: "2026-01-18T08:30:00.000Z",
+  },
 ];
+
+export const mockCommentMeta: CommentListMeta = {
+  page: 2,
+  limit: 10,
+  totalCount: 7,
+  totalRootComments: 12,
+  totalPages: 2,
+};
