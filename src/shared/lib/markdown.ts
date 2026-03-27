@@ -7,11 +7,11 @@ import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
 import { unified } from "unified";
 import { visit } from "unist-util-visit";
-import type { Element } from "hast";
+import type { Element, Root } from "hast";
 
 // <img> 노드에 loading="lazy" decoding="async" 속성 추가
 function rehypeLazyImages() {
-  return (tree: Parameters<typeof visit>[0]) => {
+  return (tree: Root) => {
     visit(tree, "element", (node: Element) => {
       if (node.tagName === "img") {
         node.properties.loading = "lazy";

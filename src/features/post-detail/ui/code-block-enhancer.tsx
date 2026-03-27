@@ -25,14 +25,17 @@ function createCodeHeader(
   if (!navigator.clipboard) {
     copyBtn.style.display = "none";
   } else {
+    let resetTimer: ReturnType<typeof setTimeout> | null = null;
     copyBtn.addEventListener("click", async () => {
       const code = pre.querySelector("code");
       const text = code?.textContent ?? "";
 
       try {
         await navigator.clipboard.writeText(text);
+        if (resetTimer !== null) clearTimeout(resetTimer);
         copyBtn.textContent = "복사됨";
-        setTimeout(() => {
+        resetTimer = setTimeout(() => {
+          resetTimer = null;
           copyBtn.textContent = "복사";
         }, 1500);
       } catch {
