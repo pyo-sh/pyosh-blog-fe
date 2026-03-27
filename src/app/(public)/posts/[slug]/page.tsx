@@ -79,23 +79,26 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
     let commentError: string | null = null;
     const cookieHeader = await toCookieHeader();
 
-    const relatedPostsData = post.category
-      ? await fetchPosts({ categoryId: post.category.id, limit: 6 }).catch(
-          () => null,
-        )
-      : null;
+    const [relatedPostsData] = await Promise.all([
+      post.category
+        ? fetchPosts({ categoryId: post.category.id, limit: 6 }).catch(
+            () => null,
+          )
+        : Promise.resolve(null),
+      fetchComments(post.id, cookieHeader)
+        .then((data) => {
+          comments = data;
+        })
+        .catch((error) => {
+          if (error instanceof ApiResponseError && error.statusCode === 404) {
+            throw error;
+          }
+          commentError =
+            "댓글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.";
+        }),
+    ]);
     const relatedPosts =
       relatedPostsData?.data.filter((p) => p.id !== post.id).slice(0, 5) ?? [];
-
-    try {
-      comments = await fetchComments(post.id, cookieHeader);
-    } catch (error) {
-      if (error instanceof ApiResponseError && error.statusCode === 404) {
-        throw error;
-      }
-
-      commentError = "댓글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.";
-    }
 
     const viewer = await getCurrentViewer();
 

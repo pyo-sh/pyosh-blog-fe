@@ -32,7 +32,6 @@
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.18",
     "unified": "^11.0.5",
-    "unist": "^0.0.1",
     "unist-util-visit": "^5.1.0"
   },
   "devDependencies": {
@@ -57,7 +56,6 @@
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-prettier": "^5.5.5",
     "globals": "^15.0.0",
-    "hast": "^1.0.0",
     "msw": "^2.12.14",
     "msw-storybook-addon": "^2.0.6",
     "postcss": "^8.5.6",
