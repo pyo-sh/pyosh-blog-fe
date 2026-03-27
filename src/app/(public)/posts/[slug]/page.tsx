@@ -81,10 +81,7 @@ async function getCurrentViewer(): Promise<CurrentViewer> {
 
 export default async function PostDetailPage({ params }: PostDetailPageProps) {
   try {
-    const [{ post, prevPost, nextPost }, categories] = await Promise.all([
-      fetchPostBySlug(params.slug),
-      fetchCategories().catch(() => []),
-    ]);
+    const { post, prevPost, nextPost } = await fetchPostBySlug(params.slug);
     let comments: Comment[] = [];
     let commentError: string | null = null;
     const cookieHeader = await toCookieHeader();
@@ -111,7 +108,10 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
     const siteUrl = getSiteUrl();
     const categoryAncestors =
       post.category.ancestors ??
-      getCategoryAncestors(categories, post.category.id);
+      getCategoryAncestors(
+        await fetchCategories().catch(() => []),
+        post.category.id,
+      );
     const breadcrumbItems = [
       { name: "홈", href: "/" },
       ...categoryAncestors.map((ancestor) => ({

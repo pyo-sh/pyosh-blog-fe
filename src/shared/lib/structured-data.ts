@@ -1,4 +1,3 @@
-import type { Post } from "@entities/post";
 import { URLS } from "@shared/constant/url";
 
 const FALLBACK_SITE_URL = "http://localhost:3000";
@@ -64,13 +63,36 @@ export interface BreadcrumbItem {
   href?: string;
 }
 
+interface StructuredDataTag {
+  name: string;
+}
+
+interface StructuredDataCategory {
+  name: string;
+}
+
+interface StructuredDataPost {
+  title: string;
+  slug: string;
+  summary: string | null;
+  contentMd: string;
+  publishedAt: string | null;
+  createdAt: string;
+  contentModifiedAt: string | null;
+  thumbnailUrl: string | null;
+  tags: StructuredDataTag[];
+  category: StructuredDataCategory;
+}
+
 export function getSiteUrl(): string {
   const value = process.env.NEXT_PUBLIC_SITE_URL?.trim() || FALLBACK_SITE_URL;
 
   return value.endsWith("/") ? value.slice(0, -1) : value;
 }
 
-export function getPostDescription(post: Pick<Post, "summary" | "contentMd">) {
+export function getPostDescription(
+  post: Pick<StructuredDataPost, "summary" | "contentMd">,
+) {
   const plainText = (
     post.summary?.trim() || stripMarkdown(post.contentMd)
   ).trim();
@@ -102,19 +124,7 @@ export function buildWebSiteJsonLd(siteUrl: string): WebSiteJsonLd {
 }
 
 export function buildBlogPostingJsonLd(
-  post: Pick<
-    Post,
-    | "title"
-    | "slug"
-    | "summary"
-    | "contentMd"
-    | "publishedAt"
-    | "createdAt"
-    | "contentModifiedAt"
-    | "thumbnailUrl"
-    | "tags"
-    | "category"
-  >,
+  post: StructuredDataPost,
   siteUrl: string,
 ): BlogPostingJsonLd {
   const normalizedSiteUrl = normalizeBaseUrl(siteUrl);
