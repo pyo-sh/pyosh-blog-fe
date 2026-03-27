@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { fetchMeServer } from "@entities/auth";
+import { fetchCategories, getCategoryAncestors } from "@entities/category";
 import {
   fetchComments,
   type Comment,
@@ -17,6 +18,13 @@ import {
   ViewCounter,
 } from "@features/post-detail";
 import { ApiResponseError } from "@shared/api";
+import { extractHeadings, type TocItem } from "@shared/lib/markdown";
+import {
+  buildBlogPostingJsonLd,
+  buildBreadcrumbJsonLd,
+  getSiteUrl,
+} from "@shared/lib/structured-data";
+import { JsonLd } from "@shared/ui/json-ld";
 import { ScrollToTop } from "@shared/ui/libs";
 
 interface PostDetailPageProps {
@@ -79,6 +87,7 @@ async function getCurrentViewer(): Promise<CurrentViewer> {
 export default async function PostDetailPage({ params }: PostDetailPageProps) {
   try {
     const { post, prevPost, nextPost } = await fetchPostBySlug(params.slug);
+    const headings = extractHeadings(post.contentMd);
     let comments: Comment[] = [];
     let commentMeta: CommentListMeta = {
       page: 1,
@@ -89,41 +98,68 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
     };
     let commentError: string | null = null;
     const cookieHeader = await toCookieHeader();
+    const siteUrl = getSiteUrl();
 
-    const [relatedPostsData, fetchedComments] = await Promise.all([
-      post.category
-        ? fetchPosts({ categoryId: post.category.id, limit: 7 }).catch(
-            () => null,
-          )
-        : Promise.resolve(null),
-      post.commentStatus === "disabled"
-        ? Promise.resolve(null)
-        : fetchComments(post.id, undefined, cookieHeader).catch(
-            (error: unknown) => {
-              if (
-                error instanceof ApiResponseError &&
-                error.statusCode === 404
-              ) {
-                throw error;
-              }
-              commentError =
-                "댓글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.";
+    const [relatedPostsData, fetchedComments, categoryAncestors] =
+      await Promise.all([
+        post.category
+          ? fetchPosts({ categoryId: post.category.id, limit: 7 }).catch(
+              () => null,
+            )
+          : Promise.resolve(null),
+        post.commentStatus === "disabled"
+          ? Promise.resolve(null)
+          : fetchComments(post.id, undefined, cookieHeader).catch(
+              (error: unknown) => {
+                if (
+                  error instanceof ApiResponseError &&
+                  error.statusCode === 404
+                ) {
+                  throw error;
+                }
+                commentError =
+                  "댓글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.";
 
-              return null;
-            },
-          ),
-    ]);
+                return null;
+              },
+            ),
+        post.category.ancestors
+          ? Promise.resolve(post.category.ancestors)
+          : fetchCategories()
+              .then((categories) =>
+                getCategoryAncestors(categories, post.category.id),
+              )
+              .catch(() => []),
+      ]);
     if (fetchedComments) {
       comments = fetchedComments.data;
       commentMeta = fetchedComments.meta;
     }
     const relatedPosts =
       relatedPostsData?.data.filter((p) => p.id !== post.id).slice(0, 5) ?? [];
+    const breadcrumbItems = [
+      { name: "홈", href: "/" },
+      ...categoryAncestors.map((ancestor) => ({
+        name: ancestor.name,
+        href: `/categories/${ancestor.slug}`,
+      })),
+      {
+        name: post.category.name,
+        href: `/categories/${post.category.slug}`,
+      },
+      { name: post.title },
+    ];
 
     const viewer = await getCurrentViewer();
 
     return (
       <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col gap-8 px-4 py-12 md:px-6">
+        {siteUrl ? (
+          <JsonLd data={buildBlogPostingJsonLd(post, siteUrl)} />
+        ) : null}
+        {siteUrl ? (
+          <JsonLd data={buildBreadcrumbJsonLd(breadcrumbItems, siteUrl)} />
+        ) : null}
         <ViewCounter postId={post.id} />
         <article className="overflow-hidden rounded-[2rem] border border-border-3 bg-background-2">
           {post.thumbnailUrl && (
@@ -167,12 +203,20 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
                   </>
                 )}
                 <span aria-hidden="true">•</span>
-                <span>
-                  {(post.totalPageviews ?? 0).toLocaleString("ko-KR")} 조회
+                <span
+                  aria-label={`조회수 ${(post.totalPageviews ?? 0).toLocaleString("ko-KR")}회`}
+                >
+                  조회 {(post.totalPageviews ?? 0).toLocaleString("ko-KR")}
                 </span>
               </div>
 
               <h1 className="text-heading-lg text-text-1">{post.title}</h1>
+
+              {post.description?.trim() ? (
+                <p className="max-w-3xl text-body-base leading-7 text-text-3">
+                  {post.description}
+                </p>
+              ) : null}
 
               {post.tags.length > 0 && (
                 <div className="flex flex-wrap gap-3">
@@ -187,6 +231,16 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
                 </div>
               )}
             </header>
+
+            {headings.length > 0 && (
+              <script
+                id="post-toc-data"
+                type="application/json"
+                dangerouslySetInnerHTML={{
+                  __html: serializeTocItems(headings),
+                }}
+              />
+            )}
 
             <PostContent contentMd={post.contentMd} />
 
@@ -215,4 +269,8 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
 
     throw error;
   }
+}
+
+function serializeTocItems(headings: TocItem[]) {
+  return JSON.stringify(headings).replace(/</g, "\\u003c");
 }

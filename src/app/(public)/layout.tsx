@@ -3,6 +3,7 @@ import { fetchCategories } from "@entities/category";
 import { fetchPosts } from "@entities/post";
 import { fetchPopularPosts, fetchTotalViews } from "@entities/stat";
 import { fetchTags } from "@entities/tag";
+import { SiteViewCounter } from "@features/site-view-counter";
 import { Footer } from "@widgets/footer";
 
 const SIDEBAR_POST_LIMIT = 5;
@@ -15,7 +16,7 @@ export default async function PublicLayout({
   const [postsResponse, popularPosts, categories, tags, totalViews] =
     await Promise.all([
       fetchPosts({ limit: SIDEBAR_POST_LIMIT }).catch(() => ({ data: [] })),
-      fetchPopularPosts(7).catch(() => []),
+      fetchPopularPosts(7, undefined, SIDEBAR_POST_LIMIT).catch(() => null),
       fetchCategories().catch(() => []),
       fetchTags().catch(() => []),
       fetchTotalViews().catch(() => null),
@@ -23,6 +24,7 @@ export default async function PublicLayout({
 
   return (
     <>
+      <SiteViewCounter />
       <PublicLayoutShell
         recentPosts={postsResponse.data}
         popularPosts={popularPosts}

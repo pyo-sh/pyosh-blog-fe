@@ -4,7 +4,6 @@ import { ListRow, Text } from "@shared/ui/libs";
 
 const navItems = [
   { label: "홈", path: "/" },
-  { label: "인기", path: "/popular" },
   { label: "태그", path: "/tags" },
   { label: "방명록", path: "/guestbook" },
 ] as const;
