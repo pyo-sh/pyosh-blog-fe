@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useRef, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import type { Post } from "@entities/post";
 
 export type AdminPostTab = "active" | "trash";
@@ -48,6 +48,10 @@ export function PostFilters({
 }: PostFiltersProps) {
   const [inputValue, setInputValue] = useState(searchQuery);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setInputValue(searchQuery);
+  }, [searchQuery]);
 
   function handleSearch(e: FormEvent) {
     e.preventDefault();

@@ -346,7 +346,6 @@ export default function ManagePostsPage() {
       } else {
         toast.error(getErrorMessage(err, "일괄 업데이트에 실패했습니다."));
       }
-      throw err;
     }
   }
 

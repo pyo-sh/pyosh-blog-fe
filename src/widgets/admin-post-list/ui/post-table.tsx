@@ -380,7 +380,7 @@ export function PostTable({
                 </th>
                 <th className="px-4 py-4 font-medium">
                   <SortableHeader
-                    label="수정일"
+                    label="작성일"
                     field="created_at"
                     currentSort={sort}
                     currentOrder={order}
@@ -528,9 +528,9 @@ export function PostTable({
                       {formatDate(post.publishedAt)}
                     </td>
 
-                    {/* Content modified at */}
+                    {/* Created at */}
                     <td className="px-4 py-4 text-sm text-text-2">
-                      {formatDate(post.contentModifiedAt)}
+                      {formatDate(post.createdAt)}
                     </td>
 
                     {/* Actions */}
