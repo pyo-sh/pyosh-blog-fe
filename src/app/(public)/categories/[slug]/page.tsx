@@ -8,6 +8,8 @@ import {
 } from "@entities/category";
 import { fetchPosts } from "@entities/post";
 import { PostListItem } from "@features/post-list";
+import { buildBreadcrumbJsonLd, getSiteUrl } from "@shared/lib/structured-data";
+import { JsonLd } from "@shared/ui/json-ld";
 import { EmptyState, Pagination, ScrollToTop } from "@shared/ui/libs";
 
 interface CategoryPageProps {
@@ -60,6 +62,14 @@ export default async function CategoryPage({
   }
 
   const ancestors = getCategoryAncestors(categories, activeCategory.id);
+  const breadcrumbItems = [
+    { name: "홈", href: "/" },
+    ...ancestors.map((ancestor) => ({
+      name: ancestor.name,
+      href: `/categories/${ancestor.slug}`,
+    })),
+    { name: activeCategory.name },
+  ];
 
   const response = await fetchPosts({ categoryId: activeCategory.id, page });
   const posts = response.data;
@@ -71,6 +81,7 @@ export default async function CategoryPage({
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col gap-8 px-4 py-12 md:px-6">
+      <JsonLd data={buildBreadcrumbJsonLd(breadcrumbItems, getSiteUrl())} />
       <header className="rounded-[2rem] border border-border-3 bg-background-2 p-8 md:p-10">
         <p className="text-body-xs uppercase tracking-[0.24em] text-text-4">
           Category Archive

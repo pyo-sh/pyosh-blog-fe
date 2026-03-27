@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { fetchMeServer } from "@entities/auth";
+import { fetchCategories, getCategoryAncestors } from "@entities/category";
 import { fetchComments, type Comment } from "@entities/comment";
 import { fetchPosts, fetchPostBySlug } from "@entities/post";
 import { CommentList } from "@features/comment-section";
@@ -13,6 +14,12 @@ import {
   ViewCounter,
 } from "@features/post-detail";
 import { ApiResponseError } from "@shared/api";
+import {
+  buildBlogPostingJsonLd,
+  buildBreadcrumbJsonLd,
+  getSiteUrl,
+} from "@shared/lib/structured-data";
+import { JsonLd } from "@shared/ui/json-ld";
 import { ScrollToTop } from "@shared/ui/libs";
 
 interface PostDetailPageProps {
@@ -74,7 +81,10 @@ async function getCurrentViewer(): Promise<CurrentViewer> {
 
 export default async function PostDetailPage({ params }: PostDetailPageProps) {
   try {
-    const { post, prevPost, nextPost } = await fetchPostBySlug(params.slug);
+    const [{ post, prevPost, nextPost }, categories] = await Promise.all([
+      fetchPostBySlug(params.slug),
+      fetchCategories().catch(() => []),
+    ]);
     let comments: Comment[] = [];
     let commentError: string | null = null;
     const cookieHeader = await toCookieHeader();
@@ -98,11 +108,29 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
     if (fetchedComments) comments = fetchedComments;
     const relatedPosts =
       relatedPostsData?.data.filter((p) => p.id !== post.id).slice(0, 5) ?? [];
+    const siteUrl = getSiteUrl();
+    const categoryAncestors =
+      post.category.ancestors ??
+      getCategoryAncestors(categories, post.category.id);
+    const breadcrumbItems = [
+      { name: "홈", href: "/" },
+      ...categoryAncestors.map((ancestor) => ({
+        name: ancestor.name,
+        href: `/categories/${ancestor.slug}`,
+      })),
+      {
+        name: post.category.name,
+        href: `/categories/${post.category.slug}`,
+      },
+      { name: post.title },
+    ];
 
     const viewer = await getCurrentViewer();
 
     return (
       <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col gap-8 px-4 py-12 md:px-6">
+        <JsonLd data={buildBlogPostingJsonLd(post, siteUrl)} />
+        <JsonLd data={buildBreadcrumbJsonLd(breadcrumbItems, siteUrl)} />
         <ViewCounter postId={post.id} />
         <article className="overflow-hidden rounded-[2rem] border border-border-3 bg-background-2">
           {post.thumbnailUrl && (
