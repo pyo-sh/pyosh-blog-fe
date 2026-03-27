@@ -139,7 +139,9 @@ export function MarkdownEditor({
   const placeholderCompartmentRef = useRef(new Compartment());
   const contentAttributesCompartmentRef = useRef(new Compartment());
   const onChangeRef = useRef(onChange);
+  const onBlurRef = useRef(onBlur);
   onChangeRef.current = onChange;
+  onBlurRef.current = onBlur;
   const initialValueRef = useRef(value);
   const effectivePlaceholder =
     placeholderText ?? legacyPlaceholder ?? "# 글 내용을 작성하세요";
@@ -184,7 +186,7 @@ export function MarkdownEditor({
       }),
       EditorView.domEventHandlers({
         blur: () => {
-          onBlur?.();
+          onBlurRef.current?.();
         },
       }),
       contentAttributesCompartmentRef.current.of(

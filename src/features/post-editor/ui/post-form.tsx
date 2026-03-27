@@ -127,6 +127,21 @@ function buildPayload(values: PostFormValues): CreatePostBody {
   };
 }
 
+function mapPostToFormValues(post: Post): PostFormValues {
+  return {
+    title: post.title,
+    categoryId: post.categoryId,
+    tags: post.tags.map((tag) => tag.name),
+    status: post.status,
+    visibility: post.visibility,
+    commentStatus: post.commentStatus ?? "open",
+    thumbnailUrl: post.thumbnailUrl ?? "",
+    summary: post.summary ?? "",
+    description: post.description ?? "",
+    contentMd: post.contentMd,
+  };
+}
+
 function FormField({
   label,
   htmlFor,
@@ -242,9 +257,16 @@ export function PostForm({
       return createPost(payload);
     },
     onSuccess: async (post) => {
+      const persistedValues = mapPostToFormValues(post);
+
+      setValues(persistedValues);
       setIsDirty(false);
       setPendingIntent(null);
       setShowPublishConfirm(false);
+      hydrationRef.current = {
+        postId: post.id,
+        signature: JSON.stringify(persistedValues),
+      };
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["admin-posts"] }),
         queryClient.invalidateQueries({ queryKey: ["admin-post", post.id] }),
@@ -337,7 +359,6 @@ export function PostForm({
 
     setSubmitError(null);
     setPendingIntent(intent);
-    setValues(nextValues);
     mutation.mutate(nextValues);
   }
 
