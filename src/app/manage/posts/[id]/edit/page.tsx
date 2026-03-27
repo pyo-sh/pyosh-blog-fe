@@ -88,7 +88,7 @@ export default function DashboardPostEditPage() {
         </p>
         <button
           type="button"
-          onClick={() => router.push("/dashboard/posts")}
+          onClick={() => router.push("/manage/posts")}
           className="mt-4 inline-flex rounded-[0.75rem] border border-negative-1/20 px-4 py-2 text-sm font-medium text-negative-1 transition-colors hover:bg-negative-1/10"
         >
           목록으로 돌아가기
@@ -120,7 +120,7 @@ export default function DashboardPostEditPage() {
           </button>
           <button
             type="button"
-            onClick={() => router.push("/dashboard/posts")}
+            onClick={() => router.push("/manage/posts")}
             className="inline-flex rounded-[0.75rem] border border-border-3 px-4 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
           >
             목록으로
@@ -149,8 +149,8 @@ export default function DashboardPostEditPage() {
         postId={postId}
         initialValues={initialValues}
         cancelLabel="목록으로"
-        onCancel={() => router.push("/dashboard/posts")}
-        onSuccess={() => router.push("/dashboard/posts")}
+        onCancel={() => router.push("/manage/posts")}
+        onSuccess={() => router.push("/manage/posts")}
       />
     </div>
   );
