@@ -30,6 +30,7 @@ export function AssetUploader() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [pendingFiles, setPendingFiles] = useState<PendingUploadFile[]>([]);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [deleteTargetIds, setDeleteTargetIds] = useState<number[]>([]);
   const [copiedState, setCopiedState] = useState<{
@@ -43,16 +44,21 @@ export function AssetUploader() {
   });
 
   const uploadMutation = useMutation({
-    mutationFn: (files: File[]) => uploadAssets(files),
+    mutationFn: (files: File[]) => {
+      setUploadProgress(0);
+      return uploadAssets(files, setUploadProgress);
+    },
     onSuccess: async () => {
       toast.success(
         "업로드가 완료되었습니다. 최신 에셋을 맨 위에서 확인하세요.",
       );
+      setUploadProgress(null);
       setPage(1);
       clearPendingFiles();
       await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
     },
     onError: (error) => {
+      setUploadProgress(null);
       toast.error(getErrorMessage(error, "에셋 업로드에 실패했습니다."));
     },
   });
@@ -273,6 +279,7 @@ export function AssetUploader() {
       <UploadZone
         files={pendingFiles}
         isUploading={uploadMutation.isPending}
+        uploadProgress={uploadProgress}
         errorMessage={null}
         onFilesAdded={addFiles}
         onRemoveFile={removePendingFile}
