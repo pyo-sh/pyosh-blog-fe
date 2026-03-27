@@ -42,7 +42,7 @@ export function TocSection({ headings, onItemClick }: TocSectionProps) {
     }
 
     headingElement.scrollIntoView({ behavior: "smooth", block: "start" });
-    window.history.replaceState(null, "", `#${id}`);
+    window.history.replaceState(window.history.state, "", `#${id}`);
 
     if (window.innerWidth < DESKTOP_BREAKPOINT) {
       setIsOpen(false);
