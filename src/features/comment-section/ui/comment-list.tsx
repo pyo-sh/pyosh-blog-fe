@@ -174,18 +174,23 @@ function getPaginationItems(currentPage: number, totalPages: number) {
   return items;
 }
 
-function getDisplayBody(comment: Comment, profile: GuestCommentProfile) {
+function collectSecretComments(comments: Comment[]): Comment[] {
+  return comments.flatMap((comment) => [
+    ...(comment.isSecret && comment.body === SECRET_MASK ? [comment] : []),
+    ...collectSecretComments(comment.replies),
+  ]);
+}
+
+function getDisplayBody(
+  comment: Comment,
+  revealedSecretBodies: Record<number, string>,
+) {
   if (comment.status === "deleted") {
     return "삭제된 댓글입니다.";
   }
 
   if (comment.isSecret && comment.body === SECRET_MASK) {
-    const storedSecretBody = readGuestSecretComment(
-      comment.id,
-      getGuestIdentity(profile) ?? readGuestSecretIdentity(),
-    );
-
-    return storedSecretBody ?? comment.body;
+    return revealedSecretBodies[comment.id] ?? comment.body;
   }
 
   return comment.body;
@@ -228,6 +233,9 @@ export function CommentList({
     guestEmail: "",
     guestPassword: "",
   });
+  const [revealedSecretBodies, setRevealedSecretBodies] = useState<
+    Record<number, string>
+  >({});
   const sectionRef = useRef<HTMLElement | null>(null);
   const commentRefs = useRef<Record<number, HTMLLIElement | null>>({});
 
@@ -253,6 +261,28 @@ export function CommentList({
   useEffect(() => {
     setLoadError(initialError);
   }, [initialError]);
+
+  useEffect(() => {
+    const identity = getGuestIdentity(profile) ?? readGuestSecretIdentity();
+
+    if (!identity) {
+      setRevealedSecretBodies({});
+
+      return;
+    }
+
+    const nextRevealedSecretBodies = Object.fromEntries(
+      collectSecretComments(comments)
+        .map((comment) => {
+          const body = readGuestSecretComment(comment.id, identity);
+
+          return body ? [comment.id, body] : null;
+        })
+        .filter((entry): entry is [number, string] => entry !== null),
+    );
+
+    setRevealedSecretBodies(nextRevealedSecretBodies);
+  }, [comments, profile]);
 
   useEffect(() => {
     setExpandedRoots((current) => {
@@ -618,7 +648,7 @@ export function CommentList({
                 >
                   <CommentItem
                     comment={comment}
-                    body={getDisplayBody(comment, profile)}
+                    body={getDisplayBody(comment, revealedSecretBodies)}
                     onReply={handleReply}
                     allowReply={!isLocked}
                     canDelete={canDeleteComment(comment)}
@@ -663,7 +693,7 @@ export function CommentList({
                         >
                           <CommentItem
                             comment={reply}
-                            body={getDisplayBody(reply, profile)}
+                            body={getDisplayBody(reply, revealedSecretBodies)}
                             onReply={handleReply}
                             allowReply={!isLocked}
                             canDelete={canDeleteComment(reply)}
