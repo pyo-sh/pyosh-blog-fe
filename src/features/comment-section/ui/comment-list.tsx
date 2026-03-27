@@ -143,16 +143,49 @@ function getGuestIdentity(profile: GuestCommentProfile): {
   };
 }
 
+function getPaginationItems(currentPage: number, totalPages: number) {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  const pages = new Set<number>([1, totalPages]);
+
+  for (
+    let page = Math.max(2, currentPage - 1);
+    page <= Math.min(totalPages - 1, currentPage + 1);
+    page += 1
+  ) {
+    pages.add(page);
+  }
+
+  const sortedPages = [...pages].sort((left, right) => left - right);
+  const items: Array<number | "ellipsis"> = [];
+
+  sortedPages.forEach((page, index) => {
+    const previousPage = sortedPages[index - 1];
+
+    if (previousPage && page - previousPage > 1) {
+      items.push("ellipsis");
+    }
+
+    items.push(page);
+  });
+
+  return items;
+}
+
 function getDisplayBody(comment: Comment, profile: GuestCommentProfile) {
   if (comment.status === "deleted") {
     return "삭제된 댓글입니다.";
   }
 
   if (comment.isSecret && comment.body === SECRET_MASK) {
-    return (
-      readGuestSecretComment(comment.id, getGuestIdentity(profile)) ??
-      comment.body
+    const storedSecretBody = readGuestSecretComment(
+      comment.id,
+      getGuestIdentity(profile) ?? readGuestSecretIdentity(),
     );
+
+    return storedSecretBody ?? comment.body;
   }
 
   return comment.body;
@@ -220,20 +253,6 @@ export function CommentList({
   useEffect(() => {
     setLoadError(initialError);
   }, [initialError]);
-
-  useEffect(() => {
-    const identity = readGuestSecretIdentity();
-
-    if (!identity) {
-      return;
-    }
-
-    setProfile((current) => ({
-      ...current,
-      guestName: current.guestName || identity.guestName,
-      guestEmail: current.guestEmail || identity.guestEmail,
-    }));
-  }, []);
 
   useEffect(() => {
     setExpandedRoots((current) => {
@@ -697,25 +716,33 @@ export function CommentList({
           >
             &lsaquo;
           </button>
-          {Array.from(
-            { length: safeMeta.totalPages },
-            (_, index) => index + 1,
-          ).map((page) => (
-            <button
-              key={page}
-              type="button"
-              onClick={() => loadPage(page)}
-              disabled={isLoadingPage || page === currentPage}
-              aria-current={page === currentPage ? "page" : undefined}
-              className={
-                page === currentPage
-                  ? "inline-flex min-w-[2.25rem] items-center justify-center rounded-[0.85rem] bg-primary-1 px-3 py-2 text-sm font-semibold text-white"
-                  : "inline-flex min-w-[2.25rem] items-center justify-center rounded-[0.85rem] border border-border-3 px-3 py-2 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
-              }
-            >
-              {page}
-            </button>
-          ))}
+          {getPaginationItems(currentPage, safeMeta.totalPages).map(
+            (page, index) =>
+              page === "ellipsis" ? (
+                <span
+                  key={`ellipsis-${currentPage}-${index}`}
+                  aria-hidden="true"
+                  className="inline-flex min-w-[2.25rem] items-center justify-center px-1 py-2 text-sm text-text-4"
+                >
+                  ...
+                </span>
+              ) : (
+                <button
+                  key={page}
+                  type="button"
+                  onClick={() => loadPage(page)}
+                  disabled={isLoadingPage || page === currentPage}
+                  aria-current={page === currentPage ? "page" : undefined}
+                  className={
+                    page === currentPage
+                      ? "inline-flex min-w-[2.25rem] items-center justify-center rounded-[0.85rem] bg-primary-1 px-3 py-2 text-sm font-semibold text-white"
+                      : "inline-flex min-w-[2.25rem] items-center justify-center rounded-[0.85rem] border border-border-3 px-3 py-2 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+                  }
+                >
+                  {page}
+                </button>
+              ),
+          )}
           <button
             type="button"
             onClick={() =>
