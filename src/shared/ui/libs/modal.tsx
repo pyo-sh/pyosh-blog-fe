@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@shared/lib/style-utils";
 
@@ -19,19 +19,81 @@ const Modal: React.FC<ModalProps> = ({
   className,
   children,
 }) => {
+  const dialogRef = useRef<HTMLDivElement>(null);
+
   // ESC 키로 닫기
   useEffect(() => {
     if (!isOpen) return;
 
+    const previousActiveElement = document.activeElement as HTMLElement | null;
+
+    const focusableSelector =
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+    const focusFirstElement = () => {
+      const dialog = dialogRef.current;
+
+      if (!dialog) {
+        return;
+      }
+
+      const focusableElements = Array.from(
+        dialog.querySelectorAll<HTMLElement>(focusableSelector),
+      ).filter((element) => !element.hasAttribute("disabled"));
+
+      const firstElement = focusableElements[0] ?? dialog;
+      firstElement.focus();
+    };
+
+    const timer = window.setTimeout(focusFirstElement, 0);
+
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         onClose();
+
+        return;
+      }
+
+      if (e.key !== "Tab") {
+        return;
+      }
+
+      const dialog = dialogRef.current;
+
+      if (!dialog) {
+        return;
+      }
+
+      const focusableElements = Array.from(
+        dialog.querySelectorAll<HTMLElement>(focusableSelector),
+      ).filter((element) => !element.hasAttribute("disabled"));
+
+      if (focusableElements.length === 0) {
+        e.preventDefault();
+        dialog.focus();
+
+        return;
+      }
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (e.shiftKey && document.activeElement === firstElement) {
+        e.preventDefault();
+        lastElement.focus();
+      } else if (!e.shiftKey && document.activeElement === lastElement) {
+        e.preventDefault();
+        firstElement.focus();
       }
     };
 
     document.addEventListener("keydown", handleEscape);
 
-    return () => document.removeEventListener("keydown", handleEscape);
+    return () => {
+      window.clearTimeout(timer);
+      document.removeEventListener("keydown", handleEscape);
+      previousActiveElement?.focus();
+    };
   }, [isOpen, onClose]);
 
   // body 스크롤 방지
@@ -65,6 +127,7 @@ const Modal: React.FC<ModalProps> = ({
       aria-modal="true"
     >
       <div
+        ref={dialogRef}
         className={cn(
           "min-w-[21.875rem] min-h-[5rem] max-h-[85%]",
           "bg-background-2 text-text-1",
@@ -74,6 +137,7 @@ const Modal: React.FC<ModalProps> = ({
           className,
         )}
         onClick={(e) => e.stopPropagation()}
+        tabIndex={-1}
       >
         {children}
       </div>

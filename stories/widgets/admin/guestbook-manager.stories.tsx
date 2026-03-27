@@ -20,7 +20,10 @@ export const Empty: Story = {
     msw: {
       handlers: [
         http.get("/api/admin/guestbook", () => {
-          return HttpResponse.json({ data: [], meta: { total: 0, page: 1, limit: 10, totalPages: 0 } });
+          return HttpResponse.json({
+            data: [],
+            meta: { total: 0, page: 1, limit: 10, totalPages: 0 },
+          });
         }),
       ],
     },
@@ -30,5 +33,17 @@ export const Empty: Story = {
 export const DarkMode: Story = {
   parameters: {
     themes: { themeOverride: "dark" },
+  },
+};
+
+export const Disabled: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.get("/api/settings/guestbook", () => {
+          return HttpResponse.json({ enabled: false });
+        }),
+      ],
+    },
   },
 };
