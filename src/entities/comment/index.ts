@@ -13,6 +13,7 @@ export {
   adminDeleteComment,
   createComment,
   deleteComment,
+  fetchAdminCommentThread,
   fetchAdminComments,
   fetchComments,
 } from "./api";
