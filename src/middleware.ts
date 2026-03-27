@@ -1,20 +1,20 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-const DASHBOARD_LOGIN_PATH = "/dashboard/login";
-const DASHBOARD_HOME_PATH = "/dashboard";
+const MANAGE_LOGIN_PATH = "/manage/login";
+const MANAGE_HOME_PATH = "/manage";
 const API_URL = process.env.API_URL ?? "http://localhost:5500";
 
-function redirectToDashboard(request: NextRequest): NextResponse {
-  const dashboardUrl = request.nextUrl.clone();
-  dashboardUrl.pathname = DASHBOARD_HOME_PATH;
-  dashboardUrl.search = "";
+function redirectToManage(request: NextRequest): NextResponse {
+  const manageUrl = request.nextUrl.clone();
+  manageUrl.pathname = MANAGE_HOME_PATH;
+  manageUrl.search = "";
 
-  return NextResponse.redirect(dashboardUrl);
+  return NextResponse.redirect(manageUrl);
 }
 
 function redirectToLogin(request: NextRequest): NextResponse {
   const loginUrl = request.nextUrl.clone();
-  loginUrl.pathname = DASHBOARD_LOGIN_PATH;
+  loginUrl.pathname = MANAGE_LOGIN_PATH;
   loginUrl.search = "";
   loginUrl.searchParams.set(
     "returnTo",
@@ -31,7 +31,7 @@ async function isAuthenticated(request: NextRequest): Promise<boolean> {
     process.env.NODE_ENV === "production" &&
     typeof process.env.API_URL === "undefined"
   ) {
-    console.error("[middleware] API_URL is not set; denying dashboard access");
+    console.error("[middleware] API_URL is not set; denying manage access");
 
     return false;
   }
@@ -58,9 +58,9 @@ async function isAuthenticated(request: NextRequest): Promise<boolean> {
 export async function middleware(request: NextRequest): Promise<NextResponse> {
   const authenticated = await isAuthenticated(request);
 
-  if (request.nextUrl.pathname === DASHBOARD_LOGIN_PATH) {
+  if (request.nextUrl.pathname === MANAGE_LOGIN_PATH) {
     if (authenticated) {
-      return redirectToDashboard(request);
+      return redirectToManage(request);
     }
 
     return NextResponse.next();
@@ -74,5 +74,5 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 }
 
 export const config = {
-  matcher: "/dashboard/:path*",
+  matcher: "/manage/:path*",
 };

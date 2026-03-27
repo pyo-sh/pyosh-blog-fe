@@ -3,11 +3,7 @@
 import { useSelectedLayoutSegment } from "next/navigation";
 import { AdminSidebar } from "@widgets/admin-sidebar";
 
-export function DashboardLayoutShell({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function ManageLayoutShell({ children }: { children: React.ReactNode }) {
   const segment = useSelectedLayoutSegment();
 
   if (segment === "login") {

@@ -11,7 +11,7 @@ export function LoginForm() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const busy = isLoading || isPending;
 
@@ -21,12 +21,12 @@ export function LoginForm() {
 
     try {
       await login({
-        email: email.trim(),
+        username: username.trim(),
         password,
       });
 
       startTransition(() => {
-        router.push("/dashboard");
+        router.push("/manage");
         router.refresh();
       });
     } catch (error) {
@@ -58,13 +58,13 @@ export function LoginForm() {
 
       <div className="mt-8 space-y-5">
         <label className="block">
-          <span className="text-body-sm font-medium text-text-1">이메일</span>
+          <span className="text-body-sm font-medium text-text-1">아이디</span>
           <input
-            type="email"
-            autoComplete="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="admin@example.com"
+            type="text"
+            autoComplete="username"
+            value={username}
+            onChange={(event) => setUsername(event.target.value)}
+            placeholder="아이디를 입력하세요"
             disabled={busy}
             className="mt-2 w-full rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
             required

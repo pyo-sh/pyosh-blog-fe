@@ -110,7 +110,7 @@ function ActionButton({
   );
 }
 
-export default function DashboardPostsPage() {
+export default function ManagePostsPage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState<AdminPostStatusFilter>("all");
@@ -189,7 +189,7 @@ export default function DashboardPostsPage() {
         </div>
 
         <Link
-          href="/dashboard/posts/new"
+          href="/manage/posts/new"
           className="inline-flex items-center justify-center rounded-[0.9rem] bg-primary-1 px-4 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
         >
           새 글 작성
@@ -335,7 +335,7 @@ export default function DashboardPostsPage() {
                               <div className="flex flex-wrap gap-2">
                                 {!deleted ? (
                                   <Link
-                                    href={`/dashboard/posts/${post.id}/edit`}
+                                    href={`/manage/posts/${post.id}/edit`}
                                     className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
                                   >
                                     수정
