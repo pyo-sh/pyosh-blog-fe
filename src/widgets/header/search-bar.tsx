@@ -111,7 +111,6 @@ const SearchBar: React.FC = () => {
           id="header-search-input"
           ref={inputRef}
           type="search"
-          role="searchbox"
           disabled={!isOpen}
           tabIndex={isOpen ? 0 : -1}
           value={query}

@@ -17,7 +17,10 @@ interface SearchFilterProps {
   query: string;
 }
 
-export function SearchFilter({ currentFilter, query }: SearchFilterProps) {
+export function SearchFilterDropdown({
+  currentFilter,
+  query,
+}: SearchFilterProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 

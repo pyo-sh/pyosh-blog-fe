@@ -2,10 +2,7 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import type { SearchFilter } from "@entities/post";
 import { fetchPosts } from "@entities/post";
-import {
-  SearchFilter as SearchFilterDropdown,
-  SearchResultItem,
-} from "@features/search";
+import { SearchFilterDropdown, SearchResultItem } from "@features/search";
 import { EmptyState, Pagination, ScrollToTop } from "@shared/ui/libs";
 
 const VALID_FILTERS: SearchFilter[] = [

@@ -96,7 +96,8 @@ export function SearchResultItem({ post, query }: SearchResultItemProps) {
         {post.matchedComment && (
           <p className="line-clamp-2 break-keep text-sm leading-relaxed italic text-text-4">
             일치하는 댓글: &ldquo;
-            {highlightText(post.matchedComment.body, query)}&rdquo;
+            {highlightText(post.matchedComment.body, query)}&rdquo; &mdash;{" "}
+            {post.matchedComment.authorName}
           </p>
         )}
 

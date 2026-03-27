@@ -8,7 +8,7 @@ export function highlightText(text: string, query: string): React.ReactNode {
   const parts = text.split(regex);
 
   return parts.map((part, i) =>
-    regex.test(part) ? (
+    i % 2 !== 0 ? (
       <mark key={i} className="rounded-sm bg-primary-1/20 text-text-1">
         {part}
       </mark>
