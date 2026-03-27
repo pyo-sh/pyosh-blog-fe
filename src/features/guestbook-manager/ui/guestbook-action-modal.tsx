@@ -61,11 +61,18 @@ export function GuestbookActionModal({
 
   const selectedOption =
     options.find((option) => option.value === selectedAction) ?? options[0];
+  const handleClose = () => {
+    if (isPending) {
+      return;
+    }
+
+    onClose();
+  };
 
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
       withBackground
       className="w-full max-w-[34rem]"
     >
@@ -110,7 +117,7 @@ export function GuestbookActionModal({
         <div className="flex justify-end gap-3">
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             disabled={isPending}
             className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
           >

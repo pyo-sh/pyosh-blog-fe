@@ -87,14 +87,18 @@ export default async function GuestbookPage({
 }: GuestbookPageProps) {
   const page = parsePage(getSingleValue(searchParams?.page));
   const cookieHeader = await toCookieHeader();
-  const settings = await fetchGuestbookSettings(cookieHeader);
+  try {
+    const settings = await fetchGuestbookSettings(cookieHeader);
 
-  if (!settings.enabled) {
-    return (
-      <section className="py-16">
-        <EmptyState message="현재 방명록 기능이 비활성화되어 있습니다." />
-      </section>
-    );
+    if (!settings.enabled) {
+      return (
+        <section className="py-16">
+          <EmptyState message="현재 방명록 기능이 비활성화되어 있습니다." />
+        </section>
+      );
+    }
+  } catch {
+    // Settings lookup should not take down the public guestbook page.
   }
 
   const [response, viewer] = await Promise.all([
