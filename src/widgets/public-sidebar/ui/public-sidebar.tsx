@@ -101,6 +101,7 @@ export function StickySidebarWrapper({ children }: StickyWrapperProps) {
 
   useEffect(() => {
     const NAV_HEIGHT = 72;
+    lastScrollY.current = window.scrollY;
 
     const handleScroll = () => {
       const el = sidebarRef.current;
