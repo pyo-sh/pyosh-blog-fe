@@ -67,7 +67,7 @@ export function ErrorBoundaryWithReset({
   const ref = useRef<ErrorBoundary>(null);
 
   useEffect(() => {
-    ref.current?.setState({ hasError: false });
+    ref.current?.setState({ hasError: false, retryKey: 0 });
   }, [pathname]);
 
   return <ErrorBoundary ref={ref}>{children}</ErrorBoundary>;

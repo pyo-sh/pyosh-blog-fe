@@ -14,13 +14,18 @@ async function handleResponse<T>(
       message: response.statusText,
     };
     const error: ApiError = await response.json().catch(() => fallback);
-    console.error("[API Error]", {
+    const logPayload = {
       url: context?.url,
       method: context?.method,
       status: response.status,
       error: error.message,
       timestamp: new Date().toISOString(),
-    });
+    };
+    if (response.status >= 500) {
+      console.error("[API Error]", logPayload);
+    } else {
+      console.warn("[API Warning]", logPayload);
+    }
     throw new ApiResponseError(error);
   }
 
