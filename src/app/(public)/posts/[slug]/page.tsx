@@ -20,6 +20,7 @@ import {
   getSiteUrl,
 } from "@shared/lib/structured-data";
 import { JsonLd } from "@shared/ui/json-ld";
+import { extractHeadings, type TocItem } from "@shared/lib/markdown";
 import { ScrollToTop } from "@shared/ui/libs";
 
 interface PostDetailPageProps {
@@ -82,6 +83,7 @@ async function getCurrentViewer(): Promise<CurrentViewer> {
 export default async function PostDetailPage({ params }: PostDetailPageProps) {
   try {
     const { post, prevPost, nextPost } = await fetchPostBySlug(params.slug);
+    const headings = extractHeadings(post.contentMd);
     let comments: Comment[] = [];
     let commentError: string | null = null;
     const cookieHeader = await toCookieHeader();
@@ -203,6 +205,16 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
               )}
             </header>
 
+            {headings.length > 0 && (
+              <script
+                id="post-toc-data"
+                type="application/json"
+                dangerouslySetInnerHTML={{
+                  __html: serializeTocItems(headings),
+                }}
+              />
+            )}
+
             <PostContent contentMd={post.contentMd} />
 
             {relatedPosts.length > 0 && <RelatedPosts posts={relatedPosts} />}
@@ -226,4 +238,8 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
 
     throw error;
   }
+}
+
+function serializeTocItems(headings: TocItem[]) {
+  return JSON.stringify(headings).replace(/</g, "\\u003c");
 }

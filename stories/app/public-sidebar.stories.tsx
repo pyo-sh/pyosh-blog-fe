@@ -29,6 +29,11 @@ const mockPopularPosts = [
 ];
 
 const mockTotalViews = { totalPageviews: 12345 };
+const mockHeadings = [
+  { id: "intro", text: "소개", level: 1 as const },
+  { id: "setup", text: "설정", level: 2 as const },
+  { id: "details", text: "상세 코드", level: 3 as const },
+];
 
 const meta: Meta<typeof PublicSidebarContent> = {
   title: "App/PublicSidebar",
@@ -42,6 +47,7 @@ const meta: Meta<typeof PublicSidebarContent> = {
     categories: mockCategories,
     tags: mockTags,
     totalViews: mockTotalViews,
+    headings: mockHeadings,
   },
 };
 
@@ -69,6 +75,7 @@ export const Empty: Story = {
     categories: [],
     tags: [],
     totalViews: null,
+    headings: [],
   },
 };
 
