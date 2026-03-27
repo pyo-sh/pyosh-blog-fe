@@ -84,12 +84,8 @@ const editorTheme = EditorView.theme({
 
 const externalSyncAnnotation = Annotation.define<boolean>();
 
-function getContentAttributes(
-  id: string,
-  labelId?: string,
-): Record<string, string> {
+function getContentAttributes(labelId?: string): Record<string, string> {
   const attrs: Record<string, string> = {
-    id,
     role: "textbox",
     "aria-multiline": "true",
     spellcheck: "false",
@@ -181,7 +177,7 @@ export function MarkdownEditor({
         }
       }),
       contentAttributesCompartmentRef.current.of(
-        EditorView.contentAttributes.of(getContentAttributes(id, labelId)),
+        EditorView.contentAttributes.of(getContentAttributes(labelId)),
       ),
     ];
 
@@ -218,7 +214,7 @@ export function MarkdownEditor({
 
     editorView.dispatch({
       effects: contentAttributesCompartmentRef.current.reconfigure(
-        EditorView.contentAttributes.of(getContentAttributes(id, labelId)),
+        EditorView.contentAttributes.of(getContentAttributes(labelId)),
       ),
     });
   }, [editorView, id, labelId]);
@@ -244,9 +240,10 @@ export function MarkdownEditor({
       <textarea
         aria-hidden="true"
         className="sr-only"
+        id={id}
         name={name}
+        onFocus={() => editorView?.focus()}
         readOnly
-        tabIndex={-1}
         value={value}
       />
       <MarkdownToolbar editorView={editorView} />
