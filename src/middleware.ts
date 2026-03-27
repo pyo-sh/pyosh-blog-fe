@@ -13,7 +13,7 @@ function buildCspDirectives(nonce: string): string {
     isDev
       ? "img-src 'self' http: https: data: blob:"
       : "img-src 'self' https: data: blob:",
-    `script-src 'self' 'nonce-${nonce}'`,
+    `script-src 'nonce-${nonce}' 'strict-dynamic'`,
     "style-src 'self' 'unsafe-inline'",
     "font-src 'self' https://fonts.gstatic.com",
     apiUrl ? `connect-src 'self' ${apiUrl}` : "connect-src 'self'",
@@ -89,7 +89,10 @@ async function isAuthenticated(request: NextRequest): Promise<boolean> {
 export async function middleware(request: NextRequest): Promise<NextResponse> {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
 
-  if (request.nextUrl.pathname.startsWith(MANAGE_HOME_PATH)) {
+  if (
+    request.nextUrl.pathname === MANAGE_HOME_PATH ||
+    request.nextUrl.pathname.startsWith(`${MANAGE_HOME_PATH}/`)
+  ) {
     const authenticated = await isAuthenticated(request);
 
     if (request.nextUrl.pathname === MANAGE_LOGIN_PATH) {
