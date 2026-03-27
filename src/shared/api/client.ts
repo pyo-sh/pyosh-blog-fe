@@ -1,6 +1,8 @@
 import { ApiResponseError, type ApiError } from "./types";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5500";
+const PUBLIC_API_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5500";
+const INTERNAL_API_URL = process.env.API_URL ?? PUBLIC_API_URL;
 
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
@@ -33,7 +35,7 @@ export async function serverFetch<T>(
     ...(cookieHeader ? { Cookie: cookieHeader } : {}),
   };
 
-  const response = await fetch(`${API_URL}${path}`, {
+  const response = await fetch(`${INTERNAL_API_URL}${path}`, {
     ...options,
     headers,
     cache: options.cache ?? "no-store",
@@ -55,7 +57,7 @@ export async function clientFetch<T>(
     ...options.headers,
   };
 
-  const response = await fetch(`${API_URL}${path}`, {
+  const response = await fetch(`${PUBLIC_API_URL}${path}`, {
     ...options,
     headers,
     credentials: "include",
