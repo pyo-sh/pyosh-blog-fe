@@ -46,6 +46,15 @@ export type SearchFilter =
   | "category"
   | "comment";
 
+export const SEARCH_FILTERS: SearchFilter[] = [
+  "title_content",
+  "title",
+  "content",
+  "tag",
+  "category",
+  "comment",
+];
+
 export interface PostNavigation {
   slug: string;
   title: string;

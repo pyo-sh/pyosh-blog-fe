@@ -20,6 +20,7 @@ function formatDate(value: string) {
   return dateFormatter.format(new Date(value));
 }
 
+// Allowed external hosts must match next.config remotePatterns
 function supportsNextImage(src: string | null): boolean {
   if (!src) return false;
   if (src.startsWith("/")) return true;

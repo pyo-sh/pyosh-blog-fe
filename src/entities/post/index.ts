@@ -12,6 +12,7 @@ export type {
   CreatePostBody,
   UpdatePostBody,
 } from "./model";
+export { SEARCH_FILTERS } from "./model";
 export {
   fetchAdminPost,
   fetchAdminPosts,

@@ -1,18 +1,9 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import type { SearchFilter } from "@entities/post";
-import { fetchPosts } from "@entities/post";
+import { SEARCH_FILTERS, fetchPosts } from "@entities/post";
 import { SearchFilterDropdown, SearchResultItem } from "@features/search";
 import { EmptyState, Pagination, ScrollToTop } from "@shared/ui/libs";
-
-const VALID_FILTERS: SearchFilter[] = [
-  "title_content",
-  "title",
-  "content",
-  "tag",
-  "category",
-  "comment",
-];
 
 interface SearchPageProps {
   searchParams?: {
@@ -41,7 +32,7 @@ function parsePage(value?: string): number {
 }
 
 function parseFilter(value?: string): SearchFilter {
-  if (value && (VALID_FILTERS as string[]).includes(value)) {
+  if (value && (SEARCH_FILTERS as string[]).includes(value)) {
     return value as SearchFilter;
   }
 
