@@ -16,7 +16,7 @@ const LG_BREAKPOINT = 1080;
 
 interface PublicLayoutShellProps {
   recentPosts: Post[];
-  popularPosts: PopularPost[];
+  popularPosts: PopularPost[] | null;
   categories: Category[];
   tags: Tag[];
   totalViews: TotalViewsStats | null;
