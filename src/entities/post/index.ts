@@ -1,4 +1,6 @@
 export type {
+  BulkPostAction,
+  BulkPostErrorDetail,
   FetchAdminPostsParams,
   FetchPostsParams,
   MatchedComment,
@@ -14,6 +16,7 @@ export type {
 } from "./model";
 export { SEARCH_FILTERS } from "./model";
 export {
+  bulkUpdatePosts,
   fetchAdminPost,
   fetchAdminPosts,
   fetchPostBySlug,

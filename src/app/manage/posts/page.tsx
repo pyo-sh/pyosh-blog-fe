@@ -1,121 +1,93 @@
 "use client";
 
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { toast } from "sonner";
+import { fetchCategoriesAdmin, type Category } from "@entities/category";
 import {
+  bulkUpdatePosts,
   deletePost,
   fetchAdminPosts,
+  hardDeletePost,
   restorePost,
+  updatePost,
+  type BulkPostErrorDetail,
+  type FetchAdminPostsParams,
   type Post,
 } from "@entities/post";
 import { getErrorMessage } from "@shared/lib/get-error-message";
-import { cn } from "@shared/lib/style-utils";
-import { EmptyState, Skeleton, Spinner } from "@shared/ui/libs";
+import {
+  BulkActions,
+  PostFilters,
+  PostTable,
+  type AdminPostStatusFilter,
+  type AdminPostTab,
+  type AdminPostVisibilityFilter,
+  type SortField,
+  type SortOrder,
+} from "@widgets/admin-post-list";
 
 const PAGE_SIZE = 10;
 
-type AdminPostStatusFilter = Post["status"] | "all";
-
-const STATUS_OPTIONS: Array<{
-  label: string;
-  value: AdminPostStatusFilter;
-}> = [
-  { label: "전체", value: "all" },
-  { label: "초안", value: "draft" },
-  { label: "발행", value: "published" },
-  { label: "보관", value: "archived" },
-];
-
-const statusLabelMap: Record<Post["status"], string> = {
-  draft: "초안",
-  published: "발행",
-  archived: "보관",
-};
-
-const visibilityLabelMap: Record<Post["visibility"], string> = {
-  public: "공개",
-  private: "비공개",
-};
-
-const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-});
-
-function formatDate(value: string): string {
-  return dateFormatter.format(new Date(value));
+function hasBulkDetails(
+  err: unknown,
+): err is { details: BulkPostErrorDetail[] } {
+  return (
+    typeof err === "object" &&
+    err !== null &&
+    "details" in err &&
+    Array.isArray((err as { details: unknown }).details)
+  );
 }
 
 function getQueryKey(
+  tab: AdminPostTab,
   page: number,
   status: AdminPostStatusFilter,
-  includeDeleted: boolean,
+  visibility: AdminPostVisibilityFilter,
+  q: string,
+  sort: FetchAdminPostsParams["sort"],
+  order: SortOrder,
 ) {
-  return ["admin-posts", page, status, includeDeleted] as const;
-}
-
-function Badge({
-  children,
-  tone,
-}: {
-  children: ReactNode;
-  tone: "neutral" | "primary" | "warning" | "danger";
-}) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium",
-        tone === "neutral" && "bg-background-3 text-text-2",
-        tone === "primary" && "bg-primary-1/10 text-primary-1",
-        tone === "warning" && "bg-positive-1/10 text-positive-1",
-        tone === "danger" && "bg-negative-1/10 text-negative-1",
-      )}
-    >
-      {children}
-    </span>
-  );
-}
-
-function ActionButton({
-  children,
-  disabled,
-  onClick,
-  tone = "default",
-}: {
-  children: ReactNode;
-  disabled?: boolean;
-  onClick: () => void;
-  tone?: "default" | "danger";
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className={cn(
-        "inline-flex items-center justify-center rounded-[0.75rem] border px-3 py-2 text-sm font-medium transition-colors",
-        "disabled:cursor-not-allowed disabled:opacity-50",
-        tone === "default" &&
-          "border-border-3 text-text-2 hover:border-border-2 hover:text-text-1",
-        tone === "danger" &&
-          "border-negative-1/30 text-negative-1 hover:bg-negative-1/10",
-      )}
-    >
-      {children}
-    </button>
-  );
+  return [
+    "admin-posts",
+    tab,
+    page,
+    status,
+    visibility,
+    q,
+    sort,
+    order,
+  ] as const;
 }
 
 export default function ManagePostsPage() {
   const queryClient = useQueryClient();
+
+  const [tab, setTab] = useState<AdminPostTab>("active");
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState<AdminPostStatusFilter>("all");
-  const [includeDeleted, setIncludeDeleted] = useState(false);
+  const [visibility, setVisibility] =
+    useState<AdminPostVisibilityFilter>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sort, setSort] = useState<FetchAdminPostsParams["sort"]>(undefined);
+  const [order, setOrder] = useState<SortOrder>("desc");
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [pendingToggleIds, setPendingToggleIds] = useState<Set<number>>(
+    new Set(),
+  );
+  const [deleteId, setDeleteId] = useState<number | null>(null);
 
-  const queryKey = getQueryKey(page, status, includeDeleted);
+  const queryKey = getQueryKey(
+    tab,
+    page,
+    status,
+    visibility,
+    searchQuery,
+    sort,
+    order,
+  );
 
   const { data, isPending, isError, error, refetch, isFetching } = useQuery({
     queryKey,
@@ -124,32 +96,27 @@ export default function ManagePostsPage() {
         page,
         limit: PAGE_SIZE,
         status: status === "all" ? undefined : status,
-        includeDeleted,
+        visibility: visibility === "all" ? undefined : visibility,
+        q: searchQuery || undefined,
+        sort,
+        order,
+        includeDeleted: tab === "trash",
       }),
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: deletePost,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["admin-posts"] });
-    },
-    onError: (mutationError) => {
-      toast.error(getErrorMessage(mutationError, "글 삭제에 실패했습니다."));
-    },
-  });
-
-  const restoreMutation = useMutation({
-    mutationFn: restorePost,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["admin-posts"] });
-    },
-    onError: (mutationError) => {
-      toast.error(getErrorMessage(mutationError, "글 복원에 실패했습니다."));
-    },
+  const { data: categories = [] } = useQuery({
+    queryKey: ["categories-admin"],
+    queryFn: (): Promise<Category[]> => fetchCategoriesAdmin(),
+    staleTime: 5 * 60 * 1000,
   });
 
   const rows = data?.data ?? [];
   const meta = data?.meta;
+
+  // Trash tab meta total — shown only after loading to avoid displaying a stale
+  // count. The badge is intentionally omitted until the backend exposes a
+  // deleted-only count endpoint, since includeDeleted=true may be additive.
+  const trashCount = tab === "trash" && meta ? meta.total : undefined;
 
   useEffect(() => {
     if (meta && meta.totalPages > 0 && page > meta.totalPages) {
@@ -157,21 +124,255 @@ export default function ManagePostsPage() {
     }
   }, [meta, page]);
 
-  const paginationLabel = useMemo(() => {
-    if (!meta || rows.length === 0) {
-      return "표시할 글이 없습니다.";
-    }
+  const resetPage = useCallback(() => {
+    setPage(1);
+    setSelectedIds([]);
+  }, []);
 
+  function handleTabChange(newTab: AdminPostTab) {
+    setTab(newTab);
+    setPage(1);
+    setSelectedIds([]);
+    setStatus("all");
+    setVisibility("all");
+    setSearchQuery("");
+  }
+
+  function handleSortChange(field: SortField) {
+    if (sort === field) {
+      if (order === "desc") {
+        setOrder("asc");
+      } else {
+        setSort(undefined);
+        setOrder("desc");
+      }
+    } else {
+      setSort(field);
+      setOrder("desc");
+    }
+    setPage(1);
+  }
+
+  function handleToggleSelect(id: number) {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  }
+
+  function handleToggleSelectAll() {
+    const allIds = rows.map((p) => p.id);
+    const allSelected = allIds.every((id) => selectedIds.includes(id));
+    setSelectedIds(allSelected ? [] : allIds);
+  }
+
+  async function handleToggleVisibility(post: Post) {
+    setPendingToggleIds((prev) => new Set(prev).add(post.id));
+
+    const nextVisibility: Post["visibility"] =
+      post.visibility === "public" ? "private" : "public";
+
+    queryClient.setQueryData(queryKey, (old: typeof data) => {
+      if (!old) return old;
+
+      return {
+        ...old,
+        data: old.data.map((p) =>
+          p.id === post.id ? { ...p, visibility: nextVisibility } : p,
+        ),
+      };
+    });
+
+    try {
+      await updatePost(post.id, { visibility: nextVisibility });
+    } catch (err) {
+      queryClient.setQueryData(queryKey, (old: typeof data) => {
+        if (!old) return old;
+
+        return {
+          ...old,
+          data: old.data.map((p) =>
+            p.id === post.id ? { ...p, visibility: post.visibility } : p,
+          ),
+        };
+      });
+      toast.error(getErrorMessage(err, "공개 여부 변경에 실패했습니다."));
+    } finally {
+      setPendingToggleIds((prev) => {
+        const next = new Set(prev);
+        next.delete(post.id);
+
+        return next;
+      });
+    }
+  }
+
+  async function handleTogglePin(post: Post) {
+    setPendingToggleIds((prev) => new Set(prev).add(post.id));
+
+    const nextPinned = !post.isPinned;
+
+    queryClient.setQueryData(queryKey, (old: typeof data) => {
+      if (!old) return old;
+
+      return {
+        ...old,
+        data: old.data.map((p) =>
+          p.id === post.id ? { ...p, isPinned: nextPinned } : p,
+        ),
+      };
+    });
+
+    try {
+      await updatePost(post.id, { isPinned: nextPinned });
+    } catch (err) {
+      queryClient.setQueryData(queryKey, (old: typeof data) => {
+        if (!old) return old;
+
+        return {
+          ...old,
+          data: old.data.map((p) =>
+            p.id === post.id ? { ...p, isPinned: post.isPinned } : p,
+          ),
+        };
+      });
+      toast.error(getErrorMessage(err, "고정 변경에 실패했습니다."));
+    } finally {
+      setPendingToggleIds((prev) => {
+        const next = new Set(prev);
+        next.delete(post.id);
+
+        return next;
+      });
+    }
+  }
+
+  async function invalidatePostQueries() {
+    await queryClient.invalidateQueries({ queryKey: ["admin-posts"] });
+  }
+
+  const deleteMutation = useMutation({
+    mutationFn: deletePost,
+    onMutate: (id) => setDeleteId(id),
+    onSuccess: async () => {
+      await invalidatePostQueries();
+      toast.success("글이 삭제되었습니다.");
+    },
+    onError: (err) => {
+      toast.error(getErrorMessage(err, "글 삭제에 실패했습니다."));
+    },
+    onSettled: () => setDeleteId(null),
+  });
+
+  const restoreMutation = useMutation({
+    mutationFn: restorePost,
+    onMutate: (id) => setDeleteId(id),
+    onSuccess: async () => {
+      await invalidatePostQueries();
+      toast.success("글이 복원되었습니다.");
+    },
+    onError: (err) => {
+      toast.error(getErrorMessage(err, "글 복원에 실패했습니다."));
+    },
+    onSettled: () => setDeleteId(null),
+  });
+
+  const hardDeleteMutation = useMutation({
+    mutationFn: hardDeletePost,
+    onMutate: (id) => setDeleteId(id),
+    onSuccess: async () => {
+      await invalidatePostQueries();
+      toast.success("글이 영구 삭제되었습니다.");
+    },
+    onError: (err) => {
+      toast.error(getErrorMessage(err, "영구 삭제에 실패했습니다."));
+    },
+    onSettled: () => setDeleteId(null),
+  });
+
+  async function handleBulkDelete(ids: number[]) {
+    try {
+      await bulkUpdatePosts({ ids, action: "soft_delete" });
+      await invalidatePostQueries();
+      toast.success(`${ids.length}개 글이 삭제되었습니다.`);
+    } catch (err) {
+      if (hasBulkDetails(err) && err.details.length) {
+        const detail = err.details
+          .map((d) => `#${d.id}: ${d.reason}`)
+          .join(", ");
+        toast.error(`삭제 실패: ${detail}`);
+      } else {
+        toast.error(getErrorMessage(err, "일괄 삭제에 실패했습니다."));
+      }
+      throw err;
+    }
+  }
+
+  async function handleBulkRestore(ids: number[]) {
+    try {
+      await bulkUpdatePosts({ ids, action: "restore" });
+      await invalidatePostQueries();
+      toast.success(`${ids.length}개 글이 복원되었습니다.`);
+    } catch (err) {
+      toast.error(getErrorMessage(err, "일괄 복원에 실패했습니다."));
+      throw err;
+    }
+  }
+
+  async function handleBulkHardDelete(ids: number[]) {
+    try {
+      await bulkUpdatePosts({ ids, action: "hard_delete" });
+      await invalidatePostQueries();
+      toast.success(`${ids.length}개 글이 영구 삭제되었습니다.`);
+    } catch (err) {
+      if (hasBulkDetails(err) && err.details.length) {
+        const detail = err.details
+          .map((d) => `#${d.id}: ${d.reason}`)
+          .join(", ");
+        toast.error(`영구 삭제 실패: ${detail}`);
+      } else {
+        toast.error(getErrorMessage(err, "일괄 영구 삭제에 실패했습니다."));
+      }
+      throw err;
+    }
+  }
+
+  async function handleBulkUpdate(
+    ids: number[],
+    categoryId?: number,
+    commentStatus?: "open" | "locked" | "disabled",
+  ) {
+    try {
+      await bulkUpdatePosts({
+        ids,
+        action: "update",
+        categoryId,
+        commentStatus,
+      });
+      await invalidatePostQueries();
+      toast.success(`${ids.length}개 글이 업데이트되었습니다.`);
+    } catch (err) {
+      if (hasBulkDetails(err) && err.details.length) {
+        const detail = err.details
+          .map((d) => `#${d.id}: ${d.reason}`)
+          .join(", ");
+        toast.error(`업데이트 실패: ${detail}`);
+      } else {
+        toast.error(getErrorMessage(err, "일괄 업데이트에 실패했습니다."));
+      }
+      throw err;
+    }
+  }
+
+  const paginationLabel = useMemo(() => {
+    if (!meta || rows.length === 0) return "표시할 글이 없습니다.";
     const start = (meta.page - 1) * meta.limit + 1;
     const end = start + rows.length - 1;
 
     return `총 ${meta.total}개 중 ${start}-${end}`;
   }, [meta, rows.length]);
 
-  const activeActionId =
-    deleteMutation.variables ?? restoreMutation.variables ?? null;
-  const isActionPending =
-    deleteMutation.isPending || restoreMutation.isPending || false;
+  const allSelected =
+    rows.length > 0 && rows.every((p) => selectedIds.includes(p.id));
 
   return (
     <div className="space-y-6">
@@ -196,195 +397,77 @@ export default function ManagePostsPage() {
       </header>
 
       <section className="rounded-[1.75rem] border border-border-3 bg-background-2 p-6">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="flex flex-col gap-2 text-sm text-text-2">
-              <span className="font-medium text-text-1">상태</span>
-              <select
-                value={status}
-                onChange={(event) => {
-                  setStatus(event.target.value as AdminPostStatusFilter);
-                  setPage(1);
-                }}
-                className="min-w-44 rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors focus:border-primary-1"
-              >
-                {STATUS_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <PostFilters
+            tab={tab}
+            trashCount={trashCount}
+            status={status}
+            visibility={visibility}
+            searchQuery={searchQuery}
+            onTabChange={handleTabChange}
+            onStatusChange={(v) => {
+              setStatus(v);
+              resetPage();
+            }}
+            onVisibilityChange={(v) => {
+              setVisibility(v);
+              resetPage();
+            }}
+            onSearch={(q) => {
+              setSearchQuery(q);
+              resetPage();
+            }}
+          />
 
-            <label className="flex items-center gap-3 rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-2">
-              <input
-                type="checkbox"
-                checked={includeDeleted}
-                onChange={(event) => {
-                  setIncludeDeleted(event.target.checked);
-                  setPage(1);
-                }}
-                className="h-4 w-4 rounded border-border-3"
-              />
-              삭제된 글 포함
-            </label>
-          </div>
-
-          <p className="text-sm text-text-4">
+          <p className="shrink-0 text-sm text-text-4">
             {isFetching && !isPending
               ? "목록을 새로 불러오는 중..."
               : paginationLabel}
           </p>
         </div>
 
-        <div className="mt-6">
-          {isPending ? (
-            <div className="overflow-hidden rounded-[1.5rem] border border-border-3 bg-background-2">
-              <div className="grid grid-cols-[minmax(0,2.4fr)_0.8fr_0.8fr_0.9fr_0.8fr] gap-4 border-b border-border-3 px-6 py-4">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Skeleton key={i} />
-                ))}
-              </div>
-              <div className="space-y-4 px-6 py-5">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Skeleton
-                    key={i}
-                    variant="rect"
-                    height="2.5rem"
-                    className="rounded-[1rem]"
-                  />
-                ))}
-              </div>
-            </div>
-          ) : null}
+        {selectedIds.length > 0 ? (
+          <div className="mt-4">
+            <BulkActions
+              tab={tab}
+              selectedIds={selectedIds}
+              allSelected={allSelected}
+              categories={categories}
+              onSelectAll={handleToggleSelectAll}
+              onBulkDelete={handleBulkDelete}
+              onBulkRestore={handleBulkRestore}
+              onBulkHardDelete={handleBulkHardDelete}
+              onBulkUpdate={handleBulkUpdate}
+              onClearSelection={() => setSelectedIds([])}
+            />
+          </div>
+        ) : null}
 
-          {!isPending && isError ? (
-            <div className="rounded-[1.5rem] border border-negative-1/20 bg-negative-1/10 px-6 py-8 text-center">
-              <p className="text-sm text-negative-1">
-                {getErrorMessage(error, "글 목록을 불러오지 못했습니다.")}
-              </p>
-              <button
-                type="button"
-                onClick={() => void refetch()}
-                className="mt-4 inline-flex rounded-[0.75rem] border border-negative-1/20 px-4 py-2 text-sm font-medium text-negative-1 transition-colors hover:bg-negative-1/10"
-              >
-                다시 시도
-              </button>
-            </div>
-          ) : null}
-
-          {!isPending && !isError ? (
-            rows.length > 0 ? (
-              <div className="overflow-hidden rounded-[1.5rem] border border-border-3">
-                <div className="overflow-x-auto">
-                  <table className="min-w-full bg-background-2">
-                    <thead className="bg-background-1 text-left text-xs uppercase tracking-[0.18em] text-text-4">
-                      <tr>
-                        <th className="px-6 py-4 font-medium">제목</th>
-                        <th className="px-6 py-4 font-medium">상태</th>
-                        <th className="px-6 py-4 font-medium">가시성</th>
-                        <th className="px-6 py-4 font-medium">작성일</th>
-                        <th className="px-6 py-4 font-medium">작업</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border-3">
-                      {rows.map((post) => {
-                        const deleted = Boolean(post.deletedAt);
-                        const disabled =
-                          isActionPending && activeActionId === post.id;
-
-                        return (
-                          <tr key={post.id} className="align-top">
-                            <td className="px-6 py-5">
-                              <div className="flex flex-col gap-2">
-                                <span className="font-medium text-text-1">
-                                  {post.title}
-                                </span>
-                                <div className="flex flex-wrap items-center gap-2 text-xs text-text-4">
-                                  <span>{post.category.name}</span>
-                                  {deleted ? (
-                                    <Badge tone="danger">삭제됨</Badge>
-                                  ) : null}
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-5">
-                              <Badge
-                                tone={
-                                  post.status === "published"
-                                    ? "primary"
-                                    : post.status === "draft"
-                                      ? "warning"
-                                      : "neutral"
-                                }
-                              >
-                                {statusLabelMap[post.status]}
-                              </Badge>
-                            </td>
-                            <td className="px-6 py-5">
-                              <Badge
-                                tone={
-                                  post.visibility === "public"
-                                    ? "primary"
-                                    : "neutral"
-                                }
-                              >
-                                {visibilityLabelMap[post.visibility]}
-                              </Badge>
-                            </td>
-                            <td className="px-6 py-5 text-sm text-text-2">
-                              {formatDate(post.createdAt)}
-                            </td>
-                            <td className="px-6 py-5">
-                              <div className="flex flex-wrap gap-2">
-                                {!deleted ? (
-                                  <Link
-                                    href={`/manage/posts/${post.id}/edit`}
-                                    className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
-                                  >
-                                    수정
-                                  </Link>
-                                ) : null}
-
-                                {deleted ? (
-                                  <ActionButton
-                                    disabled={disabled}
-                                    onClick={() =>
-                                      restoreMutation.mutate(post.id)
-                                    }
-                                  >
-                                    {disabled ? "복원 중..." : "복원"}
-                                  </ActionButton>
-                                ) : (
-                                  <ActionButton
-                                    disabled={disabled}
-                                    onClick={() =>
-                                      deleteMutation.mutate(post.id)
-                                    }
-                                    tone="danger"
-                                  >
-                                    {disabled ? (
-                                      <>
-                                        <Spinner size="sm" /> 삭제 중
-                                      </>
-                                    ) : (
-                                      "삭제"
-                                    )}
-                                  </ActionButton>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            ) : (
-              <EmptyState message="현재 조건에 맞는 글이 없습니다." />
-            )
-          ) : null}
+        <div className="mt-4">
+          <PostTable
+            tab={tab}
+            posts={rows}
+            isPending={isPending}
+            isError={isError}
+            errorMessage={getErrorMessage(
+              error,
+              "글 목록을 불러오지 못했습니다.",
+            )}
+            selectedIds={selectedIds}
+            sort={sort}
+            order={order}
+            onRetry={() => void refetch()}
+            onToggleSelect={handleToggleSelect}
+            onToggleSelectAll={handleToggleSelectAll}
+            onSortChange={handleSortChange}
+            onToggleVisibility={handleToggleVisibility}
+            onTogglePin={handleTogglePin}
+            onDelete={(id) => deleteMutation.mutateAsync(id)}
+            onRestore={(id) => restoreMutation.mutate(id)}
+            onHardDelete={(id) => hardDeleteMutation.mutateAsync(id)}
+            pendingToggleIds={pendingToggleIds}
+            deleteId={deleteId}
+          />
         </div>
 
         {meta && meta.totalPages > 1 ? (
@@ -397,7 +480,7 @@ export default function ManagePostsPage() {
             >
               <button
                 type="button"
-                onClick={() => setPage((value) => Math.max(1, value - 1))}
+                onClick={() => setPage((v) => Math.max(1, v - 1))}
                 disabled={page === 1}
                 className="inline-flex rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
               >
@@ -410,9 +493,7 @@ export default function ManagePostsPage() {
 
               <button
                 type="button"
-                onClick={() =>
-                  setPage((value) => Math.min(meta.totalPages, value + 1))
-                }
+                onClick={() => setPage((v) => Math.min(meta.totalPages, v + 1))}
                 disabled={page === meta.totalPages}
                 className="inline-flex rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
               >

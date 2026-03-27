@@ -1,4 +1,5 @@
 import type {
+  BulkPostAction,
   CreatePostBody,
   FetchAdminPostsParams,
   FetchPostsParams,
@@ -164,4 +165,11 @@ export async function updatePost(
   );
 
   return response.post;
+}
+
+export async function bulkUpdatePosts(action: BulkPostAction): Promise<void> {
+  await clientMutate<void>("/api/admin/posts/bulk", {
+    method: "PATCH",
+    body: JSON.stringify(action),
+  });
 }

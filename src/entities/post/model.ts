@@ -24,6 +24,7 @@ export interface Post {
   thumbnailUrl: string | null;
   visibility: "public" | "private";
   status: "draft" | "published" | "archived";
+  commentStatus?: "open" | "locked" | "disabled";
   publishedAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -77,9 +78,21 @@ export interface FetchAdminPostsParams {
   q?: string;
   status?: "draft" | "published" | "archived";
   visibility?: "public" | "private";
-  sort?: "published_at" | "created_at";
+  sort?: "published_at" | "created_at" | "totalPageviews" | "commentCount";
   order?: "asc" | "desc";
   includeDeleted?: boolean;
+}
+
+export interface BulkPostAction {
+  ids: number[];
+  action: "update" | "soft_delete" | "restore" | "hard_delete";
+  categoryId?: number;
+  commentStatus?: "open" | "locked" | "disabled";
+}
+
+export interface BulkPostErrorDetail {
+  id: number;
+  reason: string;
 }
 
 export interface PostDetailResponse {
@@ -103,4 +116,6 @@ export interface CreatePostBody {
   publishedAt?: string;
 }
 
-export type UpdatePostBody = Partial<CreatePostBody>;
+export type UpdatePostBody = Partial<
+  CreatePostBody & { isPinned: boolean; contentModifiedAt: string | null }
+>;
