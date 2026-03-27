@@ -26,6 +26,7 @@ export function RelatedPosts({ posts }: RelatedPostsProps) {
                   alt={post.title}
                   width={180}
                   height={113}
+                  sizes="180px"
                   className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
                 />
               ) : (
