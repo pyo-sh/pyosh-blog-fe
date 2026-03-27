@@ -22,14 +22,16 @@ function applyToggleWrap(
   const afterRunContinues =
     outerTo < state.doc.length &&
     state.sliceDoc(outerTo, outerTo + 1) === after;
+  const canUnwrapDelimitedRun =
+    beforeRunContinues === afterRunContinues &&
+    (before === after ? before.length === 1 || !beforeRunContinues : true);
 
   const alreadyWrapped =
     outerFrom >= 0 &&
     outerTo <= state.doc.length &&
     state.sliceDoc(outerFrom, from) === before &&
     state.sliceDoc(to, outerTo) === after &&
-    !beforeRunContinues &&
-    !afterRunContinues;
+    canUnwrapDelimitedRun;
 
   if (alreadyWrapped) {
     dispatch(

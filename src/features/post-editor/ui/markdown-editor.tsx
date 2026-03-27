@@ -92,6 +92,7 @@ function getContentAttributes(
     id,
     role: "textbox",
     "aria-multiline": "true",
+    spellcheck: "false",
   };
 
   if (labelId) {
