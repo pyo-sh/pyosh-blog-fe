@@ -3,6 +3,7 @@
 import type { FormEvent, ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { MarkdownEditor } from "./markdown-editor";
 import { MarkdownPreview } from "./markdown-preview";
 import { fetchCategoriesClient, type Category } from "@entities/category";
@@ -12,7 +13,7 @@ import {
   type CreatePostBody,
   type Post,
 } from "@entities/post";
-import { ApiResponseError } from "@shared/api";
+import { getErrorMessage } from "@shared/lib/get-error-message";
 import { cn } from "@shared/lib/style-utils";
 
 export interface PostFormValues {
@@ -58,18 +59,6 @@ const VISIBILITY_OPTIONS: Array<{
   { label: "공개", value: "public" },
   { label: "비공개", value: "private" },
 ];
-
-function getErrorMessage(error: unknown, fallback: string): string {
-  if (error instanceof ApiResponseError) {
-    return error.message;
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return fallback;
-}
 
 function createInitialValues(
   initialValues?: Partial<PostFormValues>,
@@ -201,7 +190,6 @@ export function PostForm({
       return createPost(payload);
     },
     onSuccess: async (post) => {
-      setSubmitError(null);
       setIsDirty(false);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["admin-posts"] }),
@@ -210,7 +198,7 @@ export function PostForm({
       onSuccess?.(post);
     },
     onError: (error) => {
-      setSubmitError(getErrorMessage(error, "글 저장에 실패했습니다."));
+      toast.error(getErrorMessage(error, "글 저장에 실패했습니다."));
     },
   });
 

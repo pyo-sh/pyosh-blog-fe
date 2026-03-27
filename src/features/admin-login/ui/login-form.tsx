@@ -2,20 +2,9 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { login } from "@entities/auth";
-import { ApiResponseError } from "@shared/api";
-
-function getErrorMessage(error: unknown): string {
-  if (error instanceof ApiResponseError) {
-    return error.message;
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "로그인에 실패했습니다. 잠시 후 다시 시도해 주세요.";
-}
+import { getErrorMessage } from "@shared/lib/get-error-message";
 
 export function LoginForm() {
   const router = useRouter();
@@ -23,12 +12,10 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const busy = isLoading || isPending;
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setErrorMessage(null);
     setIsLoading(true);
 
     try {
@@ -42,7 +29,12 @@ export function LoginForm() {
         router.refresh();
       });
     } catch (error) {
-      setErrorMessage(getErrorMessage(error));
+      toast.error(
+        getErrorMessage(
+          error,
+          "로그인에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+        ),
+      );
     } finally {
       setIsLoading(false);
     }
@@ -92,15 +84,6 @@ export function LoginForm() {
           />
         </label>
       </div>
-
-      {errorMessage ? (
-        <div
-          role="alert"
-          className="mt-5 rounded-[1rem] border border-negative-1/30 bg-negative-1/5 px-4 py-3 text-body-sm text-negative-1"
-        >
-          {errorMessage}
-        </div>
-      ) : null}
 
       <button
         type="submit"
