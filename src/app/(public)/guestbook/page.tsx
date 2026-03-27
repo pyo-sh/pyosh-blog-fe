@@ -1,9 +1,10 @@
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { fetchMeServer } from "@entities/auth";
-import { fetchGuestbook } from "@entities/guestbook";
+import { fetchGuestbook, fetchGuestbookSettings } from "@entities/guestbook";
 import { GuestbookPageContent } from "@features/guestbook-form";
 import { ApiResponseError } from "@shared/api";
+import { EmptyState } from "@shared/ui/libs";
 
 export const dynamic = "force-dynamic";
 
@@ -86,6 +87,24 @@ export default async function GuestbookPage({
 }: GuestbookPageProps) {
   const page = parsePage(getSingleValue(searchParams?.page));
   const cookieHeader = await toCookieHeader();
+  try {
+    const settings = await fetchGuestbookSettings(cookieHeader);
+
+    if (!settings.enabled) {
+      return (
+        <section className="py-16">
+          <EmptyState message="현재 방명록 기능이 비활성화되어 있습니다." />
+        </section>
+      );
+    }
+  } catch {
+    return (
+      <section className="py-16">
+        <EmptyState message="방명록 설정을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요." />
+      </section>
+    );
+  }
+
   const [response, viewer] = await Promise.all([
     fetchGuestbook(page, cookieHeader),
     getCurrentViewer(cookieHeader),
