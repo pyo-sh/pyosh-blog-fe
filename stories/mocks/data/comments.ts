@@ -1,0 +1,61 @@
+import type { Comment } from "@entities/comment";
+
+export const mockComments: Comment[] = [
+  {
+    id: 1,
+    postId: 1,
+    parentId: null,
+    depth: 0,
+    body: "정말 좋은 글이네요! 많은 도움이 됐습니다.",
+    isSecret: false,
+    status: "active",
+    author: {
+      type: "oauth",
+      id: 1,
+      name: "김철수",
+      avatarUrl: undefined,
+    },
+    replyToName: null,
+    replies: [
+      {
+        id: 2,
+        postId: 1,
+        parentId: 1,
+        depth: 1,
+        body: "감사합니다! 앞으로도 좋은 글 올릴게요.",
+        isSecret: false,
+        status: "active",
+        author: {
+          type: "oauth",
+          id: 2,
+          name: "Admin",
+          avatarUrl: undefined,
+        },
+        replyToName: "김철수",
+        replies: [],
+        createdAt: "2026-01-16T10:00:00.000Z",
+        updatedAt: "2026-01-16T10:00:00.000Z",
+      },
+    ],
+    createdAt: "2026-01-15T15:00:00.000Z",
+    updatedAt: "2026-01-15T15:00:00.000Z",
+  },
+  {
+    id: 3,
+    postId: 1,
+    parentId: null,
+    depth: 0,
+    body: "App Router 관련해서 궁금한 점이 있는데요...",
+    isSecret: false,
+    status: "active",
+    author: {
+      type: "guest",
+      name: "방문자",
+      email: "visitor@example.com",
+    },
+    replyToName: null,
+    replies: [],
+    createdAt: "2026-01-17T09:00:00.000Z",
+    updatedAt: "2026-01-17T09:00:00.000Z",
+  },
+];
