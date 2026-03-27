@@ -1,4 +1,5 @@
 export { Button } from "./button";
+export { ErrorContent } from "./error-content";
 export { ScrollToTop } from "./scroll-to-top";
 export { ImageBox } from "./image-box";
 export { ListRow } from "./list-row";
