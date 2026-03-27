@@ -368,7 +368,7 @@ export function PostForm({
           <div className="flex items-center justify-between">
             <label
               id="contentMdLabel"
-              htmlFor="contentMd"
+              onClick={() => document.getElementById("contentMd")?.focus()}
               className="text-sm font-medium text-text-1"
             >
               본문
