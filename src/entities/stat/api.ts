@@ -1,4 +1,4 @@
-import type { DashboardStats, PopularPost } from "./model";
+import type { DashboardStats, PopularPost, TotalViewsStats } from "./model";
 import { clientFetch, serverFetch } from "@shared/api";
 
 interface PopularPostsResponse {
@@ -24,4 +24,14 @@ export async function fetchPopularPosts(
   );
 
   return response.data;
+}
+
+export async function fetchTotalViews(
+  cookieHeader?: string,
+): Promise<TotalViewsStats> {
+  return serverFetch<TotalViewsStats>(
+    "/api/stats/total-views",
+    {},
+    cookieHeader,
+  );
 }

@@ -18,3 +18,7 @@ export interface PopularPost {
   pageviews: number;
   uniques: number;
 }
+
+export interface TotalViewsStats {
+  totalPageviews: number;
+}

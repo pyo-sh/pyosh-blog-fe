@@ -8,6 +8,8 @@ export interface Category {
   createdAt: string;
   updatedAt: string;
   children?: Category[];
+  publishedPostCount?: number;
+  totalPostCount?: number;
 }
 
 export interface CreateCategoryBody {
