@@ -5,6 +5,15 @@ interface PopularPostsResponse {
   data: PopularPost[];
 }
 
+function buildPopularPostsPath(days: number, limit: number) {
+  const searchParams = new URLSearchParams({
+    days: String(days),
+    limit: String(limit),
+  });
+
+  return `/api/stats/popular?${searchParams.toString()}`;
+}
+
 export async function fetchDashboardStats(): Promise<DashboardStats> {
   return clientFetch<DashboardStats>("/api/admin/stats/dashboard");
 }
@@ -12,15 +21,23 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
 export async function fetchPopularPosts(
   days: number,
   cookieHeader?: string,
+  limit = 10,
 ): Promise<PopularPost[]> {
-  const searchParams = new URLSearchParams({
-    days: String(days),
-    limit: "10",
-  });
   const response = await serverFetch<PopularPostsResponse>(
-    `/api/stats/popular?${searchParams.toString()}`,
+    buildPopularPostsPath(days, limit),
     {},
     cookieHeader,
+  );
+
+  return response.data;
+}
+
+export async function fetchPopularPostsClient(
+  days: number,
+  limit = 10,
+): Promise<PopularPost[]> {
+  const response = await clientFetch<PopularPostsResponse>(
+    buildPopularPostsPath(days, limit),
   );
 
   return response.data;
