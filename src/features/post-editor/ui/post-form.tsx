@@ -366,12 +366,14 @@ export function PostForm({
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span
+            <button
+              type="button"
               id="contentMdLabel"
+              onClick={() => document.getElementById("contentMd")?.focus()}
               className="text-sm font-medium text-text-1"
             >
               본문
-            </span>
+            </button>
             <span className="text-xs uppercase tracking-[0.2em] text-text-4">
               Markdown
             </span>

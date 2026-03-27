@@ -11,7 +11,7 @@ import {
   syntaxHighlighting,
 } from "@codemirror/language";
 import { search, searchKeymap } from "@codemirror/search";
-import { Annotation, EditorState } from "@codemirror/state";
+import { Annotation, Compartment, EditorState } from "@codemirror/state";
 import {
   EditorView,
   highlightActiveLine,
@@ -79,6 +79,25 @@ const editorTheme = EditorView.theme({
 
 const externalSyncAnnotation = Annotation.define<boolean>();
 
+function getContentAttributes(
+  id: string,
+  labelId?: string,
+): Record<string, string> {
+  const attrs: Record<string, string> = {
+    id,
+    role: "textbox",
+    "aria-multiline": "true",
+  };
+
+  if (labelId) {
+    attrs["aria-labelledby"] = labelId;
+  } else {
+    attrs["aria-label"] = "마크다운 편집기";
+  }
+
+  return attrs;
+}
+
 interface MarkdownEditorProps {
   value: string;
   onChange: (value: string) => void;
@@ -109,15 +128,13 @@ export function MarkdownEditor({
   className,
 }: MarkdownEditorProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const placeholderCompartmentRef = useRef(new Compartment());
+  const contentAttributesCompartmentRef = useRef(new Compartment());
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
-  // Capture mount-time values in refs so the init effect has no closure deps.
   const initialValueRef = useRef(value);
-  const initialIdRef = useRef(id);
-  const initialPlaceholderRef = useRef(
-    placeholderText ?? legacyPlaceholder ?? "# 글 내용을 작성하세요",
-  );
-  const initialLabelIdRef = useRef(labelId);
+  const effectivePlaceholder =
+    placeholderText ?? legacyPlaceholder ?? "# 글 내용을 작성하세요";
 
   const [editorView, setEditorView] = useState<EditorView | null>(null);
 
@@ -144,7 +161,9 @@ export function MarkdownEditor({
       EditorView.lineWrapping,
       search(),
       editorTheme,
-      editorPlaceholder(initialPlaceholderRef.current),
+      placeholderCompartmentRef.current.of(
+        editorPlaceholder(effectivePlaceholder),
+      ),
       EditorView.updateListener.of((update) => {
         if (
           update.docChanged &&
@@ -155,20 +174,8 @@ export function MarkdownEditor({
           onChangeRef.current(update.state.doc.toString());
         }
       }),
-      EditorView.contentAttributes.of(
-        initialLabelIdRef.current
-          ? {
-              id: initialIdRef.current,
-              "aria-labelledby": initialLabelIdRef.current,
-              role: "textbox",
-              "aria-multiline": "true",
-            }
-          : {
-              id: initialIdRef.current,
-              role: "textbox",
-              "aria-multiline": "true",
-              "aria-label": "마크다운 편집기",
-            },
+      contentAttributesCompartmentRef.current.of(
+        EditorView.contentAttributes.of(getContentAttributes(id, labelId)),
       ),
     ];
 
@@ -189,6 +196,26 @@ export function MarkdownEditor({
       setEditorView(null);
     };
   }, []);
+
+  useEffect(() => {
+    if (!editorView) return;
+
+    editorView.dispatch({
+      effects: placeholderCompartmentRef.current.reconfigure(
+        editorPlaceholder(effectivePlaceholder),
+      ),
+    });
+  }, [editorView, effectivePlaceholder]);
+
+  useEffect(() => {
+    if (!editorView) return;
+
+    editorView.dispatch({
+      effects: contentAttributesCompartmentRef.current.reconfigure(
+        EditorView.contentAttributes.of(getContentAttributes(id, labelId)),
+      ),
+    });
+  }, [editorView, id, labelId]);
 
   // Sync value when changed externally (e.g. form reset, edit-mode hydration)
   useEffect(() => {
