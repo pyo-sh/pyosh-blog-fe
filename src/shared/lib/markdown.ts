@@ -30,8 +30,8 @@ const sanitizeSchema = {
     span: [...(defaultSchema.attributes?.span ?? []), "style", "className"],
     pre: [...(defaultSchema.attributes?.pre ?? []), "style", "className"],
     code: [...(defaultSchema.attributes?.code ?? []), "className"],
-    // GFM 체크박스
-    input: ["type", "checked", "disabled"],
+    // GFM 체크박스 (type은 checkbox만 허용)
+    input: [["type", "checkbox"] as [string, string], "checked", "disabled"],
     // 외부 링크
     a: [...(defaultSchema.attributes?.a ?? []), "target", "rel"],
     // 이미지 지연 로딩

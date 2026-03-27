@@ -269,16 +269,21 @@
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   }
 
+  /* Default pre: no visual box — wrapper provides it when JS adds CodeBlockEnhancer */
   .markdown-content pre {
-    background-color: var(--background2);
-    border: 1px solid var(--border3);
-    border-radius: 0.75rem;
     max-width: 100%;
     overflow-x: auto;
     padding: 1rem;
   }
 
-  /* When CodeBlockEnhancer wraps pre with a header, border/radius/bg move to the wrapper */
+  /* Wrapper provides the visual card so SSR and post-hydration renders are identical */
+  .markdown-content [data-code-wrapper] {
+    background-color: var(--background2);
+    border: 1px solid var(--border3);
+    border-radius: 0.75rem;
+    overflow: hidden;
+  }
+
   .markdown-content [data-code-wrapper] > pre {
     background: transparent;
     border: none;
