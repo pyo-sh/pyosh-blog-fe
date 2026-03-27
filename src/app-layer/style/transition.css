@@ -2,7 +2,9 @@
   .transition-theme {
     transition:
       color var(--transition-timing-color),
-      background-color var(--transition-timing-bg);
+      background-color var(--transition-timing-bg),
+      border-color var(--transition-timing-color),
+      box-shadow var(--transition-timing-color);
   }
 
   .transition-color {
