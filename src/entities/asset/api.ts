@@ -48,6 +48,7 @@ export async function uploadAssets(
         } catch {
           reject(new Error("응답을 파싱할 수 없습니다."));
         }
+
         return;
       }
 
