@@ -57,7 +57,7 @@ function sortCommentsDesc(comments: Comment[]) {
 
 function appendComment(comments: Comment[], nextComment: Comment): Comment[] {
   if (nextComment.parentId === null) {
-    return sortCommentsDesc([nextComment, ...comments]);
+    return [nextComment, ...comments];
   }
 
   return comments.map((comment) => {
@@ -305,7 +305,7 @@ export function CommentList({
         1,
         Math.ceil(nextRootTotal / COMMENTS_PER_PAGE),
       );
-      const targetPage = 1;
+      const targetPage = nextTotalPages;
 
       setMeta((current) => ({
         ...current,
@@ -373,7 +373,30 @@ export function CommentList({
       });
 
       if (isRootComment) {
-        await loadPage(currentPage, { scrollToTop: false });
+        const nextComments = markCommentDeleted(comments, deleteTarget.id);
+        const rootStillVisible = nextComments.some(
+          (comment) => comment.id === deleteTarget.id,
+        );
+        const nextRootTotal = rootStillVisible
+          ? meta.totalRootComments
+          : Math.max(0, meta.totalRootComments - 1);
+        const nextTotalPages = Math.max(
+          1,
+          Math.ceil(nextRootTotal / COMMENTS_PER_PAGE),
+        );
+
+        setComments(nextComments);
+        setMeta((current) => ({
+          ...current,
+          totalCount: Math.max(0, current.totalCount - 1),
+          totalRootComments: nextRootTotal,
+          totalPages: nextTotalPages,
+          page: Math.min(current.page, nextTotalPages),
+        }));
+
+        if (!rootStillVisible && currentPage > nextTotalPages) {
+          await loadPage(nextTotalPages, { scrollToTop: false });
+        }
       } else {
         setComments((current) => markCommentDeleted(current, deleteTarget.id));
         setMeta((current) => ({
