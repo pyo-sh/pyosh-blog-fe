@@ -28,6 +28,7 @@ export interface FetchAdminCommentsParams {
   page?: number;
   limit?: number;
   postId?: number;
+  status?: "active" | "deleted" | "hidden";
   authorType?: "oauth" | "guest";
   startDate?: string;
   endDate?: string;
@@ -48,6 +49,10 @@ function buildAdminCommentSearchParams(
 
   if (params.postId !== undefined) {
     searchParams.set("postId", String(params.postId));
+  }
+
+  if (params.status !== undefined) {
+    searchParams.set("status", params.status);
   }
 
   if (params.authorType !== undefined) {
@@ -124,4 +129,14 @@ export async function adminDeleteComment(id: number): Promise<void> {
   await clientMutate<void>(`/api/admin/comments/${id}`, {
     method: "DELETE",
   });
+}
+
+export async function fetchAdminCommentThread(
+  id: number,
+): Promise<AdminCommentItem[]> {
+  const response = await clientFetch<{ data: AdminCommentItem[] }>(
+    `/api/admin/comments/${id}/thread`,
+  );
+
+  return response.data;
 }
