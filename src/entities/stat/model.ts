@@ -4,6 +4,11 @@ export interface DashboardStats {
   monthPageviews: number;
   totalPosts: number;
   totalComments: number;
+  postsByStatus: {
+    draft: number;
+    published: number;
+    archived: number;
+  };
 }
 
 export interface PopularPost {
