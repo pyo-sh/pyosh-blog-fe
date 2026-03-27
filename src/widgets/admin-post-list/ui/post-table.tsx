@@ -34,9 +34,9 @@ interface PostTableProps {
   onSortChange: (field: SortField) => void;
   onToggleVisibility: (post: Post) => void;
   onTogglePin: (post: Post) => void;
-  onDelete: (id: number) => void;
+  onDelete: (id: number) => Promise<void>;
   onRestore: (id: number) => void;
-  onHardDelete: (id: number) => void;
+  onHardDelete: (id: number) => Promise<void>;
   pendingToggleIds: Set<number>;
   deleteId: number | null;
 }
@@ -203,7 +203,7 @@ export function PostTable({
     if (!singleDeleteTarget) return;
     setIsDeletePending(true);
     try {
-      onDelete(singleDeleteTarget.id);
+      await onDelete(singleDeleteTarget.id);
       setSingleDeleteTarget(null);
     } finally {
       setIsDeletePending(false);
@@ -214,7 +214,7 @@ export function PostTable({
     if (!hardDeleteTarget) return;
     setIsHardDeletePending(true);
     try {
-      onHardDelete(hardDeleteTarget.id);
+      await onHardDelete(hardDeleteTarget.id);
       setHardDeleteTarget(null);
     } finally {
       setIsHardDeletePending(false);

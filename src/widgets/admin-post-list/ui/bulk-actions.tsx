@@ -211,17 +211,6 @@ export function BulkActions({
             >
               적용
             </button>
-
-            <div className="ml-auto">
-              <button
-                type="button"
-                onClick={() => setShowDeleteDialog(true)}
-                disabled={isPending}
-                className="rounded-[0.6rem] border border-negative-1/30 px-3 py-1.5 text-sm font-medium text-negative-1 transition-colors hover:bg-negative-1/10 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                일괄 삭제
-              </button>
-            </div>
           </>
         ) : (
           <>
@@ -244,13 +233,25 @@ export function BulkActions({
           </>
         )}
 
-        <button
-          type="button"
-          onClick={onClearSelection}
-          className="ml-auto text-xs text-text-4 hover:text-text-2"
-        >
-          선택 해제
-        </button>
+        <div className="ml-auto flex items-center gap-3">
+          {tab === "active" ? (
+            <button
+              type="button"
+              onClick={() => setShowDeleteDialog(true)}
+              disabled={isPending}
+              className="rounded-[0.6rem] border border-negative-1/30 px-3 py-1.5 text-sm font-medium text-negative-1 transition-colors hover:bg-negative-1/10 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              일괄 삭제
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={onClearSelection}
+            className="text-xs text-text-4 hover:text-text-2"
+          >
+            선택 해제
+          </button>
+        </div>
       </div>
 
       {/* Apply confirm dialog */}

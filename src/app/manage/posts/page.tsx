@@ -237,11 +237,18 @@ export default function ManagePostsPage() {
     }
   }
 
+  async function invalidatePostQueries() {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["admin-posts"] }),
+      queryClient.invalidateQueries({ queryKey: ["admin-posts-trash-count"] }),
+    ]);
+  }
+
   const deleteMutation = useMutation({
     mutationFn: deletePost,
     onMutate: (id) => setDeleteId(id),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["admin-posts"] });
+      await invalidatePostQueries();
       toast.success("글이 삭제되었습니다.");
     },
     onError: (err) => {
@@ -254,7 +261,7 @@ export default function ManagePostsPage() {
     mutationFn: restorePost,
     onMutate: (id) => setDeleteId(id),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["admin-posts"] });
+      await invalidatePostQueries();
       toast.success("글이 복원되었습니다.");
     },
     onError: (err) => {
@@ -267,7 +274,7 @@ export default function ManagePostsPage() {
     mutationFn: hardDeletePost,
     onMutate: (id) => setDeleteId(id),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["admin-posts"] });
+      await invalidatePostQueries();
       toast.success("글이 영구 삭제되었습니다.");
     },
     onError: (err) => {
@@ -279,7 +286,7 @@ export default function ManagePostsPage() {
   async function handleBulkDelete(ids: number[]) {
     try {
       await bulkUpdatePosts({ ids, action: "soft_delete" });
-      await queryClient.invalidateQueries({ queryKey: ["admin-posts"] });
+      await invalidatePostQueries();
       toast.success(`${ids.length}개 글이 삭제되었습니다.`);
     } catch (err) {
       const apiErr = err as { details?: BulkPostErrorDetail[] };
@@ -297,7 +304,7 @@ export default function ManagePostsPage() {
   async function handleBulkRestore(ids: number[]) {
     try {
       await bulkUpdatePosts({ ids, action: "restore" });
-      await queryClient.invalidateQueries({ queryKey: ["admin-posts"] });
+      await invalidatePostQueries();
       toast.success(`${ids.length}개 글이 복원되었습니다.`);
     } catch (err) {
       toast.error(getErrorMessage(err, "일괄 복원에 실패했습니다."));
@@ -307,7 +314,7 @@ export default function ManagePostsPage() {
   async function handleBulkHardDelete(ids: number[]) {
     try {
       await bulkUpdatePosts({ ids, action: "hard_delete" });
-      await queryClient.invalidateQueries({ queryKey: ["admin-posts"] });
+      await invalidatePostQueries();
       toast.success(`${ids.length}개 글이 영구 삭제되었습니다.`);
     } catch (err) {
       const apiErr = err as { details?: BulkPostErrorDetail[] };
@@ -448,9 +455,9 @@ export default function ManagePostsPage() {
             onSortChange={handleSortChange}
             onToggleVisibility={handleToggleVisibility}
             onTogglePin={handleTogglePin}
-            onDelete={(id) => deleteMutation.mutate(id)}
+            onDelete={(id) => deleteMutation.mutateAsync(id)}
             onRestore={(id) => restoreMutation.mutate(id)}
-            onHardDelete={(id) => hardDeleteMutation.mutate(id)}
+            onHardDelete={(id) => hardDeleteMutation.mutateAsync(id)}
             pendingToggleIds={pendingToggleIds}
             deleteId={deleteId}
           />
