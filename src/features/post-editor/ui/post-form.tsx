@@ -203,6 +203,9 @@ export function PostForm({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [pendingIntent, setPendingIntent] = useState<SubmitIntent | null>(null);
   const [showPublishConfirm, setShowPublishConfirm] = useState(false);
+  const [isSummaryManuallyEdited, setIsSummaryManuallyEdited] = useState(
+    Boolean(nextInitialValues.summary.trim()),
+  );
 
   useEffect(() => {
     const recordChanged =
@@ -213,6 +216,7 @@ export function PostForm({
     if (recordChanged || (!isDirty && initialChanged)) {
       setValues(nextInitialValues);
       setIsDirty(false);
+      setIsSummaryManuallyEdited(Boolean(nextInitialValues.summary.trim()));
       hydrationRef.current = {
         postId,
         signature: nextInitialSignature,
@@ -261,6 +265,7 @@ export function PostForm({
 
       setValues(persistedValues);
       setIsDirty(false);
+      setIsSummaryManuallyEdited(Boolean(persistedValues.summary.trim()));
       setPendingIntent(null);
       setShowPublishConfirm(false);
       hydrationRef.current = {
@@ -325,6 +330,9 @@ export function PostForm({
             : intent === "restore-draft" || intent === "unpublish"
               ? "draft"
               : values.status,
+      summary: isSummaryManuallyEdited
+        ? values.summary
+        : extractPlainText(values.contentMd, 200),
     };
 
     if (nextValues.categoryId === null) {
@@ -551,9 +559,10 @@ export function PostForm({
                     maxLength={200}
                     rows={4}
                     value={values.summary}
-                    onChange={(event) =>
-                      handleFieldChange("summary", event.target.value)
-                    }
+                    onChange={(event) => {
+                      setIsSummaryManuallyEdited(true);
+                      handleFieldChange("summary", event.target.value);
+                    }}
                     placeholder="글 목록과 카드에 표시될 짧은 요약"
                     aria-label="Summary"
                     className="rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
@@ -648,7 +657,7 @@ export function PostForm({
                 value={values.contentMd}
                 onChange={(value) => handleFieldChange("contentMd", value)}
                 onBlur={(contentMd) => {
-                  if (!values.summary.trim()) {
+                  if (!isSummaryManuallyEdited) {
                     handleFieldChange(
                       "summary",
                       extractPlainText(contentMd, 200),
