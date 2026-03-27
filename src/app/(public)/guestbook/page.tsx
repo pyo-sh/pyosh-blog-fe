@@ -87,11 +87,7 @@ export default async function GuestbookPage({
 }: GuestbookPageProps) {
   const page = parsePage(getSingleValue(searchParams?.page));
   const cookieHeader = await toCookieHeader();
-  const [settings, response, viewer] = await Promise.all([
-    fetchGuestbookSettings(cookieHeader),
-    fetchGuestbook(page, cookieHeader),
-    getCurrentViewer(cookieHeader),
-  ]);
+  const settings = await fetchGuestbookSettings(cookieHeader);
 
   if (!settings.enabled) {
     return (
@@ -100,6 +96,11 @@ export default async function GuestbookPage({
       </section>
     );
   }
+
+  const [response, viewer] = await Promise.all([
+    fetchGuestbook(page, cookieHeader),
+    getCurrentViewer(cookieHeader),
+  ]);
 
   return (
     <GuestbookPageContent

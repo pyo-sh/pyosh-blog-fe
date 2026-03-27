@@ -7,6 +7,7 @@ import type {
   AdminGuestbookItem,
 } from "@entities/guestbook";
 import { cn } from "@shared/lib/style-utils";
+import { EmptyState } from "@shared/ui/libs";
 
 interface GuestbookTableProps {
   items: AdminGuestbookItem[];
@@ -29,6 +30,7 @@ interface GuestbookTableProps {
   onToggleSelect: (item: AdminGuestbookItem) => void;
   onToggleSelectAllCurrent: () => void;
   onOpenDetail: (item: AdminGuestbookItem) => void;
+  emptyMessage?: string;
 }
 
 const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
@@ -86,6 +88,7 @@ export function GuestbookTable({
   onToggleSelect,
   onToggleSelectAllCurrent,
   onOpenDetail,
+  emptyMessage,
 }: GuestbookTableProps) {
   const selectAllRef = useRef<HTMLInputElement>(null);
 
@@ -206,92 +209,96 @@ export function GuestbookTable({
         </div>
       ) : null}
 
-      <div className="overflow-hidden rounded-[1.5rem] border border-border-3">
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-background-2">
-            <thead className="bg-background-1 text-left text-xs uppercase tracking-[0.18em] text-text-4">
-              <tr>
-                <th className="px-6 py-4 font-medium">
-                  <input
-                    ref={selectAllRef}
-                    type="checkbox"
-                    checked={allCurrentSelected}
-                    onChange={onToggleSelectAllCurrent}
-                    className="h-4 w-4 rounded border-border-3 accent-primary-1"
-                    aria-label="현재 페이지 전체 선택"
-                  />
-                </th>
-                <th className="px-6 py-4 font-medium">작성자</th>
-                <th className="px-6 py-4 font-medium">내용</th>
-                <th className="px-6 py-4 font-medium">비밀</th>
-                <th className="px-6 py-4 font-medium">상태</th>
-                <th className="px-6 py-4 font-medium">날짜</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border-3">
-              {items.map((item) => {
-                const isSelected = selectedIds.includes(item.id);
+      {items.length > 0 ? (
+        <div className="overflow-hidden rounded-[1.5rem] border border-border-3">
+          <div className="overflow-x-auto">
+            <table className="min-w-full bg-background-2">
+              <thead className="bg-background-1 text-left text-xs uppercase tracking-[0.18em] text-text-4">
+                <tr>
+                  <th className="px-6 py-4 font-medium">
+                    <input
+                      ref={selectAllRef}
+                      type="checkbox"
+                      checked={allCurrentSelected}
+                      onChange={onToggleSelectAllCurrent}
+                      className="h-4 w-4 rounded border-border-3 accent-primary-1"
+                      aria-label="현재 페이지 전체 선택"
+                    />
+                  </th>
+                  <th className="px-6 py-4 font-medium">작성자</th>
+                  <th className="px-6 py-4 font-medium">내용</th>
+                  <th className="px-6 py-4 font-medium">비밀</th>
+                  <th className="px-6 py-4 font-medium">상태</th>
+                  <th className="px-6 py-4 font-medium">날짜</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border-3">
+                {items.map((item) => {
+                  const isSelected = selectedIds.includes(item.id);
 
-                return (
-                  <tr key={item.id} className="align-top">
-                    <td className="px-6 py-5">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => onToggleSelect(item)}
-                        className="h-4 w-4 rounded border-border-3 accent-primary-1"
-                        aria-label={`${item.author.name} 방명록 선택`}
-                      />
-                    </td>
-                    <td className="px-6 py-5">
-                      <div className="flex flex-col gap-2">
-                        <span className="font-medium text-text-1">
-                          {item.author.name}
-                        </span>
-                        <span className="text-xs text-text-4">
-                          {item.author.type === "oauth" ? "OAuth" : "게스트"}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-5">
-                      <button
-                        type="button"
-                        onClick={() => onOpenDetail(item)}
-                        className="max-w-2xl truncate text-left text-sm text-text-2 underline-offset-4 transition-colors hover:text-text-1 hover:underline"
-                        title={getBodyPreview(item)}
-                      >
-                        {getBodyPreview(item)}
-                      </button>
-                    </td>
-                    <td className="px-6 py-5">
-                      {item.isSecret ? (
-                        <span className="inline-flex rounded-full bg-primary-1/10 px-2.5 py-1 text-xs font-medium text-primary-1">
-                          비밀
-                        </span>
-                      ) : (
-                        <span className="text-sm text-text-4">-</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-5">
-                      <span
-                        className={cn(
-                          "inline-flex rounded-full px-2.5 py-1 text-xs font-medium",
-                          getStatusTone(item.status),
+                  return (
+                    <tr key={item.id} className="align-top">
+                      <td className="px-6 py-5">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => onToggleSelect(item)}
+                          className="h-4 w-4 rounded border-border-3 accent-primary-1"
+                          aria-label={`${item.author.name} 방명록 선택`}
+                        />
+                      </td>
+                      <td className="px-6 py-5">
+                        <div className="flex flex-col gap-2">
+                          <span className="font-medium text-text-1">
+                            {item.author.name}
+                          </span>
+                          <span className="text-xs text-text-4">
+                            {item.author.type === "oauth" ? "OAuth" : "게스트"}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-5">
+                        <button
+                          type="button"
+                          onClick={() => onOpenDetail(item)}
+                          className="max-w-2xl truncate text-left text-sm text-text-2 underline-offset-4 transition-colors hover:text-text-1 hover:underline"
+                          title={getBodyPreview(item)}
+                        >
+                          {getBodyPreview(item)}
+                        </button>
+                      </td>
+                      <td className="px-6 py-5">
+                        {item.isSecret ? (
+                          <span className="inline-flex rounded-full bg-primary-1/10 px-2.5 py-1 text-xs font-medium text-primary-1">
+                            비밀
+                          </span>
+                        ) : (
+                          <span className="text-sm text-text-4">-</span>
                         )}
-                      >
-                        {getStatusLabel(item.status)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-5 text-sm text-text-2">
-                      {dateFormatter.format(new Date(item.createdAt))}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      </td>
+                      <td className="px-6 py-5">
+                        <span
+                          className={cn(
+                            "inline-flex rounded-full px-2.5 py-1 text-xs font-medium",
+                            getStatusTone(item.status),
+                          )}
+                        >
+                          {getStatusLabel(item.status)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-5 text-sm text-text-2">
+                        {dateFormatter.format(new Date(item.createdAt))}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      ) : (
+        <EmptyState message={emptyMessage ?? "표시할 방명록이 없습니다."} />
+      )}
     </div>
   );
 }

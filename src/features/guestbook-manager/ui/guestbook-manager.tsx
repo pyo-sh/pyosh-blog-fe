@@ -521,80 +521,41 @@ export function GuestbookManager() {
           ) : null}
 
           {!guestbookQuery.isLoading && !guestbookQuery.isError ? (
-            rows.length > 0 ? (
-              <>
-                <GuestbookTable
-                  items={rows}
-                  status={status}
-                  authorType={authorType}
-                  startDate={startDate}
-                  endDate={endDate}
-                  searchQuery={searchQuery}
-                  searchInput={searchInput}
-                  selectedIds={selectedIds}
-                  allCurrentSelected={allCurrentSelected}
-                  someCurrentSelected={someCurrentSelected}
-                  onStatusChange={(nextStatus) => {
-                    setStatus(nextStatus);
-                    resetToFirstPage();
-                  }}
-                  onAuthorTypeChange={(nextAuthorType) => {
-                    setAuthorType(nextAuthorType);
-                    resetToFirstPage();
-                  }}
-                  onStartDateChange={(value) => {
-                    setStartDate(value);
-                    resetToFirstPage();
-                  }}
-                  onEndDateChange={(value) => {
-                    setEndDate(value);
-                    resetToFirstPage();
-                  }}
-                  onSearchInputChange={setSearchInput}
-                  onSearchSubmit={handleSearchSubmit}
-                  onClearSearch={handleClearSearch}
-                  onToggleSelect={handleToggleSelect}
-                  onToggleSelectAllCurrent={handleToggleSelectAllCurrent}
-                  onOpenDetail={(item) => setDetailItem(item)}
-                />
-
-                {meta && meta.totalPages > 1 ? (
-                  <div className="mt-6 flex items-center justify-between gap-3">
-                    <p className="text-sm text-text-4">
-                      페이지 {meta.page} / {meta.totalPages}
-                    </p>
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setPage((current) => Math.max(1, current - 1))
-                        }
-                        disabled={page <= 1}
-                        className="rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        이전
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setPage((current) =>
-                            meta
-                              ? Math.min(meta.totalPages, current + 1)
-                              : current,
-                          )
-                        }
-                        disabled={!meta || page >= meta.totalPages}
-                        className="rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        다음
-                      </button>
-                    </div>
-                  </div>
-                ) : null}
-              </>
-            ) : (
-              <EmptyState
-                message={
+            <>
+              <GuestbookTable
+                items={rows}
+                status={status}
+                authorType={authorType}
+                startDate={startDate}
+                endDate={endDate}
+                searchQuery={searchQuery}
+                searchInput={searchInput}
+                selectedIds={selectedIds}
+                allCurrentSelected={allCurrentSelected}
+                someCurrentSelected={someCurrentSelected}
+                onStatusChange={(nextStatus) => {
+                  setStatus(nextStatus);
+                  resetToFirstPage();
+                }}
+                onAuthorTypeChange={(nextAuthorType) => {
+                  setAuthorType(nextAuthorType);
+                  resetToFirstPage();
+                }}
+                onStartDateChange={(value) => {
+                  setStartDate(value);
+                  resetToFirstPage();
+                }}
+                onEndDateChange={(value) => {
+                  setEndDate(value);
+                  resetToFirstPage();
+                }}
+                onSearchInputChange={setSearchInput}
+                onSearchSubmit={handleSearchSubmit}
+                onClearSearch={handleClearSearch}
+                onToggleSelect={handleToggleSelect}
+                onToggleSelectAllCurrent={handleToggleSelectAllCurrent}
+                onOpenDetail={(item) => setDetailItem(item)}
+                emptyMessage={
                   searchQuery ||
                   status !== "all" ||
                   authorType !== "all" ||
@@ -604,7 +565,41 @@ export function GuestbookManager() {
                     : "현재 등록된 방명록이 없습니다."
                 }
               />
-            )
+
+              {meta && meta.totalPages > 1 ? (
+                <div className="mt-6 flex items-center justify-between gap-3">
+                  <p className="text-sm text-text-4">
+                    페이지 {meta.page} / {meta.totalPages}
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPage((current) => Math.max(1, current - 1))
+                      }
+                      disabled={page <= 1}
+                      className="rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      이전
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPage((current) =>
+                          meta
+                            ? Math.min(meta.totalPages, current + 1)
+                            : current,
+                        )
+                      }
+                      disabled={!meta || page >= meta.totalPages}
+                      className="rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      다음
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+            </>
           ) : null}
         </div>
       </section>
@@ -615,6 +610,7 @@ export function GuestbookManager() {
         onClose={() => setDetailItem(null)}
         onSelectAction={(action) => {
           if (detailItem) {
+            setDetailItem(null);
             setActionContext({
               type: "single",
               item: detailItem,
