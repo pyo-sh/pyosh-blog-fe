@@ -31,8 +31,12 @@ function readPendingTimestamp(): number | null {
   return timestamp;
 }
 
-export function useSiteViewCount(): void {
+export function useSiteViewCount(enabled = true): void {
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     if (
       window.sessionStorage.getItem(SITE_VIEWED_KEY) ||
       readPendingTimestamp() ||
@@ -59,5 +63,5 @@ export function useSiteViewCount(): void {
         window.sessionStorage.removeItem(PENDING_SITE_VIEW_KEY);
         console.error(error);
       });
-  }, []);
+  }, [enabled]);
 }

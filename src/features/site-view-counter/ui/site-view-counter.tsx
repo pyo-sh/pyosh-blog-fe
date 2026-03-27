@@ -7,11 +7,7 @@ export function SiteViewCounter() {
   const pathname = usePathname();
   const isPostDetailPage = pathname.startsWith("/posts/");
 
-  if (isPostDetailPage) {
-    return null;
-  }
-
-  useSiteViewCount();
+  useSiteViewCount(!isPostDetailPage);
 
   return null;
 }
