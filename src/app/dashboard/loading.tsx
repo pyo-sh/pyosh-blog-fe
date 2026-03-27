@@ -1,25 +1,26 @@
-const dashboardCardPlaceholders = Array.from(
-  { length: 5 },
-  (_, index) => index,
-);
+import { Skeleton } from "@shared/ui/libs";
 
 export default function DashboardLoading() {
   return (
-    <div className="space-y-8">
+    <div aria-busy="true" className="space-y-8">
       <div className="space-y-3">
-        <div className="h-4 w-24 animate-pulse rounded-full bg-background-3" />
-        <div className="h-9 w-48 animate-pulse rounded-[1rem] bg-background-3" />
+        <Skeleton height="1rem" width="6rem" />
+        <Skeleton height="2.25rem" width="12rem" className="rounded-[1rem]" />
       </div>
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
-        {dashboardCardPlaceholders.map((item) => (
+        {Array.from({ length: 5 }).map((_, index) => (
           <div
-            key={item}
-            className="animate-pulse rounded-[1.5rem] border border-border-3 bg-background-2 p-6"
+            key={index}
+            className="rounded-[1.5rem] border border-border-3 bg-background-2 p-6"
           >
-            <div className="mb-4 h-4 w-20 rounded-full bg-background-4" />
-            <div className="mb-3 h-10 w-24 rounded-full bg-background-4" />
-            <div className="h-4 w-full rounded-full bg-background-4" />
+            <div className="mb-4">
+              <Skeleton height="1rem" width="5rem" />
+            </div>
+            <div className="mb-3">
+              <Skeleton height="2.5rem" width="6rem" />
+            </div>
+            <Skeleton />
           </div>
         ))}
       </div>
@@ -28,15 +29,19 @@ export default function DashboardLoading() {
         {Array.from({ length: 2 }).map((_, index) => (
           <div
             key={index}
-            className="animate-pulse rounded-[1.5rem] border border-border-3 bg-background-2 p-6"
+            className="rounded-[1.5rem] border border-border-3 bg-background-2 p-6"
           >
-            <div className="h-4 w-28 rounded-full bg-background-4" />
-            <div className="mt-4 h-8 w-40 rounded-full bg-background-4" />
+            <Skeleton height="1rem" width="7rem" />
+            <div className="mt-4">
+              <Skeleton height="2rem" width="10rem" />
+            </div>
             <div className="mt-6 space-y-3">
               {Array.from({ length: 3 }).map((__, innerIndex) => (
-                <div
+                <Skeleton
                   key={innerIndex}
-                  className="h-18 rounded-[1rem] bg-background-4"
+                  variant="rect"
+                  height="4.5rem"
+                  className="rounded-[1rem]"
                 />
               ))}
             </div>

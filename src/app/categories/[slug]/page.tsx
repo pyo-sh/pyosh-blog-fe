@@ -3,7 +3,7 @@ import type { Category } from "@entities/category";
 import { fetchCategories } from "@entities/category";
 import { fetchPosts } from "@entities/post";
 import { PostCard } from "@features/post-list";
-import { Pagination } from "@shared/ui/libs";
+import { EmptyState, Pagination } from "@shared/ui/libs";
 import { CategoryNav } from "@widgets/category-nav";
 
 interface CategoryPageProps {
@@ -116,9 +116,7 @@ export default async function CategoryPage({
           )}
         </>
       ) : (
-        <section className="rounded-[2rem] border border-dashed border-border-3 bg-background-2 p-8 text-body-md text-text-3 md:p-10">
-          아직 이 카테고리에 등록된 공개 글이 없습니다.
-        </section>
+        <EmptyState variant="page" message="아직 이 카테고리에 등록된 공개 글이 없습니다." />
       )}
     </main>
   );

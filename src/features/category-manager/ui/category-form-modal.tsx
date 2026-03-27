@@ -6,7 +6,7 @@ import type {
   CreateCategoryBody,
   UpdateCategoryBody,
 } from "@entities/category";
-import { Modal } from "@shared/ui/libs";
+import { Modal, Spinner } from "@shared/ui/libs";
 
 interface CategoryFormModalProps {
   isOpen: boolean;
@@ -61,13 +61,8 @@ export function CategoryFormModal({
   }, [category, isOpen]);
 
   const title = mode === "create" ? "카테고리 추가" : "카테고리 수정";
-  const submitLabel = isSubmitting
-    ? mode === "create"
-      ? "추가 중..."
-      : "저장 중..."
-    : mode === "create"
-      ? "추가"
-      : "저장";
+  const submitLabel = mode === "create" ? "추가" : "저장";
+  const submittingLabel = mode === "create" ? "추가 중" : "저장 중";
 
   const handleSubmit = () => {
     if (!values.name.trim()) {
@@ -179,7 +174,7 @@ export function CategoryFormModal({
           disabled={isSubmitting}
           className="inline-flex items-center justify-center rounded-[0.75rem] bg-primary-1 px-4 py-2 text-sm font-medium text-text-1 transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {submitLabel}
+          {isSubmitting ? <><Spinner size="sm" /> {submittingLabel}</> : submitLabel}
         </button>
       </div>
     </Modal>

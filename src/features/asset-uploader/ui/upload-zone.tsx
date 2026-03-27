@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { cn } from "@shared/lib/style-utils";
+import { Spinner } from "@shared/ui/libs";
 
 export interface PendingUploadFile {
   id: string;
@@ -62,7 +63,7 @@ export function UploadZone({
             disabled={!hasFiles || isUploading}
             className="inline-flex items-center justify-center rounded-[0.9rem] bg-primary-1 px-4 py-3 text-sm font-medium text-text-1 transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isUploading ? "업로드 중..." : `${files.length}개 업로드`}
+            {isUploading ? <><Spinner size="sm" /> 업로드 중</> : `${files.length}개 업로드`}
           </button>
         </div>
       </div>
