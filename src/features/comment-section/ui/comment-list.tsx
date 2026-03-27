@@ -384,6 +384,7 @@ export function CommentList({
           1,
           Math.ceil(nextRootTotal / COMMENTS_PER_PAGE),
         );
+        const targetPage = Math.min(currentPage, nextTotalPages);
 
         setComments(nextComments);
         setMeta((current) => ({
@@ -391,11 +392,11 @@ export function CommentList({
           totalCount: Math.max(0, current.totalCount - 1),
           totalRootComments: nextRootTotal,
           totalPages: nextTotalPages,
-          page: Math.min(current.page, nextTotalPages),
+          page: targetPage,
         }));
 
-        if (!rootStillVisible && currentPage > nextTotalPages) {
-          await loadPage(nextTotalPages, { scrollToTop: false });
+        if (!rootStillVisible) {
+          await loadPage(targetPage, { scrollToTop: false });
         }
       } else {
         setComments((current) => markCommentDeleted(current, deleteTarget.id));
