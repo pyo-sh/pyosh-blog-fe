@@ -21,7 +21,7 @@ import {
 } from "@entities/comment";
 import { Modal, Spinner } from "@shared/ui/libs";
 
-const COMMENTS_PER_PAGE = 10;
+const DEFAULT_COMMENTS_PER_PAGE = 10;
 const SECRET_MASK = "비공개 메시지입니다";
 
 interface CommentViewer {
@@ -109,13 +109,16 @@ function markCommentDeleted(comments: Comment[], commentId: number): Comment[] {
 function createFallbackMeta(comments: Comment[]): CommentListMeta {
   return {
     page: 1,
-    limit: COMMENTS_PER_PAGE,
+    limit: DEFAULT_COMMENTS_PER_PAGE,
     totalCount: comments.reduce(
       (count, comment) => count + 1 + comment.replies.length,
       0,
     ),
     totalRootComments: comments.length,
-    totalPages: Math.max(1, Math.ceil(comments.length / COMMENTS_PER_PAGE)),
+    totalPages: Math.max(
+      1,
+      Math.ceil(comments.length / DEFAULT_COMMENTS_PER_PAGE),
+    ),
   };
 }
 
@@ -188,8 +191,10 @@ export function CommentList({
   const sectionRef = useRef<HTMLElement | null>(null);
   const commentRefs = useRef<Record<number, HTMLLIElement | null>>({});
 
+  const safeMeta = meta ?? createFallbackMeta(comments);
   const currentPage = meta.page;
   const isLocked = commentStatus === "locked";
+  const pageSize = safeMeta.limit || DEFAULT_COMMENTS_PER_PAGE;
 
   const resolvedComments = useMemo(
     () =>
@@ -264,14 +269,17 @@ export function CommentList({
     }));
   }
 
-  async function loadPage(page: number, options?: { scrollToTop?: boolean }) {
+  async function loadPage(
+    page: number,
+    options?: { scrollToTop?: boolean },
+  ): Promise<boolean> {
     setIsLoadingPage(true);
     setLoadError(null);
 
     try {
       const response = await fetchCommentsClient(postId, {
         page,
-        limit: COMMENTS_PER_PAGE,
+        limit: pageSize,
       });
 
       setComments(response.data);
@@ -284,12 +292,16 @@ export function CommentList({
           block: "start",
         });
       }
+
+      return true;
     } catch (error) {
       setLoadError(
         error instanceof Error
           ? error.message
           : "댓글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
       );
+
+      return false;
     } finally {
       setIsLoadingPage(false);
     }
@@ -316,25 +328,30 @@ export function CommentList({
 
     if (isRootComment) {
       const nextRootTotal = meta.totalRootComments + 1;
-      const nextTotalPages = Math.max(
-        1,
-        Math.ceil(nextRootTotal / COMMENTS_PER_PAGE),
-      );
+      const nextTotalPages = Math.max(1, Math.ceil(nextRootTotal / pageSize));
       const targetPage = nextTotalPages;
-
-      setMeta((current) => ({
-        ...current,
-        totalCount: current.totalCount + 1,
-        totalRootComments: nextRootTotal,
-        totalPages: nextTotalPages,
-        page: targetPage,
-      }));
 
       if (currentPage === targetPage) {
         setComments((current) => appendComment(current, nextComment));
+        setMeta((current) => ({
+          ...current,
+          totalCount: current.totalCount + 1,
+          totalRootComments: nextRootTotal,
+          totalPages: nextTotalPages,
+          page: targetPage,
+        }));
         setPendingScrollCommentId(nextComment.id);
       } else {
-        await loadPage(targetPage, { scrollToTop: false });
+        const didReload = await loadPage(targetPage, { scrollToTop: false });
+
+        if (!didReload) {
+          setLoadError(
+            "댓글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
+          );
+
+          return;
+        }
+
         setPendingScrollCommentId(nextComment.id);
       }
     } else {
@@ -399,25 +416,28 @@ export function CommentList({
         const nextRootTotal = rootStillVisible
           ? meta.totalRootComments
           : Math.max(0, meta.totalRootComments - 1);
-        const nextTotalPages = Math.max(
-          1,
-          Math.ceil(nextRootTotal / COMMENTS_PER_PAGE),
-        );
+        const nextTotalPages = Math.max(1, Math.ceil(nextRootTotal / pageSize));
         const targetPage = Math.min(currentPage, nextTotalPages);
 
-        setComments(nextComments);
-        setMeta((current) => ({
-          ...current,
-          totalCount: rootStillVisible
-            ? current.totalCount
-            : Math.max(0, current.totalCount - 1),
-          totalRootComments: nextRootTotal,
-          totalPages: nextTotalPages,
-          page: targetPage,
-        }));
-
         if (!rootStillVisible) {
-          await loadPage(targetPage, { scrollToTop: false });
+          const didReload = await loadPage(targetPage, { scrollToTop: false });
+
+          if (!didReload) {
+            setLoadError(
+              "댓글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
+            );
+
+            return;
+          }
+        } else {
+          setComments(nextComments);
+          setMeta((current) => ({
+            ...current,
+            totalCount: current.totalCount,
+            totalRootComments: nextRootTotal,
+            totalPages: nextTotalPages,
+            page: targetPage,
+          }));
         }
       } else {
         const nextComments = markCommentDeleted(comments, deleteTarget.id);
@@ -429,14 +449,19 @@ export function CommentList({
           0,
           meta.totalRootComments - removedRootCount,
         );
-        const nextTotalPages = Math.max(
-          1,
-          Math.ceil(nextRootTotal / COMMENTS_PER_PAGE),
-        );
+        const nextTotalPages = Math.max(1, Math.ceil(nextRootTotal / pageSize));
         const targetPage = Math.min(currentPage, nextTotalPages);
 
         if (removedRootCount > 0) {
-          await loadPage(targetPage, { scrollToTop: false });
+          const didReload = await loadPage(targetPage, { scrollToTop: false });
+
+          if (!didReload) {
+            setLoadError(
+              "댓글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
+            );
+
+            return;
+          }
         } else {
           setComments(nextComments);
           setMeta((current) => ({
@@ -474,8 +499,6 @@ export function CommentList({
     }));
     setReplyTarget(target);
   }
-
-  const safeMeta = meta ?? createFallbackMeta(comments);
 
   return (
     <section
