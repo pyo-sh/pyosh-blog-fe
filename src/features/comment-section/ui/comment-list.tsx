@@ -1,91 +1,227 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CommentForm, type GuestCommentProfile } from "./comment-form";
 import { CommentItem } from "./comment-item";
+import {
+  readGuestSecretComment,
+  rememberGuestSecretComment,
+} from "../lib/guest-secret-store";
 import type {
   Comment,
+  CommentListMeta,
   CreateCommentGuestBody,
   CreateCommentOAuthBody,
 } from "@entities/comment";
-import { createComment, deleteComment } from "@entities/comment";
+import {
+  createComment,
+  deleteComment,
+  fetchCommentsClient,
+} from "@entities/comment";
 import { Modal, Spinner } from "@shared/ui/libs";
+
+const COMMENTS_PER_PAGE = 10;
+const SECRET_MASK = "비공개 메시지입니다";
 
 interface CommentViewer {
   type: "guest" | "oauth";
   id?: number;
 }
 
+interface ReplyTarget {
+  commentId: number;
+  parentId: number;
+  replyToCommentId: number;
+  replyToName: string;
+}
+
 interface CommentListProps {
   postId: number;
   initialComments: Comment[];
+  initialMeta: CommentListMeta;
   viewer: CommentViewer;
   initialError?: string | null;
+  commentStatus?: "open" | "locked" | "disabled";
+}
+
+function getRootCommentId(comment: Comment) {
+  return comment.depth === 0 ? comment.id : (comment.parentId ?? comment.id);
+}
+
+function sortCommentsDesc(comments: Comment[]) {
+  return [...comments].sort(
+    (left, right) =>
+      new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
+  );
 }
 
 function appendComment(comments: Comment[], nextComment: Comment): Comment[] {
   if (nextComment.parentId === null) {
-    return [...comments, nextComment];
+    return sortCommentsDesc([nextComment, ...comments]);
   }
 
   return comments.map((comment) => {
-    if (comment.id === nextComment.parentId) {
+    if (comment.id !== nextComment.parentId) {
       return {
         ...comment,
-        replies: [...comment.replies, nextComment],
+        replies: appendComment(comment.replies, nextComment),
       };
     }
 
     return {
       ...comment,
-      replies: appendComment(comment.replies, nextComment),
+      replies: sortCommentsDesc([...comment.replies, nextComment]),
     };
   });
 }
 
+function hasVisibleReplies(comment: Comment) {
+  return comment.replies.length > 0;
+}
+
 function markCommentDeleted(comments: Comment[], commentId: number): Comment[] {
-  return comments.map((comment) => {
+  return comments.flatMap((comment) => {
     if (comment.id === commentId) {
-      return {
+      const nextComment: Comment = {
         ...comment,
         status: "deleted",
         body: "",
       };
+
+      return hasVisibleReplies(nextComment) ? [nextComment] : [];
     }
 
-    return {
+    const nextReplies = markCommentDeleted(comment.replies, commentId);
+    const nextComment = {
       ...comment,
-      replies: markCommentDeleted(comment.replies, commentId),
+      replies: nextReplies,
     };
+
+    if (nextComment.status === "deleted" && nextReplies.length === 0) {
+      return [];
+    }
+
+    return [nextComment];
   });
+}
+
+function createFallbackMeta(comments: Comment[]): CommentListMeta {
+  return {
+    page: 1,
+    limit: COMMENTS_PER_PAGE,
+    totalCount: comments.reduce(
+      (count, comment) => count + 1 + comment.replies.length,
+      0,
+    ),
+    totalRootComments: comments.length,
+    totalPages: Math.max(1, Math.ceil(comments.length / COMMENTS_PER_PAGE)),
+  };
+}
+
+function getDisplayBody(comment: Comment) {
+  if (comment.status === "deleted") {
+    return "삭제된 댓글입니다.";
+  }
+
+  if (comment.isSecret && comment.body === SECRET_MASK) {
+    return readGuestSecretComment(comment.id) ?? comment.body;
+  }
+
+  return comment.body;
+}
+
+function buildReplyTarget(comment: Comment): ReplyTarget {
+  return {
+    commentId: comment.id,
+    parentId: getRootCommentId(comment),
+    replyToCommentId: comment.id,
+    replyToName: comment.author.name,
+  };
 }
 
 export function CommentList({
   postId,
   initialComments,
+  initialMeta,
   viewer,
   initialError = null,
+  commentStatus = "open",
 }: CommentListProps) {
   const [comments, setComments] = useState(initialComments);
+  const [meta, setMeta] = useState<CommentListMeta>(initialMeta);
   const [loadError, setLoadError] = useState<string | null>(initialError);
-  const [replyTarget, setReplyTarget] = useState<Comment | null>(null);
+  const [isLoadingPage, setIsLoadingPage] = useState(false);
+  const [replyTarget, setReplyTarget] = useState<ReplyTarget | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Comment | null>(null);
   const [deletePassword, setDeletePassword] = useState("");
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleteBusy, setDeleteBusy] = useState(false);
+  const [pendingScrollCommentId, setPendingScrollCommentId] = useState<
+    number | null
+  >(null);
+  const [expandedRoots, setExpandedRoots] = useState<Record<number, boolean>>(
+    {},
+  );
   const [profile, setProfile] = useState<GuestCommentProfile>({
     guestName: "",
     guestEmail: "",
     guestPassword: "",
   });
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const commentRefs = useRef<Record<number, HTMLLIElement | null>>({});
+
+  const currentPage = meta.page;
+  const totalPages = meta.totalPages;
+  const isLocked = commentStatus === "locked";
+
+  const resolvedComments = useMemo(
+    () =>
+      comments.map((comment) => ({
+        ...comment,
+        replies: sortCommentsDesc(comment.replies),
+      })),
+    [comments],
+  );
 
   useEffect(() => {
     setComments(initialComments);
-  }, [initialComments]);
+    setMeta(initialMeta);
+  }, [initialComments, initialMeta]);
 
   useEffect(() => {
     setLoadError(initialError);
   }, [initialError]);
+
+  useEffect(() => {
+    setExpandedRoots((current) => {
+      const nextState = { ...current };
+
+      for (const comment of initialComments) {
+        if (nextState[comment.id] === undefined) {
+          nextState[comment.id] = comment.replies.length <= 2;
+        }
+      }
+
+      return nextState;
+    });
+  }, [initialComments]);
+
+  useEffect(() => {
+    if (!pendingScrollCommentId) {
+      return;
+    }
+
+    const target = commentRefs.current[pendingScrollCommentId];
+
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+      setPendingScrollCommentId(null);
+    }
+  }, [pendingScrollCommentId, resolvedComments]);
+
+  function registerCommentRef(commentId: number, node: HTMLLIElement | null) {
+    commentRefs.current[commentId] = node;
+  }
 
   function handleProfileChange(
     field: keyof GuestCommentProfile,
@@ -97,11 +233,81 @@ export function CommentList({
     }));
   }
 
+  async function loadPage(page: number, options?: { scrollToTop?: boolean }) {
+    setIsLoadingPage(true);
+    setLoadError(null);
+
+    try {
+      const response = await fetchCommentsClient(postId, {
+        page,
+        limit: COMMENTS_PER_PAGE,
+      });
+
+      setComments(response.data);
+      setMeta(response.meta);
+      setReplyTarget(null);
+
+      if (options?.scrollToTop !== false) {
+        sectionRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+    } catch (error) {
+      setLoadError(
+        error instanceof Error
+          ? error.message
+          : "댓글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
+      );
+    } finally {
+      setIsLoadingPage(false);
+    }
+  }
+
   async function handleCreate(
     payload: CreateCommentGuestBody | CreateCommentOAuthBody,
   ) {
     const nextComment = await createComment(postId, payload);
-    setComments((current) => appendComment(current, nextComment));
+    const isRootComment = nextComment.parentId === null;
+
+    if (payload.authorType === "guest" && nextComment.isSecret) {
+      rememberGuestSecretComment(nextComment.id, nextComment.body);
+    }
+
+    if (isRootComment) {
+      const nextRootTotal = meta.totalRootComments + 1;
+      const nextTotalPages = Math.max(
+        1,
+        Math.ceil(nextRootTotal / COMMENTS_PER_PAGE),
+      );
+
+      setMeta((current) => ({
+        ...current,
+        totalCount: current.totalCount + 1,
+        totalRootComments: nextRootTotal,
+        totalPages: nextTotalPages,
+      }));
+
+      if (currentPage === totalPages) {
+        setComments((current) => appendComment(current, nextComment));
+        setPendingScrollCommentId(nextComment.id);
+      } else {
+        await loadPage(nextTotalPages, { scrollToTop: false });
+        setPendingScrollCommentId(nextComment.id);
+      }
+    } else {
+      setComments((current) => appendComment(current, nextComment));
+      setMeta((current) => ({
+        ...current,
+        totalCount: current.totalCount + 1,
+      }));
+      setExpandedRoots((current) => ({
+        ...current,
+        [nextComment.parentId as number]: true,
+      }));
+      setPendingScrollCommentId(nextComment.id);
+    }
+
     setLoadError(null);
     setReplyTarget(null);
   }
@@ -139,6 +345,14 @@ export function CommentList({
       });
 
       setComments((current) => markCommentDeleted(current, deleteTarget.id));
+      setMeta((current) => ({
+        ...current,
+        totalCount: Math.max(0, current.totalCount - 1),
+        totalRootComments:
+          deleteTarget.parentId === null
+            ? Math.max(0, current.totalRootComments - 1)
+            : current.totalRootComments,
+      }));
       setLoadError(null);
       setDeleteTarget(null);
       setDeletePassword("");
@@ -151,26 +365,46 @@ export function CommentList({
     }
   }
 
+  function handleReply(comment: Comment) {
+    const target = buildReplyTarget(comment);
+
+    setExpandedRoots((current) => ({
+      ...current,
+      [target.parentId]: true,
+    }));
+    setReplyTarget(target);
+  }
+
+  const safeMeta = meta ?? createFallbackMeta(comments);
+
   return (
-    <section className="rounded-[2rem] border border-border-3 bg-background-2 p-6 md:p-8">
+    <section
+      ref={sectionRef}
+      className="rounded-[2rem] border border-border-3 bg-background-2 p-6 md:p-8"
+      aria-labelledby="post-comments-heading"
+    >
       <header>
-        <p className="text-body-xs uppercase tracking-[0.24em] text-text-4">
-          Comments
-        </p>
-        <h2 className="mt-3 text-h2 text-text-1">댓글</h2>
-        <p className="mt-3 text-body-sm text-text-3">
-          현재 {comments.length}개의 루트 댓글이 등록되어 있습니다.
-        </p>
+        <h2 id="post-comments-heading" className="text-h2 text-text-1">
+          댓글{" "}
+          <span className="text-h2 text-text-3">({safeMeta.totalCount})</span>
+        </h2>
+        {isLocked ? (
+          <p className="mt-3 text-body-sm text-text-3">
+            댓글이 잠겼습니다. 기존 댓글만 확인할 수 있습니다.
+          </p>
+        ) : null}
       </header>
 
-      <div className="mt-8">
-        <CommentForm
-          viewerType={viewer.type}
-          profile={profile}
-          onProfileChange={handleProfileChange}
-          onSubmit={handleCreate}
-        />
-      </div>
+      {!isLocked ? (
+        <div className="mt-8">
+          <CommentForm
+            viewerType={viewer.type}
+            profile={profile}
+            onProfileChange={handleProfileChange}
+            onSubmit={handleCreate}
+          />
+        </div>
+      ) : null}
 
       <div className="mt-8">
         {loadError ? (
@@ -182,59 +416,105 @@ export function CommentList({
           </div>
         ) : null}
 
-        {comments.length > 0 ? (
+        {isLoadingPage ? (
+          <div className="flex min-h-48 items-center justify-center rounded-[1.5rem] border border-dashed border-border-3 bg-background-1 px-5 py-8 text-body-md text-text-3">
+            <Spinner size="sm" />
+            <span className="ml-3">댓글을 불러오는 중입니다.</span>
+          </div>
+        ) : resolvedComments.length > 0 ? (
           <ul className="grid gap-5">
-            {comments.map((comment) => (
-              <li key={comment.id} className="space-y-4">
-                <CommentItem
-                  comment={comment}
-                  onReply={setReplyTarget}
-                  canDelete={canDeleteComment(comment)}
-                  onDelete={(target) => {
-                    setDeleteTarget(target);
-                    setDeletePassword("");
-                    setDeleteError(null);
-                  }}
-                />
+            {resolvedComments.map((comment) => {
+              const repliesExpanded =
+                expandedRoots[comment.id] ?? comment.replies.length <= 2;
+              const shouldShowReplyToggle = comment.replies.length >= 3;
+              const visibleReplies =
+                shouldShowReplyToggle && !repliesExpanded
+                  ? []
+                  : comment.replies;
 
-                {replyTarget?.id === comment.id ? (
-                  <CommentForm
-                    viewerType={viewer.type}
-                    profile={profile}
-                    onProfileChange={handleProfileChange}
-                    onSubmit={handleCreate}
-                    parentId={comment.id}
-                    replyToCommentId={comment.id}
-                    replyToName={comment.author.name}
-                    submitLabel="답글 작성"
-                    onCancel={() => setReplyTarget(null)}
-                    className="ml-0 md:ml-8"
+              return (
+                <li
+                  key={comment.id}
+                  ref={(node) => registerCommentRef(comment.id, node)}
+                  className="space-y-4"
+                >
+                  <CommentItem
+                    comment={comment}
+                    body={getDisplayBody(comment)}
+                    onReply={handleReply}
+                    canDelete={canDeleteComment(comment)}
+                    onDelete={(target) => {
+                      setDeleteTarget(target);
+                      setDeletePassword("");
+                      setDeleteError(null);
+                    }}
+                    showReplyToggle={shouldShowReplyToggle}
+                    repliesExpanded={repliesExpanded}
+                    replyCount={comment.replies.length}
+                    onToggleReplies={() =>
+                      setExpandedRoots((current) => ({
+                        ...current,
+                        [comment.id]: !repliesExpanded,
+                      }))
+                    }
                   />
-                ) : null}
 
-                {comment.replies.length > 0 ? (
-                  <ul className="grid gap-4 md:ml-8">
-                    {comment.replies.map((reply) => (
-                      <li
-                        key={reply.id}
-                        className="border-l border-border-3 pl-5"
-                      >
-                        <CommentItem
-                          comment={reply}
-                          onReply={setReplyTarget}
-                          canDelete={canDeleteComment(reply)}
-                          onDelete={(target) => {
-                            setDeleteTarget(target);
-                            setDeletePassword("");
-                            setDeleteError(null);
-                          }}
-                        />
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-              </li>
-            ))}
+                  {replyTarget?.commentId === comment.id ? (
+                    <CommentForm
+                      viewerType={viewer.type}
+                      profile={profile}
+                      onProfileChange={handleProfileChange}
+                      onSubmit={handleCreate}
+                      parentId={replyTarget.parentId}
+                      replyToCommentId={replyTarget.replyToCommentId}
+                      replyToName={replyTarget.replyToName}
+                      submitLabel="답글 작성"
+                      onCancel={() => setReplyTarget(null)}
+                      className="ml-0 md:ml-8"
+                    />
+                  ) : null}
+
+                  {visibleReplies.length > 0 ? (
+                    <ul className="grid gap-4 md:ml-8">
+                      {visibleReplies.map((reply) => (
+                        <li
+                          key={reply.id}
+                          ref={(node) => registerCommentRef(reply.id, node)}
+                          className="border-l border-border-3 pl-5"
+                        >
+                          <CommentItem
+                            comment={reply}
+                            body={getDisplayBody(reply)}
+                            onReply={handleReply}
+                            canDelete={canDeleteComment(reply)}
+                            onDelete={(target) => {
+                              setDeleteTarget(target);
+                              setDeletePassword("");
+                              setDeleteError(null);
+                            }}
+                          />
+
+                          {replyTarget?.commentId === reply.id ? (
+                            <CommentForm
+                              viewerType={viewer.type}
+                              profile={profile}
+                              onProfileChange={handleProfileChange}
+                              onSubmit={handleCreate}
+                              parentId={replyTarget.parentId}
+                              replyToCommentId={replyTarget.replyToCommentId}
+                              replyToName={replyTarget.replyToName}
+                              submitLabel="답글 작성"
+                              onCancel={() => setReplyTarget(null)}
+                              className="mt-4"
+                            />
+                          ) : null}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </li>
+              );
+            })}
           </ul>
         ) : (
           <div className="rounded-[1.5rem] border border-dashed border-border-3 bg-background-1 px-5 py-8 text-body-md text-text-3">
@@ -242,6 +522,51 @@ export function CommentList({
           </div>
         )}
       </div>
+
+      {safeMeta.totalPages > 1 ? (
+        <nav
+          aria-label="댓글 페이지네이션"
+          className="mt-8 flex flex-wrap items-center justify-center gap-2"
+        >
+          <button
+            type="button"
+            onClick={() => loadPage(Math.max(1, currentPage - 1))}
+            disabled={isLoadingPage || currentPage <= 1}
+            className="inline-flex items-center justify-center rounded-[0.85rem] border border-border-3 px-3 py-2 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            &lsaquo;
+          </button>
+          {Array.from(
+            { length: safeMeta.totalPages },
+            (_, index) => index + 1,
+          ).map((page) => (
+            <button
+              key={page}
+              type="button"
+              onClick={() => loadPage(page)}
+              disabled={isLoadingPage || page === currentPage}
+              aria-current={page === currentPage ? "page" : undefined}
+              className={
+                page === currentPage
+                  ? "inline-flex min-w-[2.25rem] items-center justify-center rounded-[0.85rem] bg-primary-1 px-3 py-2 text-sm font-semibold text-white"
+                  : "inline-flex min-w-[2.25rem] items-center justify-center rounded-[0.85rem] border border-border-3 px-3 py-2 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+              }
+            >
+              {page}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() =>
+              loadPage(Math.min(safeMeta.totalPages, currentPage + 1))
+            }
+            disabled={isLoadingPage || currentPage >= safeMeta.totalPages}
+            className="inline-flex items-center justify-center rounded-[0.85rem] border border-border-3 px-3 py-2 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            &rsaquo;
+          </button>
+        </nav>
+      ) : null}
 
       <Modal
         isOpen={deleteTarget !== null}

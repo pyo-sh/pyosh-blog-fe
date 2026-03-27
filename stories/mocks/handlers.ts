@@ -1,7 +1,7 @@
 import { http, HttpResponse } from "msw";
 import { mockPosts, mockMeta } from "./data/posts";
 import { mockCategories } from "./data/categories";
-import { mockComments } from "./data/comments";
+import { mockComments, mockCommentMeta } from "./data/comments";
 import {
   mockAdminGuestbookEntries,
   mockGuestbookEntries,
@@ -45,8 +45,8 @@ export const handlers = [
   }),
 
   // Comments
-  http.get("/api/posts/:slug/comments", () => {
-    return HttpResponse.json({ data: mockComments });
+  http.get("/api/posts/:postId/comments", () => {
+    return HttpResponse.json({ data: mockComments, meta: mockCommentMeta });
   }),
   http.get("/api/admin/comments", () => {
     return HttpResponse.json({

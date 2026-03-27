@@ -4,38 +4,92 @@ import type { Comment } from "@entities/comment";
 
 interface CommentItemProps {
   comment: Comment;
+  body: string;
   onReply: (comment: Comment) => void;
   onDelete: (comment: Comment) => void;
   canDelete?: boolean;
+  showReplyToggle?: boolean;
+  repliesExpanded?: boolean;
+  replyCount?: number;
+  onToggleReplies?: () => void;
 }
-
-const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-  timeZone: "UTC",
-});
 
 function formatDate(value: string) {
-  return dateFormatter.format(new Date(value));
+  const date = new Date(value);
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(date.getUTCDate()).padStart(2, "0");
+
+  return `${year}.${month}.${day}`;
 }
 
-function getBody(comment: Comment) {
-  if (comment.status === "deleted") {
-    return "삭제된 댓글입니다.";
-  }
+function LockIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-3.5 w-3.5 text-text-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-label="비밀글"
+    >
+      <rect x="5" y="11" width="14" height="10" rx="2" />
+      <path d="M8 11V8a4 4 0 1 1 8 0v3" />
+    </svg>
+  );
+}
 
-  return comment.body;
+function ChevronIcon({ expanded }: { expanded: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-3.5 w-3.5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {expanded ? <path d="m6 15 6-6 6 6" /> : <path d="m6 9 6 6 6-6" />}
+    </svg>
+  );
 }
 
 export function CommentItem({
   comment,
+  body,
   onReply,
   onDelete,
   canDelete = true,
+  showReplyToggle = false,
+  repliesExpanded = true,
+  replyCount = 0,
+  onToggleReplies,
 }: CommentItemProps) {
-  const canReply = comment.depth === 0 && comment.status !== "deleted";
-  const showDelete = canDelete && comment.status !== "deleted";
+  const isDeleted = comment.status === "deleted";
+  const canReply = !isDeleted;
+  const showDelete = canDelete && !isDeleted;
+
+  if (isDeleted) {
+    return (
+      <article className="rounded-[1.5rem] border border-border-3 bg-background-1 p-5">
+        <p className="text-body-md italic text-text-4">삭제된 댓글입니다.</p>
+        {showReplyToggle ? (
+          <button
+            type="button"
+            onClick={onToggleReplies}
+            className="mt-5 inline-flex items-center gap-2 text-body-sm text-text-3 transition-colors hover:text-text-1"
+          >
+            답글 {replyCount}개
+            <ChevronIcon expanded={repliesExpanded} />
+          </button>
+        ) : null}
+      </article>
+    );
+  }
 
   return (
     <article className="rounded-[1.5rem] border border-border-3 bg-background-1 p-5">
@@ -44,20 +98,16 @@ export function CommentItem({
         <time dateTime={comment.createdAt}>
           {formatDate(comment.createdAt)}
         </time>
-        {comment.replyToName ? (
-          <span className="rounded-full bg-background-2 px-3 py-1 text-body-xs text-text-4">
-            @{comment.replyToName}
-          </span>
-        ) : null}
-        {comment.isSecret ? (
-          <span className="rounded-full bg-background-2 px-3 py-1 text-body-xs text-text-4">
-            Secret
-          </span>
-        ) : null}
+        {comment.isSecret ? <LockIcon /> : null}
       </div>
 
       <p className="mt-4 whitespace-pre-wrap text-body-md text-text-2">
-        {getBody(comment)}
+        {comment.replyToName ? (
+          <span className="font-bold text-primary-1">
+            @{comment.replyToName}{" "}
+          </span>
+        ) : null}
+        {body}
       </p>
 
       <div className="mt-5 flex flex-wrap items-center gap-4">
@@ -78,6 +128,17 @@ export function CommentItem({
             className="text-body-sm font-medium text-text-3 transition-opacity hover:opacity-80"
           >
             삭제
+          </button>
+        ) : null}
+
+        {showReplyToggle ? (
+          <button
+            type="button"
+            onClick={onToggleReplies}
+            className="inline-flex items-center gap-2 text-body-sm text-text-3 transition-colors hover:text-text-1"
+          >
+            답글 {replyCount}개
+            <ChevronIcon expanded={repliesExpanded} />
           </button>
         ) : null}
       </div>

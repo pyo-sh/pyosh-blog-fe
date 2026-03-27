@@ -1,8 +1,10 @@
 import type {
   CommentAuthor,
   Comment,
+  CommentListMeta,
   CommentResponse,
   CommentsResponse,
+  CommentsResponseLegacy,
   CreateCommentBody,
   DeleteCommentBody,
 } from "./model";
@@ -70,17 +72,98 @@ function buildAdminCommentSearchParams(
   return searchParams.toString();
 }
 
+function buildCommentListSearchParams(page?: number, limit?: number): string {
+  const searchParams = new URLSearchParams();
+
+  if (page !== undefined) {
+    searchParams.set("page", String(page));
+  }
+
+  if (limit !== undefined) {
+    searchParams.set("limit", String(limit));
+  }
+
+  return searchParams.toString();
+}
+
+function buildCommentListMeta(
+  comments: Comment[],
+  fallbackPage = 1,
+  fallbackLimit = 10,
+): CommentListMeta {
+  const totalRootComments = comments.length;
+
+  return {
+    page: fallbackPage,
+    limit: fallbackLimit,
+    totalCount: comments.reduce(
+      (count, comment) => count + 1 + comment.replies.length,
+      0,
+    ),
+    totalRootComments,
+    totalPages: Math.max(1, Math.ceil(totalRootComments / fallbackLimit)),
+  };
+}
+
+function normalizeCommentsResponse(
+  response: CommentsResponse | CommentsResponseLegacy,
+  page?: number,
+  limit = 10,
+): CommentsResponse {
+  if ("meta" in response) {
+    return response;
+  }
+
+  return {
+    data: response.data,
+    meta: buildCommentListMeta(response.data, page ?? 1, limit),
+  };
+}
+
 export async function fetchComments(
   postId: number,
+  options?: {
+    page?: number;
+    limit?: number;
+  },
   cookieHeader?: string,
-): Promise<Comment[]> {
-  const response = await serverFetch<CommentsResponse>(
-    `/api/posts/${postId}/comments`,
+): Promise<CommentsResponse> {
+  const queryString = buildCommentListSearchParams(
+    options?.page,
+    options?.limit,
+  );
+  const path = queryString
+    ? `/api/posts/${postId}/comments?${queryString}`
+    : `/api/posts/${postId}/comments`;
+
+  const response = await serverFetch<CommentsResponse | CommentsResponseLegacy>(
+    path,
     {},
     cookieHeader,
   );
 
-  return response.data;
+  return normalizeCommentsResponse(response, options?.page, options?.limit);
+}
+
+export async function fetchCommentsClient(
+  postId: number,
+  options?: {
+    page?: number;
+    limit?: number;
+  },
+): Promise<CommentsResponse> {
+  const queryString = buildCommentListSearchParams(
+    options?.page,
+    options?.limit,
+  );
+  const path = queryString
+    ? `/api/posts/${postId}/comments?${queryString}`
+    : `/api/posts/${postId}/comments`;
+  const response = await clientFetch<CommentsResponse | CommentsResponseLegacy>(
+    path,
+  );
+
+  return normalizeCommentsResponse(response, options?.page, options?.limit);
 }
 
 export async function createComment(

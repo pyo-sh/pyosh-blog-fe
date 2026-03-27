@@ -3,7 +3,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { fetchMeServer } from "@entities/auth";
-import { fetchComments, type Comment } from "@entities/comment";
+import {
+  fetchComments,
+  type Comment,
+  type CommentListMeta,
+} from "@entities/comment";
 import { fetchPosts, fetchPostBySlug } from "@entities/post";
 import { CommentList } from "@features/comment-section";
 import {
@@ -76,6 +80,13 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
   try {
     const { post, prevPost, nextPost } = await fetchPostBySlug(params.slug);
     let comments: Comment[] = [];
+    let commentMeta: CommentListMeta = {
+      page: 1,
+      limit: 10,
+      totalCount: 0,
+      totalRootComments: 0,
+      totalPages: 1,
+    };
     let commentError: string | null = null;
     const cookieHeader = await toCookieHeader();
 
@@ -85,17 +96,27 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
             () => null,
           )
         : Promise.resolve(null),
-      fetchComments(post.id, cookieHeader).catch((error: unknown) => {
-        if (error instanceof ApiResponseError && error.statusCode === 404) {
-          throw error;
-        }
-        commentError =
-          "댓글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.";
+      post.commentStatus === "disabled"
+        ? Promise.resolve(null)
+        : fetchComments(post.id, undefined, cookieHeader).catch(
+            (error: unknown) => {
+              if (
+                error instanceof ApiResponseError &&
+                error.statusCode === 404
+              ) {
+                throw error;
+              }
+              commentError =
+                "댓글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.";
 
-        return null;
-      }),
+              return null;
+            },
+          ),
     ]);
-    if (fetchedComments) comments = fetchedComments;
+    if (fetchedComments) {
+      comments = fetchedComments.data;
+      commentMeta = fetchedComments.meta;
+    }
     const relatedPosts =
       relatedPostsData?.data.filter((p) => p.id !== post.id).slice(0, 5) ?? [];
 
@@ -174,12 +195,16 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
         </article>
 
         <PostNavigation prevPost={prevPost} nextPost={nextPost} />
-        <CommentList
-          postId={post.id}
-          initialComments={comments}
-          viewer={viewer}
-          initialError={commentError}
-        />
+        {post.commentStatus !== "disabled" ? (
+          <CommentList
+            postId={post.id}
+            initialComments={comments}
+            initialMeta={commentMeta}
+            viewer={viewer}
+            initialError={commentError}
+            commentStatus={post.commentStatus}
+          />
+        ) : null}
         <ScrollToTop />
       </main>
     );
