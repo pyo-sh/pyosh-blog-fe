@@ -10,6 +10,11 @@ export interface PostCategory {
   slug: string;
 }
 
+export interface MatchedComment {
+  body: string;
+  authorName: string;
+}
+
 export interface Post {
   id: number;
   categoryId: number;
@@ -30,7 +35,25 @@ export interface Post {
   contentModifiedAt: string | null;
   category: PostCategory;
   tags: PostTag[];
+  matchedComment?: MatchedComment;
 }
+
+export type SearchFilter =
+  | "title_content"
+  | "title"
+  | "content"
+  | "tag"
+  | "category"
+  | "comment";
+
+export const SEARCH_FILTERS: SearchFilter[] = [
+  "title_content",
+  "title",
+  "content",
+  "tag",
+  "category",
+  "comment",
+];
 
 export interface PostNavigation {
   slug: string;
@@ -43,6 +66,7 @@ export interface FetchPostsParams {
   categoryId?: number;
   tagSlug?: string;
   q?: string;
+  filter?: SearchFilter;
 }
 
 export interface FetchAdminPostsParams {

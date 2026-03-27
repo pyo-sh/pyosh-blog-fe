@@ -43,6 +43,10 @@ function buildSearchParams(
     searchParams.set("q", params.q);
   }
 
+  if ("filter" in params && params.filter !== undefined) {
+    searchParams.set("filter", params.filter);
+  }
+
   if ("status" in params && params.status !== undefined) {
     searchParams.set("status", params.status);
   }
