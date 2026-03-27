@@ -273,8 +273,14 @@
     background-color: var(--background2);
     border: 1px solid var(--border3);
     border-radius: 0.75rem;
+    max-width: 100%;
     overflow-x: auto;
     padding: 1rem;
+  }
+
+  .markdown-content pre code {
+    display: block;
+    min-width: max-content;
   }
 
   .markdown-content :not(pre) > code {
@@ -284,13 +290,33 @@
   }
 
   .markdown-content table {
+    -webkit-overflow-scrolling: touch;
+    border-collapse: collapse;
     display: block;
     overflow-x: auto;
+    width: 100%;
+  }
+
+  .markdown-content th {
+    background-color: var(--background3);
+    font-weight: 600;
+    text-align: left;
+  }
+
+  .markdown-content th,
+  .markdown-content td {
+    border: 1px solid var(--border3);
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* GFM 체크박스 - 읽기 전용 */
+  .markdown-content input[type="checkbox"] {
+    pointer-events: none;
   }
 
   .markdown-content img {
-    max-width: 100%;
     height: auto;
+    max-width: 100%;
     border-radius: 1rem;
   }
 

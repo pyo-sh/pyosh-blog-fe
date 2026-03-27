@@ -4,11 +4,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { fetchMeServer } from "@entities/auth";
 import { fetchComments, type Comment } from "@entities/comment";
-import { fetchPostBySlug } from "@entities/post";
+import { fetchPosts, fetchPostBySlug } from "@entities/post";
 import { CommentList } from "@features/comment-section";
 import {
   PostContent,
   PostNavigation,
+  RelatedPosts,
   ViewCounter,
 } from "@features/post-detail";
 import { ApiResponseError } from "@shared/api";
@@ -78,6 +79,14 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
     let commentError: string | null = null;
     const cookieHeader = await toCookieHeader();
 
+    const relatedPostsData = post.category
+      ? await fetchPosts({ categoryId: post.category.id, limit: 6 }).catch(
+          () => null,
+        )
+      : null;
+    const relatedPosts =
+      relatedPostsData?.data.filter((p) => p.id !== post.id).slice(0, 5) ?? [];
+
     try {
       comments = await fetchComments(post.id, cookieHeader);
     } catch (error) {
@@ -120,6 +129,22 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
                 <time dateTime={post.publishedAt ?? post.createdAt}>
                   {formatDate(post.publishedAt, post.createdAt)}
                 </time>
+                {post.contentModifiedAt && (
+                  <>
+                    <span aria-hidden="true">•</span>
+                    <span>
+                      수정:{" "}
+                      <time dateTime={post.contentModifiedAt}>
+                        {formatDate(
+                          post.contentModifiedAt,
+                          post.contentModifiedAt,
+                        )}
+                      </time>
+                    </span>
+                  </>
+                )}
+                <span aria-hidden="true">•</span>
+                <span>{post.totalPageviews.toLocaleString("ko-KR")} 조회</span>
               </div>
 
               <h1 className="text-heading-lg text-text-1">{post.title}</h1>
@@ -139,6 +164,8 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
             </header>
 
             <PostContent contentMd={post.contentMd} />
+
+            {relatedPosts.length > 0 && <RelatedPosts posts={relatedPosts} />}
           </div>
         </article>
 

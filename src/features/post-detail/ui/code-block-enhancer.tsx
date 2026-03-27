@@ -1,0 +1,74 @@
+"use client";
+
+import { useEffect, useRef, type PropsWithChildren } from "react";
+
+function createCodeHeader(
+  lang: string | undefined,
+  pre: HTMLElement,
+): HTMLDivElement {
+  const header = document.createElement("div");
+  header.className =
+    "flex items-center justify-between px-4 py-2 border-b border-border-3";
+
+  const langLabel = document.createElement("span");
+  langLabel.className = "text-body-xs text-text-4";
+  langLabel.textContent = lang ?? "";
+  header.appendChild(langLabel);
+
+  const copyBtn = document.createElement("button");
+  copyBtn.className =
+    "text-body-xs text-text-4 transition-colors hover:text-text-2";
+  copyBtn.textContent = "복사";
+  copyBtn.setAttribute("aria-label", "코드 복사");
+  copyBtn.setAttribute("type", "button");
+
+  if (!navigator.clipboard) {
+    copyBtn.style.display = "none";
+  } else {
+    copyBtn.addEventListener("click", async () => {
+      const code = pre.querySelector("code");
+      const text = code?.textContent ?? "";
+
+      try {
+        await navigator.clipboard.writeText(text);
+        copyBtn.textContent = "복사됨";
+        setTimeout(() => {
+          copyBtn.textContent = "복사";
+        }, 1500);
+      } catch {
+        // clipboard write failed — leave button as-is
+      }
+    });
+  }
+
+  header.appendChild(copyBtn);
+
+  return header;
+}
+
+export function CodeBlockEnhancer({ children }: PropsWithChildren) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const preBlocks = container.querySelectorAll<HTMLElement>("pre");
+    preBlocks.forEach((pre) => {
+      // 이미 헤더가 삽입된 경우 중복 삽입 방지
+      if (pre.querySelector("[data-code-header]")) return;
+
+      const code = pre.querySelector("code");
+      const lang = code?.className?.match(/language-(\w+)/)?.[1];
+
+      // 언어가 없으면 헤더 미삽입
+      if (!lang) return;
+
+      const header = createCodeHeader(lang, pre);
+      header.setAttribute("data-code-header", "true");
+      pre.insertBefore(header, pre.firstChild);
+    });
+  }, []);
+
+  return <div ref={containerRef}>{children}</div>;
+}
