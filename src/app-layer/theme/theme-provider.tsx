@@ -44,7 +44,7 @@ export function ThemeProvider({ children, initialTheme }: TProviderProps) {
   React.useEffect(() => {
     if (themeType !== "default" && document.body.dataset.theme !== themeType) {
       document.body.dataset.theme = themeType;
-      setCookie(COOKIE_THEME_KEY, themeType);
+      setCookie(COOKIE_THEME_KEY, themeType, { maxAge: 60 * 60 * 24 * 365 });
     }
   }, [themeType]);
 

@@ -12,6 +12,7 @@ import {
   ViewCounter,
 } from "@features/post-detail";
 import { ApiResponseError } from "@shared/api";
+import { ScrollToTop } from "@shared/ui/libs";
 
 interface PostDetailPageProps {
   params: {
@@ -148,6 +149,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
           viewer={viewer}
           initialError={commentError}
         />
+        <ScrollToTop />
       </main>
     );
   } catch (error) {
