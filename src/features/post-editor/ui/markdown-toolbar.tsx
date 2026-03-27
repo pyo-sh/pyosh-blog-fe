@@ -17,6 +17,7 @@ interface ToolbarButtonProps {
   onClick: () => void;
   bold?: boolean;
   italic?: boolean;
+  strikethrough?: boolean;
   disabled?: boolean;
 }
 
@@ -26,6 +27,7 @@ function ToolbarButton({
   onClick,
   bold,
   italic,
+  strikethrough,
   disabled,
 }: ToolbarButtonProps) {
   return (
@@ -38,7 +40,11 @@ function ToolbarButton({
       className="flex h-7 min-w-7 items-center justify-center rounded px-1.5 text-xs text-text-2 transition-colors hover:bg-background-3 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
     >
       <span
-        className={[bold ? "font-bold" : "", italic ? "italic" : ""]
+        className={[
+          bold ? "font-bold" : "",
+          italic ? "italic" : "",
+          strikethrough ? "line-through" : "",
+        ]
           .filter(Boolean)
           .join(" ")}
       >
@@ -87,6 +93,7 @@ export function MarkdownToolbar({ editorView }: MarkdownToolbarProps) {
       <ToolbarButton
         label="S"
         title="취소선"
+        strikethrough
         disabled={!isReady}
         onClick={withView((view) => wrapSelection(view, "~~", "~~"))}
       />

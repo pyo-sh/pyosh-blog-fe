@@ -37,7 +37,9 @@ export function toggleLinePrefix(view: EditorView, prefix: string): void {
       changes: { from: line.from, to: line.from + prefix.length, insert: "" },
     });
   } else {
-    const cleaned = line.text.replace(/^#{1,6}\s/, "");
+    const cleaned = line.text
+      .replace(/^#{1,6}\s/, "")
+      .replace(/^(>\s+|\d+\.\s|-\s)/, "");
     view.dispatch({
       changes: { from: line.from, to: line.to, insert: `${prefix}${cleaned}` },
     });
@@ -104,20 +106,28 @@ export function insertTable(view: EditorView): void {
   view.focus();
 }
 
-export function insertLink(view: EditorView): void {
-  const { from, to } = view.state.selection.main;
-  const selected = view.state.sliceDoc(from, to);
+function applyLinkTemplate(
+  state: EditorState,
+  dispatch: EditorView["dispatch"],
+): void {
+  const { from, to } = state.selection.main;
+  const selected = state.sliceDoc(from, to);
   const text = selected || "링크 텍스트";
   const insert = `[${text}](url)`;
 
-  view.dispatch({
-    changes: { from, to, insert },
-    selection: EditorSelection.range(
-      from + text.length + 3,
-      from + text.length + 6,
-    ),
-  });
+  dispatch(
+    state.update({
+      changes: { from, to, insert },
+      selection: EditorSelection.range(
+        from + text.length + 3,
+        from + text.length + 6,
+      ),
+    }),
+  );
+}
 
+export function insertLink(view: EditorView): void {
+  applyLinkTemplate(view.state, view.dispatch.bind(view));
   view.focus();
 }
 
@@ -190,19 +200,7 @@ function wrapLink({
   state: EditorState;
   dispatch: EditorView["dispatch"];
 }): boolean {
-  const { from, to } = state.selection.main;
-  const selected = state.sliceDoc(from, to);
-  const text = selected || "링크 텍스트";
-  const insert = `[${text}](url)`;
-  dispatch(
-    state.update({
-      changes: { from, to, insert },
-      selection: EditorSelection.range(
-        from + text.length + 3,
-        from + text.length + 3 + 3,
-      ),
-    }),
-  );
+  applyLinkTemplate(state, dispatch);
 
   return true;
 }
