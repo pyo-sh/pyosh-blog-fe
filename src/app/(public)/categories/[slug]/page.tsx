@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import type { Category } from "@entities/category";
 import { fetchCategories } from "@entities/category";
 import { fetchPosts } from "@entities/post";
-import { PostCard } from "@features/post-list";
+import { PostListItem } from "@features/post-list";
 import { EmptyState, Pagination } from "@shared/ui/libs";
 import { CategoryNav } from "@widgets/category-nav";
 
@@ -102,7 +102,7 @@ export default async function CategoryPage({
       {posts.length > 0 ? (
         <section className="grid gap-5">
           {posts.map((post) => (
-            <PostCard key={post.id} post={post} />
+            <PostListItem key={post.id} post={post} />
           ))}
         </section>
       ) : (
