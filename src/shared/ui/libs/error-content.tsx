@@ -30,7 +30,6 @@ export function ErrorContent({
   return (
     <div
       role="alert"
-      aria-live="assertive"
       className="w-full max-w-[32rem] rounded-[2rem] border border-border-3 bg-background-2 p-8 text-center shadow-[0px_18px_60px_0px_rgba(0,0,0,0.08)]"
     >
       <Text
