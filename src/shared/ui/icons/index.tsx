@@ -4,6 +4,7 @@ export interface IIconProps {
   className?: string;
 }
 
+export { ArrowUpIcon } from "./arrow-up-icon";
 export { BrushIcon } from "./brush-icon";
 export { GithubIcon } from "./github-icon";
 export { HomeIcon } from "./home-icon";

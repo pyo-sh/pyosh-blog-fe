@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { fetchTags } from "@entities/tag";
+import { ScrollToTop } from "@shared/ui/libs";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +52,7 @@ export default async function TagsPage() {
           등록된 태그가 없습니다.
         </section>
       )}
+      <ScrollToTop />
     </main>
   );
 }

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { fetchPosts } from "@entities/post";
 import { PostCard } from "@features/post-list";
-import { Pagination } from "@shared/ui/libs";
+import { Pagination, ScrollToTop } from "@shared/ui/libs";
 
 interface SearchPageProps {
   searchParams?: {
@@ -89,6 +89,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           검색 결과가 없습니다. 다른 키워드로 다시 시도해 주세요.
         </section>
       )}
+      <ScrollToTop />
     </main>
   );
 }
