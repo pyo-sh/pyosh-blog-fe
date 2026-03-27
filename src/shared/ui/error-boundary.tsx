@@ -4,15 +4,15 @@ import React from "react";
 import { ErrorContent } from "@shared/ui/libs";
 
 type Props = { children: React.ReactNode };
-type State = { hasError: boolean };
+type State = { hasError: boolean; retryKey: number };
 
 export class ErrorBoundary extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, retryKey: 0 };
   }
 
-  static getDerivedStateFromError(): State {
+  static getDerivedStateFromError(): Partial<State> {
     return { hasError: true };
   }
 
@@ -37,7 +37,11 @@ export class ErrorBoundary extends React.Component<Props, State> {
             description="페이지를 불러오는 중 예기치 않은 오류가 발생했습니다. 잠시 후 다시 시도해 주세요."
             action={{
               type: "button",
-              onClick: () => this.setState({ hasError: false }),
+              onClick: () =>
+                this.setState((s) => ({
+                  hasError: false,
+                  retryKey: s.retryKey + 1,
+                })),
               label: "다시 시도",
             }}
           />
@@ -45,6 +49,10 @@ export class ErrorBoundary extends React.Component<Props, State> {
       );
     }
 
-    return this.props.children;
+    return (
+      <React.Fragment key={this.state.retryKey}>
+        {this.props.children}
+      </React.Fragment>
+    );
   }
 }
