@@ -1,3 +1,5 @@
+import { buildWebSiteJsonLd, getSiteUrl } from "@shared/lib/structured-data";
+import { JsonLd } from "@shared/ui/json-ld";
 import { HomePage } from "@widgets/home-page";
 
 interface PageProps {
@@ -7,5 +9,12 @@ interface PageProps {
 }
 
 export default function Page({ searchParams }: PageProps) {
-  return <HomePage searchParams={searchParams} />;
+  const siteUrl = getSiteUrl();
+
+  return (
+    <>
+      {siteUrl ? <JsonLd data={buildWebSiteJsonLd(siteUrl)} /> : null}
+      <HomePage searchParams={searchParams} />
+    </>
+  );
 }

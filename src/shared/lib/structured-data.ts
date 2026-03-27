@@ -1,6 +1,7 @@
 import { URLS } from "@shared/constant/url";
 
 const FALLBACK_SITE_URL = "http://localhost:3000";
+const BLOG_NAME = "Pyosh Blog";
 const DESCRIPTION_LIMIT = 160;
 
 interface StructuredDataBase {
@@ -12,6 +13,24 @@ interface PersonJsonLd {
   "@type": "Person";
   name: string;
   url: string;
+}
+
+interface EntryPointJsonLd {
+  "@type": "EntryPoint";
+  urlTemplate: string;
+}
+
+interface SearchActionJsonLd {
+  "@type": "SearchAction";
+  target: EntryPointJsonLd;
+  "query-input": string;
+}
+
+export interface WebSiteJsonLd extends StructuredDataBase {
+  "@type": "WebSite";
+  name: string;
+  url: string;
+  potentialAction: SearchActionJsonLd;
 }
 
 export interface BlogPostingJsonLd extends StructuredDataBase {
@@ -73,9 +92,44 @@ export function getSiteUrl(): string | null {
     return process.env.NODE_ENV === "development" ? FALLBACK_SITE_URL : null;
   }
 
-  return configuredSiteUrl.endsWith("/")
-    ? configuredSiteUrl.slice(0, -1)
-    : configuredSiteUrl;
+  const value = configuredSiteUrl;
+
+  return value.endsWith("/") ? value.slice(0, -1) : value;
+}
+
+export function getPostDescription(
+  post: Pick<StructuredDataPost, "summary" | "description" | "contentMd">,
+) {
+  const plainText = (
+    post.description?.trim() ||
+    post.summary?.trim() ||
+    stripMarkdown(post.contentMd)
+  ).trim();
+
+  if (plainText.length <= DESCRIPTION_LIMIT) {
+    return plainText;
+  }
+
+  return `${plainText.slice(0, DESCRIPTION_LIMIT).trimEnd()}...`;
+}
+
+export function buildWebSiteJsonLd(siteUrl: string): WebSiteJsonLd {
+  const normalizedSiteUrl = normalizeBaseUrl(siteUrl);
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: BLOG_NAME,
+    url: `${normalizedSiteUrl}/`,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${normalizedSiteUrl}/search?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
 }
 
 export function buildBlogPostingJsonLd(
@@ -127,22 +181,6 @@ export function buildBreadcrumbJsonLd(
         : {}),
     })),
   };
-}
-
-function getPostDescription(
-  post: Pick<StructuredDataPost, "summary" | "description" | "contentMd">,
-) {
-  const plainText = (
-    post.description?.trim() ||
-    post.summary?.trim() ||
-    stripMarkdown(post.contentMd)
-  ).trim();
-
-  if (plainText.length <= DESCRIPTION_LIMIT) {
-    return plainText;
-  }
-
-  return `${plainText.slice(0, DESCRIPTION_LIMIT).trimEnd()}...`;
 }
 
 function normalizeBaseUrl(siteUrl: string) {

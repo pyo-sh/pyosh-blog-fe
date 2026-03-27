@@ -1,6 +1,9 @@
 import rehypeShiki from "@shikijs/rehype";
+import GithubSlugger from "github-slugger";
+import { toString } from "mdast-util-to-string";
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
+import rehypeSlug from "rehype-slug";
 import rehypeStringify from "rehype-stringify";
 import remarkGfm from "remark-gfm";
 import remarkParse from "remark-parse";
@@ -25,32 +28,6 @@ function rehypeLazyImages() {
         node.properties.loading = "lazy";
         node.properties.decoding = "async";
       }
-    });
-  };
-}
-
-function rehypeHeadingIds() {
-  const seen = new Map<string, number>();
-
-  return (tree: Root) => {
-    visit(tree, "element", (node: Element) => {
-      if (!["h1", "h2", "h3"].includes(node.tagName)) {
-        return;
-      }
-
-      const text = extractElementText(node).trim();
-
-      if (!text) {
-        return;
-      }
-
-      const baseSlug = slugifyHeading(text);
-      const count = seen.get(baseSlug) ?? 0;
-      seen.set(baseSlug, count + 1);
-      node.properties.id =
-        count === 0
-          ? `${HEADING_ID_PREFIX}${baseSlug}`
-          : `${HEADING_ID_PREFIX}${baseSlug}-${count}`;
     });
   };
 }
@@ -96,7 +73,7 @@ const processor = unified()
     rel: ["noopener", "noreferrer"],
   })
   .use(rehypeLazyImages)
-  .use(rehypeHeadingIds)
+  .use(rehypeSlug, { prefix: HEADING_ID_PREFIX })
   .use(rehypeSanitize, sanitizeSchema)
   .use(rehypeStringify)
   .freeze();
@@ -107,78 +84,28 @@ export async function renderMarkdown(md: string): Promise<string> {
 
 export function extractHeadings(markdown: string): TocItem[] {
   const tree = unified().use(remarkParse).use(remarkGfm).parse(markdown);
-  const seen = new Map<string, number>();
+  const slugger = new GithubSlugger();
   const headings: TocItem[] = [];
 
-  visit(tree, "heading", (node: { depth?: number; children?: unknown[] }) => {
-    const depth = node.depth;
+  visit(tree, "heading", (node) => {
+    const heading = node as { depth: number };
 
-    if (depth === undefined || depth < 1 || depth > 3) {
+    if (heading.depth < 1 || heading.depth > 3) {
       return;
     }
 
-    const text = extractMdastText(node).trim();
+    const text = toString(heading).trim();
 
     if (!text) {
       return;
     }
 
-    const baseSlug = slugifyHeading(text);
-    const count = seen.get(baseSlug) ?? 0;
-    seen.set(baseSlug, count + 1);
-
     headings.push({
-      id:
-        count === 0
-          ? `${HEADING_ID_PREFIX}${baseSlug}`
-          : `${HEADING_ID_PREFIX}${baseSlug}-${count}`,
+      id: `${HEADING_ID_PREFIX}${slugger.slug(text)}`,
       text,
-      level: depth as TocItem["level"],
+      level: heading.depth as TocItem["level"],
     });
   });
 
   return headings;
-}
-
-function slugifyHeading(value: string): string {
-  const normalized = value
-    .trim()
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}\s-]/gu, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-
-  return normalized || "section";
-}
-
-function extractElementText(node: Element): string {
-  return node.children
-    .map((child) => {
-      if (child.type === "text") {
-        return child.value;
-      }
-
-      if (child.type === "element") {
-        return extractElementText(child);
-      }
-
-      return "";
-    })
-    .join("");
-}
-
-function extractMdastText(node: {
-  children?: unknown[];
-  value?: string;
-}): string {
-  if ("value" in node && typeof node.value === "string") {
-    return node.value;
-  }
-
-  return (node.children ?? [])
-    .map((child) =>
-      extractMdastText(child as { children?: unknown[]; value?: string }),
-    )
-    .join("");
 }

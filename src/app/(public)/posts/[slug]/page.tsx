@@ -105,11 +105,13 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
 
           return null;
         }),
-        fetchCategories()
-          .then((categories) =>
-            getCategoryAncestors(categories, post.category.id),
-          )
-          .catch(() => []),
+        post.category.ancestors
+          ? Promise.resolve(post.category.ancestors)
+          : fetchCategories()
+              .then((categories) =>
+                getCategoryAncestors(categories, post.category.id),
+              )
+              .catch(() => []),
       ]);
     if (fetchedComments) comments = fetchedComments;
     const relatedPosts =
@@ -209,7 +211,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
               )}
             </header>
 
-            {headings.length > 0 ? (
+            {headings.length > 0 && (
               <script
                 id="post-toc-data"
                 type="application/json"
@@ -217,7 +219,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
                   __html: serializeTocItems(headings),
                 }}
               />
-            ) : null}
+            )}
 
             <PostContent contentMd={post.contentMd} />
 

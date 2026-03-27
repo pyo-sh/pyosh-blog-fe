@@ -8,6 +8,10 @@ export interface PostCategory {
   id: number;
   name: string;
   slug: string;
+  ancestors?: Array<{
+    name: string;
+    slug: string;
+  }>;
 }
 
 export interface MatchedComment {
