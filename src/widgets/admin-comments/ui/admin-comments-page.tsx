@@ -84,6 +84,7 @@ export function AdminCommentsPage() {
   function handleFilterChange(partial: Partial<FilterState>) {
     setFilters((prev) => ({ ...prev, ...partial }));
     setPage(1);
+    setSelectedIds(new Set());
   }
 
   function handleDateChange(

@@ -159,11 +159,11 @@ export function CommentDetailModal({
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-grey-2/50 p-4"
       onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-label="댓글 상세"
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={mode === "thread" ? "관련 댓글" : "댓글 상세"}
         className="relative flex max-h-[85vh] w-full max-w-xl flex-col overflow-hidden rounded-[1.5rem] border border-border-3 bg-background-2 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
