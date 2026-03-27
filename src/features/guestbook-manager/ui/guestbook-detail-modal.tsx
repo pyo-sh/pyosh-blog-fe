@@ -60,6 +60,7 @@ function getAvailableActions(status: AdminGuestbookItem["status"]) {
 
   if (status === "deleted") {
     return [
+      { value: "restore" as const, label: "복원", tone: "default" as const },
       {
         value: "hard_delete" as const,
         label: "영구 삭제",

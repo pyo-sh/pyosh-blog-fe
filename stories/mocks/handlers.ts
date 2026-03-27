@@ -81,13 +81,7 @@ export const handlers = [
   http.delete("/api/admin/guestbook/:id", () => {
     return new HttpResponse(null, { status: 204 });
   }),
-  http.patch("/api/admin/guestbook/:id", () => {
-    return new HttpResponse(null, { status: 204 });
-  }),
   http.delete("/api/admin/guestbook/bulk", () => {
-    return new HttpResponse(null, { status: 204 });
-  }),
-  http.patch("/api/admin/guestbook/bulk", () => {
     return new HttpResponse(null, { status: 204 });
   }),
   http.get("/api/settings/guestbook", () => {

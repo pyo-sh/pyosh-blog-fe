@@ -49,7 +49,7 @@ function getAllowedActionsForStatus(status: AdminGuestbookItem["status"]) {
   }
 
   if (status === "deleted") {
-    return ["hard_delete"] as const;
+    return ["restore", "hard_delete"] as const;
   }
 
   return ["hide", "soft_delete", "hard_delete"] as const;
