@@ -14,13 +14,13 @@ import {
   ViewCounter,
 } from "@features/post-detail";
 import { ApiResponseError } from "@shared/api";
+import { extractHeadings, type TocItem } from "@shared/lib/markdown";
 import {
   buildBlogPostingJsonLd,
   buildBreadcrumbJsonLd,
   getSiteUrl,
 } from "@shared/lib/structured-data";
 import { JsonLd } from "@shared/ui/json-ld";
-import { extractHeadings, type TocItem } from "@shared/lib/markdown";
 import { ScrollToTop } from "@shared/ui/libs";
 
 interface PostDetailPageProps {
