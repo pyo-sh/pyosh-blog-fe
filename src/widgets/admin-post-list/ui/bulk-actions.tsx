@@ -71,6 +71,7 @@ export function BulkActions({
   >(undefined);
   const [showApplyDialog, setShowApplyDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showRestoreDialog, setShowRestoreDialog] = useState(false);
   const [showHardDeleteDialog, setShowHardDeleteDialog] = useState(false);
   const [isPending, setIsPending] = useState(false);
 
@@ -108,6 +109,7 @@ export function BulkActions({
     setIsPending(true);
     try {
       await onBulkRestore(selectedIds);
+      setShowRestoreDialog(false);
       onClearSelection();
     } finally {
       setIsPending(false);
@@ -216,7 +218,7 @@ export function BulkActions({
           <>
             <button
               type="button"
-              onClick={handleRestore}
+              onClick={() => setShowRestoreDialog(true)}
               disabled={isPending}
               className="rounded-[0.6rem] border border-border-3 px-3 py-1.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -304,6 +306,18 @@ export function BulkActions({
         isPending={isPending}
       >
         <p>삭제된 글은 휴지통에서 복원할 수 있습니다.</p>
+      </ConfirmDialog>
+
+      {/* Restore confirm dialog */}
+      <ConfirmDialog
+        isOpen={showRestoreDialog}
+        onClose={() => setShowRestoreDialog(false)}
+        onConfirm={handleRestore}
+        title={`선택한 ${count}개 글을 복원하시겠습니까?`}
+        confirmLabel="복원"
+        isPending={isPending}
+      >
+        <p>복원된 글은 활성 글 탭에 다시 표시됩니다.</p>
       </ConfirmDialog>
 
       {/* Hard delete confirm dialog */}

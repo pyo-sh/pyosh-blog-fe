@@ -93,13 +93,6 @@ export default function ManagePostsPage() {
       }),
   });
 
-  const { data: trashCount } = useQuery({
-    queryKey: ["admin-posts-trash-count"],
-    queryFn: () => fetchAdminPosts({ limit: 1, includeDeleted: true }),
-    select: (d) => d.meta.total,
-    staleTime: 30 * 1000,
-  });
-
   const { data: categories = [] } = useQuery({
     queryKey: ["categories-admin"],
     queryFn: (): Promise<Category[]> => fetchCategoriesAdmin(),
@@ -108,6 +101,11 @@ export default function ManagePostsPage() {
 
   const rows = data?.data ?? [];
   const meta = data?.meta;
+
+  // Trash tab meta total — shown only after loading to avoid displaying a stale
+  // count. The badge is intentionally omitted until the backend exposes a
+  // deleted-only count endpoint, since includeDeleted=true may be additive.
+  const trashCount = tab === "trash" && meta ? meta.total : undefined;
 
   useEffect(() => {
     if (meta && meta.totalPages > 0 && page > meta.totalPages) {
@@ -238,10 +236,7 @@ export default function ManagePostsPage() {
   }
 
   async function invalidatePostQueries() {
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ["admin-posts"] }),
-      queryClient.invalidateQueries({ queryKey: ["admin-posts-trash-count"] }),
-    ]);
+    await queryClient.invalidateQueries({ queryKey: ["admin-posts"] });
   }
 
   const deleteMutation = useMutation({
