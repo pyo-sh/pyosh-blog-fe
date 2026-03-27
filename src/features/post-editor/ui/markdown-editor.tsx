@@ -12,7 +12,7 @@ import {
 } from "@codemirror/language";
 import { languages } from "@codemirror/language-data";
 import { search, searchKeymap } from "@codemirror/search";
-import { EditorState } from "@codemirror/state";
+import { Annotation, EditorState } from "@codemirror/state";
 import {
   EditorView,
   highlightActiveLine,
@@ -78,6 +78,8 @@ const editorTheme = EditorView.theme({
   },
 });
 
+const externalSyncAnnotation = Annotation.define<boolean>();
+
 interface MarkdownEditorProps {
   value: string;
   onChange: (value: string) => void;
@@ -136,7 +138,12 @@ export function MarkdownEditor({
       editorTheme,
       placeholder(initialPlaceholderRef.current),
       EditorView.updateListener.of((update) => {
-        if (update.docChanged) {
+        if (
+          update.docChanged &&
+          !update.transactions.some((transaction) =>
+            transaction.annotation(externalSyncAnnotation),
+          )
+        ) {
           onChangeRef.current(update.state.doc.toString());
         }
       }),
@@ -175,6 +182,7 @@ export function MarkdownEditor({
 
     editorView.dispatch({
       changes: { from: 0, to: current.length, insert: value },
+      annotations: externalSyncAnnotation.of(true),
     });
   }, [editorView, value]);
 
