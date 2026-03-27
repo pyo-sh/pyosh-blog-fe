@@ -122,6 +122,13 @@ function createFallbackMeta(comments: Comment[]): CommentListMeta {
   };
 }
 
+function countVisibleComments(comments: Comment[]): number {
+  return comments.reduce(
+    (count, comment) => count + 1 + countVisibleComments(comment.replies),
+    0,
+  );
+}
+
 function getGuestIdentity(profile: GuestCommentProfile): {
   guestName: string;
   guestEmail: string;
@@ -429,16 +436,28 @@ export function CommentList({
           : Math.max(0, meta.totalRootComments - 1);
         const nextTotalPages = Math.max(1, Math.ceil(nextRootTotal / pageSize));
         const targetPage = Math.min(currentPage, nextTotalPages);
+        const nextTotalCount = countVisibleComments(nextComments);
 
         if (!rootStillVisible) {
           didRefreshFail = !(await loadPage(targetPage, {
             scrollToTop: false,
           }));
+
+          if (didRefreshFail) {
+            setComments(nextComments);
+            setMeta((current) => ({
+              ...current,
+              totalCount: nextTotalCount,
+              totalRootComments: nextRootTotal,
+              totalPages: nextTotalPages,
+              page: targetPage,
+            }));
+          }
         } else {
           setComments(nextComments);
           setMeta((current) => ({
             ...current,
-            totalCount: current.totalCount,
+            totalCount: nextTotalCount,
             totalRootComments: nextRootTotal,
             totalPages: nextTotalPages,
             page: targetPage,
@@ -456,16 +475,28 @@ export function CommentList({
         );
         const nextTotalPages = Math.max(1, Math.ceil(nextRootTotal / pageSize));
         const targetPage = Math.min(currentPage, nextTotalPages);
+        const nextTotalCount = countVisibleComments(nextComments);
 
         if (removedRootCount > 0) {
           didRefreshFail = !(await loadPage(targetPage, {
             scrollToTop: false,
           }));
+
+          if (didRefreshFail) {
+            setComments(nextComments);
+            setMeta((current) => ({
+              ...current,
+              totalCount: nextTotalCount,
+              totalRootComments: nextRootTotal,
+              totalPages: nextTotalPages,
+              page: targetPage,
+            }));
+          }
         } else {
           setComments(nextComments);
           setMeta((current) => ({
             ...current,
-            totalCount: Math.max(0, current.totalCount - 1),
+            totalCount: nextTotalCount,
             totalRootComments: nextRootTotal,
             totalPages: nextTotalPages,
             page: targetPage,
