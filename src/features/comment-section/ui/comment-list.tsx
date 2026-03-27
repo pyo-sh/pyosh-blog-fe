@@ -326,6 +326,8 @@ export function CommentList({
       });
     }
 
+    let didRefreshFail = false;
+
     if (isRootComment) {
       const nextRootTotal = meta.totalRootComments + 1;
       const nextTotalPages = Math.max(1, Math.ceil(nextRootTotal / pageSize));
@@ -345,14 +347,16 @@ export function CommentList({
         const didReload = await loadPage(targetPage, { scrollToTop: false });
 
         if (!didReload) {
-          setLoadError(
-            "댓글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
-          );
-
-          return;
+          didRefreshFail = true;
+          setMeta((current) => ({
+            ...current,
+            totalCount: current.totalCount + 1,
+            totalRootComments: nextRootTotal,
+            totalPages: nextTotalPages,
+          }));
+        } else {
+          setPendingScrollCommentId(nextComment.id);
         }
-
-        setPendingScrollCommentId(nextComment.id);
       }
     } else {
       setComments((current) => appendComment(current, nextComment));
@@ -367,7 +371,9 @@ export function CommentList({
       setPendingScrollCommentId(nextComment.id);
     }
 
-    setLoadError(null);
+    if (!didRefreshFail) {
+      setLoadError(null);
+    }
     setReplyTarget(null);
   }
 
@@ -392,15 +398,17 @@ export function CommentList({
       return;
     }
 
+    const target = deleteTarget;
     setDeleteBusy(true);
     setDeleteError(null);
 
     try {
-      const isRootComment = deleteTarget.parentId === null;
-      await deleteComment(deleteTarget.id, {
-        ...(deleteTarget.author.type === "oauth" &&
+      const isRootComment = target.parentId === null;
+      let didRefreshFail = false;
+      await deleteComment(target.id, {
+        ...(target.author.type === "oauth" &&
         viewer.type === "oauth" &&
-        viewer.id === deleteTarget.author.id
+        viewer.id === target.author.id
           ? { authorType: "oauth" as const }
           : {
               authorType: "guest" as const,
@@ -408,10 +416,13 @@ export function CommentList({
             }),
       });
 
+      setDeleteTarget(null);
+      setDeletePassword("");
+
       if (isRootComment) {
-        const nextComments = markCommentDeleted(comments, deleteTarget.id);
+        const nextComments = markCommentDeleted(comments, target.id);
         const rootStillVisible = nextComments.some(
-          (comment) => comment.id === deleteTarget.id,
+          (comment) => comment.id === target.id,
         );
         const nextRootTotal = rootStillVisible
           ? meta.totalRootComments
@@ -420,15 +431,9 @@ export function CommentList({
         const targetPage = Math.min(currentPage, nextTotalPages);
 
         if (!rootStillVisible) {
-          const didReload = await loadPage(targetPage, { scrollToTop: false });
-
-          if (!didReload) {
-            setLoadError(
-              "댓글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
-            );
-
-            return;
-          }
+          didRefreshFail = !(await loadPage(targetPage, {
+            scrollToTop: false,
+          }));
         } else {
           setComments(nextComments);
           setMeta((current) => ({
@@ -440,7 +445,7 @@ export function CommentList({
           }));
         }
       } else {
-        const nextComments = markCommentDeleted(comments, deleteTarget.id);
+        const nextComments = markCommentDeleted(comments, target.id);
         const removedRootCount = Math.max(
           0,
           comments.length - nextComments.length,
@@ -453,15 +458,9 @@ export function CommentList({
         const targetPage = Math.min(currentPage, nextTotalPages);
 
         if (removedRootCount > 0) {
-          const didReload = await loadPage(targetPage, { scrollToTop: false });
-
-          if (!didReload) {
-            setLoadError(
-              "댓글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
-            );
-
-            return;
-          }
+          didRefreshFail = !(await loadPage(targetPage, {
+            scrollToTop: false,
+          }));
         } else {
           setComments(nextComments);
           setMeta((current) => ({
@@ -474,9 +473,9 @@ export function CommentList({
         }
       }
 
-      setLoadError(null);
-      setDeleteTarget(null);
-      setDeletePassword("");
+      if (!didRefreshFail) {
+        setLoadError(null);
+      }
     } catch (error) {
       setDeleteError(
         error instanceof Error ? error.message : "댓글을 삭제하지 못했습니다.",
