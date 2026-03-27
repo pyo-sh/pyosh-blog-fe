@@ -367,8 +367,9 @@ export function PostForm({
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <label
+              id="contentMdLabel"
+              onClick={() => document.getElementById("contentMd")?.focus()}
               className="text-sm font-medium text-text-1"
-              htmlFor="contentMd"
             >
               본문
             </label>
@@ -377,6 +378,7 @@ export function PostForm({
             </span>
           </div>
           <MarkdownEditor
+            labelId="contentMdLabel"
             value={values.contentMd}
             onChange={(value) => handleFieldChange("contentMd", value)}
           />

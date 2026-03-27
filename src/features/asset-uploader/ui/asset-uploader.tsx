@@ -46,6 +46,7 @@ export function AssetUploader() {
   const uploadMutation = useMutation({
     mutationFn: (files: File[]) => {
       setUploadProgress(0);
+
       return uploadAssets(files, setUploadProgress);
     },
     onSuccess: async () => {
