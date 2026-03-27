@@ -15,6 +15,7 @@ function buildCspDirectives(nonce: string): string {
       : "img-src 'self' https: data: blob:",
     `script-src 'nonce-${nonce}' 'strict-dynamic'`,
     "object-src 'none'",
+    // Phase 2 prerequisite: replace 'unsafe-inline' with nonce-based styles before enforcement
     "style-src 'self' 'unsafe-inline'",
     "font-src 'self' https://fonts.gstatic.com",
     apiUrl ? `connect-src 'self' ${apiUrl}` : "connect-src 'self'",
