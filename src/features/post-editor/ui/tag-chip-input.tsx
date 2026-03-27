@@ -64,23 +64,6 @@ export function TagChipInput({ value, onChange }: TagChipInputProps) {
     setActiveIndex(0);
   }, [inputValue]);
 
-  useEffect(() => {
-    const handlePointerDown = (event: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
-        setInputValue("");
-      }
-    };
-
-    window.addEventListener("pointerdown", handlePointerDown);
-
-    return () => {
-      window.removeEventListener("pointerdown", handlePointerDown);
-    };
-  }, []);
-
   function commitTag(rawValue: string) {
     const nextTag = normalizeTag(rawValue);
 
@@ -179,6 +162,7 @@ export function TagChipInput({ value, onChange }: TagChipInputProps) {
             onChange={(event) =>
               setInputValue(event.target.value.slice(0, MAX_TAG_LENGTH))
             }
+            onBlur={() => commitTag(inputValue)}
             onKeyDown={handleKeyDown}
             placeholder={
               value.length === 0 ? "태그 입력 후 Enter" : "태그 추가"

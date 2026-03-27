@@ -23,5 +23,12 @@ export function extractPlainText(
     return plainText;
   }
 
-  return `${plainText.slice(0, limit).trimEnd()}...`;
+  const ellipsis = "...";
+  const safeLimit = Math.max(limit - ellipsis.length, 0);
+
+  if (safeLimit === 0) {
+    return ellipsis.slice(0, limit);
+  }
+
+  return `${plainText.slice(0, safeLimit).trimEnd()}${ellipsis}`;
 }

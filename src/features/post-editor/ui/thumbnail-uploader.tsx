@@ -176,7 +176,12 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
           <input
             type="url"
             value={urlDraft}
-            onChange={(event) => setUrlDraft(event.target.value)}
+            onChange={(event) => {
+              const nextValue = event.target.value;
+
+              setUrlDraft(nextValue);
+              onChange(nextValue);
+            }}
             placeholder="https://example.com/thumbnail.jpg"
             aria-label="썸네일 URL"
             className="flex-1 rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
