@@ -179,9 +179,10 @@ export function AdminSidebar({ isOpen = false, onClose }: AdminSidebarProps) {
           {/* Overlay sidebar */}
           <aside
             ref={overlayRef}
-            className="fixed inset-y-0 left-0 z-50 w-full bg-background-2"
+            role="dialog"
             aria-modal="true"
             aria-label="내비게이션 메뉴"
+            className="fixed inset-y-0 left-0 z-50 w-full bg-background-2"
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-border-3">
               <Link

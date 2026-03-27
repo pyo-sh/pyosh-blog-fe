@@ -109,7 +109,7 @@ function Pagination({
       )}
 
       {/* Page numbers with ellipsis — mobile: ±1, desktop: ±3 */}
-      <span className="md:hidden">
+      <span className="contents md:hidden">
         {mobilePages.map((page, idx) =>
           page === "..." ? (
             <span

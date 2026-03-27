@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSelectedLayoutSegment } from "next/navigation";
 import { AdminSidebar } from "@widgets/admin-sidebar";
 
@@ -11,6 +11,14 @@ export function DashboardLayoutShell({
 }) {
   const segment = useSelectedLayoutSegment();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const hamburgerRef = useRef<HTMLButtonElement>(null);
+
+  // Return focus to hamburger button when sidebar closes
+  useEffect(() => {
+    if (!sidebarOpen) {
+      hamburgerRef.current?.focus();
+    }
+  }, [sidebarOpen]);
 
   if (segment === "login") {
     return <>{children}</>;
@@ -26,6 +34,7 @@ export function DashboardLayoutShell({
         {/* Mobile top bar with hamburger */}
         <div className="flex h-14 items-center border-b border-border-3 bg-background-1 px-4 md:hidden">
           <button
+            ref={hamburgerRef}
             type="button"
             onClick={() => setSidebarOpen(true)}
             aria-label="메뉴 열기"
