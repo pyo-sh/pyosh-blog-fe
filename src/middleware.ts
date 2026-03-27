@@ -16,7 +16,7 @@ function buildCspDirectives(nonce: string): string {
     `script-src 'self' 'nonce-${nonce}'`,
     "style-src 'self' 'unsafe-inline'",
     "font-src 'self' https://fonts.gstatic.com",
-    `connect-src 'self' ${apiUrl}`,
+    apiUrl ? `connect-src 'self' ${apiUrl}` : "connect-src 'self'",
   ].join("; ");
 }
 
