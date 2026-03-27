@@ -18,7 +18,7 @@ import {
   type Category,
 } from "@entities/category";
 import { getErrorMessage } from "@shared/lib/get-error-message";
-import { Modal } from "@shared/ui/libs";
+import { Modal, Skeleton, Spinner } from "@shared/ui/libs";
 
 const QUERY_KEY = ["admin-categories"] as const;
 
@@ -159,7 +159,18 @@ export function CategoryManager() {
         </div>
 
         <div className="mt-6">
-          {categoriesQuery.isPending ? <TreeSkeleton /> : null}
+          {categoriesQuery.isPending ? (
+            <div className="space-y-4">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <Skeleton
+                  key={index}
+                  variant="rect"
+                  height="6rem"
+                  className="rounded-[1.25rem]"
+                />
+              ))}
+            </div>
+          ) : null}
 
           {!categoriesQuery.isPending && categoriesQuery.isError ? (
             <div className="rounded-[1.5rem] border border-negative-1/20 bg-negative-1/10 px-6 py-8 text-center">
@@ -271,23 +282,16 @@ function DeleteCategoryModal({
           disabled={isDeleting}
           className="inline-flex items-center justify-center rounded-[0.75rem] bg-negative-1 px-4 py-2 text-sm font-medium text-text-1 transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isDeleting ? "삭제 중..." : "삭제"}
+          {isDeleting ? (
+            <>
+              <Spinner size="sm" /> 삭제 중
+            </>
+          ) : (
+            "삭제"
+          )}
         </button>
       </div>
     </Modal>
-  );
-}
-
-function TreeSkeleton() {
-  return (
-    <div className="space-y-4">
-      {Array.from({ length: 4 }).map((_, index) => (
-        <div
-          key={index}
-          className="h-24 animate-pulse rounded-[1.25rem] bg-background-3"
-        />
-      ))}
-    </div>
   );
 }
 

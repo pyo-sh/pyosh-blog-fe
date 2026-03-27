@@ -8,7 +8,7 @@ import { PostListItemSkeleton } from "./post-list-item-skeleton";
 import type { Post } from "@entities/post";
 import type { PaginatedResponse } from "@shared/api";
 import { fetchPosts } from "@entities/post";
-import { Pagination } from "@shared/ui/libs";
+import { EmptyState, Pagination } from "@shared/ui/libs";
 
 interface PostListProps {
   initialData: PaginatedResponse<Post>;
@@ -62,11 +62,7 @@ function PostListInner({
   const regularPosts = posts.filter((p) => !p.isPinned);
 
   if (posts.length === 0) {
-    return (
-      <section className="rounded-2xl border border-dashed border-border-3 bg-background-2 p-8 text-sm text-text-3 md:p-10">
-        찾으시는 게시물은 없습니다
-      </section>
-    );
+    return <EmptyState variant="page" message="찾으시는 게시물은 없습니다." />;
   }
 
   return (

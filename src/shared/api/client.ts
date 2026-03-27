@@ -44,7 +44,7 @@ export async function serverFetch<T>(
 
 /**
  * Client Components 용 fetch. 브라우저 쿠키를 자동으로 포함.
- * /dashboard 경로에서 403 응답 시 /dashboard/login?reason=forbidden 으로 리다이렉트.
+ * /manage 경로에서 403 응답 시 /manage/login?reason=forbidden 으로 리다이렉트.
  */
 export async function clientFetch<T>(
   path: string,
@@ -63,9 +63,9 @@ export async function clientFetch<T>(
 
   if (
     response.status === 403 &&
-    window.location.pathname.startsWith("/dashboard")
+    window.location.pathname.startsWith("/manage")
   ) {
-    window.location.href = "/dashboard/login?reason=forbidden";
+    window.location.href = "/manage/login?reason=forbidden";
     throw new ApiResponseError({
       statusCode: 403,
       message: "접근 권한이 없습니다",

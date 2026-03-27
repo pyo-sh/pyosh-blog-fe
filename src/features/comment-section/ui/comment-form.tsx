@@ -9,6 +9,7 @@ import type {
 import type { CreateGuestbookBody } from "@entities/guestbook";
 import { getErrorMessage } from "@shared/lib/get-error-message";
 import { cn } from "@shared/lib/style-utils";
+import { Spinner } from "@shared/ui/libs";
 
 export interface GuestCommentProfile {
   guestName: string;
@@ -270,7 +271,13 @@ export function CommentForm<TPayload extends CommentFormPayload>({
           disabled={isSubmitting}
           className="inline-flex items-center justify-center rounded-[1rem] bg-primary-1 px-5 py-3 text-body-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? "저장 중..." : submitLabel}
+          {isSubmitting ? (
+            <>
+              <Spinner size="sm" /> 저장 중
+            </>
+          ) : (
+            submitLabel
+          )}
         </button>
 
         {onCancel ? (

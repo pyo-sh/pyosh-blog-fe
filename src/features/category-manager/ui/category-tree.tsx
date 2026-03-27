@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { Category } from "@entities/category";
 import { cn } from "@shared/lib/style-utils";
+import { EmptyState } from "@shared/ui/libs";
 
 interface CategoryTreeProps {
   categories: Category[];
@@ -129,11 +130,7 @@ export function CategoryTree({
   onDelete,
 }: CategoryTreeProps) {
   if (categories.length === 0) {
-    return (
-      <div className="rounded-[1.5rem] border border-dashed border-border-3 bg-background-1 px-6 py-12 text-center">
-        <p className="text-sm text-text-3">등록된 카테고리가 없습니다.</p>
-      </div>
-    );
+    return <EmptyState message="등록된 카테고리가 없습니다." />;
   }
 
   return (

@@ -1,17 +1,19 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useTransition } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { logout } from "@entities/auth";
 import { cn } from "@shared/lib/style-utils";
 
 const MENU_ITEMS = [
-  { label: "대시보드", path: "/dashboard" },
-  { label: "글 관리", path: "/dashboard/posts" },
-  { label: "카테고리", path: "/dashboard/categories" },
-  { label: "댓글", path: "/dashboard/comments" },
-  { label: "방명록", path: "/dashboard/guestbook" },
-  { label: "에셋", path: "/dashboard/assets" },
+  { label: "대시보드", path: "/manage" },
+  { label: "글 관리", path: "/manage/posts" },
+  { label: "카테고리", path: "/manage/categories" },
+  { label: "댓글", path: "/manage/comments" },
+  { label: "방명록", path: "/manage/guestbook" },
+  { label: "에셋", path: "/manage/assets" },
 ] as const;
 
 // 768px = Tailwind md breakpoint (matching theme.css default)
@@ -37,8 +39,8 @@ function SidebarNav({ onItemClick }: SidebarNavProps) {
       <ul className="flex flex-col gap-1 px-3">
         {MENU_ITEMS.map((item) => {
           const isActive =
-            item.path === "/dashboard"
-              ? pathname === "/dashboard"
+            item.path === "/manage"
+              ? pathname === "/manage"
               : pathname.startsWith(item.path);
 
           return (
@@ -64,7 +66,21 @@ function SidebarNav({ onItemClick }: SidebarNavProps) {
 }
 
 export function AdminSidebar({ isOpen = false, onClose }: AdminSidebarProps) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const overlayRef = useRef<HTMLElement>(null);
+
+  async function handleLogout() {
+    try {
+      await logout();
+      startTransition(() => {
+        router.push("/manage/login");
+        router.refresh();
+      });
+    } catch {
+      toast.error("로그아웃에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+    }
+  }
 
   // Close overlay when viewport becomes md or larger
   useEffect(() => {
@@ -156,13 +172,21 @@ export function AdminSidebar({ isOpen = false, onClose }: AdminSidebarProps) {
     <>
       {/* Desktop: fixed sidebar */}
       <aside className="hidden md:flex md:flex-col w-60 shrink-0 h-screen sticky top-0 border-r border-border-3 bg-background-2">
-        <div className="px-5 py-6">
+        <div className="px-5 py-6 flex items-center justify-between">
           <Link
-            href="/dashboard"
+            href="/manage"
             className="text-lg font-semibold text-text-1 hover:text-primary-1 transition-colors"
           >
             Admin
           </Link>
+          <button
+            type="button"
+            onClick={() => void handleLogout()}
+            disabled={isPending}
+            className="text-sm text-text-3 hover:text-text-1 transition-colors disabled:opacity-50"
+          >
+            로그아웃
+          </button>
         </div>
         <SidebarNav />
       </aside>
@@ -187,7 +211,7 @@ export function AdminSidebar({ isOpen = false, onClose }: AdminSidebarProps) {
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-border-3">
               <Link
-                href="/dashboard"
+                href="/manage"
                 className="text-lg font-semibold text-text-1 hover:text-primary-1 transition-colors"
                 onClick={onClose}
               >

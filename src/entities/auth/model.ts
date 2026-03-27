@@ -1,13 +1,13 @@
 export interface AdminUser {
   id: string;
-  email: string;
+  username: string;
   displayName: string;
 }
 
 export interface CurrentAdminUser {
   type: "admin";
   id: number;
-  email: string;
+  username: string;
   createdAt: string;
   updatedAt: string;
   lastLoginAt: string | null;
@@ -25,6 +25,6 @@ export interface CurrentOAuthUser {
 export type CurrentUser = CurrentAdminUser | CurrentOAuthUser;
 
 export interface LoginCredentials {
-  email: string;
+  username: string;
   password: string;
 }

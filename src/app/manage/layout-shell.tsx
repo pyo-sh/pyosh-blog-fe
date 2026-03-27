@@ -4,11 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSelectedLayoutSegment } from "next/navigation";
 import { AdminSidebar } from "@widgets/admin-sidebar";
 
-export function DashboardLayoutShell({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function ManageLayoutShell({ children }: { children: React.ReactNode }) {
   const segment = useSelectedLayoutSegment();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const hamburgerRef = useRef<HTMLButtonElement>(null);

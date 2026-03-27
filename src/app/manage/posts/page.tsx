@@ -12,6 +12,7 @@ import {
 } from "@entities/post";
 import { getErrorMessage } from "@shared/lib/get-error-message";
 import { cn } from "@shared/lib/style-utils";
+import { EmptyState, Skeleton, Spinner } from "@shared/ui/libs";
 
 const PAGE_SIZE = 10;
 
@@ -78,29 +79,6 @@ function Badge({
   );
 }
 
-function TableSkeleton() {
-  return (
-    <div className="overflow-hidden rounded-[1.5rem] border border-border-3 bg-background-2">
-      <div className="grid grid-cols-[minmax(0,2.4fr)_0.8fr_0.8fr_0.9fr_0.8fr] gap-4 border-b border-border-3 px-6 py-4">
-        {Array.from({ length: 5 }).map((_, index) => (
-          <div
-            key={index}
-            className="h-4 animate-pulse rounded-full bg-background-4"
-          />
-        ))}
-      </div>
-      <div className="space-y-4 px-6 py-5">
-        {Array.from({ length: 5 }).map((_, index) => (
-          <div
-            key={index}
-            className="h-10 animate-pulse rounded-[1rem] bg-background-3"
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function ActionButton({
   children,
   disabled,
@@ -131,7 +109,7 @@ function ActionButton({
   );
 }
 
-export default function DashboardPostsPage() {
+export default function ManagePostsPage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState<AdminPostStatusFilter>("all");
@@ -210,7 +188,7 @@ export default function DashboardPostsPage() {
         </div>
 
         <Link
-          href="/dashboard/posts/new"
+          href="/manage/posts/new"
           className="inline-flex items-center justify-center rounded-[0.9rem] bg-primary-1 px-4 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
         >
           새 글 작성
@@ -260,7 +238,25 @@ export default function DashboardPostsPage() {
         </div>
 
         <div className="mt-6">
-          {isPending ? <TableSkeleton /> : null}
+          {isPending ? (
+            <div className="overflow-hidden rounded-[1.5rem] border border-border-3 bg-background-2">
+              <div className="grid grid-cols-[minmax(0,2.4fr)_0.8fr_0.8fr_0.9fr_0.8fr] gap-4 border-b border-border-3 px-6 py-4">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} />
+                ))}
+              </div>
+              <div className="space-y-4 px-6 py-5">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton
+                    key={i}
+                    variant="rect"
+                    height="2.5rem"
+                    className="rounded-[1rem]"
+                  />
+                ))}
+              </div>
+            </div>
+          ) : null}
 
           {!isPending && isError ? (
             <div className="rounded-[1.5rem] border border-negative-1/20 bg-negative-1/10 px-6 py-8 text-center">
@@ -343,7 +339,7 @@ export default function DashboardPostsPage() {
                               <div className="flex flex-wrap gap-2">
                                 {!deleted ? (
                                   <Link
-                                    href={`/dashboard/posts/${post.id}/edit`}
+                                    href={`/manage/posts/${post.id}/edit`}
                                     className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
                                   >
                                     수정
@@ -367,7 +363,13 @@ export default function DashboardPostsPage() {
                                     }
                                     tone="danger"
                                   >
-                                    {disabled ? "삭제 중..." : "삭제"}
+                                    {disabled ? (
+                                      <>
+                                        <Spinner size="sm" /> 삭제 중
+                                      </>
+                                    ) : (
+                                      "삭제"
+                                    )}
                                   </ActionButton>
                                 )}
                               </div>
@@ -380,11 +382,7 @@ export default function DashboardPostsPage() {
                 </div>
               </div>
             ) : (
-              <div className="rounded-[1.5rem] border border-dashed border-border-3 bg-background-1 px-6 py-12 text-center">
-                <p className="text-sm text-text-3">
-                  현재 조건에 맞는 글이 없습니다.
-                </p>
-              </div>
+              <EmptyState message="현재 조건에 맞는 글이 없습니다." />
             )
           ) : null}
         </div>

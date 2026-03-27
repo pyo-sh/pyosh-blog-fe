@@ -15,6 +15,7 @@ import {
 } from "@entities/post";
 import { getErrorMessage } from "@shared/lib/get-error-message";
 import { cn } from "@shared/lib/style-utils";
+import { Spinner } from "@shared/ui/libs";
 
 export interface PostFormValues {
   title: string;
@@ -414,9 +415,13 @@ export function PostForm({
             "disabled:cursor-not-allowed disabled:opacity-60",
           )}
         >
-          {mutation.isPending
-            ? "저장 중..."
-            : getSubmitLabel(mode, submitLabel)}
+          {mutation.isPending ? (
+            <>
+              <Spinner size="sm" /> 저장 중
+            </>
+          ) : (
+            getSubmitLabel(mode, submitLabel)
+          )}
         </button>
       </div>
     </form>
