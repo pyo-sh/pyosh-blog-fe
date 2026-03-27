@@ -3,6 +3,7 @@ import { fetchCategories } from "@entities/category";
 import { fetchPosts } from "@entities/post";
 import { fetchPopularPosts, fetchTotalViews } from "@entities/stat";
 import { fetchTags } from "@entities/tag";
+import { SiteViewCounter } from "@features/site-view-counter";
 import { Footer } from "@widgets/footer";
 
 const SIDEBAR_POST_LIMIT = 5;
@@ -23,6 +24,7 @@ export default async function PublicLayout({
 
   return (
     <>
+      <SiteViewCounter />
       <PublicLayoutShell
         recentPosts={postsResponse.data}
         popularPosts={popularPosts}
