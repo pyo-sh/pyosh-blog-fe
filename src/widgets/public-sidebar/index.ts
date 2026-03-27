@@ -1,1 +1,4 @@
-export { PublicSidebarContent, StickySidebarWrapper } from "./ui/public-sidebar";
+export {
+  PublicSidebarContent,
+  StickySidebarWrapper,
+} from "./ui/public-sidebar";

@@ -10,9 +10,14 @@ import { Logo } from "@widgets/logo";
 interface HeaderProps {
   onHamburgerClick?: () => void;
   isSidebarOpen?: boolean;
+  hamburgerRef?: React.Ref<HTMLButtonElement>;
 }
 
-const Header: React.FC<HeaderProps> = ({ onHamburgerClick, isSidebarOpen }) => {
+const Header: React.FC<HeaderProps> = ({
+  onHamburgerClick,
+  isSidebarOpen,
+  hamburgerRef,
+}) => {
   const [isShown, setIsShown] = useState<boolean>(true);
   const [headerHeight, setHeaderHeight] = useState<number>(0);
   const headerRef = useRef<HTMLElement>(null);
@@ -82,6 +87,7 @@ const Header: React.FC<HeaderProps> = ({ onHamburgerClick, isSidebarOpen }) => {
             <ThemeButton />
             {onHamburgerClick && (
               <button
+                ref={hamburgerRef}
                 type="button"
                 onClick={onHamburgerClick}
                 aria-label="메뉴 열기"

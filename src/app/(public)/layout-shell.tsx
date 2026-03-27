@@ -32,7 +32,7 @@ export function PublicLayoutShell({
   children,
 }: PublicLayoutShellProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const hamburgerBtnRef = useRef<HTMLButtonElement>(null);
   const didOpenRef = useRef(false);
 
   // Auto-close slide-in when viewport reaches lg breakpoint
@@ -47,12 +47,12 @@ export function PublicLayoutShell({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Return focus to close button area when sidebar closes
+  // Return focus to hamburger button when sidebar closes
   useEffect(() => {
     if (isSidebarOpen) {
       didOpenRef.current = true;
     } else if (didOpenRef.current) {
-      closeBtnRef.current?.focus();
+      hamburgerBtnRef.current?.focus();
     }
   }, [isSidebarOpen]);
 
@@ -61,6 +61,7 @@ export function PublicLayoutShell({
   return (
     <>
       <Header
+        hamburgerRef={hamburgerBtnRef}
         onHamburgerClick={() => setIsSidebarOpen((v) => !v)}
         isSidebarOpen={isSidebarOpen}
       />
@@ -96,7 +97,6 @@ export function PublicLayoutShell({
         <div className="flex items-center justify-between border-b border-border-3 px-4 py-3">
           <span className="text-body-sm font-medium text-text-1">메뉴</span>
           <button
-            ref={closeBtnRef}
             type="button"
             onClick={closeSidebar}
             aria-label="메뉴 닫기"

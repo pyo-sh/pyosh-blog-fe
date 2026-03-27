@@ -97,10 +97,10 @@ interface StickyWrapperProps {
 export function StickySidebarWrapper({ children }: StickyWrapperProps) {
   const sidebarRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
-  const currentTop = useRef(70);
+  const currentTop = useRef(72);
 
   useEffect(() => {
-    const NAV_HEIGHT = 70;
+    const NAV_HEIGHT = 72;
 
     const handleScroll = () => {
       const el = sidebarRef.current;
@@ -135,7 +135,7 @@ export function StickySidebarWrapper({ children }: StickyWrapperProps) {
   }, []);
 
   return (
-    <div ref={sidebarRef} className="sticky" style={{ top: "70px" }}>
+    <div ref={sidebarRef} className="sticky" style={{ top: "72px" }}>
       {children}
     </div>
   );
