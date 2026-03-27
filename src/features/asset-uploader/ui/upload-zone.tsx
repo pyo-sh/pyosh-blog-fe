@@ -209,7 +209,9 @@ function DropArea({
       aria-label="파일을 드래그하거나 클릭하여 대기열에 추가"
       className={cn(
         "mt-6 rounded-[1.5rem] border border-dashed border-border-3 bg-[radial-gradient(circle_at_top,rgba(0,0,0,0.04),transparent_55%)] px-6 py-10 text-center transition-colors",
-        !disabled && !isDragging && "hover:border-primary-1/60 hover:bg-background-1",
+        !disabled &&
+          !isDragging &&
+          "hover:border-primary-1/60 hover:bg-background-1",
         disabled && "cursor-not-allowed opacity-60",
         isDragging && !disabled && "border-primary-1 bg-primary-2/10",
       )}
