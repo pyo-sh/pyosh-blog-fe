@@ -14,7 +14,13 @@ import {
   type GuestCommentProfile,
 } from "@features/comment-section";
 import { ApiResponseError } from "@shared/api";
-import { EmptyState, Modal, Pagination, ScrollToTop, Spinner } from "@shared/ui/libs";
+import {
+  EmptyState,
+  Modal,
+  Pagination,
+  ScrollToTop,
+  Spinner,
+} from "@shared/ui/libs";
 
 interface GuestbookViewer {
   type: "guest" | "oauth";
@@ -276,7 +282,7 @@ export function GuestbookPageContent({
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-8 px-6 py-12">
+    <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col gap-8 px-4 py-12 md:px-6">
       <header className="rounded-[2rem] border border-border-3 bg-background-2 p-8 md:p-10">
         <p className="text-body-xs uppercase tracking-[0.24em] text-text-4">
           Guestbook
@@ -331,7 +337,10 @@ export function GuestbookPageContent({
           />
         </>
       ) : (
-        <EmptyState variant="page" message="아직 등록된 방명록이 없습니다. 첫 메시지를 남겨 보세요." />
+        <EmptyState
+          variant="page"
+          message="아직 등록된 방명록이 없습니다. 첫 메시지를 남겨 보세요."
+        />
       )}
 
       <ScrollToTop />
@@ -402,7 +411,13 @@ export function GuestbookPageContent({
               }
               className="inline-flex items-center justify-center rounded-[1rem] bg-negative-1 px-5 py-3 text-body-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {deleteBusy ? <><Spinner size="sm" /> 삭제 중</> : "삭제"}
+              {deleteBusy ? (
+                <>
+                  <Spinner size="sm" /> 삭제 중
+                </>
+              ) : (
+                "삭제"
+              )}
             </button>
             <button
               type="button"

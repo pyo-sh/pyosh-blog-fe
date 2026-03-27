@@ -9,12 +9,14 @@ interface EmptyStateProps {
   className?: string;
 }
 
-const variantClasses: Record<NonNullable<EmptyStateProps["variant"]>, string> =
-  {
-    default:
-      "rounded-[1.5rem] border border-dashed border-border-3 bg-background-1 px-6 py-12 text-center text-sm",
-    page: "rounded-[2rem] border border-dashed border-border-3 bg-background-2 p-8 text-body-md md:p-10",
-  };
+const variantClasses: Record<
+  NonNullable<EmptyStateProps["variant"]>,
+  string
+> = {
+  default:
+    "rounded-[1.5rem] border border-dashed border-border-3 bg-background-1 px-6 py-12 text-center text-sm",
+  page: "rounded-[2rem] border border-dashed border-border-3 bg-background-2 p-8 text-body-md md:p-10",
+};
 
 export function EmptyState({
   icon,

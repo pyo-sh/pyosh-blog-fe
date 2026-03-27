@@ -83,7 +83,7 @@ export default async function CategoryPage({
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-8 px-6 py-12">
+    <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col gap-8 px-4 py-12 md:px-6">
       <CategoryNav categories={categories} activeSlug={activeCategory.slug} />
 
       <header className="rounded-[2rem] border border-border-3 bg-background-2 p-8 md:p-10">
@@ -116,7 +116,10 @@ export default async function CategoryPage({
           )}
         </>
       ) : (
-        <EmptyState variant="page" message="아직 이 카테고리에 등록된 공개 글이 없습니다." />
+        <EmptyState
+          variant="page"
+          message="아직 이 카테고리에 등록된 공개 글이 없습니다."
+        />
       )}
     </main>
   );

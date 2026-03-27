@@ -21,11 +21,12 @@ function buildHref(
 function generatePageNumbers(
   currentPage: number,
   totalPages: number,
+  windowSize: number,
 ): Array<number | "..."> {
   if (totalPages <= 1) return [];
 
-  const windowStart = Math.max(2, currentPage - 3);
-  const windowEnd = Math.min(totalPages - 1, currentPage + 3);
+  const windowStart = Math.max(2, currentPage - windowSize);
+  const windowEnd = Math.min(totalPages - 1, currentPage + windowSize);
   const pages: Array<number | "..."> = [1];
 
   if (windowStart > 2) pages.push("...");
@@ -61,7 +62,8 @@ function Pagination({
   const hasNext = currentPage < totalPages;
   const hasNextFive = currentPage + jumpFive <= totalPages;
 
-  const pages = generatePageNumbers(currentPage, totalPages);
+  const mobilePages = generatePageNumbers(currentPage, totalPages, 1);
+  const desktopPages = generatePageNumbers(currentPage, totalPages, 3);
 
   return (
     <nav
@@ -106,35 +108,67 @@ function Pagination({
         </span>
       )}
 
-      {/* Page numbers with ellipsis */}
-      {pages.map((page, idx) =>
-        page === "..." ? (
-          <span
-            key={`ellipsis-${idx}`}
-            className={cn(navBtnBase, "text-text-4 select-none")}
-            aria-hidden="true"
-          >
-            &hellip;
-          </span>
-        ) : (
-          <Link
-            key={page}
-            href={buildHref(basePath, page, queryParams)}
-            tabIndex={page === currentPage ? -1 : undefined}
-            className={cn(
-              navBtnBase,
-              "min-w-[2rem]",
-              page === currentPage
-                ? "bg-primary-1 text-white font-semibold pointer-events-none"
-                : "text-text-1 hover:bg-background-2",
-            )}
-            aria-current={page === currentPage ? "page" : undefined}
-            aria-label={`Page ${page}`}
-          >
-            {page}
-          </Link>
-        ),
-      )}
+      {/* Page numbers with ellipsis — mobile: ±1, desktop: ±3 */}
+      <span className="contents md:hidden">
+        {mobilePages.map((page, idx) =>
+          page === "..." ? (
+            <span
+              key={`m-ellipsis-${idx}`}
+              className={cn(navBtnBase, "text-text-4 select-none")}
+              aria-hidden="true"
+            >
+              &hellip;
+            </span>
+          ) : (
+            <Link
+              key={`m-${page}`}
+              href={buildHref(basePath, page, queryParams)}
+              tabIndex={page === currentPage ? -1 : undefined}
+              className={cn(
+                navBtnBase,
+                "min-w-[2rem]",
+                page === currentPage
+                  ? "bg-primary-1 text-white font-semibold pointer-events-none"
+                  : "text-text-1 hover:bg-background-2",
+              )}
+              aria-current={page === currentPage ? "page" : undefined}
+              aria-label={`Page ${page}`}
+            >
+              {page}
+            </Link>
+          ),
+        )}
+      </span>
+      <span className="hidden md:contents">
+        {desktopPages.map((page, idx) =>
+          page === "..." ? (
+            <span
+              key={`d-ellipsis-${idx}`}
+              className={cn(navBtnBase, "text-text-4 select-none")}
+              aria-hidden="true"
+            >
+              &hellip;
+            </span>
+          ) : (
+            <Link
+              key={`d-${page}`}
+              href={buildHref(basePath, page, queryParams)}
+              tabIndex={page === currentPage ? -1 : undefined}
+              className={cn(
+                navBtnBase,
+                "min-w-[2rem]",
+                page === currentPage
+                  ? "bg-primary-1 text-white font-semibold pointer-events-none"
+                  : "text-text-1 hover:bg-background-2",
+              )}
+              aria-current={page === currentPage ? "page" : undefined}
+              aria-label={`Page ${page}`}
+            >
+              {page}
+            </Link>
+          ),
+        )}
+      </span>
 
       {/* > +1 */}
       {hasNext ? (

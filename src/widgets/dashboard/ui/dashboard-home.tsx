@@ -72,7 +72,10 @@ function mapStatsToCards(stats: DashboardStats): StatCard[] {
 
 function DashboardStatsSkeleton() {
   return (
-    <div aria-busy="true" className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
+    <div
+      aria-busy="true"
+      className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5"
+    >
       {Array.from({ length: 5 }).map((_, index) => (
         <div
           key={index}
@@ -156,7 +159,7 @@ function DashboardStatsSection() {
       ) : null}
 
       {data ? (
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
           {mapStatsToCards(data).map((card) => (
             <DashboardStatCard key={card.label} {...card} />
           ))}
@@ -240,7 +243,7 @@ export function DashboardHome() {
     <div className="space-y-8">
       <DashboardStatsSection />
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <RecentCommentsSection />
         <QuickActionsSection />
       </div>

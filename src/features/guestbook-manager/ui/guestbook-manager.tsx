@@ -87,7 +87,6 @@ function ActionButton({
   );
 }
 
-
 export function GuestbookManager() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
@@ -184,7 +183,12 @@ export function GuestbookManager() {
               </div>
               <div className="space-y-4 px-6 py-5">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <Skeleton key={i} variant="rect" height="2.5rem" className="rounded-[1rem]" />
+                  <Skeleton
+                    key={i}
+                    variant="rect"
+                    height="2.5rem"
+                    className="rounded-[1rem]"
+                  />
                 ))}
               </div>
             </div>
@@ -264,7 +268,13 @@ export function GuestbookManager() {
                                   disabled={disabled}
                                   onClick={() => deleteMutation.mutate(item.id)}
                                 >
-                                  {disabled ? <><Spinner size="sm" /> 삭제 중</> : "삭제"}
+                                  {disabled ? (
+                                    <>
+                                      <Spinner size="sm" /> 삭제 중
+                                    </>
+                                  ) : (
+                                    "삭제"
+                                  )}
                                 </ActionButton>
                               )}
                             </td>

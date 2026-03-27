@@ -162,7 +162,12 @@ export function CategoryManager() {
           {categoriesQuery.isPending ? (
             <div className="space-y-4">
               {Array.from({ length: 4 }).map((_, index) => (
-                <Skeleton key={index} variant="rect" height="6rem" className="rounded-[1.25rem]" />
+                <Skeleton
+                  key={index}
+                  variant="rect"
+                  height="6rem"
+                  className="rounded-[1.25rem]"
+                />
               ))}
             </div>
           ) : null}
@@ -277,13 +282,18 @@ function DeleteCategoryModal({
           disabled={isDeleting}
           className="inline-flex items-center justify-center rounded-[0.75rem] bg-negative-1 px-4 py-2 text-sm font-medium text-text-1 transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isDeleting ? <><Spinner size="sm" /> 삭제 중</> : "삭제"}
+          {isDeleting ? (
+            <>
+              <Spinner size="sm" /> 삭제 중
+            </>
+          ) : (
+            "삭제"
+          )}
         </button>
       </div>
     </Modal>
   );
 }
-
 
 function countCategories(categories: Category[]): number {
   return categories.reduce((total, category) => {

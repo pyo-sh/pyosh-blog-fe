@@ -130,9 +130,7 @@ export function CategoryTree({
   onDelete,
 }: CategoryTreeProps) {
   if (categories.length === 0) {
-    return (
-      <EmptyState message="등록된 카테고리가 없습니다." />
-    );
+    return <EmptyState message="등록된 카테고리가 없습니다." />;
   }
 
   return (

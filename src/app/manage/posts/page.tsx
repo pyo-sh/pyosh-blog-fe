@@ -79,7 +79,6 @@ function Badge({
   );
 }
 
-
 function ActionButton({
   children,
   disabled,
@@ -248,7 +247,12 @@ export default function ManagePostsPage() {
               </div>
               <div className="space-y-4 px-6 py-5">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <Skeleton key={i} variant="rect" height="2.5rem" className="rounded-[1rem]" />
+                  <Skeleton
+                    key={i}
+                    variant="rect"
+                    height="2.5rem"
+                    className="rounded-[1rem]"
+                  />
                 ))}
               </div>
             </div>
@@ -359,7 +363,13 @@ export default function ManagePostsPage() {
                                     }
                                     tone="danger"
                                   >
-                                    {disabled ? <><Spinner size="sm" /> 삭제 중</> : "삭제"}
+                                    {disabled ? (
+                                      <>
+                                        <Spinner size="sm" /> 삭제 중
+                                      </>
+                                    ) : (
+                                      "삭제"
+                                    )}
                                   </ActionButton>
                                 )}
                               </div>

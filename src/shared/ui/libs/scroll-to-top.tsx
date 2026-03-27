@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import throttle from "@shared/lib/throttle";
 import { cn } from "@shared/lib/style-utils";
+import throttle from "@shared/lib/throttle";
 import { ArrowUpIcon } from "@shared/ui/icons";
 
 const ScrollToTop = () => {
@@ -15,6 +15,7 @@ const ScrollToTop = () => {
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -35,7 +36,9 @@ const ScrollToTop = () => {
         "text-text-3 hover:text-text-1 hover:border-border-2",
         "shadow-[0px_2px_7px_0px_rgba(0,0,0,0.26)]",
         "transition-all duration-300",
-        visible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
+        visible
+          ? "opacity-100 pointer-events-auto"
+          : "opacity-0 pointer-events-none",
       )}
     >
       <ArrowUpIcon width={20} height={20} />

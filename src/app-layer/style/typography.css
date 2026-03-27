@@ -4,14 +4,26 @@
   }
 
   h1 {
-    font-size: 1.875rem;
-    line-height: 2.375rem;
+    font-size: 1.5rem;
+    line-height: 2rem;
     font-weight: 700;
   }
+  @media (min-width: 768px) {
+    h1 {
+      font-size: 1.875rem;
+      line-height: 2.375rem;
+    }
+  }
   h2 {
-    font-size: 1.625rem;
-    line-height: 2.063rem;
+    font-size: 1.25rem;
+    line-height: 1.625rem;
     font-weight: 700;
+  }
+  @media (min-width: 768px) {
+    h2 {
+      font-size: 1.625rem;
+      line-height: 2.063rem;
+    }
   }
   h3 {
     font-size: 1.375rem;
@@ -37,14 +49,26 @@
 
 @layer utilities {
   .text-h1 {
-    font-size: 1.875rem;
-    line-height: 2.375rem;
+    font-size: 1.5rem;
+    line-height: 2rem;
     font-weight: 700;
   }
+  @media (min-width: 768px) {
+    .text-h1 {
+      font-size: 1.875rem;
+      line-height: 2.375rem;
+    }
+  }
   .text-h2 {
-    font-size: 1.625rem;
-    line-height: 2.063rem;
+    font-size: 1.25rem;
+    line-height: 1.625rem;
     font-weight: 700;
+  }
+  @media (min-width: 768px) {
+    .text-h2 {
+      font-size: 1.625rem;
+      line-height: 2.063rem;
+    }
   }
   .text-h3 {
     font-size: 1.375rem;
@@ -130,6 +154,7 @@
   }
 
   .markdown-content {
+    overflow-wrap: break-word;
     --tw-prose-body: var(--text2);
     --tw-prose-headings: var(--text1);
     --tw-prose-lead: var(--text2);
@@ -242,7 +267,14 @@
     padding: 0.125rem 0.375rem;
   }
 
+  .markdown-content table {
+    display: block;
+    overflow-x: auto;
+  }
+
   .markdown-content img {
+    max-width: 100%;
+    height: auto;
     border-radius: 1rem;
   }
 

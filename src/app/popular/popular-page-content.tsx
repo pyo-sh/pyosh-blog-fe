@@ -14,7 +14,7 @@ const PERIOD_OPTIONS = [
 
 export function PopularPageContent({ days, posts }: PopularPageContentProps) {
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-8 px-6 py-12">
+    <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col gap-8 px-4 py-12 md:px-6">
       <header className="rounded-[2rem] border border-border-3 bg-background-2 p-8 md:p-10">
         <p className="text-body-xs uppercase tracking-[0.24em] text-text-4">
           Popular Posts
