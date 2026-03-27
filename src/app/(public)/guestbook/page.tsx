@@ -98,7 +98,11 @@ export default async function GuestbookPage({
       );
     }
   } catch {
-    // Settings lookup should not take down the public guestbook page.
+    return (
+      <section className="py-16">
+        <EmptyState message="현재 방명록 기능이 비활성화되어 있습니다." />
+      </section>
+    );
   }
 
   const [response, viewer] = await Promise.all([

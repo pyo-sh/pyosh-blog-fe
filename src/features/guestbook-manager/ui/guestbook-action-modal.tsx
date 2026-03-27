@@ -53,7 +53,7 @@ export function GuestbookActionModal({
     }
 
     setSelectedAction(defaultAction ?? options[0]?.value ?? null);
-  }, [defaultAction, isOpen, options]);
+  }, [defaultAction, isOpen]);
 
   if (!isOpen) {
     return null;
