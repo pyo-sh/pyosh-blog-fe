@@ -1,5 +1,5 @@
 import type { Tag } from "./model";
-import { serverFetch } from "@shared/api";
+import { clientFetch, serverFetch } from "@shared/api";
 
 interface TagsResponse {
   tags: Tag[];
@@ -11,6 +11,12 @@ export async function fetchTags(cookieHeader?: string): Promise<Tag[]> {
     {},
     cookieHeader,
   );
+
+  return response.tags;
+}
+
+export async function fetchTagsClient(): Promise<Tag[]> {
+  const response = await clientFetch<TagsResponse>("/api/tags");
 
   return response.tags;
 }

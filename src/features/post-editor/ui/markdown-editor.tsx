@@ -107,6 +107,7 @@ function getContentAttributes(
 interface MarkdownEditorProps {
   value: string;
   onChange: (value: string) => void;
+  onBlur?: (value: string) => void;
   /**
    * Sets the `id` attribute on the CM6 content element. Read once at mount;
    * changes after initial render are ignored.
@@ -126,6 +127,7 @@ interface MarkdownEditorProps {
 export function MarkdownEditor({
   value,
   onChange,
+  onBlur,
   id = "contentMd",
   name = "contentMd",
   labelId,
@@ -137,7 +139,9 @@ export function MarkdownEditor({
   const placeholderCompartmentRef = useRef(new Compartment());
   const contentAttributesCompartmentRef = useRef(new Compartment());
   const onChangeRef = useRef(onChange);
+  const onBlurRef = useRef(onBlur);
   onChangeRef.current = onChange;
+  onBlurRef.current = onBlur;
   const initialValueRef = useRef(value);
   const effectivePlaceholder =
     placeholderText ?? legacyPlaceholder ?? "# 글 내용을 작성하세요";
@@ -179,6 +183,11 @@ export function MarkdownEditor({
         ) {
           onChangeRef.current(update.state.doc.toString());
         }
+      }),
+      EditorView.domEventHandlers({
+        blur: (_event, view) => {
+          onBlurRef.current?.(view.state.doc.toString());
+        },
       }),
       contentAttributesCompartmentRef.current.of(
         EditorView.contentAttributes.of(getContentAttributes(id, labelId)),

@@ -69,10 +69,13 @@ export default function DashboardPostEditPage() {
     return {
       title: postQuery.data.title,
       categoryId: postQuery.data.categoryId,
-      tags: postQuery.data.tags.map((tag) => tag.name).join(", "),
+      tags: postQuery.data.tags.map((tag) => tag.name),
       status: postQuery.data.status,
       visibility: postQuery.data.visibility,
+      commentStatus: postQuery.data.commentStatus ?? "open",
       thumbnailUrl: postQuery.data.thumbnailUrl ?? "",
+      summary: postQuery.data.summary ?? "",
+      description: postQuery.data.description ?? "",
       contentMd: postQuery.data.contentMd,
     };
   }, [postQuery.data]);

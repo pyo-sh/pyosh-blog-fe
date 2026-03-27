@@ -75,6 +75,7 @@ interface StructuredDataPost {
   title: string;
   slug: string;
   summary: string | null;
+  description: string | null;
   contentMd: string;
   publishedAt: string | null;
   createdAt: string;
@@ -97,10 +98,12 @@ export function getSiteUrl(): string | null {
 }
 
 export function getPostDescription(
-  post: Pick<StructuredDataPost, "summary" | "contentMd">,
+  post: Pick<StructuredDataPost, "summary" | "description" | "contentMd">,
 ) {
   const plainText = (
-    post.summary?.trim() || stripMarkdown(post.contentMd)
+    post.description?.trim() ||
+    post.summary?.trim() ||
+    stripMarkdown(post.contentMd)
   ).trim();
 
   if (plainText.length <= DESCRIPTION_LIMIT) {
