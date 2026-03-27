@@ -12,13 +12,19 @@ interface CategoryTreeProps {
   onDelete: (category: Category) => void;
 }
 
-function collectNonLeafIds(categories: Category[]): Set<number> {
+function collectVisibleNonLeafIds(
+  categories: Category[],
+  showHidden: boolean,
+): Set<number> {
   const ids = new Set<number>();
   function traverse(cats: Category[]) {
     for (const cat of cats) {
-      if (cat.children && cat.children.length > 0) {
+      const visible = showHidden
+        ? (cat.children ?? [])
+        : (cat.children ?? []).filter((c) => c.isVisible);
+      if (visible.length > 0) {
         ids.add(cat.id);
-        traverse(cat.children);
+        traverse(visible);
       }
     }
   }
@@ -64,7 +70,8 @@ function CategoryTreeRow({
           type="button"
           onClick={() => onToggle(category.id)}
           disabled={!hasVisibleChildren}
-          aria-label={isExpanded ? "접기" : "펼치기"}
+          aria-label="하위 카테고리 토글"
+          aria-expanded={hasVisibleChildren ? isExpanded : undefined}
           className={cn(
             "flex h-5 w-5 shrink-0 items-center justify-center text-xs text-text-3 transition-colors",
             hasVisibleChildren
@@ -156,8 +163,8 @@ export function CategoryTree({
   }, []);
 
   const handleExpandAll = useCallback(() => {
-    setExpandedIds(collectNonLeafIds(categories));
-  }, [categories]);
+    setExpandedIds(collectVisibleNonLeafIds(categories, showHidden));
+  }, [categories, showHidden]);
 
   const handleCollapseAll = useCallback(() => {
     setExpandedIds(new Set());
