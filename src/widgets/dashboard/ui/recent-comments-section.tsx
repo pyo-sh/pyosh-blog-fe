@@ -8,6 +8,7 @@ import {
   fetchAdminComments,
   type AdminCommentItem,
 } from "@entities/comment";
+import { formatNumber } from "@shared/lib/format-number";
 import { getErrorMessage } from "@shared/lib/get-error-message";
 import { cn } from "@shared/lib/style-utils";
 import { Skeleton, Spinner } from "@shared/ui/libs";
@@ -184,7 +185,7 @@ export function RecentCommentsSection() {
             최근 댓글
             {data ? (
               <span className="ml-2 text-base font-normal text-text-4">
-                (총 {totalComments.toLocaleString("ko-KR")}개)
+                (총 {formatNumber(totalComments)}개)
               </span>
             ) : null}
           </h2>

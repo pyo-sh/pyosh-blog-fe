@@ -5,10 +5,6 @@ import { fetchDashboardStats } from "@entities/stat";
 import { formatNumber } from "@shared/lib/format-number";
 import { Skeleton } from "@shared/ui/libs";
 
-function formatStatValue(value: number) {
-  return formatNumber(value);
-}
-
 function StatsSkeleton() {
   return (
     <div aria-busy="true" className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -107,7 +103,7 @@ export function StatsSection() {
                 {sublabel}
               </p>
               <p className="mt-4 text-[2rem] font-semibold leading-none text-text-1">
-                {formatStatValue(data[key])}
+                {formatNumber(data[key])}
               </p>
               <p className="mt-3 text-body-sm text-text-3">{description}</p>
             </article>
