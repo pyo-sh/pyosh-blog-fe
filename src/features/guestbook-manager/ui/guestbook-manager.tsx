@@ -43,6 +43,18 @@ type ActionContext =
     }
   | null;
 
+function getAllowedActionsForStatus(status: AdminGuestbookItem["status"]) {
+  if (status === "hidden") {
+    return ["restore", "soft_delete", "hard_delete"] as const;
+  }
+
+  if (status === "deleted") {
+    return ["hard_delete"] as const;
+  }
+
+  return ["hide", "soft_delete", "hard_delete"] as const;
+}
+
 function getPageLabel(
   total: number,
   page: number,
@@ -66,45 +78,52 @@ function isPatchAction(
 }
 
 function getBulkOptions(items: AdminGuestbookItem[]) {
-  const hasActive = items.some((item) => item.status === "active");
-  const hasHidden = items.some((item) => item.status === "hidden");
-
-  const options: Array<{
-    value: GuestbookManageAction;
-    label: string;
-    description: string;
-    tone?: "default" | "danger";
-  }> = [];
-
-  if (hasActive) {
-    options.push({
+  const optionMap: Record<
+    GuestbookManageAction,
+    {
+      value: GuestbookManageAction;
+      label: string;
+      description: string;
+      tone?: "default" | "danger";
+    }
+  > = {
+    hide: {
       value: "hide",
       label: "숨기기",
-      description: "선택한 정상 방명록을 공개 페이지에서 숨깁니다.",
-    });
-  }
-
-  if (hasHidden) {
-    options.push({
+      description: "선택한 방명록을 공개 페이지에서 숨깁니다.",
+    },
+    restore: {
       value: "restore",
       label: "복원",
       description: "선택한 숨김 방명록을 다시 공개 상태로 되돌립니다.",
-    });
-  }
+    },
+    soft_delete: {
+      value: "soft_delete",
+      label: "소프트 삭제",
+      description: "본문은 보존한 채 공개 페이지에는 삭제된 상태로 표시합니다.",
+    },
+    hard_delete: {
+      value: "hard_delete",
+      label: "영구 삭제",
+      description: "선택한 방명록을 완전히 삭제합니다. 되돌릴 수 없습니다.",
+      tone: "danger",
+    },
+  };
 
-  options.push({
-    value: "soft_delete",
-    label: "소프트 삭제",
-    description: "본문은 보존한 채 공개 페이지에는 삭제된 상태로 표시합니다.",
-  });
-  options.push({
-    value: "hard_delete",
-    label: "영구 삭제",
-    description: "선택한 방명록을 완전히 삭제합니다. 되돌릴 수 없습니다.",
-    tone: "danger",
-  });
+  const commonActions = items.reduce<GuestbookManageAction[]>(
+    (current, item, index) => {
+      const allowedActions = [...getAllowedActionsForStatus(item.status)];
 
-  return options;
+      if (index === 0) {
+        return allowedActions;
+      }
+
+      return current.filter((action) => allowedActions.includes(action));
+    },
+    [],
+  );
+
+  return commonActions.map((action) => optionMap[action]);
 }
 
 export function GuestbookManager() {
@@ -165,6 +184,18 @@ export function GuestbookManager() {
       toast.error(getErrorMessage(error, "방명록 설정 변경에 실패했습니다."));
     },
   });
+
+  const settingsStatusLabel = settingsQuery.isLoading
+    ? "불러오는 중"
+    : settingsQuery.isError
+      ? "불러오기 실패"
+      : settingsQuery.data?.enabled
+        ? "활성"
+        : "비활성";
+  const isSettingsToggleDisabled =
+    settingsQuery.isLoading ||
+    settingsQuery.isError ||
+    settingMutation.isPending;
 
   const actionMutation = useMutation({
     mutationFn: async (payload: {
@@ -360,11 +391,20 @@ export function GuestbookManager() {
           <div className="flex items-center gap-3">
             {settingsQuery.isLoading ? <Spinner size="sm" /> : null}
             <span className="text-sm font-medium text-text-2">
-              {settingsQuery.data?.enabled ? "활성" : "비활성"}
+              {settingsStatusLabel}
             </span>
+            {settingsQuery.isError ? (
+              <button
+                type="button"
+                onClick={() => void settingsQuery.refetch()}
+                className="rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+              >
+                다시 시도
+              </button>
+            ) : null}
             <ToggleSwitch
               checked={settingsQuery.data?.enabled ?? false}
-              disabled={settingsQuery.isLoading || settingMutation.isPending}
+              disabled={isSettingsToggleDisabled}
               onChange={(nextChecked) => {
                 void settingMutation.mutateAsync(nextChecked);
               }}
@@ -372,6 +412,15 @@ export function GuestbookManager() {
             />
           </div>
         </div>
+
+        {settingsQuery.isError ? (
+          <div className="mt-4 rounded-[1rem] border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-sm text-negative-1">
+            {getErrorMessage(
+              settingsQuery.error,
+              "방명록 설정을 불러오지 못했습니다. 상태를 확인한 뒤 다시 시도해 주세요.",
+            )}
+          </div>
+        ) : null}
 
         <div className="mt-6 flex flex-col gap-3 border-b border-border-3 pb-5 md:flex-row md:items-center md:justify-between">
           <div>
