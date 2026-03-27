@@ -69,18 +69,15 @@ export function CodeBlockEnhancer({ children }: PropsWithChildren) {
       if (pre.parentElement?.hasAttribute("data-code-wrapper")) return;
 
       const code = pre.querySelector("code");
-      const lang = code?.className?.match(/language-(\w+)/)?.[1];
-
-      // 언어가 없으면 헤더 미삽입
-      if (!lang) return;
+      // [^\s]+ captures language names with special chars (c++, c#, objective-c)
+      const lang = code?.className?.match(/language-([^\s]+)/)?.[1];
 
       const header = createCodeHeader(lang, pre, timers);
 
       // pre를 wrapper로 감싸서 헤더가 가로 스크롤 밖에 고정되도록 함
+      // 시각 스타일(bg/border/radius)은 typography.css의 [data-code-wrapper]에서 관리
       const wrapper = document.createElement("div");
       wrapper.setAttribute("data-code-wrapper", "true");
-      wrapper.className =
-        "overflow-hidden rounded-xl border border-border-3 bg-background-2";
       pre.parentNode?.insertBefore(wrapper, pre);
       wrapper.appendChild(header);
       wrapper.appendChild(pre);
