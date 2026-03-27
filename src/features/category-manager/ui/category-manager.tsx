@@ -38,7 +38,6 @@ export function CategoryManager() {
   const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(
     null,
   );
-  const [actionError, setActionError] = useState<string | null>(null);
 
   const categoriesQuery = useQuery({
     queryKey: QUERY_KEY,
@@ -87,23 +86,20 @@ export function CategoryManager() {
   });
 
   const handleCreate = () => {
-    setActionError(null);
     setFormState({ open: true, mode: "create", category: null });
   };
 
   const handleEdit = (category: Category) => {
-    setActionError(null);
     setFormState({ open: true, mode: "edit", category });
   };
 
   const handleDelete = (category: Category) => {
     if (category.children && category.children.length > 0) {
-      setActionError("하위 카테고리가 있는 항목은 삭제할 수 없습니다.");
+      toast.error("하위 카테고리가 있는 항목은 삭제할 수 없습니다.");
 
       return;
     }
 
-    setActionError(null);
     setCategoryToDelete(category);
   };
 
@@ -161,12 +157,6 @@ export function CategoryManager() {
             총 {countCategories(categories)}개
           </span>
         </div>
-
-        {actionError ? (
-          <div className="mt-5 rounded-[1rem] border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-sm text-negative-1">
-            {actionError}
-          </div>
-        ) : null}
 
         <div className="mt-6">
           {categoriesQuery.isPending ? <TreeSkeleton /> : null}

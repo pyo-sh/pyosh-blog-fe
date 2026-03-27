@@ -5,7 +5,7 @@ export function getErrorMessage(error: unknown, fallback: string): string {
     return error.message;
   }
 
-  if (error instanceof Error) {
+  if (error instanceof Error && error.message) {
     return error.message;
   }
 
