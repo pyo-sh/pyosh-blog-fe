@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
 import "@app-layer/style/index.css";
 import Providers from "@app-layer/provider";
@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Pyosh Blog",
   icons: {
     icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
       { url: "/favicon.ico", type: "image/x-icon" },
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
@@ -27,17 +28,16 @@ export const metadata: Metadata = {
       },
     ],
   },
-  manifest: "/manifest.json",
-  other: {
-    "msapplication-TileColor": "#BB86FC",
-    "msapplication-TileImage": "/mstile-150x150",
-  },
+  manifest: "/manifest.webmanifest",
 };
 
-export const viewport = {
+export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#6200EE",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#8a6fe0" },
+    { media: "(prefers-color-scheme: dark)", color: "#131415" },
+  ],
 };
 
 export default async function RootLayout({

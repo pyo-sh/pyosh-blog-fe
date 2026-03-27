@@ -5,7 +5,7 @@
     {
       "src": "/favicon.ico",
       "sizes": "64x64",
-      "type": "image/png"
+      "type": "image/x-icon"
     },
     {
       "src": "/favicon-16x16.png",
@@ -26,9 +26,14 @@
       "src": "/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
     }
   ],
   "display": "standalone",
-  "theme_color": "#8D72E1",
-  "background_color": "#FFFFFF"
+  "theme_color": "#8a6fe0",
+  "background_color": "#f9f9fa"
 }
