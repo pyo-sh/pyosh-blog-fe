@@ -28,10 +28,7 @@ export function ErrorContent({
       : "bg-negative-1/10 text-negative-1";
 
   return (
-    <div
-      role="alert"
-      className="w-full max-w-[32rem] rounded-[2rem] border border-border-3 bg-background-2 p-8 text-center shadow-[0px_18px_60px_0px_rgba(0,0,0,0.08)]"
-    >
+    <div className="w-full max-w-[32rem] rounded-[2rem] border border-border-3 bg-background-2 p-8 text-center shadow-[0px_18px_60px_0px_rgba(0,0,0,0.08)]">
       <Text
         as="span"
         fontSize="body-sm"
