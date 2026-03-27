@@ -58,8 +58,8 @@ export function CodeBlockEnhancer({ children }: PropsWithChildren) {
 
     const preBlocks = container.querySelectorAll<HTMLElement>("pre");
     preBlocks.forEach((pre) => {
-      // 이미 헤더가 삽입된 경우 중복 삽입 방지
-      if (pre.querySelector("[data-code-header]")) return;
+      // 이미 래퍼가 삽입된 경우 중복 삽입 방지
+      if (pre.parentElement?.hasAttribute("data-code-wrapper")) return;
 
       const code = pre.querySelector("code");
       const lang = code?.className?.match(/language-(\w+)/)?.[1];
@@ -68,8 +68,15 @@ export function CodeBlockEnhancer({ children }: PropsWithChildren) {
       if (!lang) return;
 
       const header = createCodeHeader(lang, pre);
-      header.setAttribute("data-code-header", "true");
-      pre.insertBefore(header, pre.firstChild);
+
+      // pre를 wrapper로 감싸서 헤더가 가로 스크롤 밖에 고정되도록 함
+      const wrapper = document.createElement("div");
+      wrapper.setAttribute("data-code-wrapper", "true");
+      wrapper.className =
+        "overflow-hidden rounded-xl border border-border-3 bg-background-2";
+      pre.parentNode?.insertBefore(wrapper, pre);
+      wrapper.appendChild(header);
+      wrapper.appendChild(pre);
     });
   }, []);
 

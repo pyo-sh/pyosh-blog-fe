@@ -12,7 +12,7 @@ export function RelatedPosts({ posts }: RelatedPostsProps) {
   return (
     <section aria-label="관련 글">
       <h2 className="mb-4 text-body-sm font-semibold text-text-2">관련 글</h2>
-      <div className="flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [scroll-snap-type:x_mandatory] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
+      <div className="flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [scroll-snap-type:x_mandatory] [&::-webkit-scrollbar]:hidden">
         {posts.map((post) => (
           <Link
             key={post.id}

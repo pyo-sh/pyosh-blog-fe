@@ -278,6 +278,13 @@
     padding: 1rem;
   }
 
+  /* When CodeBlockEnhancer wraps pre with a header, border/radius/bg move to the wrapper */
+  .markdown-content [data-code-wrapper] > pre {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+  }
+
   .markdown-content pre code {
     display: block;
     min-width: max-content;
