@@ -14,6 +14,7 @@ function buildCspDirectives(nonce: string): string {
       ? "img-src 'self' http: https: data: blob:"
       : "img-src 'self' https: data: blob:",
     `script-src 'nonce-${nonce}' 'strict-dynamic'`,
+    "object-src 'none'",
     "style-src 'self' 'unsafe-inline'",
     "font-src 'self' https://fonts.gstatic.com",
     apiUrl ? `connect-src 'self' ${apiUrl}` : "connect-src 'self'",
