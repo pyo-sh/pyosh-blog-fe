@@ -11,7 +11,7 @@ import {
   type Asset,
 } from "@entities/asset";
 import { ApiResponseError } from "@shared/api";
-import { Modal } from "@shared/ui/libs";
+import { Modal, Spinner } from "@shared/ui/libs";
 
 const PAGE_SIZE = 18;
 const MAX_FILES = 5;
@@ -427,7 +427,7 @@ function DeleteAssetsModal({
           disabled={isDeleting}
           className="inline-flex items-center justify-center rounded-[0.75rem] bg-negative-1 px-4 py-2 text-sm font-medium text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isDeleting ? "삭제 중..." : "삭제"}
+          {isDeleting ? <><Spinner size="sm" /> 삭제 중</> : "삭제"}
         </button>
       </div>
     </Modal>

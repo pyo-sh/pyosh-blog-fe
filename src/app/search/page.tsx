@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { fetchPosts } from "@entities/post";
 import { PostCard } from "@features/post-list";
-import { Pagination } from "@shared/ui/libs";
+import { EmptyState, Pagination } from "@shared/ui/libs";
 
 interface SearchPageProps {
   searchParams?: {
@@ -85,9 +85,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           />
         </>
       ) : (
-        <section className="rounded-[2rem] border border-dashed border-border-3 bg-background-2 p-8 text-body-md text-text-3 md:p-10">
-          검색 결과가 없습니다. 다른 키워드로 다시 시도해 주세요.
-        </section>
+        <EmptyState message="검색 결과가 없습니다. 다른 키워드로 다시 시도해 주세요." />
       )}
     </main>
   );

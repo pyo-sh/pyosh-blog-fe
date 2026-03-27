@@ -14,6 +14,7 @@ import {
 } from "@entities/post";
 import { ApiResponseError } from "@shared/api";
 import { cn } from "@shared/lib/style-utils";
+import { Spinner } from "@shared/ui/libs";
 
 export interface PostFormValues {
   title: string;
@@ -427,7 +428,7 @@ export function PostForm({
           )}
         >
           {mutation.isPending
-            ? "저장 중..."
+            ? <><Spinner size="sm" /> 저장 중</>
             : getSubmitLabel(mode, submitLabel)}
         </button>
       </div>

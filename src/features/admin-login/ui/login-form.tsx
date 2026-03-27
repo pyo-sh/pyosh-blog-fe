@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@entities/auth";
 import { ApiResponseError } from "@shared/api";
+import { Spinner } from "@shared/ui/libs";
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof ApiResponseError) {
@@ -107,7 +108,7 @@ export function LoginForm() {
         disabled={busy}
         className="mt-8 inline-flex w-full items-center justify-center rounded-[1rem] bg-primary-1 px-4 py-3 text-body-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {busy ? "로그인 중..." : "로그인"}
+        {busy ? <><Spinner size="sm" /> 로그인 중</> : "로그인"}
       </button>
     </form>
   );

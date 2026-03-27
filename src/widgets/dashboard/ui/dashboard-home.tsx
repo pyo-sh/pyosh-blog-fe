@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchDashboardStats, type DashboardStats } from "@entities/stat";
 import { cn } from "@shared/lib/style-utils";
+import { Skeleton } from "@shared/ui/libs";
 
 const numberFormatter = new Intl.NumberFormat("ko-KR");
 
@@ -71,15 +72,19 @@ function mapStatsToCards(stats: DashboardStats): StatCard[] {
 
 function DashboardStatsSkeleton() {
   return (
-    <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
+    <div aria-busy="true" className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
       {Array.from({ length: 5 }).map((_, index) => (
         <div
           key={index}
-          className="animate-pulse rounded-[1.5rem] border border-border-3 bg-background-2 p-5"
+          className="rounded-[1.5rem] border border-border-3 bg-background-2 p-5"
         >
-          <div className="h-4 w-20 rounded-full bg-background-4" />
-          <div className="mt-5 h-10 w-24 rounded-full bg-background-4" />
-          <div className="mt-4 h-4 w-full rounded-full bg-background-4" />
+          <Skeleton height="1rem" width="5rem" />
+          <div className="mt-5">
+            <Skeleton height="2.5rem" width="6rem" />
+          </div>
+          <div className="mt-4">
+            <Skeleton />
+          </div>
         </div>
       ))}
     </div>

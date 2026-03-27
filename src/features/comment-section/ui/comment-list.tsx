@@ -9,7 +9,7 @@ import type {
   CreateCommentOAuthBody,
 } from "@entities/comment";
 import { createComment, deleteComment } from "@entities/comment";
-import { Modal } from "@shared/ui/libs";
+import { Modal, Spinner } from "@shared/ui/libs";
 
 interface CommentViewer {
   type: "guest" | "oauth";
@@ -310,7 +310,7 @@ export function CommentList({
               }
               className="inline-flex items-center justify-center rounded-[1rem] bg-negative-1 px-5 py-3 text-body-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {deleteBusy ? "삭제 중..." : "삭제"}
+              {deleteBusy ? <><Spinner size="sm" /> 삭제 중</> : "삭제"}
             </button>
             <button
               type="button"
