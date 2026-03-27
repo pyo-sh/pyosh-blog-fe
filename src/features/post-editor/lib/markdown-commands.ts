@@ -104,6 +104,23 @@ export function insertTable(view: EditorView): void {
   view.focus();
 }
 
+export function insertLink(view: EditorView): void {
+  const { from, to } = view.state.selection.main;
+  const selected = view.state.sliceDoc(from, to);
+  const text = selected || "링크 텍스트";
+  const insert = `[${text}](url)`;
+
+  view.dispatch({
+    changes: { from, to, insert },
+    selection: EditorSelection.range(
+      from + text.length + 3,
+      from + text.length + 6,
+    ),
+  });
+
+  view.focus();
+}
+
 export function insertImageTemplate(view: EditorView): void {
   const { from, to } = view.state.selection.main;
   const selected = view.state.sliceDoc(from, to);

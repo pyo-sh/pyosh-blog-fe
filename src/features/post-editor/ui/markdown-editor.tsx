@@ -81,7 +81,15 @@ const editorTheme = EditorView.theme({
 interface MarkdownEditorProps {
   value: string;
   onChange: (value: string) => void;
+  /**
+   * Sets the `id` attribute on the CM6 content element. Read once at mount;
+   * changes after initial render are ignored.
+   */
   id?: string;
+  /**
+   * Placeholder text shown when the editor is empty. Read once at mount;
+   * changes after initial render are ignored.
+   */
   placeholderText?: string;
   className?: string;
 }

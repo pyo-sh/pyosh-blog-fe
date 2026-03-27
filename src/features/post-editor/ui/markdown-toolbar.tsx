@@ -1,10 +1,10 @@
 "use client";
 
 import {
-  insertAtCursor,
   insertCodeBlock,
   insertHorizontalRule,
   insertImageTemplate,
+  insertLink,
   insertTable,
   toggleLinePrefix,
   wrapSelection,
@@ -17,6 +17,7 @@ interface ToolbarButtonProps {
   onClick: () => void;
   bold?: boolean;
   italic?: boolean;
+  disabled?: boolean;
 }
 
 function ToolbarButton({
@@ -25,6 +26,7 @@ function ToolbarButton({
   onClick,
   bold,
   italic,
+  disabled,
 }: ToolbarButtonProps) {
   return (
     <button
@@ -32,7 +34,8 @@ function ToolbarButton({
       title={title}
       aria-label={title}
       onClick={onClick}
-      className="flex h-7 min-w-7 items-center justify-center rounded px-1.5 text-xs text-text-2 transition-colors hover:bg-background-3 hover:text-text-1"
+      disabled={disabled}
+      className="flex h-7 min-w-7 items-center justify-center rounded px-1.5 text-xs text-text-2 transition-colors hover:bg-background-3 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
     >
       <span
         className={[bold ? "font-bold" : "", italic ? "italic" : ""]
@@ -54,6 +57,8 @@ interface MarkdownToolbarProps {
 }
 
 export function MarkdownToolbar({ editorView }: MarkdownToolbarProps) {
+  const isReady = editorView !== null;
+
   const withView = (fn: (view: EditorView) => void) => () => {
     if (editorView) fn(editorView);
   };
@@ -69,17 +74,20 @@ export function MarkdownToolbar({ editorView }: MarkdownToolbarProps) {
         label="B"
         title="볼드 (Ctrl+B)"
         bold
+        disabled={!isReady}
         onClick={withView((view) => wrapSelection(view, "**", "**"))}
       />
       <ToolbarButton
         label="I"
         title="이탤릭 (Ctrl+I)"
         italic
+        disabled={!isReady}
         onClick={withView((view) => wrapSelection(view, "*", "*"))}
       />
       <ToolbarButton
         label="S"
         title="취소선"
+        disabled={!isReady}
         onClick={withView((view) => wrapSelection(view, "~~", "~~"))}
       />
 
@@ -90,18 +98,21 @@ export function MarkdownToolbar({ editorView }: MarkdownToolbarProps) {
         label="H1"
         title="제목 1"
         bold
+        disabled={!isReady}
         onClick={withView((view) => toggleLinePrefix(view, "# "))}
       />
       <ToolbarButton
         label="H2"
         title="제목 2"
         bold
+        disabled={!isReady}
         onClick={withView((view) => toggleLinePrefix(view, "## "))}
       />
       <ToolbarButton
         label="H3"
         title="제목 3"
         bold
+        disabled={!isReady}
         onClick={withView((view) => toggleLinePrefix(view, "### "))}
       />
 
@@ -111,11 +122,13 @@ export function MarkdownToolbar({ editorView }: MarkdownToolbarProps) {
       <ToolbarButton
         label="링크"
         title="링크 (Ctrl+K)"
-        onClick={withView((view) => wrapSelection(view, "[링크 텍스트](", ")"))}
+        disabled={!isReady}
+        onClick={withView((view) => insertLink(view))}
       />
       <ToolbarButton
         label="이미지"
         title="이미지 삽입"
+        disabled={!isReady}
         onClick={withView((view) => insertImageTemplate(view))}
       />
 
@@ -125,11 +138,13 @@ export function MarkdownToolbar({ editorView }: MarkdownToolbarProps) {
       <ToolbarButton
         label="<>"
         title="인라인 코드"
+        disabled={!isReady}
         onClick={withView((view) => wrapSelection(view, "`", "`"))}
       />
       <ToolbarButton
         label="</>"
         title="코드 블록"
+        disabled={!isReady}
         onClick={withView((view) => insertCodeBlock(view))}
       />
 
@@ -139,16 +154,19 @@ export function MarkdownToolbar({ editorView }: MarkdownToolbarProps) {
       <ToolbarButton
         label="인용"
         title="인용"
+        disabled={!isReady}
         onClick={withView((view) => toggleLinePrefix(view, "> "))}
       />
       <ToolbarButton
         label="1."
         title="순서 목록"
-        onClick={withView((view) => insertAtCursor(view, "1. "))}
+        disabled={!isReady}
+        onClick={withView((view) => toggleLinePrefix(view, "1. "))}
       />
       <ToolbarButton
         label="-"
         title="비순서 목록"
+        disabled={!isReady}
         onClick={withView((view) => toggleLinePrefix(view, "- "))}
       />
 
@@ -158,11 +176,13 @@ export function MarkdownToolbar({ editorView }: MarkdownToolbarProps) {
       <ToolbarButton
         label="──"
         title="구분선"
+        disabled={!isReady}
         onClick={withView((view) => insertHorizontalRule(view))}
       />
       <ToolbarButton
         label="표"
         title="테이블 삽입"
+        disabled={!isReady}
         onClick={withView((view) => insertTable(view))}
       />
     </div>
