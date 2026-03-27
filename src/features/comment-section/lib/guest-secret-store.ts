@@ -1,4 +1,5 @@
 const STORAGE_KEY = "pyosh:guest-secret-comments";
+const ACTIVE_IDENTITY_KEY = "pyosh:guest-secret-comments:identity";
 
 interface GuestSecretEntry {
   body: string;
@@ -78,6 +79,55 @@ function writeStore(nextStore: GuestSecretMap) {
   }
 }
 
+function readActiveIdentity(): GuestIdentity | null {
+  if (!isBrowser()) {
+    return null;
+  }
+
+  try {
+    const raw = window.sessionStorage.getItem(ACTIVE_IDENTITY_KEY);
+
+    if (!raw) {
+      return null;
+    }
+
+    const parsed = JSON.parse(raw) as unknown;
+
+    if (
+      !parsed ||
+      typeof parsed !== "object" ||
+      !("guestName" in parsed) ||
+      !("guestEmail" in parsed) ||
+      typeof parsed.guestName !== "string" ||
+      typeof parsed.guestEmail !== "string"
+    ) {
+      return null;
+    }
+
+    return {
+      guestName: parsed.guestName,
+      guestEmail: parsed.guestEmail,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function writeActiveIdentity(identity: GuestIdentity) {
+  if (!isBrowser()) {
+    return;
+  }
+
+  try {
+    window.sessionStorage.setItem(
+      ACTIVE_IDENTITY_KEY,
+      JSON.stringify(normalizeIdentity(identity)),
+    );
+  } catch {
+    // Ignore storage failures so comment UX degrades gracefully.
+  }
+}
+
 export function rememberGuestSecretComment(
   commentId: number,
   body: string,
@@ -94,6 +144,7 @@ export function rememberGuestSecretComment(
   }
 
   const currentStore = readStore();
+  writeActiveIdentity(identity);
   writeStore({
     ...currentStore,
     [String(commentId)]: {
@@ -128,4 +179,8 @@ export function readGuestSecretComment(
   }
 
   return entry.body;
+}
+
+export function readGuestSecretIdentity() {
+  return readActiveIdentity();
 }

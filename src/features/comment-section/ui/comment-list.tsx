@@ -5,6 +5,7 @@ import { CommentForm, type GuestCommentProfile } from "./comment-form";
 import { CommentItem } from "./comment-item";
 import {
   readGuestSecretComment,
+  readGuestSecretIdentity,
   rememberGuestSecretComment,
 } from "../lib/guest-secret-store";
 import type {
@@ -207,6 +208,20 @@ export function CommentList({
   useEffect(() => {
     setLoadError(initialError);
   }, [initialError]);
+
+  useEffect(() => {
+    const identity = readGuestSecretIdentity();
+
+    if (!identity) {
+      return;
+    }
+
+    setProfile((current) => ({
+      ...current,
+      guestName: current.guestName || identity.guestName,
+      guestEmail: current.guestEmail || identity.guestEmail,
+    }));
+  }, []);
 
   useEffect(() => {
     setExpandedRoots((current) => {
