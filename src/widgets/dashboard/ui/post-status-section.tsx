@@ -3,9 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { fetchDashboardStats } from "@entities/stat";
+import { formatNumber } from "@shared/lib/format-number";
 import { Skeleton } from "@shared/ui/libs";
-
-const numberFormatter = new Intl.NumberFormat("ko-KR");
 
 function PostStatusSkeleton() {
   return (
@@ -93,7 +92,7 @@ export function PostStatusSection() {
             >
               <p className="text-body-xs text-text-4">{label}</p>
               <p className="mt-2 text-2xl font-semibold text-text-1">
-                {numberFormatter.format(getValue())}
+                {formatNumber(getValue())}
               </p>
             </Link>
           ))}

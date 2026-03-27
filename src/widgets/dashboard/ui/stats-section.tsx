@@ -2,12 +2,11 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { fetchDashboardStats } from "@entities/stat";
+import { formatNumber } from "@shared/lib/format-number";
 import { Skeleton } from "@shared/ui/libs";
 
-const numberFormatter = new Intl.NumberFormat("ko-KR");
-
 function formatStatValue(value: number) {
-  return numberFormatter.format(value);
+  return formatNumber(value);
 }
 
 function StatsSkeleton() {

@@ -152,8 +152,10 @@ export function RecentCommentsSection() {
 
   const deleteMutation = useMutation({
     mutationFn: adminDeleteComment,
-    onSuccess: async () => {
+    onMutate: () => {
       setDeleteError(null);
+    },
+    onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
     },
     onError: (err) => {
