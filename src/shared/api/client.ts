@@ -4,13 +4,23 @@ const PUBLIC_API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5500";
 const INTERNAL_API_URL = process.env.API_URL ?? PUBLIC_API_URL;
 
-async function handleResponse<T>(response: Response): Promise<T> {
+async function handleResponse<T>(
+  response: Response,
+  context?: { url: string; method: string },
+): Promise<T> {
   if (!response.ok) {
     const fallback: ApiError = {
       statusCode: response.status,
       message: response.statusText,
     };
     const error: ApiError = await response.json().catch(() => fallback);
+    console.error("[API Error]", {
+      url: context?.url,
+      method: context?.method,
+      status: response.status,
+      error: error.message,
+      timestamp: new Date().toISOString(),
+    });
     throw new ApiResponseError(error);
   }
 
@@ -74,5 +84,8 @@ export async function clientFetch<T>(
     });
   }
 
-  return handleResponse<T>(response);
+  return handleResponse<T>(response, {
+    url: `${PUBLIC_API_URL}${path}`,
+    method: options.method ?? "GET",
+  });
 }
