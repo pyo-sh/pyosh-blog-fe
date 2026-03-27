@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { fetchPosts } from "@entities/post";
 import { fetchTags } from "@entities/tag";
-import { PostCard } from "@features/post-list";
+import { PostListItem } from "@features/post-list";
 import { EmptyState, Pagination, ScrollToTop } from "@shared/ui/libs";
 
 interface TagPostsPageProps {
@@ -77,25 +77,23 @@ export default async function TagPostsPage({
       </header>
 
       {posts.length > 0 ? (
-        <>
-          <section className="grid gap-5">
-            {posts.map((post) => (
-              <PostCard key={post.id} post={post} />
-            ))}
-          </section>
-
-          <Pagination
-            currentPage={meta.page}
-            totalPages={meta.totalPages}
-            basePath={`/tags/${activeTag.slug}`}
-          />
-        </>
+        <section className="grid gap-5">
+          {posts.map((post) => (
+            <PostListItem key={post.id} post={post} />
+          ))}
+        </section>
       ) : (
         <EmptyState
           variant="page"
           message="아직 이 태그에 연결된 공개 글이 없습니다."
         />
       )}
+
+      <Pagination
+        currentPage={meta.page}
+        totalPages={meta.totalPages}
+        basePath={`/tags/${activeTag.slug}`}
+      />
       <ScrollToTop />
     </main>
   );
