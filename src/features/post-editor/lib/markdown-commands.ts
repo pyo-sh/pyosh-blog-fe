@@ -66,6 +66,8 @@ export function wrapSelection(
   view.focus();
 }
 
+// Currently only affects the cursor line. Multi-line selection support
+// (apply prefix to all intersecting lines) is deferred to a future iteration.
 export function toggleLinePrefix(view: EditorView, prefix: string): void {
   const line = view.state.doc.lineAt(view.state.selection.main.from);
   const isOrderedList = prefix === "1. ";

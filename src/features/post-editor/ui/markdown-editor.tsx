@@ -11,7 +11,7 @@ import {
   syntaxHighlighting,
 } from "@codemirror/language";
 import { languages } from "@codemirror/language-data";
-import { searchKeymap } from "@codemirror/search";
+import { search, searchKeymap } from "@codemirror/search";
 import { EditorState } from "@codemirror/state";
 import {
   EditorView,
@@ -128,6 +128,7 @@ export function MarkdownEditor({
         ...markdownKeymap,
       ]),
       EditorView.lineWrapping,
+      search(),
       editorTheme,
       placeholder(placeholderText),
       EditorView.updateListener.of((update) => {

@@ -112,16 +112,19 @@ function buildToolbarItems(): ToolbarItem[] {
   ];
 }
 
+const TOOLBAR_ITEMS = buildToolbarItems();
+const TOOLBAR_BUTTONS = TOOLBAR_ITEMS.filter(
+  (item): item is ButtonDef => item !== "separator",
+);
+
 interface MarkdownToolbarProps {
   editorView: EditorView | null;
 }
 
 export function MarkdownToolbar({ editorView }: MarkdownToolbarProps) {
   const isReady = editorView !== null;
-  const items = buildToolbarItems();
-  const buttons = items.filter(
-    (item): item is ButtonDef => item !== "separator",
-  );
+  const items = TOOLBAR_ITEMS;
+  const buttons = TOOLBAR_BUTTONS;
   const [focusedIdx, setFocusedIdx] = useState(0);
   const buttonRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
