@@ -227,6 +227,8 @@ export function CommentList({
   >({});
   const sectionRef = useRef<HTMLElement | null>(null);
   const commentRefs = useRef<Record<number, HTMLLIElement | null>>({});
+  const revealedSecretBodiesRef = useRef<Record<number, string>>({});
+  const inFlightRevealIdsRef = useRef<Set<number>>(new Set());
 
   const safeMeta = meta ?? createFallbackMeta(comments);
   const currentPage = meta.page;
@@ -252,8 +254,15 @@ export function CommentList({
   }, [initialError]);
 
   useEffect(() => {
+    revealedSecretBodiesRef.current = revealedSecretBodies;
+  }, [revealedSecretBodies]);
+
+  useEffect(() => {
     let isCancelled = false;
     const secretComments = collectSecretComments(comments);
+    const secretCommentIds = new Set(
+      secretComments.map((comment) => comment.id),
+    );
     const legacyBodies = Object.fromEntries(
       secretComments
         .map((comment) => {
@@ -265,18 +274,45 @@ export function CommentList({
     );
     const revealTargets = secretComments
       .map((comment) => {
+        if (
+          legacyBodies[comment.id] ||
+          revealedSecretBodiesRef.current[comment.id] ||
+          inFlightRevealIdsRef.current.has(comment.id)
+        ) {
+          return null;
+        }
+
         const revealToken = readGuestSecretRevealToken(comment.id);
 
         return revealToken ? [comment.id, revealToken] : null;
       })
       .filter((entry): entry is [number, string] => entry !== null);
 
-    setRevealedSecretBodies(legacyBodies);
+    setRevealedSecretBodies((current) => {
+      const nextBodies: Record<number, string> = {};
+
+      for (const commentId of secretCommentIds) {
+        if (legacyBodies[commentId]) {
+          nextBodies[commentId] = legacyBodies[commentId];
+          continue;
+        }
+
+        if (current[commentId]) {
+          nextBodies[commentId] = current[commentId];
+        }
+      }
+
+      return nextBodies;
+    });
 
     if (revealTargets.length === 0) {
       return () => {
         isCancelled = true;
       };
+    }
+
+    for (const [commentId] of revealTargets) {
+      inFlightRevealIdsRef.current.add(commentId);
     }
 
     void Promise.all(
@@ -300,17 +336,37 @@ export function CommentList({
         }
       }),
     ).then((entries) => {
+      for (const [commentId] of revealTargets) {
+        inFlightRevealIdsRef.current.delete(commentId);
+      }
+
       if (isCancelled) {
         return;
       }
 
-      setRevealedSecretBodies({
-        ...legacyBodies,
-        ...Object.fromEntries(
-          entries.filter(
-            (entry): entry is readonly [number, string] => entry !== null,
-          ),
+      const revealedBodies = Object.fromEntries(
+        entries.filter(
+          (entry): entry is readonly [number, string] => entry !== null,
         ),
+      );
+
+      if (Object.keys(revealedBodies).length === 0) {
+        return;
+      }
+
+      setRevealedSecretBodies((current) => {
+        const nextBodies: Record<number, string> = {
+          ...current,
+          ...revealedBodies,
+        };
+
+        for (const commentId of Object.keys(nextBodies).map(Number)) {
+          if (!secretCommentIds.has(commentId)) {
+            delete nextBodies[commentId];
+          }
+        }
+
+        return nextBodies;
       });
     });
 
