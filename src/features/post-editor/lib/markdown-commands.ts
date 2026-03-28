@@ -235,19 +235,56 @@ export function insertLink(view: EditorView): void {
 }
 
 export function insertImageTemplate(view: EditorView): void {
+  insertMarkdownImage(view, "이미지 설명", "url");
+}
+
+export function insertMarkdownImage(
+  view: EditorView,
+  alt: string,
+  src: string,
+): void {
+  insertMarkdownImages(view, [{ alt, src }]);
+}
+
+export function insertMarkdownImages(
+  view: EditorView,
+  images: Array<{ alt: string; src: string }>,
+): void {
+  if (images.length === 0) {
+    view.focus();
+
+    return;
+  }
+
   const { from, to } = view.state.selection.main;
   const selected = view.state.sliceDoc(from, to);
-  const alt = selected || "이미지 설명";
+  const selectionText = selected.trim();
+  const insert = images
+    .map((image, index) => {
+      const nextAlt =
+        index === 0 && selectionText
+          ? escapeMarkdownImageAlt(selectionText)
+          : escapeMarkdownImageAlt(image.alt);
+
+      return `![${nextAlt}](${image.src})`;
+    })
+    .join("\n");
 
   view.dispatch({
-    changes: { from, to, insert: `![${alt}](url)` },
-    selection: EditorSelection.range(
-      from + alt.length + 4,
-      from + alt.length + 4 + 3,
-    ),
+    changes: { from, to, insert },
+    selection: EditorSelection.cursor(from + insert.length),
   });
 
   view.focus();
+}
+
+function escapeMarkdownImageAlt(value: string): string {
+  return value
+    .replaceAll("\\", "\\\\")
+    .replaceAll("[", "\\[")
+    .replaceAll("]", "\\]")
+    .replaceAll("(", "\\(")
+    .replaceAll(")", "\\)");
 }
 
 function wrapBold({

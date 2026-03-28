@@ -4,6 +4,7 @@ import { type KeyboardEvent, useRef, useState } from "react";
 import {
   insertCodeBlock,
   insertHorizontalRule,
+  insertMarkdownImage,
   insertImageTemplate,
   insertLink,
   insertTable,
@@ -124,9 +125,15 @@ const TOOLBAR_BUTTONS = TOOLBAR_ITEMS.filter(
 
 interface MarkdownToolbarProps {
   editorView: EditorView | null;
+  onImageButtonClick?: () => void;
+  pendingImageCount?: number;
 }
 
-export function MarkdownToolbar({ editorView }: MarkdownToolbarProps) {
+export function MarkdownToolbar({
+  editorView,
+  onImageButtonClick,
+  pendingImageCount = 0,
+}: MarkdownToolbarProps) {
   const isReady = editorView !== null;
   const items = TOOLBAR_ITEMS;
   const buttons = TOOLBAR_BUTTONS;
@@ -177,7 +184,23 @@ export function MarkdownToolbar({ editorView }: MarkdownToolbarProps) {
             tabIndex={idx === focusedIdx ? 0 : -1}
             onFocus={() => setFocusedIdx(idx)}
             onClick={() => {
-              if (editorView) item.action(editorView);
+              if (!editorView) {
+                return;
+              }
+
+              if (item.label === "이미지" && onImageButtonClick) {
+                onImageButtonClick();
+
+                return;
+              }
+
+              if (item.label === "이미지") {
+                insertMarkdownImage(editorView, "이미지 설명", "url");
+
+                return;
+              }
+
+              item.action(editorView);
             }}
             className="flex h-7 min-w-7 items-center justify-center rounded px-1.5 text-xs text-text-2 transition-colors hover:bg-background-3 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
           >
@@ -195,6 +218,10 @@ export function MarkdownToolbar({ editorView }: MarkdownToolbarProps) {
           </button>
         );
       })}
+
+      <div className="ml-auto rounded-full bg-background-3 px-2.5 py-1 text-[11px] font-medium text-text-3">
+        대기 이미지 {pendingImageCount}
+      </div>
     </div>
   );
 }
