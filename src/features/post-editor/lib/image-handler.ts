@@ -91,14 +91,28 @@ export function resolvePreviewContent(
 export function syncPendingImagesWithContent(
   contentMd: string,
   current: Map<string, PendingImage>,
-): Map<string, PendingImage> {
+): {
+  pendingImages: Map<string, PendingImage>;
+  removedImages: Map<string, PendingImage>;
+} {
   const activeIds = new Set(getPendingImageIds(contentMd));
+  const pendingImages = new Map<string, PendingImage>();
+  const removedImages = new Map<string, PendingImage>();
 
-  if (activeIds.size === 0) {
-    return current;
+  for (const [id, image] of current) {
+    if (activeIds.has(id)) {
+      pendingImages.set(id, image);
+      continue;
+    }
+
+    URL.revokeObjectURL(image.blobUrl);
+    removedImages.set(id, {
+      ...image,
+      blobUrl: "",
+    });
   }
 
-  return new Map(current);
+  return { pendingImages, removedImages };
 }
 
 export async function uploadPendingImages(

@@ -121,6 +121,8 @@ const TABS: Array<{ id: EditorTab; label: string; description: string }> = [
   },
 ];
 
+const REMOVED_PENDING_IMAGE_TTL_MS = 30_000;
+
 function createInitialValues(
   initialValues?: Partial<PostFormValues>,
 ): PostFormValues {
@@ -235,6 +237,8 @@ export function PostForm({
   );
   const previewRef = useRef<HTMLDivElement | null>(null);
   const pendingImagesRef = useRef(pendingImages);
+  const removedPendingImagesRef = useRef<Map<string, PendingImage>>(new Map());
+  const removedPendingImageTimersRef = useRef<Map<string, number>>(new Map());
 
   useEffect(() => {
     pendingImagesRef.current = pendingImages;
@@ -294,13 +298,61 @@ export function PostForm({
   }, []);
 
   useEffect(() => {
-    setPendingImages((current) =>
-      syncPendingImagesWithContent(values.contentMd, current),
-    );
+    setPendingImages((current) => {
+      const activeIds = new Set(getPendingImageIds(values.contentMd));
+      const restored = new Map(current);
+
+      activeIds.forEach((id) => {
+        if (restored.has(id)) {
+          return;
+        }
+
+        const removed = removedPendingImagesRef.current.get(id);
+
+        if (!removed) {
+          return;
+        }
+
+        const timeoutId = removedPendingImageTimersRef.current.get(id);
+
+        if (timeoutId !== undefined) {
+          window.clearTimeout(timeoutId);
+          removedPendingImageTimersRef.current.delete(id);
+        }
+
+        removedPendingImagesRef.current.delete(id);
+        restored.set(id, {
+          ...removed,
+          blobUrl: URL.createObjectURL(removed.file),
+        });
+      });
+
+      const synced = syncPendingImagesWithContent(values.contentMd, restored);
+
+      synced.removedImages.forEach((image, id) => {
+        removedPendingImagesRef.current.set(id, image);
+
+        if (removedPendingImageTimersRef.current.has(id)) {
+          window.clearTimeout(removedPendingImageTimersRef.current.get(id));
+        }
+
+        const timeoutId = window.setTimeout(() => {
+          removedPendingImagesRef.current.delete(id);
+          removedPendingImageTimersRef.current.delete(id);
+        }, REMOVED_PENDING_IMAGE_TTL_MS);
+
+        removedPendingImageTimersRef.current.set(id, timeoutId);
+      });
+
+      return synced.pendingImages;
+    });
   }, [values.contentMd]);
 
   useEffect(() => {
     return () => {
+      removedPendingImageTimersRef.current.forEach((timeoutId) => {
+        window.clearTimeout(timeoutId);
+      });
       pendingImagesRef.current.forEach((image) => {
         URL.revokeObjectURL(image.blobUrl);
       });
@@ -352,6 +404,11 @@ export function PostForm({
       pendingImagesRef.current.forEach((image) => {
         URL.revokeObjectURL(image.blobUrl);
       });
+      removedPendingImageTimersRef.current.forEach((timeoutId) => {
+        window.clearTimeout(timeoutId);
+      });
+      removedPendingImagesRef.current.clear();
+      removedPendingImageTimersRef.current.clear();
       setValues(persistedValues);
       setPendingImages(new Map());
       setIsDirty(false);
