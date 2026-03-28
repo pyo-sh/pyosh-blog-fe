@@ -5,7 +5,6 @@ import { CommentForm, type GuestCommentProfile } from "./comment-form";
 import { CommentItem } from "./comment-item";
 import {
   readGuestSecretComment,
-  readGuestSecretIdentity,
   rememberGuestSecretComment,
 } from "../lib/guest-secret-store";
 import type {
@@ -19,6 +18,7 @@ import {
   deleteComment,
   fetchCommentsClient,
 } from "@entities/comment";
+import { ApiResponseError } from "@shared/api";
 import { Modal, Spinner } from "@shared/ui/libs";
 
 const DEFAULT_COMMENTS_PER_PAGE = 10;
@@ -127,20 +127,6 @@ function countVisibleComments(comments: Comment[]): number {
     (count, comment) => count + 1 + countVisibleComments(comment.replies),
     0,
   );
-}
-
-function getGuestIdentity(profile: GuestCommentProfile): {
-  guestName: string;
-  guestEmail: string;
-} | null {
-  if (!profile.guestName.trim() || !profile.guestEmail.trim()) {
-    return null;
-  }
-
-  return {
-    guestName: profile.guestName,
-    guestEmail: profile.guestEmail,
-  };
 }
 
 function getPaginationItems(currentPage: number, totalPages: number) {
@@ -263,18 +249,10 @@ export function CommentList({
   }, [initialError]);
 
   useEffect(() => {
-    const identity = getGuestIdentity(profile) ?? readGuestSecretIdentity();
-
-    if (!identity) {
-      setRevealedSecretBodies({});
-
-      return;
-    }
-
     const nextRevealedSecretBodies = Object.fromEntries(
       collectSecretComments(comments)
         .map((comment) => {
-          const body = readGuestSecretComment(comment.id, identity);
+          const body = readGuestSecretComment(comment.id);
 
           return body ? [comment.id, body] : null;
         })
@@ -282,7 +260,7 @@ export function CommentList({
     );
 
     setRevealedSecretBodies(nextRevealedSecretBodies);
-  }, [comments, profile]);
+  }, [comments]);
 
   useEffect(() => {
     setExpandedRoots((current) => {
@@ -376,10 +354,7 @@ export function CommentList({
     const isRootComment = nextComment.parentId === null;
 
     if (payload.authorType === "guest" && nextComment.isSecret) {
-      rememberGuestSecretComment(nextComment.id, nextComment.body, {
-        guestName: payload.guestName,
-        guestEmail: payload.guestEmail,
-      });
+      rememberGuestSecretComment(nextComment.id, nextComment.body);
     }
 
     let didRefreshFail = false;
@@ -563,9 +538,17 @@ export function CommentList({
         setLoadError(null);
       }
     } catch (error) {
-      setDeleteError(
-        error instanceof Error ? error.message : "댓글을 삭제하지 못했습니다.",
-      );
+      if (error instanceof ApiResponseError && error.statusCode === 429) {
+        setDeleteError(
+          "너무 많은 요청을 보냈습니다. 잠시 후 다시 시도해 주세요.",
+        );
+      } else {
+        setDeleteError(
+          error instanceof Error
+            ? error.message
+            : "댓글을 삭제하지 못했습니다.",
+        );
+      }
     } finally {
       setDeleteBusy(false);
     }
@@ -801,7 +784,7 @@ export function CommentList({
       >
         <div className="p-6 text-left">
           <p className="text-body-xs uppercase tracking-[0.2em] text-text-4">
-            Delete comment
+            댓글 삭제
           </p>
           <h3 className="mt-3 text-body-lg font-semibold text-text-1">
             댓글 삭제
@@ -813,6 +796,15 @@ export function CommentList({
               ? "로그인된 계정으로 작성한 댓글을 삭제합니다."
               : "작성 시 사용한 비밀번호를 입력하면 댓글을 삭제할 수 있습니다."}
           </p>
+
+          {deleteTarget && deleteTarget.replies.length > 0 ? (
+            <div className="mt-4 rounded-[1rem] border border-warning-1/30 bg-warning-1/5 px-4 py-3 text-body-sm text-warning-1">
+              <p className="font-medium">대댓글이 있는 댓글입니다.</p>
+              <p className="mt-1">
+                삭제 후에도 대댓글 {deleteTarget.replies.length}개는 유지됩니다.
+              </p>
+            </div>
+          ) : null}
 
           {deleteTarget?.author.type === "oauth" &&
           viewer.type === "oauth" &&

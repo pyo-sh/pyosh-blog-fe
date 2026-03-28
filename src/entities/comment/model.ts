@@ -37,7 +37,7 @@ export interface CreateCommentGuestBody {
   replyToCommentId?: number;
   isSecret?: boolean;
   guestName: string;
-  guestEmail: string;
+  guestEmail?: string;
   guestPassword: string;
 }
 
