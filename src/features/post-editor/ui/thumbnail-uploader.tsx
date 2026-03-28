@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { uploadAssets } from "@entities/asset";
+import { AssetPickerModal, uploadAssets } from "@entities/asset";
 import { cn } from "@shared/lib/style-utils";
 import { Spinner } from "@shared/ui/libs";
 
@@ -34,6 +34,7 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
   const [urlDraft, setUrlDraft] = useState(value);
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
 
   useEffect(() => {
     setUrlDraft(value);
@@ -134,9 +135,12 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
-          disabled
-          title="준비 중"
-          className="rounded-[0.8rem] border border-border-3 px-3 py-2 text-xs font-medium text-text-4 opacity-60"
+          onClick={() => {
+            setIsAwaitingPaste(false);
+            setIsPickerOpen(true);
+          }}
+          disabled={isUploading}
+          className="rounded-[0.8rem] border border-border-3 px-3 py-2 text-xs font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-60"
         >
           에셋 갤러리
         </button>
@@ -274,6 +278,18 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
             void uploadFile(file);
           }
           event.target.value = "";
+        }}
+      />
+
+      <AssetPickerModal
+        isOpen={isPickerOpen}
+        onClose={() => setIsPickerOpen(false)}
+        onSelect={(url) => {
+          onChange(url);
+          setPendingFile(null);
+          setIsAwaitingPaste(false);
+          setIsPickerOpen(false);
+          toast.success("에셋 갤러리에서 썸네일을 선택했습니다.");
         }}
       />
     </div>
