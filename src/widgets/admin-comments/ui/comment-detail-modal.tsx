@@ -190,6 +190,7 @@ export function CommentDetailModal({
       isOpen={isOpen}
       onClose={onClose}
       withBackground
+      aria-label={mode === "thread" ? "댓글 스레드 보기" : "댓글 상세 보기"}
       className="w-full max-w-xl overflow-hidden rounded-[1.5rem] border border-border-3 bg-background-2"
     >
       <div className="relative flex max-h-[85vh] flex-col">
@@ -266,7 +267,7 @@ function DetailView({
 }: DetailViewProps) {
   const isReply = comment.depth > 0;
   const actionButtons =
-    comment.status === "deleted"
+    comment.status === "deleted" || comment.status === "hidden"
       ? [
           {
             value: "restore" as const,

@@ -74,6 +74,7 @@ export function GuestbookActionModal({
       isOpen={isOpen}
       onClose={handleClose}
       withBackground
+      aria-label={title}
       className="w-full max-w-[34rem]"
     >
       <div className="flex flex-col gap-5 p-6 text-left">

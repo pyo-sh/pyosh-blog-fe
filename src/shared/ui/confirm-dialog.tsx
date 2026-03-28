@@ -26,7 +26,7 @@ export function ConfirmDialog({
   isPending,
 }: ConfirmDialogProps) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} withBackground>
+    <Modal isOpen={isOpen} onClose={onClose} withBackground aria-label={title}>
       <div className="flex flex-col gap-5 p-6 text-left">
         <h2 className="text-base font-semibold text-text-1">{title}</h2>
 

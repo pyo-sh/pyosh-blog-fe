@@ -58,6 +58,7 @@ export function AssetPickerModal({
       isOpen={isOpen}
       onClose={onClose}
       withBackground
+      aria-label="에셋 선택"
       className="w-[min(94vw,72rem)] p-0 text-left"
     >
       <div className="flex h-[min(88vh,56rem)] flex-col overflow-hidden rounded-[1.5rem] bg-background-1">

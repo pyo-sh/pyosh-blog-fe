@@ -472,6 +472,7 @@ function DeleteAssetsModal({
       isOpen={ids.length > 0}
       onClose={onCancel}
       withBackground
+      aria-label={ids.length === 1 ? "에셋 삭제 확인" : "에셋 일괄 삭제 확인"}
       className="w-[min(100%,30rem)] p-0 text-left"
     >
       <div className="border-b border-border-3 px-6 py-5">

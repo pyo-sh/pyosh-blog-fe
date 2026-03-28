@@ -75,6 +75,7 @@ export function AssetDetailModal({
       isOpen={Boolean(asset)}
       onClose={onClose}
       withBackground
+      aria-label="에셋 상세 보기"
       className="w-[min(94vw,72rem)] p-0 text-left"
     >
       <div className="flex max-h-[90vh] flex-col overflow-hidden rounded-[1.5rem] bg-background-1">
