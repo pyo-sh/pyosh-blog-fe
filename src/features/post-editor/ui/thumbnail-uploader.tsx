@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { uploadAssets } from "@entities/asset";
-import { AssetPickerModal } from "@features/asset-uploader";
+import { AssetPickerModal, uploadAssets } from "@entities/asset";
 import { cn } from "@shared/lib/style-utils";
 import { Spinner } from "@shared/ui/libs";
 
