@@ -174,7 +174,7 @@ export async function uploadPendingImages(
         continue;
       }
 
-      nextContent = nextContent.replace(
+      nextContent = nextContent.replaceAll(
         `${PENDING_IMAGE_PREFIX}${image.id}`,
         resolved.uploadedUrl,
       );

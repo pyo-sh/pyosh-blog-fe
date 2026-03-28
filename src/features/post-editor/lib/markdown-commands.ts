@@ -245,7 +245,7 @@ export function insertMarkdownImage(
 ): void {
   const { from, to } = view.state.selection.main;
   const selected = view.state.sliceDoc(from, to);
-  const nextAlt = selected || alt;
+  const nextAlt = escapeMarkdownImageAlt(selected || alt);
 
   view.dispatch({
     changes: { from, to, insert: `![${nextAlt}](${src})` },
@@ -256,6 +256,15 @@ export function insertMarkdownImage(
   });
 
   view.focus();
+}
+
+function escapeMarkdownImageAlt(value: string): string {
+  return value
+    .replaceAll("\\", "\\\\")
+    .replaceAll("[", "\\[")
+    .replaceAll("]", "\\]")
+    .replaceAll("(", "\\(")
+    .replaceAll(")", "\\)");
 }
 
 function wrapBold({
