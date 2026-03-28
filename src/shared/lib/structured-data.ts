@@ -1,8 +1,11 @@
 import { URLS } from "@shared/constant/url";
+import {
+  buildAbsoluteUrl,
+  getPostDescription,
+  getSiteName,
+} from "@shared/lib/seo";
 
-const FALLBACK_SITE_URL = "http://localhost:3000";
-const BLOG_NAME = "Pyosh Blog";
-const DESCRIPTION_LIMIT = 160;
+export { getPostDescription, getSiteUrl } from "@shared/lib/seo";
 
 interface StructuredDataBase {
   "@context": "https://schema.org";
@@ -85,41 +88,13 @@ interface StructuredDataPost {
   category: StructuredDataCategory;
 }
 
-export function getSiteUrl(): string | null {
-  const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-
-  if (!configuredSiteUrl) {
-    return process.env.NODE_ENV === "development" ? FALLBACK_SITE_URL : null;
-  }
-
-  const value = configuredSiteUrl;
-
-  return value.endsWith("/") ? value.slice(0, -1) : value;
-}
-
-export function getPostDescription(
-  post: Pick<StructuredDataPost, "summary" | "description" | "contentMd">,
-) {
-  const plainText = (
-    post.description?.trim() ||
-    post.summary?.trim() ||
-    stripMarkdown(post.contentMd)
-  ).trim();
-
-  if (plainText.length <= DESCRIPTION_LIMIT) {
-    return plainText;
-  }
-
-  return `${plainText.slice(0, DESCRIPTION_LIMIT).trimEnd()}...`;
-}
-
 export function buildWebSiteJsonLd(siteUrl: string): WebSiteJsonLd {
   const normalizedSiteUrl = normalizeBaseUrl(siteUrl);
 
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: BLOG_NAME,
+    name: getSiteName(),
     url: `${normalizedSiteUrl}/`,
     potentialAction: {
       "@type": "SearchAction",
@@ -141,7 +116,7 @@ export function buildBlogPostingJsonLd(
   const modifiedAt = post.contentModifiedAt ?? publishedAt;
   const keywords = post.tags.map((tag) => tag.name).filter(Boolean);
   const image = post.thumbnailUrl
-    ? buildAbsoluteUrl(post.thumbnailUrl, normalizedSiteUrl)
+    ? (buildAbsoluteUrl(post.thumbnailUrl) ?? undefined)
     : undefined;
 
   return {
@@ -177,7 +152,10 @@ export function buildBreadcrumbJsonLd(
       position: index + 1,
       name: item.name,
       ...(item.href
-        ? { item: buildAbsoluteUrl(item.href, normalizedSiteUrl) }
+        ? {
+            item:
+              buildAbsoluteUrl(item.href) ?? `${normalizedSiteUrl}${item.href}`,
+          }
         : {}),
     })),
   };
@@ -185,31 +163,4 @@ export function buildBreadcrumbJsonLd(
 
 function normalizeBaseUrl(siteUrl: string) {
   return siteUrl.endsWith("/") ? siteUrl.slice(0, -1) : siteUrl;
-}
-
-function buildAbsoluteUrl(pathOrUrl: string, siteUrl: string) {
-  if (/^https?:\/\//.test(pathOrUrl)) {
-    return pathOrUrl;
-  }
-
-  const normalizedPath = pathOrUrl.startsWith("/")
-    ? pathOrUrl
-    : `/${pathOrUrl}`;
-
-  return `${siteUrl}${normalizedPath}`;
-}
-
-function stripMarkdown(contentMd: string) {
-  return contentMd
-    .replace(/```[\s\S]*?```/g, " ")
-    .replace(/`([^`]+)`/g, "$1")
-    .replace(/!\[([^\]]*)\]\([^)]+\)/g, "$1")
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-    .replace(/^#{1,6}\s+/gm, "")
-    .replace(/^\s*[-*+]\s+/gm, "")
-    .replace(/^\s*\d+\.\s+/gm, "")
-    .replace(/[>*_~]/g, "")
-    .replace(/\n+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
 }
