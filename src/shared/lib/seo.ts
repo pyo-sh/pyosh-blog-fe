@@ -26,7 +26,7 @@ export function getSiteUrl() {
   const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
 
   if (!configuredSiteUrl) {
-    return FALLBACK_SITE_URL;
+    return process.env.NODE_ENV === "development" ? FALLBACK_SITE_URL : null;
   }
 
   return configuredSiteUrl.endsWith("/")
@@ -35,7 +35,9 @@ export function getSiteUrl() {
 }
 
 export function getMetadataBase() {
-  return new URL(getSiteUrl());
+  const siteUrl = getSiteUrl();
+
+  return siteUrl ? new URL(siteUrl) : undefined;
 }
 
 export function extractPlainText(
@@ -127,9 +129,15 @@ export function buildAbsoluteUrl(pathOrUrl: string) {
     return pathOrUrl;
   }
 
+  const siteUrl = getSiteUrl();
+
+  if (!siteUrl) {
+    return null;
+  }
+
   const normalizedPath = pathOrUrl.startsWith("/")
     ? pathOrUrl
     : `/${pathOrUrl}`;
 
-  return `${getSiteUrl()}${normalizedPath}`;
+  return `${siteUrl}${normalizedPath}`;
 }

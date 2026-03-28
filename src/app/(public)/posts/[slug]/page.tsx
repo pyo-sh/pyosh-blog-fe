@@ -21,7 +21,7 @@ import {
 } from "@features/post-detail";
 import { ApiResponseError } from "@shared/api";
 import { extractHeadings, type TocItem } from "@shared/lib/markdown";
-import { buildCanonicalMetadata, buildAbsoluteUrl } from "@shared/lib/seo";
+import { buildCanonicalMetadata } from "@shared/lib/seo";
 import {
   buildBlogPostingJsonLd,
   buildBreadcrumbJsonLd,
@@ -119,9 +119,7 @@ export async function generateMetadata({
       publishedTime: post.publishedAt ?? undefined,
       modifiedTime: post.contentModifiedAt ?? post.publishedAt ?? undefined,
       tags: post.tags.map((tag) => tag.name),
-      ...(post.thumbnailUrl
-        ? { images: [buildAbsoluteUrl(post.thumbnailUrl)] }
-        : {}),
+      ...(post.thumbnailUrl ? { images: [post.thumbnailUrl] } : {}),
     },
     twitter: {
       card: post.thumbnailUrl ? "summary_large_image" : "summary",
@@ -203,7 +201,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
           <JsonLd data={buildBlogPostingJsonLd(post, siteUrl)} />
         ) : null}
         {siteUrl ? (
-          <JsonLd data={buildBreadcrumbJsonLd(breadcrumbItems)} />
+          <JsonLd data={buildBreadcrumbJsonLd(breadcrumbItems, siteUrl)} />
         ) : null}
         <ViewCounter postId={post.id} />
         <article className="overflow-hidden rounded-[2rem] border border-border-3 bg-background-2">

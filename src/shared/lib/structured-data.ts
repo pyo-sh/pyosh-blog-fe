@@ -116,7 +116,7 @@ export function buildBlogPostingJsonLd(
   const modifiedAt = post.contentModifiedAt ?? publishedAt;
   const keywords = post.tags.map((tag) => tag.name).filter(Boolean);
   const image = post.thumbnailUrl
-    ? buildAbsoluteUrl(post.thumbnailUrl)
+    ? (buildAbsoluteUrl(post.thumbnailUrl) ?? undefined)
     : undefined;
 
   return {
@@ -140,7 +140,10 @@ export function buildBlogPostingJsonLd(
 
 export function buildBreadcrumbJsonLd(
   items: BreadcrumbItem[],
+  siteUrl: string,
 ): BreadcrumbJsonLd {
+  const normalizedSiteUrl = normalizeBaseUrl(siteUrl);
+
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -148,7 +151,12 @@ export function buildBreadcrumbJsonLd(
       "@type": "ListItem",
       position: index + 1,
       name: item.name,
-      ...(item.href ? { item: buildAbsoluteUrl(item.href) } : {}),
+      ...(item.href
+        ? {
+            item:
+              buildAbsoluteUrl(item.href) ?? `${normalizedSiteUrl}${item.href}`,
+          }
+        : {}),
     })),
   };
 }
