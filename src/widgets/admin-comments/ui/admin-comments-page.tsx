@@ -2,6 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import {
+  CommentDeleteModal,
+  type CommentManageAction,
+} from "./comment-delete-modal";
 import { CommentDetailModal } from "./comment-detail-modal";
 import { CommentFilters } from "./comment-filters";
 import { CommentTable } from "./comment-table";
@@ -10,7 +15,10 @@ import type {
   CommentAuthorTypeFilter,
 } from "./comment-filters";
 import {
+  adminBulkOperateComments,
   adminDeleteComment,
+  adminRestoreComment,
+  fetchAdminCommentThread,
   fetchAdminComments,
   type AdminCommentItem,
 } from "@entities/comment";
@@ -28,6 +36,28 @@ interface FilterState {
   endDate: string | undefined;
 }
 
+type SelectedCommentMap = Record<number, AdminCommentItem>;
+type ActionContext =
+  | {
+      type: "single";
+      item: AdminCommentItem;
+      defaultAction?: CommentManageAction;
+    }
+  | {
+      type: "bulk";
+      items: AdminCommentItem[];
+      defaultAction?: CommentManageAction;
+    }
+  | null;
+
+function getAllowedActionsForStatus(status: AdminCommentItem["status"]) {
+  if (status === "deleted") {
+    return ["restore", "hard_delete"] as const;
+  }
+
+  return ["soft_delete", "hard_delete"] as const;
+}
+
 export function AdminCommentsPage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
@@ -40,9 +70,13 @@ export function AdminCommentsPage() {
     endDate: undefined,
   });
   const [dateError, setDateError] = useState<string | undefined>(undefined);
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [selectedItems, setSelectedItems] = useState<SelectedCommentMap>({});
   const [openedComment, setOpenedComment] = useState<AdminCommentItem | null>(
     null,
+  );
+  const [actionContext, setActionContext] = useState<ActionContext>(null);
+  const [cascadeCount, setCascadeCount] = useState<number | undefined>(
+    undefined,
   );
 
   const queryParams = useMemo(
@@ -71,25 +105,83 @@ export function AdminCommentsPage() {
   const rows = data?.data ?? [];
   const meta = data?.meta;
 
-  const deleteMutation = useMutation({
-    mutationFn: adminDeleteComment,
-    onSuccess: async (_, deletedId) => {
+  useEffect(() => {
+    setSelectedItems((current) => {
+      const next = { ...current };
+
+      for (const row of rows) {
+        if (next[row.id]) {
+          next[row.id] = row;
+        }
+      }
+
+      return next;
+    });
+  }, [rows]);
+
+  const actionMutation = useMutation({
+    mutationFn: async (payload: {
+      action: CommentManageAction;
+      items: AdminCommentItem[];
+    }) => {
+      if (payload.items.length === 1) {
+        const [item] = payload.items;
+
+        if (payload.action === "restore") {
+          await adminRestoreComment(item.id);
+        } else {
+          await adminDeleteComment(item.id, payload.action);
+        }
+
+        return;
+      }
+
+      await adminBulkOperateComments(
+        payload.items.map((item) => item.id),
+        payload.action,
+      );
+    },
+    onSuccess: async (_data, variables) => {
       setActionError(null);
-      setSelectedIds((prev) => {
-        const next = new Set(prev);
-        next.delete(deletedId);
+      setSelectedItems((current) => {
+        const next = { ...current };
+        for (const item of variables.items) {
+          delete next[item.id];
+        }
 
         return next;
       });
+      if (
+        openedComment &&
+        variables.items.some((item) => item.id === openedComment.id)
+      ) {
+        setOpenedComment(null);
+      }
+      setActionContext(null);
+      setCascadeCount(undefined);
       setPage((currentPage) =>
         currentPage > 1 && rows.length === 1 ? currentPage - 1 : currentPage,
       );
       await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      const actionLabel =
+        variables.action === "restore"
+          ? "복원"
+          : variables.action === "hard_delete"
+            ? "영구 삭제"
+            : "삭제";
+      toast.success(
+        variables.items.length > 1
+          ? `${variables.items.length}개 댓글을 ${actionLabel}했습니다.`
+          : `댓글을 ${actionLabel}했습니다.`,
+      );
     },
     onError: (mutationError) => {
-      setActionError(
-        getErrorMessage(mutationError, "댓글 삭제에 실패했습니다."),
+      const message = getErrorMessage(
+        mutationError,
+        "댓글 처리에 실패했습니다.",
       );
+      setActionError(message);
+      toast.error(message);
     },
   });
 
@@ -127,14 +219,14 @@ export function AdminCommentsPage() {
     handleFilterChange({ startDate: start, endDate: end });
   }
 
-  function handleToggleSelect(id: number) {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
+  function handleToggleSelect(item: AdminCommentItem) {
+    setSelectedItems((current) => {
+      const next = { ...current };
 
-      if (next.has(id)) {
-        next.delete(id);
+      if (next[item.id]) {
+        delete next[item.id];
       } else {
-        next.add(id);
+        next[item.id] = item;
       }
 
       return next;
@@ -143,44 +235,124 @@ export function AdminCommentsPage() {
 
   const handleToggleSelectPage = useCallback(
     (ids: number[]) => {
-      const allSelected = ids.every((id) => selectedIds.has(id));
-
-      setSelectedIds((prev) => {
-        const next = new Set(prev);
+      setSelectedItems((current) => {
+        const next = { ...current };
+        const allSelected = ids.every((id) => next[id] !== undefined);
 
         if (allSelected) {
-          ids.forEach((id) => next.delete(id));
+          ids.forEach((id) => {
+            delete next[id];
+          });
         } else {
-          ids.forEach((id) => next.add(id));
+          rows.forEach((row) => {
+            if (ids.includes(row.id)) {
+              next[row.id] = row;
+            }
+          });
         }
 
         return next;
       });
     },
-    [selectedIds],
+    [rows],
   );
 
   const currentPageIds = rows.map((r) => r.id);
+  const selectedIds = Object.keys(selectedItems).map(Number);
+  const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds]);
   const selectedOnCurrentPage = currentPageIds.filter((id) =>
-    selectedIds.has(id),
+    selectedIdSet.has(id),
   ).length;
-  const selectedOnOtherPages = selectedIds.size - selectedOnCurrentPage;
+  const selectedOnOtherPages = selectedIds.length - selectedOnCurrentPage;
+  const selectedList = Object.values(selectedItems);
 
   function handleClearSelection() {
-    setSelectedIds(new Set());
+    setSelectedItems({});
   }
 
-  const handleDeleteComment = useCallback(
-    (id: number) => {
+  const handleOpenActionModal = useCallback(
+    (item: AdminCommentItem, defaultAction?: CommentManageAction) => {
       setActionError(null);
-      deleteMutation.mutate(id);
+      setActionContext({ type: "single", item, defaultAction });
+      setCascadeCount(undefined);
     },
-    [deleteMutation.mutate],
+    [],
+  );
+
+  const handleOpenBulkAction = useCallback(
+    (defaultAction: CommentManageAction) => {
+      if (selectedList.length === 0) {
+        return;
+      }
+
+      setActionError(null);
+      setActionContext({ type: "bulk", items: selectedList, defaultAction });
+      setCascadeCount(undefined);
+    },
+    [selectedList],
   );
 
   const handleCloseModal = useCallback(() => {
     setOpenedComment(null);
   }, []);
+
+  const handleCloseActionModal = useCallback(() => {
+    if (actionMutation.isPending) {
+      return;
+    }
+
+    setActionContext(null);
+    setCascadeCount(undefined);
+  }, [actionMutation.isPending]);
+
+  useEffect(() => {
+    async function loadCascade() {
+      if (!actionContext || actionContext.type !== "single") {
+        setCascadeCount(undefined);
+
+        return;
+      }
+
+      if (actionContext.item.depth > 0) {
+        setCascadeCount(0);
+
+        return;
+      }
+
+      try {
+        const thread = await fetchAdminCommentThread(actionContext.item.id);
+        const nextCascadeCount = thread.filter(
+          (item) => item.parentId === actionContext.item.id,
+        ).length;
+        setCascadeCount(nextCascadeCount);
+      } catch {
+        setCascadeCount(undefined);
+      }
+    }
+
+    void loadCascade();
+  }, [actionContext]);
+
+  const actionModalTitle =
+    actionContext?.type === "bulk" ? "일괄 삭제" : "댓글 삭제";
+  const actionModalDescription =
+    actionContext?.type === "bulk"
+      ? `${actionContext.items.length}개 댓글을 처리합니다.`
+      : "삭제 방식을 선택하세요.";
+  const actionModalCount =
+    actionContext?.type === "bulk" ? actionContext.items.length : 1;
+  const actionModalActions =
+    actionContext?.type === "bulk"
+      ? (["restore", "soft_delete", "hard_delete"] as const)
+      : actionContext
+        ? getAllowedActionsForStatus(actionContext.item.status)
+        : [];
+  const actionItems =
+    actionContext?.type === "bulk"
+      ? actionContext.items
+      : actionContext
+        ? [actionContext.item]
+        : [];
 
   return (
     <div className="space-y-6">
@@ -219,10 +391,10 @@ export function AdminCommentsPage() {
         </div>
 
         {/* Bulk selection bar */}
-        {selectedIds.size > 0 ? (
+        {selectedIds.length > 0 ? (
           <div className="mb-4 flex flex-wrap items-center gap-3 rounded-[1rem] border border-primary-1/20 bg-primary-1/5 px-4 py-3">
             <span className="text-sm font-medium text-text-1">
-              선택됨 {selectedIds.size}개
+              선택됨 {selectedIds.length}개
               {selectedOnOtherPages > 0 ? (
                 <span className="ml-1 text-text-3">
                   (다른 페이지 {selectedOnOtherPages}개 포함)
@@ -231,10 +403,19 @@ export function AdminCommentsPage() {
             </span>
             <button
               type="button"
-              onClick={() => handleToggleSelectPage(currentPageIds)}
+              onClick={() => {
+                setSelectedItems((current) => {
+                  const next = { ...current };
+                  rows.forEach((row) => {
+                    next[row.id] = row;
+                  });
+
+                  return next;
+                });
+              }}
               className="rounded-[0.6rem] border border-border-3 px-3 py-1.5 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
             >
-              현재 페이지 전체 선택
+              전체 선택
             </button>
             <button
               type="button"
@@ -242,6 +423,27 @@ export function AdminCommentsPage() {
               className="rounded-[0.6rem] px-3 py-1.5 text-sm text-text-4 transition-colors hover:text-text-2"
             >
               전체 해제
+            </button>
+            <button
+              type="button"
+              onClick={() => handleOpenBulkAction("restore")}
+              className="rounded-[0.6rem] border border-border-3 px-3 py-1.5 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+            >
+              복원
+            </button>
+            <button
+              type="button"
+              onClick={() => handleOpenBulkAction("soft_delete")}
+              className="rounded-[0.6rem] border border-border-3 px-3 py-1.5 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+            >
+              소프트 삭제
+            </button>
+            <button
+              type="button"
+              onClick={() => handleOpenBulkAction("hard_delete")}
+              className="rounded-[0.6rem] border border-negative-1/30 px-3 py-1.5 text-sm text-negative-1 transition-colors hover:bg-negative-1/10"
+            >
+              영구 삭제
             </button>
           </div>
         ) : null}
@@ -311,14 +513,16 @@ export function AdminCommentsPage() {
           rows.length > 0 ? (
             <CommentTable
               rows={rows}
-              selectedIds={selectedIds}
+              selectedIds={selectedIdSet}
               deletingId={
-                deleteMutation.isPending ? deleteMutation.variables : null
+                actionMutation.isPending && actionItems.length === 1
+                  ? (actionItems[0]?.id ?? null)
+                  : null
               }
               onToggleSelect={handleToggleSelect}
               onToggleSelectPage={handleToggleSelectPage}
               onClickComment={setOpenedComment}
-              onDelete={handleDeleteComment}
+              onManage={handleOpenActionModal}
             />
           ) : (
             <EmptyState message="현재 등록된 댓글이 없습니다." />
@@ -364,7 +568,37 @@ export function AdminCommentsPage() {
       <CommentDetailModal
         comment={openedComment}
         isOpen={openedComment !== null}
+        isActionPending={
+          actionMutation.isPending &&
+          actionItems.length === 1 &&
+          actionItems[0]?.id === openedComment?.id
+        }
         onClose={handleCloseModal}
+        onSelectAction={(comment, action) =>
+          handleOpenActionModal(comment, action)
+        }
+      />
+
+      <CommentDeleteModal
+        isOpen={actionContext !== null}
+        title={actionModalTitle}
+        description={actionModalDescription}
+        count={actionModalCount}
+        cascadeCount={cascadeCount}
+        allowedActions={[...actionModalActions]}
+        defaultAction={actionContext?.defaultAction}
+        isPending={actionMutation.isPending}
+        onClose={handleCloseActionModal}
+        onConfirm={async (action) => {
+          if (actionItems.length === 0) {
+            return;
+          }
+
+          await actionMutation.mutateAsync({
+            action,
+            items: actionItems,
+          });
+        }}
       />
     </div>
   );

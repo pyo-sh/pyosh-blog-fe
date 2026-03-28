@@ -152,7 +152,7 @@ export function RecentCommentsSection() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: adminDeleteComment,
+    mutationFn: (id: number) => adminDeleteComment(id),
     onMutate: () => {
       setDeleteError(null);
     },
