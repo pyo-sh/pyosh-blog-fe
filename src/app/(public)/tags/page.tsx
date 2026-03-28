@@ -1,8 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { fetchTags } from "@entities/tag";
+import { buildCanonicalMetadata } from "@shared/lib/seo";
 import { EmptyState, ScrollToTop } from "@shared/ui/libs";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "태그 목록",
+  description: "모든 태그 목록",
+  ...buildCanonicalMetadata("/tags"),
+};
 
 export default async function TagsPage() {
   const tags = await fetchTags();

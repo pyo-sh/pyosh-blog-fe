@@ -1,9 +1,11 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { fetchMeServer } from "@entities/auth";
 import { fetchGuestbook, fetchGuestbookSettings } from "@entities/guestbook";
 import { GuestbookPageContent } from "@features/guestbook-form";
 import { ApiResponseError } from "@shared/api";
+import { buildCanonicalMetadata } from "@shared/lib/seo";
 import { EmptyState } from "@shared/ui/libs";
 
 export const dynamic = "force-dynamic";
@@ -36,6 +38,18 @@ function parsePage(value?: string): number {
   }
 
   return page;
+}
+
+export function generateMetadata({
+  searchParams,
+}: GuestbookPageProps): Metadata {
+  const page = parsePage(getSingleValue(searchParams?.page));
+
+  return {
+    title: "방명록",
+    description: "방명록",
+    ...buildCanonicalMetadata("/guestbook", { page }),
+  };
 }
 
 async function toCookieHeader() {

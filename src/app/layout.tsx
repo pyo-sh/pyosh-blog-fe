@@ -2,10 +2,35 @@ import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
 import "@app-layer/style/index.css";
 import Providers from "@app-layer/provider";
+import {
+  getMetadataBase,
+  getSiteDescription,
+  getSiteName,
+} from "@shared/lib/seo";
 import { ErrorBoundaryWithReset } from "@shared/ui/error-boundary";
 
 export const metadata: Metadata = {
-  title: "Pyosh Blog",
+  metadataBase: getMetadataBase(),
+  title: {
+    default: getSiteName(),
+    template: `%s | ${getSiteName()}`,
+  },
+  description: getSiteDescription(),
+  openGraph: {
+    type: "website",
+    siteName: getSiteName(),
+    locale: "ko_KR",
+    title: getSiteName(),
+    description: getSiteDescription(),
+  },
+  twitter: {
+    card: "summary",
+  },
+  alternates: {
+    types: {
+      "application/rss+xml": "/rss.xml",
+    },
+  },
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },

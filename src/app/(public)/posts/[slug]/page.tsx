@@ -1,3 +1,5 @@
+import { cache } from "react";
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
@@ -19,9 +21,11 @@ import {
 } from "@features/post-detail";
 import { ApiResponseError } from "@shared/api";
 import { extractHeadings, type TocItem } from "@shared/lib/markdown";
+import { buildCanonicalMetadata, buildAbsoluteUrl } from "@shared/lib/seo";
 import {
   buildBlogPostingJsonLd,
   buildBreadcrumbJsonLd,
+  getPostDescription,
   getSiteUrl,
 } from "@shared/lib/structured-data";
 import { JsonLd } from "@shared/ui/json-ld";
@@ -37,6 +41,18 @@ interface CurrentViewer {
   type: "guest" | "oauth";
   id?: number;
 }
+
+const getPostDetail = cache(async (slug: string) => {
+  try {
+    return await fetchPostBySlug(slug);
+  } catch (error) {
+    if (error instanceof ApiResponseError && error.statusCode === 404) {
+      notFound();
+    }
+
+    throw error;
+  }
+});
 
 const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
   year: "numeric",
@@ -84,9 +100,38 @@ async function getCurrentViewer(): Promise<CurrentViewer> {
   return { type: "guest" };
 }
 
+export async function generateMetadata({
+  params,
+}: PostDetailPageProps): Promise<Metadata> {
+  const { post } = await getPostDetail(params.slug);
+  const description = getPostDescription(post);
+  const canonical = `/posts/${post.slug}`;
+
+  return {
+    title: post.title,
+    ...(description ? { description } : {}),
+    ...buildCanonicalMetadata(canonical),
+    openGraph: {
+      url: canonical,
+      type: "article",
+      title: post.title,
+      ...(description ? { description } : {}),
+      publishedTime: post.publishedAt ?? undefined,
+      modifiedTime: post.contentModifiedAt ?? post.publishedAt ?? undefined,
+      tags: post.tags.map((tag) => tag.name),
+      ...(post.thumbnailUrl
+        ? { images: [buildAbsoluteUrl(post.thumbnailUrl)] }
+        : {}),
+    },
+    twitter: {
+      card: post.thumbnailUrl ? "summary_large_image" : "summary",
+    },
+  };
+}
+
 export default async function PostDetailPage({ params }: PostDetailPageProps) {
   try {
-    const { post, prevPost, nextPost } = await fetchPostBySlug(params.slug);
+    const { post, prevPost, nextPost } = await getPostDetail(params.slug);
     const headings = extractHeadings(post.contentMd);
     let comments: Comment[] = [];
     let commentMeta: CommentListMeta = {
@@ -158,7 +203,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
           <JsonLd data={buildBlogPostingJsonLd(post, siteUrl)} />
         ) : null}
         {siteUrl ? (
-          <JsonLd data={buildBreadcrumbJsonLd(breadcrumbItems, siteUrl)} />
+          <JsonLd data={buildBreadcrumbJsonLd(breadcrumbItems)} />
         ) : null}
         <ViewCounter postId={post.id} />
         <article className="overflow-hidden rounded-[2rem] border border-border-3 bg-background-2">

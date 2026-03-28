@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { cache } from "react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -8,6 +10,7 @@ import {
 } from "@entities/category";
 import { fetchPosts } from "@entities/post";
 import { PostListItem } from "@features/post-list";
+import { buildCanonicalMetadata } from "@shared/lib/seo";
 import { buildBreadcrumbJsonLd, getSiteUrl } from "@shared/lib/structured-data";
 import { JsonLd } from "@shared/ui/json-ld";
 import { EmptyState, Pagination, ScrollToTop } from "@shared/ui/libs";
@@ -47,19 +50,52 @@ function isOutOfRangePage(page: number, totalPages: number) {
   return page > totalPages;
 }
 
+const getCategoryPageData = cache(async (slug: string, page: number) => {
+  const categories = await fetchCategories();
+  const activeCategory = findCategoryBySlug(categories, slug);
+
+  if (!activeCategory || !activeCategory.isVisible) {
+    notFound();
+  }
+
+  const response = await fetchPosts({ categoryId: activeCategory.id, page });
+
+  if (isOutOfRangePage(page, response.meta.totalPages)) {
+    notFound();
+  }
+
+  return {
+    categories,
+    activeCategory,
+    response,
+  };
+});
+
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+  searchParams,
+}: CategoryPageProps): Promise<Metadata> {
+  const page = parsePage(getSingleValue(searchParams?.page));
+  const { activeCategory } = await getCategoryPageData(params.slug, page);
+
+  return {
+    title: `${activeCategory.name} - 글 목록`,
+    description: `${activeCategory.name} 카테고리의 글 목록`,
+    ...buildCanonicalMetadata(`/categories/${activeCategory.slug}`, { page }),
+  };
+}
 
 export default async function CategoryPage({
   params,
   searchParams,
 }: CategoryPageProps) {
   const page = parsePage(getSingleValue(searchParams?.page));
-  const categories = await fetchCategories();
-  const activeCategory = findCategoryBySlug(categories, params.slug);
-
-  if (!activeCategory || !activeCategory.isVisible) {
-    notFound();
-  }
+  const { categories, activeCategory, response } = await getCategoryPageData(
+    params.slug,
+    page,
+  );
 
   const ancestors = getCategoryAncestors(categories, activeCategory.id);
   const siteUrl = getSiteUrl();
@@ -71,19 +107,13 @@ export default async function CategoryPage({
     })),
     { name: activeCategory.name },
   ];
-
-  const response = await fetchPosts({ categoryId: activeCategory.id, page });
   const posts = response.data;
   const { meta } = response;
-
-  if (isOutOfRangePage(page, meta.totalPages)) {
-    notFound();
-  }
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col gap-8 px-4 py-12 md:px-6">
       {siteUrl ? (
-        <JsonLd data={buildBreadcrumbJsonLd(breadcrumbItems, siteUrl)} />
+        <JsonLd data={buildBreadcrumbJsonLd(breadcrumbItems)} />
       ) : null}
       <header className="rounded-[2rem] border border-border-3 bg-background-2 p-8 md:p-10">
         <p className="text-body-xs uppercase tracking-[0.24em] text-text-4">
