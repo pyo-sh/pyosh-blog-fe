@@ -412,6 +412,8 @@ export function CommentList({
       payload,
     );
     const isRootComment = nextComment.parentId === null;
+    const missingRevealToken =
+      payload.authorType === "guest" && nextComment.isSecret && !revealToken;
 
     if (payload.authorType === "guest" && nextComment.isSecret && revealToken) {
       rememberGuestSecretRevealToken(nextComment.id, revealToken);
@@ -463,7 +465,11 @@ export function CommentList({
     }
 
     if (!didRefreshFail) {
-      setLoadError(null);
+      setLoadError(
+        missingRevealToken
+          ? "비밀 댓글이 작성되었지만 복원 토큰을 받지 못했습니다. 새로고침 후에는 원문을 다시 열 수 없을 수 있습니다."
+          : null,
+      );
     }
     setReplyTarget(null);
   }
