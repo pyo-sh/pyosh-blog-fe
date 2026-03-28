@@ -93,18 +93,12 @@ export function syncPendingImagesWithContent(
   current: Map<string, PendingImage>,
 ): Map<string, PendingImage> {
   const activeIds = new Set(getPendingImageIds(contentMd));
-  const next = new Map<string, PendingImage>();
 
-  for (const [id, image] of current) {
-    if (activeIds.has(id)) {
-      next.set(id, image);
-      continue;
-    }
-
-    URL.revokeObjectURL(image.blobUrl);
+  if (activeIds.size === 0) {
+    return current;
   }
 
-  return next;
+  return new Map(current);
 }
 
 export async function uploadPendingImages(

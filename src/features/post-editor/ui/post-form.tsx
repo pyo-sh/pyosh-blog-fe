@@ -16,6 +16,7 @@ import { ThumbnailUploader } from "./thumbnail-uploader";
 import { extractPlainText } from "../lib/extract-plain-text";
 import {
   createPendingImage,
+  getPendingImageIds,
   resolvePreviewContent,
   syncPendingImagesWithContent,
   uploadPendingImages,
@@ -348,8 +349,11 @@ export function PostForm({
     onSuccess: async (post) => {
       const persistedValues = mapPostToFormValues(post);
 
+      pendingImagesRef.current.forEach((image) => {
+        URL.revokeObjectURL(image.blobUrl);
+      });
       setValues(persistedValues);
-      setPendingImages((current) => syncPendingImagesWithContent("", current));
+      setPendingImages(new Map());
       setIsDirty(false);
       setIsSummaryManuallyEdited(Boolean(persistedValues.summary.trim()));
       setPendingIntent(null);
@@ -397,7 +401,13 @@ export function PostForm({
     () => resolvePreviewContent(values.contentMd, pendingImages),
     [pendingImages, values.contentMd],
   );
-  const pendingImageCount = useMemo(() => pendingImages.size, [pendingImages]);
+  const pendingImageCount = useMemo(
+    () =>
+      Array.from(new Set(getPendingImageIds(values.contentMd))).filter((id) =>
+        pendingImages.has(id),
+      ).length,
+    [pendingImages, values.contentMd],
+  );
 
   const handleFieldChange = <Key extends keyof PostFormValues>(
     key: Key,

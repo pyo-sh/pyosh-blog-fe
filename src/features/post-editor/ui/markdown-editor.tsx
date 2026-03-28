@@ -201,6 +201,10 @@ export function MarkdownEditor({
           onBlurRef.current?.(view.state.doc.toString());
         },
         drop: (event) => {
+          if (!onImageFilesRef.current) {
+            return false;
+          }
+
           const files = Array.from(event.dataTransfer?.files ?? []).filter(
             (file) => file.type.startsWith("image/"),
           );
@@ -215,6 +219,10 @@ export function MarkdownEditor({
           return true;
         },
         paste: (event) => {
+          if (!onImageFilesRef.current) {
+            return false;
+          }
+
           const files = Array.from(event.clipboardData?.files ?? []).filter(
             (file) => file.type.startsWith("image/"),
           );
