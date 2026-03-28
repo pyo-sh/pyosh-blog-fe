@@ -211,41 +211,40 @@ export default function ManagePostsPage() {
   async function handleTogglePin(post: Post) {
     setPendingToggleIds((prev) => new Set(prev).add(post.id));
 
-    const nextPinned = !post.isPinned;
+    try {
+      const nextPinned = !post.isPinned;
 
-    if (nextPinned) {
-      try {
-        const pinnedCount = await countPinnedAdminPosts();
+      if (nextPinned) {
+        try {
+          const pinnedCount = await countPinnedAdminPosts();
 
-        if (pinnedCount >= MAX_PINNED_POSTS) {
+          if (pinnedCount >= MAX_PINNED_POSTS) {
+            toast.error(
+              `고정 글은 최대 ${MAX_PINNED_POSTS}개까지 설정할 수 있습니다.`,
+            );
+
+            return;
+          }
+        } catch (err) {
           toast.error(
-            `고정 글은 최대 ${MAX_PINNED_POSTS}개까지 설정할 수 있습니다.`,
+            getErrorMessage(err, "고정 글 개수를 확인하지 못했습니다."),
           );
 
           return;
         }
-      } finally {
-        setPendingToggleIds((prev) => {
-          const next = new Set(prev);
-          next.delete(post.id);
-
-          return next;
-        });
       }
-    }
 
-    queryClient.setQueryData(queryKey, (old: typeof data) => {
-      if (!old) return old;
+      queryClient.setQueryData(queryKey, (old: typeof data) => {
+        if (!old) return old;
 
-      return {
-        ...old,
-        data: old.data.map((p) =>
-          p.id === post.id ? { ...p, isPinned: nextPinned } : p,
-        ),
-      };
-    });
+        return {
+          ...old,
+          data: old.data.map((p) =>
+            p.id === post.id ? { ...p, isPinned: nextPinned } : p,
+          ),
+        };
+      });
 
-    try {
       await updatePost(post.id, { isPinned: nextPinned });
     } catch (err) {
       queryClient.setQueryData(queryKey, (old: typeof data) => {

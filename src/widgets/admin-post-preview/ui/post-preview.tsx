@@ -166,11 +166,19 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
             const prev = currentPost.isPinned;
 
             if (!currentPost.isPinned) {
-              const pinnedCount = await countPinnedAdminPosts();
+              try {
+                const pinnedCount = await countPinnedAdminPosts();
 
-              if (pinnedCount >= MAX_PINNED_POSTS) {
+                if (pinnedCount >= MAX_PINNED_POSTS) {
+                  toast.error(
+                    `고정 글은 최대 ${MAX_PINNED_POSTS}개까지 설정할 수 있습니다.`,
+                  );
+
+                  return;
+                }
+              } catch (error) {
                 toast.error(
-                  `고정 글은 최대 ${MAX_PINNED_POSTS}개까지 설정할 수 있습니다.`,
+                  getErrorMessage(error, "고정 글 개수를 확인하지 못했습니다."),
                 );
 
                 return;
