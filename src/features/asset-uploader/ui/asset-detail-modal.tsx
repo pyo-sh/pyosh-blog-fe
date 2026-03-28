@@ -226,6 +226,10 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 function AssetPreview({ asset }: { asset: Asset }) {
   const [hasError, setHasError] = useState(false);
 
+  useEffect(() => {
+    setHasError(false);
+  }, [asset.url]);
+
   if (hasError) {
     return (
       <div className="flex min-h-[18rem] items-center justify-center rounded-[1.35rem] border border-dashed border-border-3 bg-background-1 px-6 py-10 text-sm text-text-4">
