@@ -63,9 +63,10 @@ export function CategoryFormModal({
   const title = mode === "create" ? "카테고리 추가" : "카테고리 수정";
   const submitLabel = mode === "create" ? "추가" : "저장";
   const submittingLabel = mode === "create" ? "추가 중" : "저장 중";
+  const trimmedName = values.name.trim();
 
   const handleSubmit = () => {
-    if (!values.name.trim()) {
+    if (!trimmedName) {
       setValidationError("카테고리 이름을 입력하세요.");
 
       return;
@@ -73,7 +74,7 @@ export function CategoryFormModal({
 
     setValidationError(null);
     onSubmit({
-      name: values.name.trim(),
+      name: trimmedName,
       parentId: values.parentId,
       isVisible: values.isVisible,
     });
@@ -107,7 +108,9 @@ export function CategoryFormModal({
               setValues((current) => ({ ...current, name: event.target.value }))
             }
             placeholder="카테고리 이름"
+            maxLength={50}
             disabled={isSubmitting}
+            aria-label="카테고리 이름"
             className="rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
           />
         </label>
@@ -125,6 +128,7 @@ export function CategoryFormModal({
               }))
             }
             disabled={isSubmitting}
+            aria-label="부모 카테고리"
             className="rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <option value="">최상위 카테고리</option>
@@ -147,6 +151,7 @@ export function CategoryFormModal({
               }))
             }
             disabled={isSubmitting}
+            aria-label="공개 여부"
             className="h-4 w-4 rounded border-border-3"
           />
           화면에 표시
@@ -171,7 +176,7 @@ export function CategoryFormModal({
         <button
           type="button"
           onClick={handleSubmit}
-          disabled={isSubmitting}
+          disabled={isSubmitting || !trimmedName}
           className="inline-flex items-center justify-center rounded-[0.75rem] bg-primary-1 px-4 py-2 text-sm font-medium text-text-1 transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSubmitting ? (

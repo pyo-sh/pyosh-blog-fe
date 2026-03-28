@@ -30,3 +30,10 @@ export interface UpdateCategoryOrderBody {
     sortOrder: number;
   }>;
 }
+
+export type DeleteCategoryAction = "move" | "trash";
+
+export interface DeleteCategoryOptions {
+  action: DeleteCategoryAction;
+  moveTo?: number;
+}
