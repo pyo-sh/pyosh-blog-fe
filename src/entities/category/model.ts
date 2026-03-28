@@ -40,3 +40,10 @@ export interface CategoryTreeChange {
 export interface UpdateCategoryTreeBody {
   changes: CategoryTreeChange[];
 }
+
+export type DeleteCategoryAction = "move" | "trash";
+
+export interface DeleteCategoryOptions {
+  action: DeleteCategoryAction;
+  moveTo?: number;
+}

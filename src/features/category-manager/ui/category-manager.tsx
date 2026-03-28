@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { CategoryDeleteModal } from "./category-delete-modal";
 import {
   CategoryFormModal,
   type CategoryFormValues,
@@ -18,9 +19,10 @@ import {
   updateCategory,
   type Category,
   type CategoryTreeChange,
+  type DeleteCategoryOptions,
 } from "@entities/category";
 import { getErrorMessage } from "@shared/lib/get-error-message";
-import { Modal, Skeleton, Spinner } from "@shared/ui/libs";
+import { Skeleton } from "@shared/ui/libs";
 
 const QUERY_KEY = ["admin-categories"] as const;
 
@@ -77,7 +79,13 @@ export function CategoryManager() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: deleteCategory,
+    mutationFn: ({
+      id,
+      options,
+    }: {
+      id: number;
+      options: DeleteCategoryOptions;
+    }) => deleteCategory(id, options),
     onSuccess: async () => {
       setCategoryToDelete(null);
       await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
@@ -132,12 +140,6 @@ export function CategoryManager() {
   };
 
   const handleDelete = (category: Category) => {
-    if (category.children && category.children.length > 0) {
-      toast.error("하위 카테고리가 있는 항목은 삭제할 수 없습니다.");
-
-      return;
-    }
-
     setCategoryToDelete(category);
   };
 
@@ -258,86 +260,21 @@ export function CategoryManager() {
         onSubmit={handleSubmit}
       />
 
-      <DeleteCategoryModal
+      <CategoryDeleteModal
         category={categoryToDelete}
+        categories={categories}
         isDeleting={deleteMutation.isPending}
         onCancel={() => setCategoryToDelete(null)}
-        onConfirm={() => {
+        onConfirm={(options) => {
           if (categoryToDelete) {
-            deleteMutation.mutate(categoryToDelete.id);
+            deleteMutation.mutate({
+              id: categoryToDelete.id,
+              options,
+            });
           }
         }}
       />
     </div>
-  );
-}
-
-function DeleteCategoryModal({
-  category,
-  isDeleting,
-  onCancel,
-  onConfirm,
-}: {
-  category: Category | null;
-  isDeleting: boolean;
-  onCancel: () => void;
-  onConfirm: () => void;
-}) {
-  return (
-    <Modal
-      isOpen={Boolean(category)}
-      onClose={() => {
-        if (!isDeleting) {
-          onCancel();
-        }
-      }}
-      withBackground
-      className="w-[min(100%,30rem)] p-0 text-left"
-    >
-      <div className="border-b border-border-3 px-6 py-5">
-        <p className="text-body-xs uppercase tracking-[0.2em] text-text-4">
-          Delete category
-        </p>
-        <h2 className="mt-2 text-xl font-semibold text-text-1">
-          카테고리 삭제
-        </h2>
-      </div>
-
-      <div className="space-y-3 px-6 py-5">
-        <p className="text-sm text-text-2">
-          <strong className="font-semibold text-text-1">
-            {category?.name}
-          </strong>
-          을(를) 삭제하시겠습니까?
-        </p>
-        <p className="text-sm text-text-3">이 작업은 되돌릴 수 없습니다.</p>
-      </div>
-
-      <div className="flex justify-end gap-3 border-t border-border-3 px-6 py-5">
-        <button
-          type="button"
-          onClick={onCancel}
-          disabled={isDeleting}
-          className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-4 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          취소
-        </button>
-        <button
-          type="button"
-          onClick={onConfirm}
-          disabled={isDeleting}
-          className="inline-flex items-center justify-center rounded-[0.75rem] bg-negative-1 px-4 py-2 text-sm font-medium text-text-1 transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isDeleting ? (
-            <>
-              <Spinner size="sm" /> 삭제 중
-            </>
-          ) : (
-            "삭제"
-          )}
-        </button>
-      </div>
-    </Modal>
   );
 }
 

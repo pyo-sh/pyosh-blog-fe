@@ -2,6 +2,8 @@ export type {
   Category,
   CategoryTreeChange,
   CreateCategoryBody,
+  DeleteCategoryAction,
+  DeleteCategoryOptions,
   UpdateCategoryBody,
   UpdateCategoryOrderBody,
   UpdateCategoryTreeBody,
