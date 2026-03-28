@@ -1,153 +1,112 @@
 "use client";
 
-import { useCallback, useState } from "react";
-import type { Category } from "@entities/category";
-import { cn } from "@shared/lib/style-utils";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  DndContext,
+  DragOverlay,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  type DragOverEvent,
+  type DragStartEvent,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import { CategoryTreeRow, CategoryTreeRowPreview } from "./category-tree-row";
+import { CategoryTreeToolbar } from "./category-tree-toolbar";
+import {
+  calculateTreeChanges,
+  cloneCategoryTree,
+  collectExpandableIds,
+  flattenCategoryTree,
+  getChangeMarkerMap,
+  getDisplayedCategoryIds,
+  isDropBlocked,
+  moveCategory,
+  parseDropZoneId,
+  type CategoryTreeMode,
+  type DropTarget,
+} from "../lib/tree-utils";
+import type { Category, CategoryTreeChange } from "@entities/category";
+import { ConfirmDialog } from "@shared/ui/confirm-dialog";
 import { EmptyState } from "@shared/ui/libs";
-import { ToggleSwitch } from "@shared/ui/toggle-switch";
 
 interface CategoryTreeProps {
   categories: Category[];
   onEdit: (category: Category) => void;
   onDelete: (category: Category) => void;
-}
-
-function collectVisibleNonLeafIds(
-  categories: Category[],
-  showHidden: boolean,
-): Set<number> {
-  const ids = new Set<number>();
-  function traverse(cats: Category[]) {
-    for (const cat of cats) {
-      const visible = showHidden
-        ? (cat.children ?? [])
-        : (cat.children ?? []).filter((c) => c.isVisible);
-      if (visible.length > 0) {
-        ids.add(cat.id);
-        traverse(visible);
-      }
-    }
-  }
-  traverse(categories);
-
-  return ids;
-}
-
-function CategoryTreeRow({
-  category,
-  depth,
-  expandedIds,
-  showHidden,
-  onToggle,
-  onEdit,
-  onDelete,
-}: {
-  category: Category;
-  depth: number;
-  expandedIds: Set<number>;
-  showHidden: boolean;
-  onToggle: (id: number) => void;
-  onEdit: (category: Category) => void;
-  onDelete: (category: Category) => void;
-}) {
-  const visibleChildren = showHidden
-    ? (category.children ?? [])
-    : (category.children ?? []).filter((c) => c.isVisible);
-  const hasVisibleChildren = visibleChildren.length > 0;
-  const isExpanded = expandedIds.has(category.id);
-  const isHidden = !category.isVisible;
-
-  return (
-    <li>
-      <div
-        className={cn(
-          "flex items-center gap-2 rounded-lg px-3 py-2.5 transition-colors hover:bg-background-3/50",
-          isHidden && "opacity-50",
-        )}
-        style={{ paddingLeft: `${depth * 24 + 12}px` }}
-      >
-        <button
-          type="button"
-          onClick={() => onToggle(category.id)}
-          disabled={!hasVisibleChildren}
-          aria-label="하위 카테고리 토글"
-          aria-expanded={hasVisibleChildren ? isExpanded : undefined}
-          className={cn(
-            "flex h-5 w-5 shrink-0 items-center justify-center text-xs text-text-3 transition-colors",
-            hasVisibleChildren
-              ? "cursor-pointer hover:text-text-1"
-              : "cursor-default",
-          )}
-        >
-          {hasVisibleChildren ? (isExpanded ? "▼" : "▶") : null}
-        </button>
-
-        <div className="flex min-w-0 flex-1 items-center gap-2">
-          <span className="truncate font-medium text-text-1">
-            {category.name}
-          </span>
-          {isHidden && (
-            <span className="shrink-0 text-sm text-text-3">(숨김)</span>
-          )}
-          <span className="shrink-0 rounded-full bg-background-3 px-2 py-0.5 text-xs text-text-4">
-            {category.slug}
-          </span>
-        </div>
-
-        <span className="shrink-0 text-sm text-text-3">
-          발행 {category.publishedPostCount ?? 0} / 전체{" "}
-          {category.totalPostCount ?? 0}
-        </span>
-
-        <div className="flex shrink-0 gap-1.5">
-          <button
-            type="button"
-            onClick={() => onEdit(category)}
-            className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-3 py-1.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
-          >
-            수정
-          </button>
-          <button
-            type="button"
-            onClick={() => onDelete(category)}
-            className="inline-flex items-center justify-center rounded-[0.75rem] border border-negative-1/30 px-3 py-1.5 text-sm font-medium text-negative-1 transition-colors hover:bg-negative-1/10"
-          >
-            삭제
-          </button>
-        </div>
-      </div>
-
-      {hasVisibleChildren && isExpanded ? (
-        <ul>
-          {visibleChildren.map((child) => (
-            <CategoryTreeRow
-              key={child.id}
-              category={child}
-              depth={depth + 1}
-              expandedIds={expandedIds}
-              showHidden={showHidden}
-              onToggle={onToggle}
-              onEdit={onEdit}
-              onDelete={onDelete}
-            />
-          ))}
-        </ul>
-      ) : null}
-    </li>
-  );
+  onBulkVisibilityChange: (ids: number[], isVisible: boolean) => Promise<void>;
+  onSaveTree: (changes: CategoryTreeChange[]) => Promise<void>;
+  isBulkUpdating: boolean;
+  isSavingTree: boolean;
 }
 
 export function CategoryTree({
   categories,
   onEdit,
   onDelete,
+  onBulkVisibilityChange,
+  onSaveTree,
+  isBulkUpdating,
+  isSavingTree,
 }: CategoryTreeProps) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 4,
+      },
+    }),
+    useSensor(KeyboardSensor),
+  );
+  const [mode, setMode] = useState<CategoryTreeMode>("view");
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
   const [showHidden, setShowHidden] = useState(false);
+  const [workingCategories, setWorkingCategories] = useState<Category[]>(
+    cloneCategoryTree(categories),
+  );
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [originalTree, setOriginalTree] = useState<Category[] | null>(null);
+  const [restoreExpandedIds, setRestoreExpandedIds] = useState<Set<number>>(
+    new Set(),
+  );
+  const [activeDragId, setActiveDragId] = useState<number | null>(null);
+  const [dropTarget, setDropTarget] = useState<DropTarget | null>(null);
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
 
-  const visibleRootCategories = showHidden
-    ? categories
-    : categories.filter((c) => c.isVisible);
+  useEffect(() => {
+    if (mode !== "edit") {
+      setWorkingCategories(cloneCategoryTree(categories));
+    }
+  }, [categories, mode]);
+
+  const visibleRows = useMemo(
+    () => flattenCategoryTree(workingCategories, expandedIds, showHidden),
+    [expandedIds, showHidden, workingCategories],
+  );
+  const displayedCategoryIds = useMemo(
+    () => getDisplayedCategoryIds(workingCategories, expandedIds, showHidden),
+    [expandedIds, showHidden, workingCategories],
+  );
+  const pendingChanges = useMemo(
+    () =>
+      originalTree
+        ? calculateTreeChanges(originalTree, workingCategories)
+        : ([] as CategoryTreeChange[]),
+    [originalTree, workingCategories],
+  );
+  const changeMarkerMap = useMemo(
+    () =>
+      originalTree
+        ? getChangeMarkerMap(originalTree, workingCategories)
+        : new Map<number, "moved" | "new-parent">(),
+    [originalTree, workingCategories],
+  );
+  const activeRow = activeDragId
+    ? visibleRows.find(({ category }) => category.id === activeDragId)
+    : null;
+  const allDisplayedSelected =
+    displayedCategoryIds.length > 0 &&
+    displayedCategoryIds.every((id) => selectedIds.has(id));
 
   const handleToggle = useCallback((id: number) => {
     setExpandedIds((prev) => {
@@ -163,12 +122,151 @@ export function CategoryTree({
   }, []);
 
   const handleExpandAll = useCallback(() => {
-    setExpandedIds(collectVisibleNonLeafIds(categories, showHidden));
-  }, [categories, showHidden]);
+    setExpandedIds(collectExpandableIds(workingCategories, showHidden));
+  }, [showHidden, workingCategories]);
 
   const handleCollapseAll = useCallback(() => {
     setExpandedIds(new Set());
   }, []);
+
+  const handleEnterSelectMode = () => {
+    setSelectedIds(new Set());
+    setMode("select");
+  };
+
+  const handleEnterEditMode = () => {
+    setRestoreExpandedIds(new Set(expandedIds));
+    setOriginalTree(cloneCategoryTree(workingCategories));
+    setExpandedIds(collectExpandableIds(workingCategories, showHidden));
+    setSelectedIds(new Set());
+    setMode("edit");
+  };
+
+  const handleExitSelectMode = () => {
+    setSelectedIds(new Set());
+    setMode("view");
+  };
+
+  const resetEditMode = (restoreOriginalTree: boolean) => {
+    if (restoreOriginalTree && originalTree) {
+      setWorkingCategories(cloneCategoryTree(originalTree));
+    }
+
+    setMode("view");
+    setExpandedIds(new Set(restoreExpandedIds));
+    setOriginalTree(null);
+    setActiveDragId(null);
+    setDropTarget(null);
+    setIsCancelDialogOpen(false);
+  };
+
+  const handleToggleSelect = (id: number) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+
+      return next;
+    });
+  };
+
+  const handleToggleSelectAll = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+
+      if (displayedCategoryIds.every((id) => next.has(id))) {
+        displayedCategoryIds.forEach((id) => next.delete(id));
+      } else {
+        displayedCategoryIds.forEach((id) => next.add(id));
+      }
+
+      return next;
+    });
+  };
+
+  const handleApplyVisibility = async (isVisible: boolean) => {
+    const ids = Array.from(selectedIds);
+
+    if (ids.length === 0) {
+      return;
+    }
+
+    await onBulkVisibilityChange(ids, isVisible);
+    setSelectedIds(new Set());
+  };
+
+  const handleSaveEditMode = async () => {
+    if (pendingChanges.length === 0) {
+      resetEditMode(false);
+
+      return;
+    }
+
+    await onSaveTree(pendingChanges);
+    resetEditMode(false);
+  };
+
+  const handleCancelEditMode = () => {
+    if (pendingChanges.length === 0) {
+      resetEditMode(true);
+
+      return;
+    }
+
+    setIsCancelDialogOpen(true);
+  };
+
+  const handleDragStart = ({ active }: DragStartEvent) => {
+    const nextId = Number(active.data.current?.categoryId);
+
+    if (!Number.isFinite(nextId)) {
+      return;
+    }
+
+    setActiveDragId(nextId);
+  };
+
+  const handleDragOver = ({ over }: DragOverEvent) => {
+    if (!over || activeDragId === null) {
+      setDropTarget(null);
+
+      return;
+    }
+
+    const parsedTarget = parseDropZoneId(String(over.id));
+
+    if (!parsedTarget) {
+      setDropTarget(null);
+
+      return;
+    }
+
+    setDropTarget({
+      ...parsedTarget,
+      invalid: isDropBlocked(
+        workingCategories,
+        activeDragId,
+        parsedTarget.targetId,
+      ),
+    });
+  };
+
+  const handleDragEnd = () => {
+    if (activeDragId !== null && dropTarget && !dropTarget.invalid) {
+      setWorkingCategories((prev) =>
+        moveCategory(prev, activeDragId, {
+          targetId: dropTarget.targetId,
+          position: dropTarget.position,
+        }),
+      );
+    }
+
+    setActiveDragId(null);
+    setDropTarget(null);
+  };
 
   if (categories.length === 0) {
     return (
@@ -177,48 +275,82 @@ export function CategoryTree({
   }
 
   return (
-    <div>
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={handleExpandAll}
-          className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-3 py-1.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+    <>
+      <div>
+        <CategoryTreeToolbar
+          mode={mode}
+          showHidden={showHidden}
+          selectedCount={selectedIds.size}
+          pendingChangeCount={pendingChanges.length}
+          allDisplayedSelected={allDisplayedSelected}
+          isBulkUpdating={isBulkUpdating}
+          isSavingTree={isSavingTree}
+          onShowHiddenChange={setShowHidden}
+          onExpandAll={handleExpandAll}
+          onCollapseAll={handleCollapseAll}
+          onEnterSelectMode={handleEnterSelectMode}
+          onEnterEditMode={handleEnterEditMode}
+          onToggleSelectAll={handleToggleSelectAll}
+          onClearSelection={() => setSelectedIds(new Set())}
+          onCompleteSelectMode={handleExitSelectMode}
+          onHideSelected={() => void handleApplyVisibility(false)}
+          onShowSelected={() => void handleApplyVisibility(true)}
+          onCancelEditMode={handleCancelEditMode}
+          onSaveEditMode={() => void handleSaveEditMode()}
+        />
+
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+          onDragCancel={() => {
+            setActiveDragId(null);
+            setDropTarget(null);
+          }}
         >
-          전체 펼침
-        </button>
-        <button
-          type="button"
-          onClick={handleCollapseAll}
-          className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-3 py-1.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
-        >
-          전체 접힘
-        </button>
-        <label className="flex cursor-pointer items-center gap-2">
-          <ToggleSwitch
-            checked={showHidden}
-            onChange={setShowHidden}
-            aria-label="숨김 카테고리 표시"
-          />
-          <span className="text-sm text-text-3">
-            숨김 표시 {showHidden ? "on" : "off"}
-          </span>
-        </label>
+          <ul>
+            {visibleRows.map(({ category, depth, hasVisibleChildren }) => (
+              <CategoryTreeRow
+                key={category.id}
+                category={category}
+                depth={depth}
+                mode={mode}
+                hasVisibleChildren={hasVisibleChildren}
+                isExpanded={expandedIds.has(category.id)}
+                isSelected={selectedIds.has(category.id)}
+                changeMarker={changeMarkerMap.get(category.id)}
+                dropTarget={dropTarget}
+                onToggle={handleToggle}
+                onSelectToggle={handleToggleSelect}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
+            ))}
+          </ul>
+
+          <DragOverlay>
+            {activeRow ? (
+              <CategoryTreeRowPreview
+                category={activeRow.category}
+                depth={activeRow.depth}
+                changeMarker={changeMarkerMap.get(activeRow.category.id)}
+              />
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       </div>
 
-      <ul>
-        {visibleRootCategories.map((category) => (
-          <CategoryTreeRow
-            key={category.id}
-            category={category}
-            depth={0}
-            expandedIds={expandedIds}
-            showHidden={showHidden}
-            onToggle={handleToggle}
-            onEdit={onEdit}
-            onDelete={onDelete}
-          />
-        ))}
-      </ul>
-    </div>
+      <ConfirmDialog
+        isOpen={isCancelDialogOpen}
+        onClose={() => setIsCancelDialogOpen(false)}
+        onConfirm={() => resetEditMode(true)}
+        title="변경사항을 취소하시겠습니까?"
+        confirmLabel="변경 취소"
+      >
+        저장하지 않은 배치 편집 변경사항이 사라집니다.
+      </ConfirmDialog>
+    </>
   );
 }

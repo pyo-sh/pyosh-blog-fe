@@ -1,8 +1,10 @@
 export type {
   Category,
+  CategoryTreeChange,
   CreateCategoryBody,
   UpdateCategoryBody,
   UpdateCategoryOrderBody,
+  UpdateCategoryTreeBody,
 } from "./model";
 export { findCategoryBySlug, getCategoryAncestors } from "./lib";
 export {
@@ -13,4 +15,5 @@ export {
   fetchCategoriesClient,
   updateCategory,
   updateCategoryOrder,
+  updateCategoryTree,
 } from "./api";
