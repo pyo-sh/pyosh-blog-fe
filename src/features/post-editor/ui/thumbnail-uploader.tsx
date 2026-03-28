@@ -135,8 +135,12 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
-          onClick={() => setIsPickerOpen(true)}
-          className="rounded-[0.8rem] border border-border-3 px-3 py-2 text-xs font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+          onClick={() => {
+            setIsAwaitingPaste(false);
+            setIsPickerOpen(true);
+          }}
+          disabled={isUploading}
+          className="rounded-[0.8rem] border border-border-3 px-3 py-2 text-xs font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-60"
         >
           에셋 갤러리
         </button>
@@ -283,6 +287,7 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
         onSelect={(url) => {
           onChange(url);
           setPendingFile(null);
+          setIsAwaitingPaste(false);
           setIsPickerOpen(false);
           toast.success("에셋 갤러리에서 썸네일을 선택했습니다.");
         }}
