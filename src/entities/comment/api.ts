@@ -6,6 +6,7 @@ import type {
   CommentsResponse,
   CommentsResponseLegacy,
   CreateCommentBody,
+  CreateCommentResponse,
   DeleteCommentBody,
 } from "./model";
 import type { PaginatedResponse } from "@shared/api";
@@ -181,12 +182,30 @@ export async function fetchCommentsClient(
 export async function createComment(
   postId: number,
   body: CreateCommentBody,
-): Promise<Comment> {
+): Promise<{ comment: Comment; revealToken: string | null }> {
   const { authorType: _authorType, ...payload } = body;
-  const response = await clientMutate<CommentResponse>(
+  const response = await clientMutate<CreateCommentResponse>(
     `/api/posts/${postId}/comments`,
     {
       body: JSON.stringify(payload),
+    },
+  );
+
+  return {
+    comment: response.data,
+    revealToken: response.revealToken ?? null,
+  };
+}
+
+export async function revealSecretComment(
+  commentId: number,
+  revealToken: string,
+): Promise<Comment> {
+  const response = await clientMutate<CommentResponse>(
+    `/api/comments/${commentId}/reveal`,
+    {
+      method: "POST",
+      body: JSON.stringify({ revealToken }),
     },
   );
 

@@ -1,47 +1,52 @@
-const STORAGE_KEY = "pyosh:guest-secret-comments";
-const ACTIVE_IDENTITY_KEY = "pyosh:guest-secret-comments:identity";
+const STORAGE_KEY = "guest-secret-comments";
+const LEGACY_STORAGE_KEY = "pyosh:guest-secret-comments";
+const LEGACY_ACTIVE_IDENTITY_KEY = "pyosh:guest-secret-comments:identity";
+const LEGACY_BODY_CACHE_KEY = "guest-secret-comments-legacy-body-cache";
+const MAX_ENTRIES = 20;
 
-interface GuestSecretEntry {
+type GuestSecretTokenMap = Record<string, string>;
+interface LegacyBodyCacheEntry {
   body: string;
-  guestName: string;
+  authorKey: string;
+}
+
+type LegacyBodyCacheMap = Record<string, LegacyBodyCacheEntry>;
+
+interface LegacyGuestSecretEntry {
+  body: string;
   guestNameKey: string;
   guestEmailKey: string;
 }
 
-type GuestSecretMap = Record<string, GuestSecretEntry>;
-
-interface GuestIdentity {
-  guestName: string;
-  guestEmail: string;
+interface LegacyGuestIdentity {
+  guestName?: string | null;
+  guestEmail?: string | null;
 }
 
 function isBrowser() {
   return typeof window !== "undefined";
 }
 
-function normalizeIdentity(identity: GuestIdentity) {
-  return {
-    guestName: identity.guestName.trim().toLowerCase(),
-    guestEmail: identity.guestEmail.trim().toLowerCase(),
-  };
+function isSecretToken(value: unknown): value is string {
+  return typeof value === "string";
 }
 
-function isGuestSecretEntry(value: unknown): value is GuestSecretEntry {
+function isLegacyGuestSecretEntry(
+  value: unknown,
+): value is LegacyGuestSecretEntry {
   return (
     value !== null &&
     typeof value === "object" &&
     "body" in value &&
-    "guestName" in value &&
     "guestNameKey" in value &&
     "guestEmailKey" in value &&
     typeof value.body === "string" &&
-    typeof value.guestName === "string" &&
     typeof value.guestNameKey === "string" &&
     typeof value.guestEmailKey === "string"
   );
 }
 
-function readStore(): GuestSecretMap {
+function readTokenStore(): GuestSecretTokenMap {
   if (!isBrowser()) {
     return {};
   }
@@ -60,9 +65,8 @@ function readStore(): GuestSecretMap {
     }
 
     return Object.fromEntries(
-      Object.entries(parsed).filter(
-        (entry): entry is [string, GuestSecretEntry] =>
-          isGuestSecretEntry(entry[1]),
+      Object.entries(parsed).filter((entry): entry is [string, string] =>
+        isSecretToken(entry[1]),
       ),
     );
   } catch {
@@ -70,7 +74,7 @@ function readStore(): GuestSecretMap {
   }
 }
 
-function writeStore(nextStore: GuestSecretMap) {
+function writeTokenStore(nextStore: GuestSecretTokenMap) {
   if (!isBrowser()) {
     return;
   }
@@ -82,13 +86,128 @@ function writeStore(nextStore: GuestSecretMap) {
   }
 }
 
-function readActiveIdentity(): GuestIdentity | null {
+function readLegacyBodyCache(): LegacyBodyCacheMap {
+  if (!isBrowser()) {
+    return {};
+  }
+
+  try {
+    const raw = window.sessionStorage.getItem(LEGACY_BODY_CACHE_KEY);
+
+    if (!raw) {
+      return {};
+    }
+
+    const parsed = JSON.parse(raw) as unknown;
+
+    if (!parsed || typeof parsed !== "object") {
+      return {};
+    }
+
+    return Object.fromEntries(
+      Object.entries(parsed).flatMap((entry) => {
+        if (
+          !entry[1] ||
+          typeof entry[1] !== "object" ||
+          !("body" in entry[1]) ||
+          !("authorKey" in entry[1]) ||
+          typeof entry[1].body !== "string" ||
+          typeof entry[1].authorKey !== "string"
+        ) {
+          return [];
+        }
+
+        return [[entry[0], entry[1]] as const];
+      }),
+    );
+  } catch {
+    return {};
+  }
+}
+
+function writeLegacyBodyCache(nextStore: LegacyBodyCacheMap) {
+  if (!isBrowser()) {
+    return;
+  }
+
+  try {
+    window.sessionStorage.setItem(
+      LEGACY_BODY_CACHE_KEY,
+      JSON.stringify(nextStore),
+    );
+  } catch {
+    // Ignore storage failures so comment UX degrades gracefully.
+  }
+}
+
+function capStoreEntries<T extends Record<string, unknown>>(store: T) {
+  const orderedEntries = Object.entries(store);
+
+  while (orderedEntries.length > MAX_ENTRIES) {
+    orderedEntries.shift();
+  }
+
+  return Object.fromEntries(orderedEntries) as T;
+}
+
+function normalizeGuestName(guestName: string) {
+  return guestName.trim().toLowerCase();
+}
+
+function normalizeGuestEmail(guestEmail: string) {
+  return guestEmail.trim().toLowerCase();
+}
+
+function createLegacyAuthorKey(
+  guestName?: string | null,
+  guestEmail?: string | null,
+) {
+  if (!guestName?.trim() || !guestEmail?.trim()) {
+    return null;
+  }
+
+  return `${normalizeGuestName(guestName)}:${normalizeGuestEmail(guestEmail)}`;
+}
+
+function readLegacyStore() {
+  if (!isBrowser()) {
+    return {};
+  }
+
+  try {
+    const raw = window.sessionStorage.getItem(LEGACY_STORAGE_KEY);
+
+    if (!raw) {
+      return {};
+    }
+
+    const parsed = JSON.parse(raw) as unknown;
+
+    if (!parsed || typeof parsed !== "object") {
+      return {};
+    }
+
+    return Object.fromEntries(
+      Object.entries(parsed).flatMap((entry) => {
+        if (!isLegacyGuestSecretEntry(entry[1])) {
+          return [];
+        }
+
+        return [[entry[0], entry[1]] as const];
+      }),
+    );
+  } catch {
+    return {};
+  }
+}
+
+function readLegacyActiveAuthor() {
   if (!isBrowser()) {
     return null;
   }
 
   try {
-    const raw = window.sessionStorage.getItem(ACTIVE_IDENTITY_KEY);
+    const raw = window.sessionStorage.getItem(LEGACY_ACTIVE_IDENTITY_KEY);
 
     if (!raw) {
       return null;
@@ -107,87 +226,135 @@ function readActiveIdentity(): GuestIdentity | null {
       return null;
     }
 
-    return {
-      guestName: parsed.guestName,
-      guestEmail: parsed.guestEmail,
-    };
+    return createLegacyAuthorKey(parsed.guestName, parsed.guestEmail);
   } catch {
     return null;
   }
 }
 
-function writeActiveIdentity(identity: GuestIdentity) {
-  if (!isBrowser()) {
-    return;
-  }
-
-  try {
-    window.sessionStorage.setItem(
-      ACTIVE_IDENTITY_KEY,
-      JSON.stringify({
-        guestName: identity.guestName.trim(),
-        guestEmail: identity.guestEmail.trim().toLowerCase(),
-      }),
-    );
-  } catch {
-    // Ignore storage failures so comment UX degrades gracefully.
-  }
+function getLegacyEntryAuthorKey(entry: LegacyGuestSecretEntry) {
+  return createLegacyAuthorKey(entry.guestNameKey, entry.guestEmailKey);
 }
 
-export function rememberGuestSecretComment(
-  commentId: number,
-  body: string,
-  identity: GuestIdentity,
+function resolveSingleLegacyAuthorKey(
+  store: Record<string, LegacyGuestSecretEntry>,
 ) {
-  const normalizedIdentity = normalizeIdentity(identity);
+  const authorKeys = new Set(
+    Object.values(store)
+      .map((entry) => getLegacyEntryAuthorKey(entry))
+      .filter((authorKey): authorKey is string => Boolean(authorKey)),
+  );
 
-  if (
-    !body.trim() ||
-    !normalizedIdentity.guestName ||
-    !normalizedIdentity.guestEmail
-  ) {
-    return;
-  }
+  return authorKeys.size === 1 ? [...authorKeys][0] : null;
+}
 
-  const currentStore = readStore();
-  writeActiveIdentity(identity);
-  writeStore({
-    ...currentStore,
-    [String(commentId)]: {
-      body,
-      guestName: identity.guestName.trim(),
-      guestNameKey: normalizedIdentity.guestName,
-      guestEmailKey: normalizedIdentity.guestEmail,
-    },
+export function needsLegacyGuestEmailRecovery(
+  commentIds: number[],
+  identity?: LegacyGuestIdentity,
+) {
+  const legacyStore = readLegacyStore();
+  const activeIdentity = readLegacyActiveAuthor();
+  const profileIdentity = createLegacyAuthorKey(
+    identity?.guestName,
+    identity?.guestEmail,
+  );
+  const singleAuthorFallback = resolveSingleLegacyAuthorKey(legacyStore);
+
+  return commentIds.some((commentId) => {
+    const legacyEntry = legacyStore[String(commentId)];
+
+    if (!legacyEntry) {
+      return false;
+    }
+
+    const legacyAuthorKey = getLegacyEntryAuthorKey(legacyEntry);
+
+    if (!legacyAuthorKey) {
+      return false;
+    }
+
+    return ![activeIdentity, profileIdentity, singleAuthorFallback].includes(
+      legacyAuthorKey,
+    );
   });
 }
 
-export function readGuestSecretComment(
+export function rememberGuestSecretRevealToken(
   commentId: number,
-  identity: GuestIdentity | null,
+  revealToken: string,
 ) {
-  if (!identity) {
-    return null;
+  if (!revealToken.trim()) {
+    return;
   }
 
-  const entry = readStore()[String(commentId)];
+  const currentStore = readTokenStore();
+  const nextStore = { ...currentStore };
+  delete nextStore[String(commentId)];
+  nextStore[String(commentId)] = revealToken;
 
-  if (!entry) {
-    return null;
-  }
-
-  const normalizedIdentity = normalizeIdentity(identity);
-
-  if (
-    entry.guestNameKey !== normalizedIdentity.guestName ||
-    entry.guestEmailKey !== normalizedIdentity.guestEmail
-  ) {
-    return null;
-  }
-
-  return entry.body;
+  writeTokenStore(capStoreEntries(nextStore));
 }
 
-export function readGuestSecretIdentity() {
-  return readActiveIdentity();
+export function readGuestSecretRevealToken(commentId: number) {
+  return readTokenStore()[String(commentId)] ?? null;
+}
+
+export function removeGuestSecretRevealToken(commentId: number) {
+  const currentStore = readTokenStore();
+
+  if (!(String(commentId) in currentStore)) {
+    return;
+  }
+
+  const nextStore = { ...currentStore };
+  delete nextStore[String(commentId)];
+  writeTokenStore(nextStore);
+}
+
+export function readLegacyGuestSecretComment(
+  commentId: number,
+  identity?: LegacyGuestIdentity,
+) {
+  const activeIdentity = readLegacyActiveAuthor();
+  const profileIdentity = createLegacyAuthorKey(
+    identity?.guestName,
+    identity?.guestEmail,
+  );
+  const cachedEntry = readLegacyBodyCache()[String(commentId)];
+
+  if (
+    cachedEntry &&
+    (cachedEntry.authorKey === activeIdentity ||
+      cachedEntry.authorKey === profileIdentity)
+  ) {
+    return cachedEntry.body;
+  }
+
+  const legacyStore = readLegacyStore();
+  const legacyEntry = legacyStore[String(commentId)];
+
+  if (!legacyEntry) {
+    return null;
+  }
+
+  const legacyAuthorKey = getLegacyEntryAuthorKey(legacyEntry);
+  const fallbackIdentity =
+    profileIdentity ??
+    activeIdentity ??
+    resolveSingleLegacyAuthorKey(legacyStore);
+
+  if (!legacyAuthorKey || legacyAuthorKey !== fallbackIdentity) {
+    return null;
+  }
+
+  const nextCache = {
+    ...readLegacyBodyCache(),
+    [String(commentId)]: {
+      body: legacyEntry.body,
+      authorKey: legacyAuthorKey,
+    },
+  };
+  writeLegacyBodyCache(capStoreEntries(nextCache));
+
+  return legacyEntry.body;
 }

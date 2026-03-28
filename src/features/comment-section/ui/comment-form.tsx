@@ -7,6 +7,7 @@ import type {
   CreateCommentOAuthBody,
 } from "@entities/comment";
 import type { CreateGuestbookBody } from "@entities/guestbook";
+import { ApiResponseError } from "@shared/api";
 import { getErrorMessage } from "@shared/lib/get-error-message";
 import { cn } from "@shared/lib/style-utils";
 import { Spinner } from "@shared/ui/libs";
@@ -26,6 +27,7 @@ interface CommentFormProps<TPayload extends CommentFormPayload> {
   variant?: "comment" | "guestbook";
   viewerType: "guest" | "oauth";
   profile: GuestCommentProfile;
+  forceGuestEmailField?: boolean;
   onProfileChange: (field: keyof GuestCommentProfile, value: string) => void;
   onSubmit: (payload: TPayload) => Promise<void>;
   parentId?: number;
@@ -41,10 +43,10 @@ function getEyebrowLabel(
   replyToName?: string | null,
 ) {
   if (replyToName) {
-    return "Reply";
+    return "답글";
   }
 
-  return variant === "guestbook" ? "Guestbook" : "Comment";
+  return variant === "guestbook" ? "방명록" : "댓글";
 }
 
 function getTitleLabel(
@@ -70,7 +72,7 @@ function getDescriptionLabel(
 
   return variant === "guestbook"
     ? "이름, 이메일, 비밀번호를 입력하면 방명록을 남길 수 있습니다."
-    : "이름, 이메일, 비밀번호를 입력하면 게스트 댓글을 작성할 수 있습니다.";
+    : "이름과 비밀번호를 입력하면 게스트 댓글을 작성할 수 있습니다.";
 }
 
 function getBodyPlaceholder(
@@ -87,13 +89,50 @@ function getBodyPlaceholder(
 }
 
 function getSecretLabel(variant: "comment" | "guestbook") {
-  return variant === "guestbook" ? "비밀 방명록으로 작성" : "비밀 댓글로 작성";
+  return variant === "guestbook" ? "비밀 방명록" : "비밀 댓글";
+}
+
+function LockIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="5" y="11" width="14" height="10" rx="2" />
+      <path d="M8 11V8a4 4 0 1 1 8 0v3" />
+    </svg>
+  );
+}
+
+function UnlockIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="5" y="11" width="14" height="10" rx="2" />
+      <path d="M16 11V8a4 4 0 0 0-7.2-2.4" />
+    </svg>
+  );
 }
 
 export function CommentForm<TPayload extends CommentFormPayload>({
   variant = "comment",
   viewerType,
   profile,
+  forceGuestEmailField = false,
   onProfileChange,
   onSubmit,
   parentId,
@@ -107,6 +146,13 @@ export function CommentForm<TPayload extends CommentFormPayload>({
   const [isSecret, setIsSecret] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const bodyLength = body.length;
+  const isCommentVariant = variant === "comment";
+  const showGuestEmailField =
+    viewerType === "guest" &&
+    (!isCommentVariant ||
+      forceGuestEmailField ||
+      Boolean(profile.guestEmail.trim()));
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -138,7 +184,9 @@ export function CommentForm<TPayload extends CommentFormPayload>({
         await onSubmit({
           authorType: "guest",
           guestName: profile.guestName.trim(),
-          guestEmail: profile.guestEmail.trim(),
+          ...(showGuestEmailField
+            ? { guestEmail: profile.guestEmail.trim() }
+            : {}),
           guestPassword: profile.guestPassword,
           ...payloadBase,
         } as TPayload);
@@ -147,14 +195,18 @@ export function CommentForm<TPayload extends CommentFormPayload>({
       setBody("");
       setIsSecret(false);
     } catch (error) {
-      toast.error(
-        getErrorMessage(
-          error,
-          variant === "guestbook"
-            ? "방명록을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요."
-            : "댓글을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.",
-        ),
-      );
+      if (error instanceof ApiResponseError && error.statusCode === 429) {
+        toast.error("너무 많은 요청을 보냈습니다. 잠시 후 다시 시도해 주세요.");
+      } else {
+        setErrorMessage(
+          getErrorMessage(
+            error,
+            variant === "guestbook"
+              ? "방명록을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요."
+              : "댓글을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+          ),
+        );
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -181,7 +233,12 @@ export function CommentForm<TPayload extends CommentFormPayload>({
       </div>
 
       {viewerType === "guest" ? (
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
+        <div
+          className={cn(
+            "mt-6 grid gap-4",
+            showGuestEmailField ? "md:grid-cols-3" : "md:grid-cols-2",
+          )}
+        >
           <label className="block">
             <span className="text-body-sm font-medium text-text-1">이름</span>
             <input
@@ -197,20 +254,24 @@ export function CommentForm<TPayload extends CommentFormPayload>({
             />
           </label>
 
-          <label className="block">
-            <span className="text-body-sm font-medium text-text-1">이메일</span>
-            <input
-              type="email"
-              value={profile.guestEmail}
-              onChange={(event) =>
-                onProfileChange("guestEmail", event.target.value)
-              }
-              disabled={isSubmitting}
-              className="mt-2 w-full rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
-              placeholder="guest@example.com"
-              required
-            />
-          </label>
+          {showGuestEmailField ? (
+            <label className="block">
+              <span className="text-body-sm font-medium text-text-1">
+                이메일
+              </span>
+              <input
+                type="email"
+                value={profile.guestEmail}
+                onChange={(event) =>
+                  onProfileChange("guestEmail", event.target.value)
+                }
+                disabled={isSubmitting}
+                className="mt-2 w-full rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+                placeholder="guest@example.com"
+                required
+              />
+            </label>
+          ) : null}
 
           <label className="block">
             <span className="text-body-sm font-medium text-text-1">
@@ -243,18 +304,42 @@ export function CommentForm<TPayload extends CommentFormPayload>({
           maxLength={2000}
           required
         />
+        <span
+          className={cn(
+            "mt-2 block text-right text-body-xs text-text-4",
+            bodyLength >= 2000
+              ? "text-negative-1"
+              : bodyLength >= 1500
+                ? "text-warning-1"
+                : null,
+          )}
+        >
+          {bodyLength}/2000
+        </span>
       </label>
 
-      <label className="mt-4 inline-flex items-center gap-3 text-body-sm text-text-2">
-        <input
-          type="checkbox"
-          checked={isSecret}
-          onChange={(event) => setIsSecret(event.target.checked)}
-          disabled={isSubmitting}
-          className="h-4 w-4 rounded border-border-3 text-primary-1 focus:ring-primary-1"
-        />
+      <button
+        type="button"
+        onClick={() => setIsSecret((current) => !current)}
+        disabled={isSubmitting}
+        className={cn(
+          "mt-4 inline-flex items-center gap-2 text-body-sm transition-colors",
+          isSecret ? "text-primary-1" : "text-text-4",
+        )}
+        aria-pressed={isSecret}
+        aria-label={
+          variant === "guestbook"
+            ? isSecret
+              ? "비밀 방명록 해제"
+              : "비밀 방명록으로 작성"
+            : isSecret
+              ? "비밀 댓글 해제"
+              : "비밀 댓글로 작성"
+        }
+      >
+        {isSecret ? <LockIcon /> : <UnlockIcon />}
         {getSecretLabel(variant)}
-      </label>
+      </button>
 
       {errorMessage ? (
         <div

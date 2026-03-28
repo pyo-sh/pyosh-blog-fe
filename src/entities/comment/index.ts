@@ -3,6 +3,7 @@ export type {
   Comment,
   CommentListMeta,
   CreateCommentBody,
+  CreateCommentResponse,
   CreateCommentGuestBody,
   CreateCommentOAuthBody,
   DeleteCommentBody,
@@ -26,4 +27,5 @@ export {
   fetchAdminComments,
   fetchCommentsClient,
   fetchComments,
+  revealSecretComment,
 } from "./api";

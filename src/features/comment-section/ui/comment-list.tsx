@@ -4,9 +4,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { CommentForm, type GuestCommentProfile } from "./comment-form";
 import { CommentItem } from "./comment-item";
 import {
-  readGuestSecretComment,
-  readGuestSecretIdentity,
-  rememberGuestSecretComment,
+  needsLegacyGuestEmailRecovery,
+  readGuestSecretRevealToken,
+  readLegacyGuestSecretComment,
+  rememberGuestSecretRevealToken,
+  removeGuestSecretRevealToken,
 } from "../lib/guest-secret-store";
 import type {
   Comment,
@@ -18,7 +20,9 @@ import {
   createComment,
   deleteComment,
   fetchCommentsClient,
+  revealSecretComment,
 } from "@entities/comment";
+import { ApiResponseError } from "@shared/api";
 import { Modal, Spinner } from "@shared/ui/libs";
 
 const DEFAULT_COMMENTS_PER_PAGE = 10;
@@ -129,20 +133,6 @@ function countVisibleComments(comments: Comment[]): number {
   );
 }
 
-function getGuestIdentity(profile: GuestCommentProfile): {
-  guestName: string;
-  guestEmail: string;
-} | null {
-  if (!profile.guestName.trim() || !profile.guestEmail.trim()) {
-    return null;
-  }
-
-  return {
-    guestName: profile.guestName,
-    guestEmail: profile.guestEmail,
-  };
-}
-
 function getPaginationItems(currentPage: number, totalPages: number) {
   if (totalPages <= 7) {
     return Array.from({ length: totalPages }, (_, index) => index + 1);
@@ -238,11 +228,24 @@ export function CommentList({
   >({});
   const sectionRef = useRef<HTMLElement | null>(null);
   const commentRefs = useRef<Record<number, HTMLLIElement | null>>({});
+  const revealedSecretBodiesRef = useRef<Record<number, string>>({});
+  const inFlightRevealIdsRef = useRef<Set<number>>(new Set());
+  const secretCommentIdsRef = useRef<Set<number>>(new Set());
 
   const safeMeta = meta ?? createFallbackMeta(comments);
   const currentPage = meta.page;
   const isLocked = commentStatus === "locked";
   const pageSize = safeMeta.limit || DEFAULT_COMMENTS_PER_PAGE;
+  const secretCommentIds = useMemo(
+    () => collectSecretComments(comments).map((comment) => comment.id),
+    [comments],
+  );
+  const shouldShowLegacyEmailField =
+    viewer.type === "guest" &&
+    needsLegacyGuestEmailRecovery(secretCommentIds, {
+      guestName: profile.guestName,
+      guestEmail: profile.guestEmail,
+    });
 
   const resolvedComments = useMemo(
     () =>
@@ -263,26 +266,127 @@ export function CommentList({
   }, [initialError]);
 
   useEffect(() => {
-    const identity = getGuestIdentity(profile) ?? readGuestSecretIdentity();
+    revealedSecretBodiesRef.current = revealedSecretBodies;
+  }, [revealedSecretBodies]);
 
-    if (!identity) {
-      setRevealedSecretBodies({});
-
-      return;
-    }
-
-    const nextRevealedSecretBodies = Object.fromEntries(
-      collectSecretComments(comments)
+  useEffect(() => {
+    const secretComments = collectSecretComments(comments);
+    const secretCommentIdSet = new Set(
+      secretComments.map((comment) => comment.id),
+    );
+    secretCommentIdsRef.current = secretCommentIdSet;
+    const legacyBodies = Object.fromEntries(
+      secretComments
         .map((comment) => {
-          const body = readGuestSecretComment(comment.id, identity);
+          const body = readLegacyGuestSecretComment(comment.id, {
+            guestName: profile.guestName,
+            guestEmail: profile.guestEmail,
+          });
 
           return body ? [comment.id, body] : null;
         })
         .filter((entry): entry is [number, string] => entry !== null),
     );
 
-    setRevealedSecretBodies(nextRevealedSecretBodies);
-  }, [comments, profile]);
+    setRevealedSecretBodies((current) => {
+      const nextBodies: Record<number, string> = {};
+
+      for (const commentId of secretCommentIdSet) {
+        if (legacyBodies[commentId]) {
+          nextBodies[commentId] = legacyBodies[commentId];
+          continue;
+        }
+
+        if (current[commentId]) {
+          nextBodies[commentId] = current[commentId];
+        }
+      }
+
+      return nextBodies;
+    });
+  }, [comments, profile.guestEmail, profile.guestName]);
+
+  useEffect(() => {
+    const secretComments = collectSecretComments(comments);
+    const secretCommentIdSet = new Set(
+      secretComments.map((comment) => comment.id),
+    );
+    secretCommentIdsRef.current = secretCommentIdSet;
+    const revealTargets = secretComments
+      .map((comment) => {
+        if (
+          revealedSecretBodiesRef.current[comment.id] ||
+          inFlightRevealIdsRef.current.has(comment.id)
+        ) {
+          return null;
+        }
+
+        const revealToken = readGuestSecretRevealToken(comment.id);
+
+        return revealToken ? [comment.id, revealToken] : null;
+      })
+      .filter((entry): entry is [number, string] => entry !== null);
+
+    if (revealTargets.length === 0) {
+      return;
+    }
+
+    for (const [commentId] of revealTargets) {
+      inFlightRevealIdsRef.current.add(commentId);
+    }
+
+    void Promise.all(
+      revealTargets.map(async ([commentId, revealToken]) => {
+        try {
+          const revealedComment = await revealSecretComment(
+            commentId,
+            revealToken,
+          );
+
+          return [commentId, revealedComment.body] as const;
+        } catch (error) {
+          if (
+            error instanceof ApiResponseError &&
+            (error.statusCode === 403 || error.statusCode === 404)
+          ) {
+            removeGuestSecretRevealToken(commentId);
+          }
+
+          return null;
+        }
+      }),
+    ).then((entries) => {
+      for (const [commentId] of revealTargets) {
+        inFlightRevealIdsRef.current.delete(commentId);
+      }
+
+      const revealedBodies = Object.fromEntries(
+        entries.filter(
+          (entry): entry is readonly [number, string] =>
+            entry !== null && secretCommentIdsRef.current.has(entry[0]),
+        ),
+      );
+
+      if (Object.keys(revealedBodies).length === 0) {
+        return;
+      }
+
+      setRevealedSecretBodies((current) => {
+        const nextBodies: Record<number, string> = {
+          ...current,
+          ...revealedBodies,
+        };
+
+        for (const commentId of Object.keys(nextBodies).map(Number)) {
+          if (!secretCommentIdsRef.current.has(commentId)) {
+            delete nextBodies[commentId];
+          }
+        }
+
+        return nextBodies;
+      });
+    });
+  }, [comments]);
 
   useEffect(() => {
     setExpandedRoots((current) => {
@@ -372,14 +476,16 @@ export function CommentList({
       return;
     }
 
-    const nextComment = await createComment(postId, payload);
+    const { comment: nextComment, revealToken } = await createComment(
+      postId,
+      payload,
+    );
     const isRootComment = nextComment.parentId === null;
+    const missingRevealToken =
+      payload.authorType === "guest" && nextComment.isSecret && !revealToken;
 
-    if (payload.authorType === "guest" && nextComment.isSecret) {
-      rememberGuestSecretComment(nextComment.id, nextComment.body, {
-        guestName: payload.guestName,
-        guestEmail: payload.guestEmail,
-      });
+    if (payload.authorType === "guest" && nextComment.isSecret && revealToken) {
+      rememberGuestSecretRevealToken(nextComment.id, revealToken);
     }
 
     let didRefreshFail = false;
@@ -428,7 +534,11 @@ export function CommentList({
     }
 
     if (!didRefreshFail) {
-      setLoadError(null);
+      setLoadError(
+        missingRevealToken
+          ? "비밀 댓글이 작성되었지만 복원 토큰을 받지 못했습니다. 새로고침 후에는 원문을 다시 열 수 없을 수 있습니다."
+          : null,
+      );
     }
     setReplyTarget(null);
   }
@@ -563,9 +673,17 @@ export function CommentList({
         setLoadError(null);
       }
     } catch (error) {
-      setDeleteError(
-        error instanceof Error ? error.message : "댓글을 삭제하지 못했습니다.",
-      );
+      if (error instanceof ApiResponseError && error.statusCode === 429) {
+        setDeleteError(
+          "너무 많은 요청을 보냈습니다. 잠시 후 다시 시도해 주세요.",
+        );
+      } else {
+        setDeleteError(
+          error instanceof Error
+            ? error.message
+            : "댓글을 삭제하지 못했습니다.",
+        );
+      }
     } finally {
       setDeleteBusy(false);
     }
@@ -608,6 +726,7 @@ export function CommentList({
           <CommentForm
             viewerType={viewer.type}
             profile={profile}
+            forceGuestEmailField={shouldShowLegacyEmailField}
             onProfileChange={handleProfileChange}
             onSubmit={handleCreate}
           />
@@ -672,6 +791,7 @@ export function CommentList({
                     <CommentForm
                       viewerType={viewer.type}
                       profile={profile}
+                      forceGuestEmailField={shouldShowLegacyEmailField}
                       onProfileChange={handleProfileChange}
                       onSubmit={handleCreate}
                       parentId={replyTarget.parentId}
@@ -708,6 +828,7 @@ export function CommentList({
                             <CommentForm
                               viewerType={viewer.type}
                               profile={profile}
+                              forceGuestEmailField={shouldShowLegacyEmailField}
                               onProfileChange={handleProfileChange}
                               onSubmit={handleCreate}
                               parentId={replyTarget.parentId}
@@ -788,6 +909,7 @@ export function CommentList({
 
       <Modal
         isOpen={deleteTarget !== null}
+        aria-label="댓글 삭제"
         onClose={() => {
           if (deleteBusy) {
             return;
@@ -802,7 +924,7 @@ export function CommentList({
       >
         <div className="p-6 text-left">
           <p className="text-body-xs uppercase tracking-[0.2em] text-text-4">
-            Delete comment
+            댓글 삭제
           </p>
           <h3 className="mt-3 text-body-lg font-semibold text-text-1">
             댓글 삭제
@@ -814,6 +936,15 @@ export function CommentList({
               ? "로그인된 계정으로 작성한 댓글을 삭제합니다."
               : "작성 시 사용한 비밀번호를 입력하면 댓글을 삭제할 수 있습니다."}
           </p>
+
+          {deleteTarget && deleteTarget.replies.length > 0 ? (
+            <div className="mt-4 rounded-[1rem] border border-warning-1/30 bg-warning-1/5 px-4 py-3 text-body-sm text-warning-1">
+              <p className="font-medium">대댓글이 있는 댓글입니다.</p>
+              <p className="mt-1">
+                삭제 후에도 대댓글 {deleteTarget.replies.length}개는 유지됩니다.
+              </p>
+            </div>
+          ) : null}
 
           {deleteTarget?.author.type === "oauth" &&
           viewer.type === "oauth" &&
