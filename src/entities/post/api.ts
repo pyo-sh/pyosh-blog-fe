@@ -6,6 +6,7 @@ import type {
   Post,
   PostDetailResponse,
   PostDetailWithNavigationResponse,
+  PublishedPostSlugsResponse,
   UpdatePostBody,
 } from "./model";
 import type { PaginatedResponse } from "@shared/api";
@@ -87,6 +88,16 @@ export async function fetchPostBySlug(
 ): Promise<PostDetailWithNavigationResponse> {
   return serverFetch<PostDetailWithNavigationResponse>(
     `/api/posts/${encodeURIComponent(slug)}`,
+    {},
+    cookieHeader,
+  );
+}
+
+export async function fetchPublishedPostSlugs(
+  cookieHeader?: string,
+): Promise<PublishedPostSlugsResponse> {
+  return serverFetch<PublishedPostSlugsResponse>(
+    "/api/posts/slugs",
     {},
     cookieHeader,
   );

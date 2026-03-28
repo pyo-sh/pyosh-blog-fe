@@ -66,6 +66,15 @@ export interface PostNavigation {
   title: string;
 }
 
+export interface PublishedPostSlug {
+  slug: string;
+  updatedAt: string;
+}
+
+export interface PublishedPostSlugsResponse {
+  slugs: PublishedPostSlug[];
+}
+
 export interface FetchPostsParams {
   page?: number;
   limit?: number;
