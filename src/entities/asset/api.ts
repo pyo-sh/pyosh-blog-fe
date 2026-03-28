@@ -80,3 +80,10 @@ export async function deleteAsset(id: number): Promise<void> {
     method: "DELETE",
   });
 }
+
+export async function deleteAssets(ids: number[]): Promise<void> {
+  await clientMutate<void>("/api/assets/bulk", {
+    method: "DELETE",
+    body: JSON.stringify({ ids }),
+  });
+}

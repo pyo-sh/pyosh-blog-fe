@@ -3,10 +3,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { AssetDetailModal } from "./asset-detail-modal";
 import { AssetGrid } from "./asset-grid";
 import { type PendingUploadFile, UploadZone } from "./upload-zone";
 import {
+  buildAssetMarkdown,
   deleteAsset,
+  deleteAssets,
   fetchAssets,
   uploadAssets,
   type Asset,
@@ -31,8 +34,16 @@ export function AssetUploader() {
   const [page, setPage] = useState(1);
   const [pendingFiles, setPendingFiles] = useState<PendingUploadFile[]>([]);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(
+    null,
+  );
   const [deleteTargetIds, setDeleteTargetIds] = useState<number[]>([]);
+  const [detailDeleteIndex, setDetailDeleteIndex] = useState<number | null>(
+    null,
+  );
+  const [detailAssetId, setDetailAssetId] = useState<number | null>(null);
   const [copiedState, setCopiedState] = useState<{
     id: number;
     type: "url" | "markdown";
@@ -64,54 +75,53 @@ export function AssetUploader() {
     },
   });
 
+  const assets = assetsQuery.data?.data ?? [];
+  const meta = assetsQuery.data?.meta;
+
   const deleteMutation = useMutation({
     mutationFn: async (ids: number[]) => {
-      const results = await Promise.allSettled(
-        ids.map((id) => deleteAsset(id)),
-      );
-      const deletedIds: number[] = [];
-      const failedIds: number[] = [];
-
-      results.forEach((result, index) => {
-        if (result.status === "fulfilled") {
-          deletedIds.push(ids[index]);
-        } else {
-          failedIds.push(ids[index]);
-        }
-      });
-
-      return { deletedIds, failedIds };
-    },
-    onSuccess: async ({ deletedIds, failedIds }) => {
-      if (failedIds.length > 0) {
-        toast.error(
-          failedIds.length === 1
-            ? "일부 삭제에 실패했습니다. 목록을 새로고침했습니다."
-            : `${failedIds.length}개 에셋 삭제에 실패했습니다. 목록을 새로고침했습니다.`,
-        );
+      if (ids.length === 1) {
+        await deleteAsset(ids[0]);
+      } else {
+        await deleteAssets(ids);
       }
 
-      if (deletedIds.length > 0) {
-        toast.success(
-          deletedIds.length === 1
-            ? "에셋을 삭제했습니다."
-            : `${deletedIds.length}개의 에셋을 삭제했습니다.`,
+      return ids;
+    },
+    onSuccess: async (deletedIds) => {
+      const deletedSet = new Set(deletedIds);
+
+      if (deletedIds.length === 1) {
+        toast.success("에셋을 삭제했습니다.");
+      } else {
+        toast.success(`${deletedIds.length}개의 에셋을 삭제했습니다.`);
+      }
+
+      if (
+        detailDeleteIndex !== null &&
+        detailAssetId !== null &&
+        deletedSet.has(detailAssetId)
+      ) {
+        const remainingAssets = assets.filter(
+          (asset) => !deletedSet.has(asset.id),
         );
+        const nextAsset =
+          remainingAssets[detailDeleteIndex] ??
+          remainingAssets[detailDeleteIndex - 1] ??
+          null;
+        setDetailAssetId(nextAsset?.id ?? null);
       }
 
       setDeleteTargetIds([]);
-      setSelectedIds((current) =>
-        current.filter((id) => !deletedIds.includes(id)),
-      );
+      setDetailDeleteIndex(null);
+      setSelectedIds((current) => current.filter((id) => !deletedSet.has(id)));
+
       await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
     },
     onError: (error) => {
       toast.error(getErrorMessage(error, "에셋 삭제에 실패했습니다."));
     },
   });
-
-  const assets = assetsQuery.data?.data ?? [];
-  const meta = assetsQuery.data?.meta;
 
   useEffect(() => {
     if (meta && meta.totalPages > 0 && page > meta.totalPages) {
@@ -124,6 +134,31 @@ export function AssetUploader() {
       current.filter((id) => assets.some((asset) => asset.id === id)),
     );
   }, [assets]);
+
+  useEffect(() => {
+    if (detailAssetId && !assets.some((asset) => asset.id === detailAssetId)) {
+      setDetailAssetId(null);
+    }
+  }, [assets, detailAssetId]);
+
+  useEffect(() => {
+    if (!selectionMode) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        exitSelectionMode();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [selectionMode]);
 
   useEffect(() => {
     if (!copiedState) {
@@ -227,21 +262,54 @@ export function AssetUploader() {
     );
   }
 
-  function toggleSelect(id: number) {
-    setSelectedIds((current) =>
-      current.includes(id)
+  function enterSelectionMode() {
+    setSelectionMode(true);
+  }
+
+  function exitSelectionMode() {
+    setSelectionMode(false);
+    setSelectedIds([]);
+    setLastSelectedIndex(null);
+  }
+
+  function toggleSelect(
+    id: number,
+    index: number,
+    options: { shiftKey: boolean } = { shiftKey: false },
+  ) {
+    setSelectedIds((current) => {
+      if (
+        options.shiftKey &&
+        lastSelectedIndex !== null &&
+        assets[lastSelectedIndex]
+      ) {
+        const start = Math.min(lastSelectedIndex, index);
+        const end = Math.max(lastSelectedIndex, index);
+        const rangeIds = assets.slice(start, end + 1).map((asset) => asset.id);
+        const next = new Set(current);
+
+        rangeIds.forEach((rangeId) => next.add(rangeId));
+
+        return Array.from(next);
+      }
+
+      return current.includes(id)
         ? current.filter((value) => value !== id)
-        : [...current, id],
-    );
+        : [...current, id];
+    });
+
+    setLastSelectedIndex(index);
   }
 
   function selectAll(checked: boolean) {
     setSelectedIds(checked ? assets.map((asset) => asset.id) : []);
+    setLastSelectedIndex(
+      checked && assets.length > 0 ? assets.length - 1 : null,
+    );
   }
 
   async function handleCopy(asset: Asset, type: "url" | "markdown") {
-    const text =
-      type === "url" ? asset.url : `![${getFilename(asset.url)}](${asset.url})`;
+    const text = type === "url" ? asset.url : buildAssetMarkdown(asset);
 
     try {
       await navigator.clipboard.writeText(text);
@@ -252,6 +320,26 @@ export function AssetUploader() {
     } catch {
       toast.error("클립보드 복사에 실패했습니다.");
     }
+  }
+
+  function requestDelete(ids: number[]) {
+    if (ids.length === 0) {
+      return;
+    }
+
+    setDeleteTargetIds(ids);
+  }
+
+  function requestDeleteFromDetail(asset: Asset) {
+    setDetailDeleteIndex(assets.findIndex((item) => item.id === asset.id));
+    setDeleteTargetIds([asset.id]);
+  }
+
+  function handlePageChange(nextPage: number) {
+    setPage(nextPage);
+    setSelectedIds([]);
+    setLastSelectedIndex(null);
+    setSelectionMode(false);
   }
 
   return (
@@ -265,8 +353,8 @@ export function AssetUploader() {
             에셋 라이브러리
           </h1>
           <p className="mt-2 text-sm text-text-3">
-            업로드 대기열을 확인한 뒤 배치 업로드하고, 갤러리에서 URL 또는
-            마크다운을 복사하거나 여러 개를 선택해 삭제할 수 있습니다.
+            업로드 대기열을 확인한 뒤 배치 업로드하고, 갤러리에서 상세 정보, URL
+            복사, 선택 삭제를 관리할 수 있습니다.
           </p>
         </div>
 
@@ -320,21 +408,25 @@ export function AssetUploader() {
         <>
           <AssetGrid
             assets={assets}
+            selectionMode={selectionMode}
             selectedIds={selectedIds}
             deletingIds={
               deleteMutation.isPending ? (deleteMutation.variables ?? []) : []
             }
-            copiedState={copiedState}
+            copiedAssetId={copiedState?.type === "url" ? copiedState.id : null}
             isPending={deleteMutation.isPending}
+            onEnterSelectionMode={enterSelectionMode}
+            onExitSelectionMode={exitSelectionMode}
             onToggleSelect={toggleSelect}
             onSelectAll={selectAll}
-            onCopy={handleCopy}
-            onRequestDelete={setDeleteTargetIds}
+            onCopyUrl={(asset) => void handleCopy(asset, "url")}
+            onOpenDetail={setDetailAssetId}
+            onRequestDelete={requestDelete}
           />
           <PaginationControls
             currentPage={meta?.page ?? 1}
             totalPages={meta?.totalPages ?? 1}
-            onPageChange={setPage}
+            onPageChange={handlePageChange}
           />
         </>
       ) : null}
@@ -345,9 +437,20 @@ export function AssetUploader() {
         onCancel={() => {
           if (!deleteMutation.isPending) {
             setDeleteTargetIds([]);
+            setDetailDeleteIndex(null);
           }
         }}
         onConfirm={() => deleteMutation.mutate(deleteTargetIds)}
+      />
+
+      <AssetDetailModal
+        assets={assets}
+        assetId={detailAssetId}
+        copiedType={copiedState?.id === detailAssetId ? copiedState.type : null}
+        onClose={() => setDetailAssetId(null)}
+        onCopy={(asset, type) => void handleCopy(asset, type)}
+        onRequestDelete={requestDeleteFromDetail}
+        onSelectAsset={setDetailAssetId}
       />
     </div>
   );
@@ -455,7 +558,7 @@ function PaginationControls({
             disabled={page === currentPage}
             className={
               page === currentPage
-                ? "inline-flex h-10 min-w-10 items-center justify-center rounded-[0.85rem] bg-primary-1 px-3 text-sm font-semibold text-text-1"
+                ? "inline-flex h-10 min-w-10 items-center justify-center rounded-[0.85rem] bg-primary-1 px-3 text-sm font-semibold text-white"
                 : "inline-flex h-10 min-w-10 items-center justify-center rounded-[0.85rem] border border-border-3 px-3 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
             }
           >
@@ -486,24 +589,12 @@ function AssetGridSkeleton() {
           >
             <div className="aspect-[4/3] animate-pulse bg-background-3" />
             <div className="space-y-3 p-4">
-              <div className="h-4 animate-pulse rounded-full bg-background-3" />
-              <div className="h-3 animate-pulse rounded-full bg-background-3" />
+              <div className="h-4 w-2/3 animate-pulse rounded bg-background-3" />
+              <div className="h-3 w-1/2 animate-pulse rounded bg-background-3" />
             </div>
           </div>
         ))}
       </div>
     </section>
   );
-}
-
-function getFilename(url: string): string {
-  const pathname = url.split("?")[0] ?? url;
-  const parts = pathname.split("/");
-  const segment = parts[parts.length - 1] || "asset";
-
-  try {
-    return decodeURIComponent(segment);
-  } catch {
-    return segment;
-  }
 }
