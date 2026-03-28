@@ -1,6 +1,8 @@
 export type {
   Category,
   CreateCategoryBody,
+  DeleteCategoryAction,
+  DeleteCategoryOptions,
   UpdateCategoryBody,
   UpdateCategoryOrderBody,
 } from "./model";
