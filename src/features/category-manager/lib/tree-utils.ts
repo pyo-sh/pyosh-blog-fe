@@ -194,10 +194,10 @@ export function moveCategory(
     return clonedTree;
   }
 
-  const { tree, removedCategory } = removed;
+  const { removedCategory } = removed;
 
   if (target.position === "inside") {
-    const parentNode = findCategory(tree, target.targetId);
+    const parentNode = findCategory(clonedTree, target.targetId);
 
     if (!parentNode) {
       return categories;
@@ -207,10 +207,10 @@ export function moveCategory(
     parentNode.children = nextChildren;
     normalizeSiblingOrder(nextChildren, parentNode.id);
 
-    return normalizeTree(tree, null);
+    return normalizeTree(clonedTree, null);
   }
 
-  const parentChildren = findSiblingList(tree, target.targetId);
+  const parentChildren = findSiblingList(clonedTree, target.targetId);
 
   if (!parentChildren) {
     return categories;
@@ -230,7 +230,7 @@ export function moveCategory(
   parentChildren.items.splice(insertIndex, 0, removedCategory);
   normalizeSiblingOrder(parentChildren.items, parentChildren.parentId);
 
-  return normalizeTree(tree, null);
+  return normalizeTree(clonedTree, null);
 }
 
 export function buildDropZoneId(
