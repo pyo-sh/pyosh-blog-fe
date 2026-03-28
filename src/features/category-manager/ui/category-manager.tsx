@@ -15,8 +15,10 @@ import {
   createCategory,
   deleteCategory,
   fetchCategoriesAdmin,
+  updateCategoryTree,
   updateCategory,
   type Category,
+  type CategoryTreeChange,
   type DeleteCategoryOptions,
 } from "@entities/category";
 import { getErrorMessage } from "@shared/lib/get-error-message";
@@ -90,6 +92,42 @@ export function CategoryManager() {
     },
     onError: (error) => {
       toast.error(getErrorMessage(error, "카테고리 삭제에 실패했습니다."));
+    },
+  });
+
+  const bulkVisibilityMutation = useMutation({
+    mutationFn: async ({
+      ids,
+      isVisible,
+    }: {
+      ids: number[];
+      isVisible: boolean;
+    }) => {
+      await Promise.all(ids.map((id) => updateCategory(id, { isVisible })));
+    },
+    onSuccess: async (_data, variables) => {
+      await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      toast.success(
+        variables.isVisible
+          ? "선택한 카테고리를 표시했습니다."
+          : "선택한 카테고리를 숨겼습니다.",
+      );
+    },
+    onError: (error) => {
+      toast.error(
+        getErrorMessage(error, "카테고리 공개 상태 변경에 실패했습니다."),
+      );
+    },
+  });
+
+  const treeUpdateMutation = useMutation({
+    mutationFn: (changes: CategoryTreeChange[]) => updateCategoryTree(changes),
+    onSuccess: async (_data, changes) => {
+      await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      toast.success(`배치 편집 변경사항 ${changes.length}건을 저장했습니다.`);
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error, "카테고리 트리 저장에 실패했습니다."));
     },
   });
 
@@ -197,6 +235,14 @@ export function CategoryManager() {
               categories={categories}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              onBulkVisibilityChange={async (ids, isVisible) => {
+                await bulkVisibilityMutation.mutateAsync({ ids, isVisible });
+              }}
+              onSaveTree={async (changes) => {
+                await treeUpdateMutation.mutateAsync(changes);
+              }}
+              isBulkUpdating={bulkVisibilityMutation.isPending}
+              isSavingTree={treeUpdateMutation.isPending}
             />
           ) : null}
         </div>

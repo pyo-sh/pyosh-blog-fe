@@ -1,9 +1,11 @@
 import type {
   Category,
+  CategoryTreeChange,
   CreateCategoryBody,
   DeleteCategoryOptions,
   UpdateCategoryBody,
   UpdateCategoryOrderBody,
+  UpdateCategoryTreeBody,
 } from "./model";
 import { clientFetch, clientMutate, serverFetch } from "@shared/api";
 
@@ -78,6 +80,17 @@ export async function updateCategoryOrder(
   body: UpdateCategoryOrderBody,
 ): Promise<void> {
   await clientMutate<void>("/api/categories/order", {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function updateCategoryTree(
+  changes: CategoryTreeChange[],
+): Promise<void> {
+  const body: UpdateCategoryTreeBody = { changes };
+
+  await clientMutate<void>("/api/categories/tree", {
     method: "PATCH",
     body: JSON.stringify(body),
   });
