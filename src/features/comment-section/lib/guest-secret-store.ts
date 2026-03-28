@@ -248,6 +248,37 @@ function resolveSingleLegacyAuthorKey(
   return authorKeys.size === 1 ? [...authorKeys][0] : null;
 }
 
+export function needsLegacyGuestEmailRecovery(
+  commentIds: number[],
+  identity?: LegacyGuestIdentity,
+) {
+  const legacyStore = readLegacyStore();
+  const activeIdentity = readLegacyActiveAuthor();
+  const profileIdentity = createLegacyAuthorKey(
+    identity?.guestName,
+    identity?.guestEmail,
+  );
+  const singleAuthorFallback = resolveSingleLegacyAuthorKey(legacyStore);
+
+  return commentIds.some((commentId) => {
+    const legacyEntry = legacyStore[String(commentId)];
+
+    if (!legacyEntry) {
+      return false;
+    }
+
+    const legacyAuthorKey = getLegacyEntryAuthorKey(legacyEntry);
+
+    if (!legacyAuthorKey) {
+      return false;
+    }
+
+    return ![activeIdentity, profileIdentity, singleAuthorFallback].includes(
+      legacyAuthorKey,
+    );
+  });
+}
+
 export function rememberGuestSecretRevealToken(
   commentId: number,
   revealToken: string,
@@ -294,8 +325,7 @@ export function readLegacyGuestSecretComment(
   if (
     cachedEntry &&
     (cachedEntry.authorKey === activeIdentity ||
-      cachedEntry.authorKey === profileIdentity ||
-      (!activeIdentity && !profileIdentity))
+      cachedEntry.authorKey === profileIdentity)
   ) {
     return cachedEntry.body;
   }

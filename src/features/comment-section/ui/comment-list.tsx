@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { CommentForm, type GuestCommentProfile } from "./comment-form";
 import { CommentItem } from "./comment-item";
 import {
+  needsLegacyGuestEmailRecovery,
   readGuestSecretRevealToken,
   readLegacyGuestSecretComment,
   rememberGuestSecretRevealToken,
@@ -234,6 +235,16 @@ export function CommentList({
   const currentPage = meta.page;
   const isLocked = commentStatus === "locked";
   const pageSize = safeMeta.limit || DEFAULT_COMMENTS_PER_PAGE;
+  const secretCommentIds = useMemo(
+    () => collectSecretComments(comments).map((comment) => comment.id),
+    [comments],
+  );
+  const shouldShowLegacyEmailField =
+    viewer.type === "guest" &&
+    needsLegacyGuestEmailRecovery(secretCommentIds, {
+      guestName: profile.guestName,
+      guestEmail: profile.guestEmail,
+    });
 
   const resolvedComments = useMemo(
     () =>
@@ -260,7 +271,7 @@ export function CommentList({
   useEffect(() => {
     let isCancelled = false;
     const secretComments = collectSecretComments(comments);
-    const secretCommentIds = new Set(
+    const secretCommentIdSet = new Set(
       secretComments.map((comment) => comment.id),
     );
     const legacyBodies = Object.fromEntries(
@@ -294,7 +305,7 @@ export function CommentList({
     setRevealedSecretBodies((current) => {
       const nextBodies: Record<number, string> = {};
 
-      for (const commentId of secretCommentIds) {
+      for (const commentId of secretCommentIdSet) {
         if (legacyBodies[commentId]) {
           nextBodies[commentId] = legacyBodies[commentId];
           continue;
@@ -364,7 +375,7 @@ export function CommentList({
         };
 
         for (const commentId of Object.keys(nextBodies).map(Number)) {
-          if (!secretCommentIds.has(commentId)) {
+          if (!secretCommentIdSet.has(commentId)) {
             delete nextBodies[commentId];
           }
         }
@@ -716,6 +727,7 @@ export function CommentList({
           <CommentForm
             viewerType={viewer.type}
             profile={profile}
+            forceGuestEmailField={shouldShowLegacyEmailField}
             onProfileChange={handleProfileChange}
             onSubmit={handleCreate}
           />
@@ -780,6 +792,7 @@ export function CommentList({
                     <CommentForm
                       viewerType={viewer.type}
                       profile={profile}
+                      forceGuestEmailField={shouldShowLegacyEmailField}
                       onProfileChange={handleProfileChange}
                       onSubmit={handleCreate}
                       parentId={replyTarget.parentId}
@@ -816,6 +829,7 @@ export function CommentList({
                             <CommentForm
                               viewerType={viewer.type}
                               profile={profile}
+                              forceGuestEmailField={shouldShowLegacyEmailField}
                               onProfileChange={handleProfileChange}
                               onSubmit={handleCreate}
                               parentId={replyTarget.parentId}

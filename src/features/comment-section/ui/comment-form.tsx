@@ -27,6 +27,7 @@ interface CommentFormProps<TPayload extends CommentFormPayload> {
   variant?: "comment" | "guestbook";
   viewerType: "guest" | "oauth";
   profile: GuestCommentProfile;
+  forceGuestEmailField?: boolean;
   onProfileChange: (field: keyof GuestCommentProfile, value: string) => void;
   onSubmit: (payload: TPayload) => Promise<void>;
   parentId?: number;
@@ -131,6 +132,7 @@ export function CommentForm<TPayload extends CommentFormPayload>({
   variant = "comment",
   viewerType,
   profile,
+  forceGuestEmailField = false,
   onProfileChange,
   onSubmit,
   parentId,
@@ -146,7 +148,11 @@ export function CommentForm<TPayload extends CommentFormPayload>({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const bodyLength = body.length;
   const isCommentVariant = variant === "comment";
-  const showGuestEmailField = viewerType === "guest" && !isCommentVariant;
+  const showGuestEmailField =
+    viewerType === "guest" &&
+    (!isCommentVariant ||
+      forceGuestEmailField ||
+      Boolean(profile.guestEmail.trim()));
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
