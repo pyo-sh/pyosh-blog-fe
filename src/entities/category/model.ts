@@ -30,3 +30,20 @@ export interface UpdateCategoryOrderBody {
     sortOrder: number;
   }>;
 }
+
+export interface CategoryTreeChange {
+  id: number;
+  parentId: number | null;
+  sortOrder: number;
+}
+
+export interface UpdateCategoryTreeBody {
+  changes: CategoryTreeChange[];
+}
+
+export type DeleteCategoryAction = "move" | "trash";
+
+export interface DeleteCategoryOptions {
+  action: DeleteCategoryAction;
+  moveTo?: number;
+}

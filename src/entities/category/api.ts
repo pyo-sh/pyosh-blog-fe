@@ -1,8 +1,11 @@
 import type {
   Category,
+  CategoryTreeChange,
   CreateCategoryBody,
+  DeleteCategoryOptions,
   UpdateCategoryBody,
   UpdateCategoryOrderBody,
+  UpdateCategoryTreeBody,
 } from "./model";
 import { clientFetch, clientMutate, serverFetch } from "@shared/api";
 
@@ -82,8 +85,34 @@ export async function updateCategoryOrder(
   });
 }
 
-export async function deleteCategory(id: number): Promise<void> {
-  await clientMutate<void>(`/api/categories/${id}`, {
+export async function updateCategoryTree(
+  changes: CategoryTreeChange[],
+): Promise<void> {
+  const body: UpdateCategoryTreeBody = { changes };
+
+  await clientMutate<void>("/api/categories/tree", {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function deleteCategory(
+  id: number,
+  options: DeleteCategoryOptions,
+): Promise<void> {
+  const searchParams = new URLSearchParams();
+
+  if (options.action) {
+    searchParams.set("action", options.action);
+  }
+
+  if (options.moveTo !== undefined) {
+    searchParams.set("moveTo", String(options.moveTo));
+  }
+
+  const query = searchParams.toString();
+
+  await clientMutate<void>(`/api/categories/${id}${query ? `?${query}` : ""}`, {
     method: "DELETE",
   });
 }
