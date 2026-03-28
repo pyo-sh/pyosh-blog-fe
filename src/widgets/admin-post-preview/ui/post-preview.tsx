@@ -6,7 +6,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type { Post } from "@entities/post";
-import { deletePost, updatePost } from "@entities/post";
+import {
+  countPinnedAdminPosts,
+  deletePost,
+  MAX_PINNED_POSTS,
+  updatePost,
+} from "@entities/post";
 import { getErrorMessage } from "@shared/lib/get-error-message";
 import { cn } from "@shared/lib/style-utils";
 import { ConfirmDialog } from "@shared/ui/confirm-dialog";
@@ -157,8 +162,21 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
         <button
           type="button"
           disabled={isUpdating}
-          onClick={() => {
+          onClick={async () => {
             const prev = currentPost.isPinned;
+
+            if (!currentPost.isPinned) {
+              const pinnedCount = await countPinnedAdminPosts();
+
+              if (pinnedCount >= MAX_PINNED_POSTS) {
+                toast.error(
+                  `고정 글은 최대 ${MAX_PINNED_POSTS}개까지 설정할 수 있습니다.`,
+                );
+
+                return;
+              }
+            }
+
             setCurrentPost((p) => ({ ...p, isPinned: !p.isPinned }));
             updateMutation.mutate(
               { isPinned: !currentPost.isPinned },

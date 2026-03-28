@@ -7,9 +7,11 @@ import { toast } from "sonner";
 import { fetchCategoriesAdmin, type Category } from "@entities/category";
 import {
   bulkUpdatePosts,
+  countPinnedAdminPosts,
   deletePost,
   fetchAdminPosts,
   hardDeletePost,
+  MAX_PINNED_POSTS,
   restorePost,
   updatePost,
   type BulkPostErrorDetail,
@@ -210,6 +212,27 @@ export default function ManagePostsPage() {
     setPendingToggleIds((prev) => new Set(prev).add(post.id));
 
     const nextPinned = !post.isPinned;
+
+    if (nextPinned) {
+      try {
+        const pinnedCount = await countPinnedAdminPosts();
+
+        if (pinnedCount >= MAX_PINNED_POSTS) {
+          toast.error(
+            `고정 글은 최대 ${MAX_PINNED_POSTS}개까지 설정할 수 있습니다.`,
+          );
+
+          return;
+        }
+      } finally {
+        setPendingToggleIds((prev) => {
+          const next = new Set(prev);
+          next.delete(post.id);
+
+          return next;
+        });
+      }
+    }
 
     queryClient.setQueryData(queryKey, (old: typeof data) => {
       if (!old) return old;

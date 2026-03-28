@@ -17,6 +17,7 @@ export type {
   UpdatePostBody,
 } from "./model";
 export { SEARCH_FILTERS } from "./model";
+export { countPinnedAdminPosts, MAX_PINNED_POSTS } from "./lib";
 export {
   bulkUpdatePosts,
   fetchAdminPost,
