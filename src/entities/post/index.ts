@@ -4,6 +4,7 @@ export type {
   FetchAdminPostsParams,
   FetchPostsParams,
   MatchedComment,
+  PinnedPostCountResponse,
   Post,
   PostTag,
   PostCategory,
@@ -17,11 +18,12 @@ export type {
   UpdatePostBody,
 } from "./model";
 export { SEARCH_FILTERS } from "./model";
-export { countPinnedAdminPostsFromCache, MAX_PINNED_POSTS } from "./lib";
+export { isPinnedPostLimitError, MAX_PINNED_POSTS } from "./lib";
 export {
   bulkUpdatePosts,
   fetchAdminPost,
   fetchAdminPosts,
+  fetchPinnedPostCount,
   fetchPostBySlug,
   fetchPublishedPostSlugs,
   fetchPosts,

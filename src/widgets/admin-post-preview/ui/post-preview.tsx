@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type { Post } from "@entities/post";
 import {
-  countPinnedAdminPostsFromCache,
   deletePost,
+  fetchPinnedPostCount,
+  isPinnedPostLimitError,
   MAX_PINNED_POSTS,
   updatePost,
 } from "@entities/post";
@@ -60,6 +61,11 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
   const [modifiedAtInput, setModifiedAtInput] = useState(
     toDatetimeLocalValue(post.contentModifiedAt),
   );
+  const { data: pinnedCount } = useQuery({
+    queryKey: ["admin-posts", "pinned-count"],
+    queryFn: fetchPinnedPostCount,
+    staleTime: 30 * 1000,
+  });
 
   const updateMutation = useMutation({
     mutationFn: (body: Parameters<typeof updatePost>[1]) =>
@@ -67,10 +73,21 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
     onSuccess: (updated) => {
       setCurrentPost(updated);
       setModifiedAtInput(toDatetimeLocalValue(updated.contentModifiedAt));
-      void queryClient.invalidateQueries({ queryKey: ["admin-posts"] });
+      void Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["admin-posts"] }),
+        queryClient.invalidateQueries({
+          queryKey: ["admin-posts", "pinned-count"],
+        }),
+      ]);
     },
     onError: (error) => {
-      toast.error(getErrorMessage(error, "수정에 실패했습니다."));
+      if (isPinnedPostLimitError(error)) {
+        toast.error(
+          `고정 글은 최대 ${MAX_PINNED_POSTS}개까지 설정할 수 있습니다.`,
+        );
+      } else {
+        toast.error(getErrorMessage(error, "수정에 실패했습니다."));
+      }
     },
   });
 
@@ -78,7 +95,12 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
     mutationFn: () => deletePost(currentPost.id),
     onSuccess: () => {
       toast.success("글이 삭제되었습니다.");
-      void queryClient.invalidateQueries({ queryKey: ["admin-posts"] });
+      void Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["admin-posts"] }),
+        queryClient.invalidateQueries({
+          queryKey: ["admin-posts", "pinned-count"],
+        }),
+      ]);
       router.push("/manage/posts");
     },
     onError: (error) => {
@@ -165,24 +187,16 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
           onClick={async () => {
             const prev = currentPost.isPinned;
 
-            if (!currentPost.isPinned) {
-              try {
-                const pinnedCount = countPinnedAdminPostsFromCache(queryClient);
+            if (
+              !currentPost.isPinned &&
+              typeof pinnedCount === "number" &&
+              pinnedCount >= MAX_PINNED_POSTS
+            ) {
+              toast.error(
+                `고정 글은 최대 ${MAX_PINNED_POSTS}개까지 설정할 수 있습니다.`,
+              );
 
-                if (pinnedCount !== null && pinnedCount >= MAX_PINNED_POSTS) {
-                  toast.error(
-                    `고정 글은 최대 ${MAX_PINNED_POSTS}개까지 설정할 수 있습니다.`,
-                  );
-
-                  return;
-                }
-              } catch (error) {
-                toast.error(
-                  getErrorMessage(error, "고정 글 개수를 확인하지 못했습니다."),
-                );
-
-                return;
-              }
+              return;
             }
 
             setCurrentPost((p) => ({ ...p, isPinned: !p.isPinned }));
