@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 const FALLBACK_SITE_URL = "http://localhost:3000";
 const BLOG_NAME = "Pyosh Blog";
 const BLOG_DESCRIPTION = "Pyosh 개발 블로그";
+const BLOG_LOCALE = "ko_KR";
 const DESCRIPTION_LIMIT = 160;
 const DEFAULT_TEXT_LIMIT = 200;
 
@@ -20,6 +21,10 @@ export function getSiteName() {
 
 export function getSiteDescription() {
   return BLOG_DESCRIPTION;
+}
+
+export function getSiteLocale() {
+  return BLOG_LOCALE;
 }
 
 export function getSiteUrl() {
@@ -111,15 +116,12 @@ export function buildCanonicalPath(
 export function buildCanonicalMetadata(
   pathname: string,
   query?: Record<string, QueryValue>,
-): Pick<Metadata, "alternates" | "openGraph"> {
+): Pick<Metadata, "alternates"> {
   const canonical = buildCanonicalPath(pathname, query);
 
   return {
     alternates: {
       canonical,
-    },
-    openGraph: {
-      url: canonical,
     },
   };
 }

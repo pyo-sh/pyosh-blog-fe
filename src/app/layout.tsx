@@ -5,6 +5,7 @@ import Providers from "@app-layer/provider";
 import {
   getMetadataBase,
   getSiteDescription,
+  getSiteLocale,
   getSiteName,
 } from "@shared/lib/seo";
 import { ErrorBoundaryWithReset } from "@shared/ui/error-boundary";
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: getSiteName(),
-    locale: "ko_KR",
+    locale: getSiteLocale(),
     title: getSiteName(),
     description: getSiteDescription(),
   },

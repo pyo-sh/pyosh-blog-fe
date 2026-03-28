@@ -21,7 +21,11 @@ import {
 } from "@features/post-detail";
 import { ApiResponseError } from "@shared/api";
 import { extractHeadings, type TocItem } from "@shared/lib/markdown";
-import { buildCanonicalMetadata } from "@shared/lib/seo";
+import {
+  buildCanonicalMetadata,
+  getSiteLocale,
+  getSiteName,
+} from "@shared/lib/seo";
 import {
   buildBlogPostingJsonLd,
   buildBreadcrumbJsonLd,
@@ -114,6 +118,8 @@ export async function generateMetadata({
     openGraph: {
       url: canonical,
       type: "article",
+      siteName: getSiteName(),
+      locale: getSiteLocale(),
       title: post.title,
       ...(description ? { description } : {}),
       publishedTime: post.publishedAt ?? undefined,
