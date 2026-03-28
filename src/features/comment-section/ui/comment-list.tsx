@@ -288,8 +288,13 @@ export function CommentList({
           );
 
           return [commentId, revealedComment.body] as const;
-        } catch {
-          removeGuestSecretRevealToken(commentId);
+        } catch (error) {
+          if (
+            error instanceof ApiResponseError &&
+            (error.statusCode === 403 || error.statusCode === 404)
+          ) {
+            removeGuestSecretRevealToken(commentId);
+          }
 
           return null;
         }
