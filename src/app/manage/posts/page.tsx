@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { fetchCategoriesAdmin, type Category } from "@entities/category";
 import {
   bulkUpdatePosts,
-  countPinnedAdminPosts,
+  countPinnedAdminPostsFromCache,
   deletePost,
   fetchAdminPosts,
   hardDeletePost,
@@ -216,9 +216,9 @@ export default function ManagePostsPage() {
 
       if (nextPinned) {
         try {
-          const pinnedCount = await countPinnedAdminPosts();
+          const pinnedCount = countPinnedAdminPostsFromCache(queryClient);
 
-          if (pinnedCount >= MAX_PINNED_POSTS) {
+          if (pinnedCount !== null && pinnedCount >= MAX_PINNED_POSTS) {
             toast.error(
               `고정 글은 최대 ${MAX_PINNED_POSTS}개까지 설정할 수 있습니다.`,
             );

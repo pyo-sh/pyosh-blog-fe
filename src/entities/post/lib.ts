@@ -1,27 +1,29 @@
-import { fetchAdminPosts } from "./api";
 import type { Post } from "./model";
+import type { PaginatedResponse } from "@shared/api";
+import type { QueryClient } from "@tanstack/react-query";
 
 export const MAX_PINNED_POSTS = 5;
 
-const PINNED_COUNT_PAGE_SIZE = 100;
+export function countPinnedAdminPostsFromCache(queryClient: QueryClient) {
+  const cachedQueries = queryClient.getQueriesData<PaginatedResponse<Post>>({
+    queryKey: ["admin-posts"],
+  });
 
-export async function countPinnedAdminPosts() {
-  let page = 1;
-  let totalPages = 1;
-  let pinnedCount = 0;
+  if (cachedQueries.length === 0) {
+    return null;
+  }
 
-  do {
-    const response = await fetchAdminPosts({
-      page,
-      limit: PINNED_COUNT_PAGE_SIZE,
-    });
+  const pinnedIds = new Set<number>();
 
-    pinnedCount += response.data.filter(isPinnedActivePost).length;
-    totalPages = response.meta.totalPages;
-    page += 1;
-  } while (page <= totalPages);
+  for (const [, response] of cachedQueries) {
+    for (const post of response?.data ?? []) {
+      if (isPinnedActivePost(post)) {
+        pinnedIds.add(post.id);
+      }
+    }
+  }
 
-  return pinnedCount;
+  return pinnedIds.size;
 }
 
 function isPinnedActivePost(post: Post) {
