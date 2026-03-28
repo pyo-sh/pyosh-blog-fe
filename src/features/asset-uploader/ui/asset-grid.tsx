@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { useLongPress } from "../lib/use-long-press";
 import type { Asset } from "@entities/asset";
 import {
@@ -325,13 +324,11 @@ function AssetCardMedia({ asset }: { asset: Asset }) {
           미리보기를 불러오지 못했습니다.
         </div>
       ) : (
-        <Image
+        // eslint-disable-next-line @next/next/no-img-element -- arbitrary admin asset hosts are allowed
+        <img
           src={asset.url}
           alt={getAssetFilename(asset.url)}
-          fill
-          unoptimized
-          sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
-          className="object-cover transition duration-300 group-hover:scale-[1.03]"
+          className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
           onError={() => setHasError(true)}
         />
       )}

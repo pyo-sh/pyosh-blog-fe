@@ -136,7 +136,9 @@ export function AssetPickerModal({
         <div className="flex flex-col gap-4 border-t border-border-3 px-6 py-5 md:flex-row md:items-center md:justify-between">
           <div className="text-sm text-text-4">
             {meta
-              ? `총 ${meta.total}개 중 ${(meta.page - 1) * meta.limit + 1}-${(meta.page - 1) * meta.limit + assets.length}`
+              ? meta.total === 0
+                ? "표시할 에셋이 없습니다."
+                : `총 ${meta.total}개 중 ${(meta.page - 1) * meta.limit + 1}-${(meta.page - 1) * meta.limit + assets.length}`
               : "페이지 정보를 불러오는 중입니다."}
           </div>
 
