@@ -16,7 +16,12 @@ export function PublishConfirmModal({
   onConfirm,
 }: PublishConfirmModalProps) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} withBackground>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      withBackground
+      aria-label="게시글 발행 확인"
+    >
       <div className="w-full max-w-xl rounded-[1.5rem] bg-background-1 p-6">
         <div className="space-y-2">
           <p className="text-xs uppercase tracking-[0.24em] text-text-4">

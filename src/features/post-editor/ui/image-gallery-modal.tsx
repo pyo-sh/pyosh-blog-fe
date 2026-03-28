@@ -25,7 +25,12 @@ export function ImageGalleryModal({
   });
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} withBackground>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      withBackground
+      aria-label="이미지 삽입"
+    >
       <div className="flex h-[min(88vh,52rem)] w-[min(92vw,64rem)] flex-col overflow-hidden rounded-[1.5rem] bg-background-1 text-left">
         <div className="border-b border-border-3 px-6 py-5">
           <p className="text-xs uppercase tracking-[0.24em] text-text-4">

@@ -70,6 +70,7 @@ export function CategoryDeleteModal({
         }
       }}
       withBackground
+      aria-label="카테고리 삭제"
       className="w-[min(100%,34rem)] p-0 text-left"
     >
       <div className="border-b border-border-3 px-6 py-5">
