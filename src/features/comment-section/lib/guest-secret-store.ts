@@ -339,8 +339,8 @@ export function readLegacyGuestSecretComment(
 
   const legacyAuthorKey = getLegacyEntryAuthorKey(legacyEntry);
   const fallbackIdentity =
-    activeIdentity ??
     profileIdentity ??
+    activeIdentity ??
     resolveSingleLegacyAuthorKey(legacyStore);
 
   if (!legacyAuthorKey || legacyAuthorKey !== fallbackIdentity) {

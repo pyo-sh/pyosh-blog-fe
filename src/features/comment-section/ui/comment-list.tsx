@@ -910,6 +910,7 @@ export function CommentList({
 
       <Modal
         isOpen={deleteTarget !== null}
+        aria-label="댓글 삭제"
         onClose={() => {
           if (deleteBusy) {
             return;
