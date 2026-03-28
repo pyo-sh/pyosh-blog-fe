@@ -89,6 +89,7 @@ export function CategoryFormModal({
         }
       }}
       withBackground
+      aria-label={title}
       className="w-[min(100%,40rem)] p-0 text-left"
     >
       <div className="border-b border-border-3 px-6 py-5">

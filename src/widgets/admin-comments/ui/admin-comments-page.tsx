@@ -51,7 +51,7 @@ type ActionContext =
   | null;
 
 function getAllowedActionsForStatus(status: AdminCommentItem["status"]) {
-  if (status === "deleted") {
+  if (status === "deleted" || status === "hidden") {
     return ["restore", "hard_delete"] as const;
   }
 
@@ -384,11 +384,11 @@ export function AdminCommentsPage() {
   }, [actionContext]);
 
   const actionModalTitle =
-    actionContext?.type === "bulk" ? "일괄 삭제" : "댓글 삭제";
+    actionContext?.type === "bulk" ? "댓글 일괄 작업" : "댓글 작업";
   const actionModalDescription =
     actionContext?.type === "bulk"
-      ? `${actionContext.items.length}개 댓글을 처리합니다.`
-      : "삭제 방식을 선택하세요.";
+      ? `${actionContext.items.length}개 댓글에 적용할 작업을 선택하세요.`
+      : "댓글에 적용할 작업을 선택하세요.";
   const actionModalCount =
     actionContext?.type === "bulk" ? actionContext.items.length : 1;
   const actionModalActions =

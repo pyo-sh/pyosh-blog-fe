@@ -190,14 +190,14 @@ export function CommentTable({
                       onClick={() => onManage(item)}
                       className={cn(
                         "inline-flex items-center justify-center rounded-[0.75rem] border px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
-                        item.status === "deleted"
+                        item.status === "deleted" || item.status === "hidden"
                           ? "border-border-3 text-text-2 hover:border-border-2 hover:text-text-1"
                           : "border-negative-1/30 text-negative-1 hover:bg-negative-1/10",
                       )}
                     >
                       {deletingId === item.id
                         ? "처리 중"
-                        : item.status === "deleted"
+                        : item.status === "deleted" || item.status === "hidden"
                           ? "관리"
                           : "삭제"}
                     </button>

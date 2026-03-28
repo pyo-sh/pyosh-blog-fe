@@ -102,6 +102,7 @@ export function GuestbookDetailModal({
       isOpen={isOpen}
       onClose={onClose}
       withBackground
+      aria-label="방명록 상세 보기"
       className="w-full max-w-[44rem]"
     >
       <div className="flex max-h-[80vh] flex-col text-left">

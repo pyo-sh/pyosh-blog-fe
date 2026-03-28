@@ -10,6 +10,8 @@ type ModalProps = {
   withBackground?: boolean;
   className?: string;
   children?: React.ReactNode;
+  "aria-label"?: string;
+  "aria-labelledby"?: string;
 };
 
 const Modal: React.FC<ModalProps> = ({
@@ -18,6 +20,8 @@ const Modal: React.FC<ModalProps> = ({
   withBackground = false,
   className,
   children,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledby,
 }) => {
   const dialogRef = useRef<HTMLDivElement>(null);
 
@@ -123,8 +127,6 @@ const Modal: React.FC<ModalProps> = ({
         withBackground && "bg-grey-2/50",
       )}
       onClick={onClose}
-      role="dialog"
-      aria-modal="true"
     >
       <div
         ref={dialogRef}
@@ -138,6 +140,10 @@ const Modal: React.FC<ModalProps> = ({
         )}
         onClick={(e) => e.stopPropagation()}
         tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-label={ariaLabel}
+        aria-labelledby={ariaLabelledby}
       >
         {children}
       </div>

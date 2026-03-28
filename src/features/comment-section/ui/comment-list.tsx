@@ -798,6 +798,7 @@ export function CommentList({
           setDeleteError(null);
         }}
         withBackground
+        aria-label="댓글 삭제"
       >
         <div className="p-6 text-left">
           <p className="text-body-xs uppercase tracking-[0.2em] text-text-4">

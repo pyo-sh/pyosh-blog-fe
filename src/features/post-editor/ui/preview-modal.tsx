@@ -11,7 +11,12 @@ interface PreviewModalProps {
 
 export function PreviewModal({ isOpen, value, onClose }: PreviewModalProps) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} withBackground>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      withBackground
+      aria-label="마크다운 미리보기"
+    >
       <div className="flex h-[min(88vh,60rem)] w-[min(92vw,72rem)] flex-col overflow-hidden rounded-[1.5rem] bg-background-1 text-left">
         <div className="flex items-center justify-between border-b border-border-3 px-6 py-4">
           <div>

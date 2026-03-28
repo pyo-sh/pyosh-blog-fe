@@ -35,7 +35,7 @@ interface ActionOption {
 const OPTION_MAP: Record<CommentManageAction, Omit<ActionOption, "value">> = {
   restore: {
     label: "복원",
-    description: "삭제된 댓글을 다시 정상 상태로 되돌립니다.",
+    description: "숨김 또는 삭제된 댓글을 다시 정상 상태로 되돌립니다.",
   },
   soft_delete: {
     label: "소프트 삭제",
@@ -124,6 +124,7 @@ export function CommentDeleteModal({
       isOpen={isOpen}
       onClose={handleClose}
       withBackground
+      aria-label={title}
       className="w-full max-w-[34rem]"
     >
       <div className="flex flex-col gap-5 p-6 text-left">
