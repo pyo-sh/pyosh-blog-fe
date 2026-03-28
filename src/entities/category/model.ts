@@ -34,6 +34,6 @@ export interface UpdateCategoryOrderBody {
 export type DeleteCategoryAction = "move" | "trash";
 
 export interface DeleteCategoryOptions {
-  action?: DeleteCategoryAction;
+  action: DeleteCategoryAction;
   moveTo?: number;
 }

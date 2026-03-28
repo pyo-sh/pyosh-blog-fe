@@ -85,7 +85,7 @@ export async function updateCategoryOrder(
 
 export async function deleteCategory(
   id: number,
-  options: DeleteCategoryOptions = {},
+  options: DeleteCategoryOptions,
 ): Promise<void> {
   const searchParams = new URLSearchParams();
 

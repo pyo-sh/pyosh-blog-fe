@@ -82,7 +82,7 @@ export function CategoryManager() {
       options,
     }: {
       id: number;
-      options?: DeleteCategoryOptions;
+      options: DeleteCategoryOptions;
     }) => deleteCategory(id, options),
     onSuccess: async () => {
       setCategoryToDelete(null);
