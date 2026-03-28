@@ -445,7 +445,7 @@ export function AssetUploader() {
 
       <AssetDetailModal
         assets={assets}
-        assetId={detailAssetId}
+        assetId={deleteTargetIds.length > 0 ? null : detailAssetId}
         copiedType={copiedState?.id === detailAssetId ? copiedState.type : null}
         onClose={() => setDetailAssetId(null)}
         onCopy={(asset, type) => void handleCopy(asset, type)}

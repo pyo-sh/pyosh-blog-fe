@@ -254,6 +254,8 @@ function AssetGridCard({
           <div className="absolute right-3 top-3 z-10 hidden sm:block">
             <button
               type="button"
+              onPointerDown={(event) => event.stopPropagation()}
+              onPointerUp={(event) => event.stopPropagation()}
               onClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
