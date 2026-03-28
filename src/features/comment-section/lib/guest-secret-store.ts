@@ -1,9 +1,11 @@
 const STORAGE_KEY = "guest-secret-comments";
 const LEGACY_STORAGE_KEY = "pyosh:guest-secret-comments";
 const LEGACY_ACTIVE_IDENTITY_KEY = "pyosh:guest-secret-comments:identity";
+const LEGACY_BODY_CACHE_KEY = "guest-secret-comments-legacy-body-cache";
 const MAX_ENTRIES = 20;
 
 type GuestSecretTokenMap = Record<string, string>;
+type LegacyBodyCacheMap = Record<string, string>;
 
 interface LegacyGuestSecretEntry {
   body: string;
@@ -72,6 +74,59 @@ function writeTokenStore(nextStore: GuestSecretTokenMap) {
   } catch {
     // Ignore storage failures so comment UX degrades gracefully.
   }
+}
+
+function readLegacyBodyCache(): LegacyBodyCacheMap {
+  if (!isBrowser()) {
+    return {};
+  }
+
+  try {
+    const raw = window.sessionStorage.getItem(LEGACY_BODY_CACHE_KEY);
+
+    if (!raw) {
+      return {};
+    }
+
+    const parsed = JSON.parse(raw) as unknown;
+
+    if (!parsed || typeof parsed !== "object") {
+      return {};
+    }
+
+    return Object.fromEntries(
+      Object.entries(parsed).filter((entry): entry is [string, string] =>
+        isSecretToken(entry[1]),
+      ),
+    );
+  } catch {
+    return {};
+  }
+}
+
+function writeLegacyBodyCache(nextStore: LegacyBodyCacheMap) {
+  if (!isBrowser()) {
+    return;
+  }
+
+  try {
+    window.sessionStorage.setItem(
+      LEGACY_BODY_CACHE_KEY,
+      JSON.stringify(nextStore),
+    );
+  } catch {
+    // Ignore storage failures so comment UX degrades gracefully.
+  }
+}
+
+function capStoreEntries<T extends Record<string, string>>(store: T) {
+  const orderedEntries = Object.entries(store);
+
+  while (orderedEntries.length > MAX_ENTRIES) {
+    orderedEntries.shift();
+  }
+
+  return Object.fromEntries(orderedEntries) as T;
 }
 
 function normalizeGuestName(guestName: string) {
@@ -158,13 +213,7 @@ export function rememberGuestSecretRevealToken(
   delete nextStore[String(commentId)];
   nextStore[String(commentId)] = revealToken;
 
-  const orderedEntries = Object.entries(nextStore);
-
-  while (orderedEntries.length > MAX_ENTRIES) {
-    orderedEntries.shift();
-  }
-
-  writeTokenStore(Object.fromEntries(orderedEntries));
+  writeTokenStore(capStoreEntries(nextStore));
 }
 
 export function readGuestSecretRevealToken(commentId: number) {
@@ -184,6 +233,12 @@ export function removeGuestSecretRevealToken(commentId: number) {
 }
 
 export function readLegacyGuestSecretComment(commentId: number) {
+  const cachedBody = readLegacyBodyCache()[String(commentId)];
+
+  if (cachedBody) {
+    return cachedBody;
+  }
+
   const activeIdentity = readLegacyActiveAuthor();
   const legacyEntry = readLegacyStore()[String(commentId)];
 
@@ -193,5 +248,15 @@ export function readLegacyGuestSecretComment(commentId: number) {
 
   const legacyAuthorKey = `${legacyEntry.guestNameKey}:${legacyEntry.guestEmailKey}`;
 
-  return legacyAuthorKey === activeIdentity ? legacyEntry.body : null;
+  if (legacyAuthorKey !== activeIdentity) {
+    return null;
+  }
+
+  const nextCache = {
+    ...readLegacyBodyCache(),
+    [String(commentId)]: legacyEntry.body,
+  };
+  writeLegacyBodyCache(capStoreEntries(nextCache));
+
+  return legacyEntry.body;
 }
