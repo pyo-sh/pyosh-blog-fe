@@ -353,6 +353,8 @@ export function AdminCommentsPage() {
       : actionContext
         ? [actionContext.item]
         : [];
+  const isSingleActionModalOpen =
+    actionContext !== null && actionContext.type === "single";
 
   return (
     <div className="space-y-6">
@@ -567,13 +569,14 @@ export function AdminCommentsPage() {
       {/* Detail modal */}
       <CommentDetailModal
         comment={openedComment}
-        isOpen={openedComment !== null}
+        isOpen={openedComment !== null && !isSingleActionModalOpen}
         isActionPending={
           actionMutation.isPending &&
           actionItems.length === 1 &&
           actionItems[0]?.id === openedComment?.id
         }
         onClose={handleCloseModal}
+        onCommentChange={setOpenedComment}
         onSelectAction={(comment, action) =>
           handleOpenActionModal(comment, action)
         }

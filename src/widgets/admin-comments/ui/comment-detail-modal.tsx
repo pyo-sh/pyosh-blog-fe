@@ -41,6 +41,7 @@ interface CommentDetailModalProps {
   isOpen: boolean;
   isActionPending?: boolean;
   onClose: () => void;
+  onCommentChange?: (comment: AdminCommentItem) => void;
   onSelectAction: (
     comment: AdminCommentItem,
     action: "restore" | "soft_delete" | "hard_delete",
@@ -52,6 +53,7 @@ export function CommentDetailModal({
   isOpen,
   isActionPending = false,
   onClose,
+  onCommentChange,
   onSelectAction,
 }: CommentDetailModalProps) {
   const [mode, setMode] = useState<ModalMode>("detail");
@@ -87,7 +89,10 @@ export function CommentDetailModal({
 
   useEffect(() => {
     activeCommentIdRef.current = currentComment?.id ?? null;
-  }, [currentComment]);
+    if (currentComment) {
+      onCommentChange?.(currentComment);
+    }
+  }, [currentComment, onCommentChange]);
 
   const loadThread = useCallback(
     async (commentId: number) => {
