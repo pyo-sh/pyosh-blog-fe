@@ -5,7 +5,12 @@ const LEGACY_BODY_CACHE_KEY = "guest-secret-comments-legacy-body-cache";
 const MAX_ENTRIES = 20;
 
 type GuestSecretTokenMap = Record<string, string>;
-type LegacyBodyCacheMap = Record<string, string>;
+interface LegacyBodyCacheEntry {
+  body: string;
+  authorKey: string;
+}
+
+type LegacyBodyCacheMap = Record<string, LegacyBodyCacheEntry>;
 
 interface LegacyGuestSecretEntry {
   body: string;
@@ -95,9 +100,20 @@ function readLegacyBodyCache(): LegacyBodyCacheMap {
     }
 
     return Object.fromEntries(
-      Object.entries(parsed).filter((entry): entry is [string, string] =>
-        isSecretToken(entry[1]),
-      ),
+      Object.entries(parsed).flatMap((entry) => {
+        if (
+          !entry[1] ||
+          typeof entry[1] !== "object" ||
+          !("body" in entry[1]) ||
+          !("authorKey" in entry[1]) ||
+          typeof entry[1].body !== "string" ||
+          typeof entry[1].authorKey !== "string"
+        ) {
+          return [];
+        }
+
+        return [[entry[0], entry[1]] as const];
+      }),
     );
   } catch {
     return {};
@@ -119,7 +135,7 @@ function writeLegacyBodyCache(nextStore: LegacyBodyCacheMap) {
   }
 }
 
-function capStoreEntries<T extends Record<string, string>>(store: T) {
+function capStoreEntries<T extends Record<string, unknown>>(store: T) {
   const orderedEntries = Object.entries(store);
 
   while (orderedEntries.length > MAX_ENTRIES) {
@@ -233,13 +249,13 @@ export function removeGuestSecretRevealToken(commentId: number) {
 }
 
 export function readLegacyGuestSecretComment(commentId: number) {
-  const cachedBody = readLegacyBodyCache()[String(commentId)];
+  const activeIdentity = readLegacyActiveAuthor();
+  const cachedEntry = readLegacyBodyCache()[String(commentId)];
 
-  if (cachedBody) {
-    return cachedBody;
+  if (cachedEntry && activeIdentity === cachedEntry.authorKey) {
+    return cachedEntry.body;
   }
 
-  const activeIdentity = readLegacyActiveAuthor();
   const legacyEntry = readLegacyStore()[String(commentId)];
 
   if (!activeIdentity || !legacyEntry) {
@@ -254,7 +270,10 @@ export function readLegacyGuestSecretComment(commentId: number) {
 
   const nextCache = {
     ...readLegacyBodyCache(),
-    [String(commentId)]: legacyEntry.body,
+    [String(commentId)]: {
+      body: legacyEntry.body,
+      authorKey: legacyAuthorKey,
+    },
   };
   writeLegacyBodyCache(capStoreEntries(nextCache));
 
