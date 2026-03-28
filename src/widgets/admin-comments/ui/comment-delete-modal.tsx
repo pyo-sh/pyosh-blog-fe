@@ -117,6 +117,7 @@ export function CommentDeleteModal({
 
     onClose();
   };
+  const confirmLabel = selectedOption?.label ?? "확인";
 
   return (
     <Modal
@@ -185,7 +186,7 @@ export function CommentDeleteModal({
                 : "bg-primary-1",
             )}
           >
-            {isPending ? "처리 중..." : "삭제"}
+            {isPending ? "처리 중..." : confirmLabel}
           </button>
         </div>
       </div>

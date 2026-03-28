@@ -471,7 +471,7 @@ export function AdminCommentsPage() {
               }}
               className="rounded-[0.6rem] border border-border-3 px-3 py-1.5 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
             >
-              전체 선택
+              현재 페이지 전체 선택
             </button>
             <button
               type="button"
