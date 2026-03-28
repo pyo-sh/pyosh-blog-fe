@@ -1,6 +1,7 @@
 const STORAGE_KEY = "guest-secret-comments";
 const LEGACY_STORAGE_KEY = "pyosh:guest-secret-comments";
 const LEGACY_ACTIVE_IDENTITY_KEY = "pyosh:guest-secret-comments:identity";
+const MAX_ENTRIES = 20;
 
 type GuestSecretTokenMap = Record<string, string>;
 
@@ -157,7 +158,13 @@ export function rememberGuestSecretRevealToken(
   delete nextStore[String(commentId)];
   nextStore[String(commentId)] = revealToken;
 
-  writeTokenStore(nextStore);
+  const orderedEntries = Object.entries(nextStore);
+
+  while (orderedEntries.length > MAX_ENTRIES) {
+    orderedEntries.shift();
+  }
+
+  writeTokenStore(Object.fromEntries(orderedEntries));
 }
 
 export function readGuestSecretRevealToken(commentId: number) {
