@@ -230,14 +230,6 @@ function AssetGridCard({
             }
           }
         }}
-        onClick={(event) => {
-          if (selectionMode) {
-            event.preventDefault();
-            onToggleSelect(asset.id, index, { shiftKey: event.shiftKey });
-          } else if (!selectionMode) {
-            onOpenDetail(asset.id);
-          }
-        }}
         className="block w-full text-left"
         aria-pressed={selectionMode ? isSelected : undefined}
       >

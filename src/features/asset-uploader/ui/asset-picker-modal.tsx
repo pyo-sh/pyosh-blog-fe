@@ -53,25 +53,6 @@ export function AssetPickerModal({
     );
   }, [assets]);
 
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Enter" && selectedAsset) {
-        event.preventDefault();
-        onSelect(selectedAsset.url);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isOpen, onSelect, selectedAsset]);
-
   return (
     <Modal
       isOpen={isOpen}
