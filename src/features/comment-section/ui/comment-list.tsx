@@ -4,8 +4,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { CommentForm, type GuestCommentProfile } from "./comment-form";
 import { CommentItem } from "./comment-item";
 import {
-  readGuestSecretComment,
-  rememberGuestSecretComment,
+  readGuestSecretRevealToken,
+  readLegacyGuestSecretComment,
+  rememberGuestSecretRevealToken,
+  removeGuestSecretRevealToken,
 } from "../lib/guest-secret-store";
 import type {
   Comment,
@@ -17,6 +19,7 @@ import {
   createComment,
   deleteComment,
   fetchCommentsClient,
+  revealSecretComment,
 } from "@entities/comment";
 import { ApiResponseError } from "@shared/api";
 import { Modal, Spinner } from "@shared/ui/libs";
@@ -249,22 +252,67 @@ export function CommentList({
   }, [initialError]);
 
   useEffect(() => {
-    const nextRevealedSecretBodies = Object.fromEntries(
-      collectSecretComments(comments)
+    let isCancelled = false;
+    const secretComments = collectSecretComments(comments);
+    const legacyBodies = Object.fromEntries(
+      secretComments
         .map((comment) => {
-          const body = readGuestSecretComment(
-            comment.id,
-            profile.guestName,
-            profile.guestPassword,
-          );
+          const body = readLegacyGuestSecretComment(comment.id);
 
           return body ? [comment.id, body] : null;
         })
         .filter((entry): entry is [number, string] => entry !== null),
     );
+    const revealTargets = secretComments
+      .map((comment) => {
+        const revealToken = readGuestSecretRevealToken(comment.id);
 
-    setRevealedSecretBodies(nextRevealedSecretBodies);
-  }, [comments, profile.guestName, profile.guestPassword]);
+        return revealToken ? [comment.id, revealToken] : null;
+      })
+      .filter((entry): entry is [number, string] => entry !== null);
+
+    setRevealedSecretBodies(legacyBodies);
+
+    if (revealTargets.length === 0) {
+      return () => {
+        isCancelled = true;
+      };
+    }
+
+    void Promise.all(
+      revealTargets.map(async ([commentId, revealToken]) => {
+        try {
+          const revealedComment = await revealSecretComment(
+            commentId,
+            revealToken,
+          );
+
+          return [commentId, revealedComment.body] as const;
+        } catch {
+          removeGuestSecretRevealToken(commentId);
+
+          return null;
+        }
+      }),
+    ).then((entries) => {
+      if (isCancelled) {
+        return;
+      }
+
+      setRevealedSecretBodies({
+        ...legacyBodies,
+        ...Object.fromEntries(
+          entries.filter(
+            (entry): entry is readonly [number, string] => entry !== null,
+          ),
+        ),
+      });
+    });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [comments]);
 
   useEffect(() => {
     setExpandedRoots((current) => {
@@ -354,16 +402,14 @@ export function CommentList({
       return;
     }
 
-    const nextComment = await createComment(postId, payload);
+    const { comment: nextComment, revealToken } = await createComment(
+      postId,
+      payload,
+    );
     const isRootComment = nextComment.parentId === null;
 
-    if (payload.authorType === "guest" && nextComment.isSecret) {
-      rememberGuestSecretComment(
-        nextComment.id,
-        nextComment.body,
-        payload.guestName,
-        payload.guestPassword,
-      );
+    if (payload.authorType === "guest" && nextComment.isSecret && revealToken) {
+      rememberGuestSecretRevealToken(nextComment.id, revealToken);
     }
 
     let didRefreshFail = false;

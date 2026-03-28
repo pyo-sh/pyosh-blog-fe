@@ -74,3 +74,8 @@ export interface CommentsResponse {
 export interface CommentResponse {
   data: Comment;
 }
+
+export interface CreateCommentResponse {
+  data: Comment;
+  revealToken?: string | null;
+}
