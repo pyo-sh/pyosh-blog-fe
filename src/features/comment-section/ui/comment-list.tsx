@@ -252,7 +252,7 @@ export function CommentList({
     const nextRevealedSecretBodies = Object.fromEntries(
       collectSecretComments(comments)
         .map((comment) => {
-          const body = readGuestSecretComment(comment.id);
+          const body = readGuestSecretComment(comment.id, profile.guestName);
 
           return body ? [comment.id, body] : null;
         })
@@ -260,7 +260,7 @@ export function CommentList({
     );
 
     setRevealedSecretBodies(nextRevealedSecretBodies);
-  }, [comments]);
+  }, [comments, profile.guestName]);
 
   useEffect(() => {
     setExpandedRoots((current) => {
@@ -354,7 +354,11 @@ export function CommentList({
     const isRootComment = nextComment.parentId === null;
 
     if (payload.authorType === "guest" && nextComment.isSecret) {
-      rememberGuestSecretComment(nextComment.id, nextComment.body);
+      rememberGuestSecretComment(
+        nextComment.id,
+        nextComment.body,
+        payload.guestName,
+      );
     }
 
     let didRefreshFail = false;
