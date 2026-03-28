@@ -243,16 +243,36 @@ export function insertMarkdownImage(
   alt: string,
   src: string,
 ): void {
+  insertMarkdownImages(view, [{ alt, src }]);
+}
+
+export function insertMarkdownImages(
+  view: EditorView,
+  images: Array<{ alt: string; src: string }>,
+): void {
+  if (images.length === 0) {
+    view.focus();
+
+    return;
+  }
+
   const { from, to } = view.state.selection.main;
   const selected = view.state.sliceDoc(from, to);
-  const nextAlt = escapeMarkdownImageAlt(selected || alt);
+  const selectionText = selected.trim();
+  const insert = images
+    .map((image, index) => {
+      const nextAlt =
+        index === 0 && selectionText
+          ? escapeMarkdownImageAlt(selectionText)
+          : escapeMarkdownImageAlt(image.alt);
+
+      return `![${nextAlt}](${image.src})`;
+    })
+    .join("\n");
 
   view.dispatch({
-    changes: { from, to, insert: `![${nextAlt}](${src})` },
-    selection: EditorSelection.range(
-      from + nextAlt.length + 4,
-      from + nextAlt.length + 4 + src.length,
-    ),
+    changes: { from, to, insert },
+    selection: EditorSelection.cursor(from + insert.length),
   });
 
   view.focus();

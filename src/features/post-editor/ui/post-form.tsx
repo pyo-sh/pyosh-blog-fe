@@ -22,7 +22,10 @@ import {
   validatePendingImageFile,
   type PendingImage,
 } from "../lib/image-handler";
-import { insertMarkdownImage } from "../lib/markdown-commands";
+import {
+  insertMarkdownImage,
+  insertMarkdownImages,
+} from "../lib/markdown-commands";
 import { attachScrollSync } from "../lib/scroll-sync";
 import type { EditorView } from "@codemirror/view";
 import { type Asset } from "@entities/asset";
@@ -421,6 +424,7 @@ export function PostForm({
     }
 
     const fileList = Array.from(files);
+    const nextPending: PendingImage[] = [];
 
     for (const file of fileList) {
       const validationError = validatePendingImageFile(file);
@@ -431,19 +435,29 @@ export function PostForm({
       }
 
       const pending = createPendingImage(file);
-
-      setPendingImages((current) => {
-        const next = new Map(current);
-        next.set(pending.id, pending);
-
-        return next;
-      });
-      insertMarkdownImage(
-        editorView,
-        pending.alt,
-        `pending-upload:${pending.id}`,
-      );
+      nextPending.push(pending);
     }
+
+    if (nextPending.length === 0) {
+      return;
+    }
+
+    setPendingImages((current) => {
+      const next = new Map(current);
+
+      nextPending.forEach((pending) => {
+        next.set(pending.id, pending);
+      });
+
+      return next;
+    });
+    insertMarkdownImages(
+      editorView,
+      nextPending.map((pending) => ({
+        alt: pending.alt,
+        src: `pending-upload:${pending.id}`,
+      })),
+    );
 
     setShowImageGallery(false);
   }

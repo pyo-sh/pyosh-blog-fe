@@ -24,7 +24,8 @@ export interface PendingImage {
 
 export const PENDING_IMAGE_PREFIX = "pending-upload:";
 
-const PENDING_IMAGE_PATTERN = /!\[([^\]]*)\]\(pending-upload:([a-f0-9-]+)\)/g;
+const PENDING_IMAGE_PATTERN =
+  /!\[((?:\\.|[^\]])*)\]\(pending-upload:([a-f0-9-]+)\)/g;
 
 export function getPendingImageMarkdown(alt: string, id: string): string {
   return `![${alt}](${PENDING_IMAGE_PREFIX}${id})`;
@@ -133,7 +134,7 @@ export async function uploadPendingImages(
         continue;
       }
 
-      nextContent = nextContent.replace(
+      nextContent = nextContent.replaceAll(
         `${PENDING_IMAGE_PREFIX}${image.id}`,
         image.uploadedUrl,
       );
