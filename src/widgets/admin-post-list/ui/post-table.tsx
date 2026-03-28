@@ -378,6 +378,7 @@ export function PostTable({
                     onSort={onSortChange}
                   />
                 </th>
+                <th className="px-4 py-4 font-medium">수정일</th>
                 <th className="px-4 py-4 font-medium">
                   <SortableHeader
                     label="작성일"
@@ -526,6 +527,11 @@ export function PostTable({
                     {/* Published at */}
                     <td className="px-4 py-4 text-sm text-text-2">
                       {formatDate(post.publishedAt)}
+                    </td>
+
+                    {/* Modified at */}
+                    <td className="px-4 py-4 text-sm text-text-2">
+                      {formatDate(post.contentModifiedAt)}
                     </td>
 
                     {/* Created at */}

@@ -9,7 +9,10 @@ import {
   bulkUpdatePosts,
   deletePost,
   fetchAdminPosts,
+  fetchPinnedPostCount,
   hardDeletePost,
+  isPinnedPostLimitError,
+  MAX_PINNED_POSTS,
   restorePost,
   updatePost,
   type BulkPostErrorDetail,
@@ -108,6 +111,11 @@ export default function ManagePostsPage() {
     queryKey: ["categories-admin"],
     queryFn: (): Promise<Category[]> => fetchCategoriesAdmin(),
     staleTime: 5 * 60 * 1000,
+  });
+  const { data: pinnedCount } = useQuery({
+    queryKey: ["admin-posts", "pinned-count"],
+    queryFn: fetchPinnedPostCount,
+    staleTime: 30 * 1000,
   });
 
   const rows = data?.data ?? [];
@@ -209,21 +217,39 @@ export default function ManagePostsPage() {
   async function handleTogglePin(post: Post) {
     setPendingToggleIds((prev) => new Set(prev).add(post.id));
 
-    const nextPinned = !post.isPinned;
-
-    queryClient.setQueryData(queryKey, (old: typeof data) => {
-      if (!old) return old;
-
-      return {
-        ...old,
-        data: old.data.map((p) =>
-          p.id === post.id ? { ...p, isPinned: nextPinned } : p,
-        ),
-      };
-    });
-
     try {
+      const nextPinned = !post.isPinned;
+
+      if (
+        nextPinned &&
+        typeof pinnedCount === "number" &&
+        pinnedCount >= MAX_PINNED_POSTS
+      ) {
+        toast.error(
+          `고정 글은 최대 ${MAX_PINNED_POSTS}개까지 설정할 수 있습니다.`,
+        );
+
+        return;
+      }
+
+      queryClient.setQueryData(queryKey, (old: typeof data) => {
+        if (!old) return old;
+
+        return {
+          ...old,
+          data: old.data.map((p) =>
+            p.id === post.id ? { ...p, isPinned: nextPinned } : p,
+          ),
+        };
+      });
+
       await updatePost(post.id, { isPinned: nextPinned });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["admin-posts"] }),
+        queryClient.invalidateQueries({
+          queryKey: ["admin-posts", "pinned-count"],
+        }),
+      ]);
     } catch (err) {
       queryClient.setQueryData(queryKey, (old: typeof data) => {
         if (!old) return old;
@@ -235,7 +261,14 @@ export default function ManagePostsPage() {
           ),
         };
       });
-      toast.error(getErrorMessage(err, "고정 변경에 실패했습니다."));
+
+      if (isPinnedPostLimitError(err)) {
+        toast.error(
+          `고정 글은 최대 ${MAX_PINNED_POSTS}개까지 설정할 수 있습니다.`,
+        );
+      } else {
+        toast.error(getErrorMessage(err, "고정 변경에 실패했습니다."));
+      }
     } finally {
       setPendingToggleIds((prev) => {
         const next = new Set(prev);
@@ -247,7 +280,12 @@ export default function ManagePostsPage() {
   }
 
   async function invalidatePostQueries() {
-    await queryClient.invalidateQueries({ queryKey: ["admin-posts"] });
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["admin-posts"] }),
+      queryClient.invalidateQueries({
+        queryKey: ["admin-posts", "pinned-count"],
+      }),
+    ]);
   }
 
   const deleteMutation = useMutation({

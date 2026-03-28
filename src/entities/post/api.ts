@@ -3,6 +3,7 @@ import type {
   CreatePostBody,
   FetchAdminPostsParams,
   FetchPostsParams,
+  PinnedPostCountResponse,
   Post,
   PostDetailResponse,
   PostDetailWithNavigationResponse,
@@ -130,6 +131,14 @@ export async function fetchAdminPosts(
   return cookieHeader
     ? serverFetch<PaginatedResponse<Post>>(path, {}, cookieHeader)
     : clientFetch<PaginatedResponse<Post>>(path);
+}
+
+export async function fetchPinnedPostCount(): Promise<number> {
+  const response = await clientFetch<PinnedPostCountResponse>(
+    "/api/admin/posts/pinned-count",
+  );
+
+  return response.pinnedCount;
 }
 
 export async function createPost(body: CreatePostBody): Promise<Post> {

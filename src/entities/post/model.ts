@@ -75,6 +75,10 @@ export interface PublishedPostSlugsResponse {
   slugs: PublishedPostSlug[];
 }
 
+export interface PinnedPostCountResponse {
+  pinnedCount: number;
+}
+
 export interface FetchPostsParams {
   page?: number;
   limit?: number;
