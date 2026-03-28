@@ -19,6 +19,7 @@ interface BulkActionsProps {
     ids: number[],
     categoryId?: number,
     commentStatus?: "open" | "locked" | "disabled",
+    visibility?: "public" | "private",
   ) => Promise<void>;
   onClearSelection: () => void;
 }
@@ -37,6 +38,14 @@ const COMMENT_STATUS_DESC: Record<"open" | "locked" | "disabled", string> = {
   locked: "기존 댓글은 유지되며 새 댓글 작성이 차단됩니다.",
   disabled: "댓글 영역이 완전히 숨겨집니다.",
 };
+
+const VISIBILITY_OPTIONS: Array<{
+  label: string;
+  value: "public" | "private";
+}> = [
+  { label: "공개", value: "public" },
+  { label: "비공개", value: "private" },
+];
 
 function buildCategoryTree(
   categories: Category[],
@@ -69,6 +78,9 @@ export function BulkActions({
   const [commentStatus, setCommentStatus] = useState<
     "open" | "locked" | "disabled" | undefined
   >(undefined);
+  const [visibility, setVisibility] = useState<
+    "public" | "private" | undefined
+  >(undefined);
   const [showApplyDialog, setShowApplyDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showRestoreDialog, setShowRestoreDialog] = useState(false);
@@ -76,7 +88,10 @@ export function BulkActions({
   const [isPending, setIsPending] = useState(false);
 
   const count = selectedIds.length;
-  const hasUpdate = categoryId !== undefined || commentStatus !== undefined;
+  const hasUpdate =
+    categoryId !== undefined ||
+    commentStatus !== undefined ||
+    visibility !== undefined;
   const flatCategories = buildCategoryTree(categories);
 
   if (count === 0) return null;
@@ -84,9 +99,10 @@ export function BulkActions({
   async function handleApply() {
     setIsPending(true);
     try {
-      await onBulkUpdate(selectedIds, categoryId, commentStatus);
+      await onBulkUpdate(selectedIds, categoryId, commentStatus, visibility);
       setCategoryId(undefined);
       setCommentStatus(undefined);
+      setVisibility(undefined);
       setShowApplyDialog(false);
       onClearSelection();
     } catch {
@@ -194,11 +210,32 @@ export function BulkActions({
               </select>
             </div>
 
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-text-4">공개:</span>
+              <select
+                value={visibility ?? ""}
+                onChange={(e) =>
+                  setVisibility(
+                    (e.target.value as "public" | "private") || undefined,
+                  )
+                }
+                className="rounded-[0.6rem] border border-border-3 bg-background-1 px-2 py-1.5 text-sm text-text-1 outline-none focus:border-primary-1"
+              >
+                <option value="">-</option>
+                {VISIBILITY_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <button
               type="button"
               onClick={() => {
                 setCategoryId(undefined);
                 setCommentStatus(undefined);
+                setVisibility(undefined);
               }}
               disabled={!hasUpdate}
               className="rounded-[0.6rem] border border-border-3 px-2.5 py-1.5 text-sm text-text-3 transition-colors hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
@@ -298,6 +335,16 @@ export function BulkActions({
               <p className="mt-1 text-xs text-text-4">
                 &quot;{COMMENT_STATUS_DESC[commentStatus]}&quot;
               </p>
+            </li>
+          ) : null}
+          {visibility !== undefined ? (
+            <li>
+              공개 여부: →{" "}
+              <span className="font-medium text-text-1">
+                {VISIBILITY_OPTIONS.find(
+                  (option) => option.value === visibility,
+                )?.label ?? visibility}
+              </span>
             </li>
           ) : null}
         </ul>

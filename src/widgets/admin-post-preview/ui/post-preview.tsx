@@ -18,6 +18,20 @@ const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
   day: "2-digit",
 });
 
+function toDatetimeLocalValue(value: string | null): string {
+  if (!value) return "";
+
+  const date = new Date(value);
+  const offset = date.getTimezoneOffset();
+  const localDate = new Date(date.getTime() - offset * 60 * 1000);
+
+  return localDate.toISOString().slice(0, 16);
+}
+
+function fromDatetimeLocalValue(value: string): string {
+  return new Date(value).toISOString();
+}
+
 interface PostPreviewProps {
   post: Post;
   renderedContent: string;
@@ -38,12 +52,16 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
 
   const [currentPost, setCurrentPost] = useState(post);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [modifiedAtInput, setModifiedAtInput] = useState(
+    toDatetimeLocalValue(post.contentModifiedAt),
+  );
 
   const updateMutation = useMutation({
     mutationFn: (body: Parameters<typeof updatePost>[1]) =>
       updatePost(currentPost.id, body),
     onSuccess: (updated) => {
       setCurrentPost(updated);
+      setModifiedAtInput(toDatetimeLocalValue(updated.contentModifiedAt));
       void queryClient.invalidateQueries({ queryKey: ["admin-posts"] });
     },
     onError: (error) => {
@@ -64,6 +82,27 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
   });
 
   const isUpdating = updateMutation.isPending;
+
+  function updateModifiedAt(nextValue: string | null) {
+    const previousValue = currentPost.contentModifiedAt;
+    const previousInput = modifiedAtInput;
+
+    setCurrentPost((prev) => ({ ...prev, contentModifiedAt: nextValue }));
+    setModifiedAtInput(toDatetimeLocalValue(nextValue));
+
+    updateMutation.mutate(
+      { contentModifiedAt: nextValue },
+      {
+        onError: () => {
+          setCurrentPost((prev) => ({
+            ...prev,
+            contentModifiedAt: previousValue,
+          }));
+          setModifiedAtInput(previousInput);
+        },
+      },
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -167,6 +206,36 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
             ))}
           </select>
         </div>
+
+        <div className="flex flex-wrap items-center gap-2 text-sm text-text-2">
+          <span>수정일</span>
+          <input
+            type="datetime-local"
+            value={modifiedAtInput}
+            disabled={isUpdating}
+            onChange={(event) => setModifiedAtInput(event.target.value)}
+            className="rounded-[0.75rem] border border-border-3 bg-background-1 px-3 py-2 text-sm text-text-1 outline-none transition-colors focus:border-primary-1 disabled:opacity-50"
+            aria-label="수정일 설정"
+          />
+          <button
+            type="button"
+            disabled={isUpdating || !modifiedAtInput}
+            onClick={() =>
+              updateModifiedAt(fromDatetimeLocalValue(modifiedAtInput))
+            }
+            className="inline-flex items-center rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            적용
+          </button>
+          <button
+            type="button"
+            disabled={isUpdating || currentPost.contentModifiedAt === null}
+            onClick={() => updateModifiedAt(null)}
+            className="inline-flex items-center rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            수정일 제거
+          </button>
+        </div>
       </div>
 
       {/* Preview content */}
@@ -180,6 +249,12 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
           {currentPost.publishedAt ? (
             <span>
               {dateFormatter.format(new Date(currentPost.publishedAt))}
+            </span>
+          ) : null}
+          {currentPost.contentModifiedAt ? (
+            <span>
+              수정{" "}
+              {dateFormatter.format(new Date(currentPost.contentModifiedAt))}
             </span>
           ) : null}
           <span>조회 {currentPost.totalPageviews}</span>
