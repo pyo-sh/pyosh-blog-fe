@@ -1,8 +1,10 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { SearchFilter } from "@entities/post";
 import { SEARCH_FILTERS, fetchPosts } from "@entities/post";
 import { SearchFilterDropdown, SearchResultItem } from "@features/search";
+import { buildCanonicalMetadata } from "@shared/lib/seo";
 import { EmptyState, Pagination, ScrollToTop } from "@shared/ui/libs";
 
 interface SearchPageProps {
@@ -37,6 +39,30 @@ function parseFilter(value?: string): SearchFilter {
   }
 
   return "title_content";
+}
+
+export function generateMetadata({ searchParams }: SearchPageProps): Metadata {
+  const query = getSingleValue(searchParams?.q)?.trim() ?? "";
+  const page = parsePage(getSingleValue(searchParams?.page));
+  const filter = parseFilter(getSingleValue(searchParams?.filter));
+
+  if (!query) {
+    return {
+      title: "검색",
+      description: "블로그 글을 검색합니다.",
+      ...buildCanonicalMetadata("/search"),
+    };
+  }
+
+  return {
+    title: `검색: ${query}`,
+    description: `'${query}' 검색 결과`,
+    ...buildCanonicalMetadata("/search", {
+      q: query,
+      filter,
+      page,
+    }),
+  };
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {

@@ -1,7 +1,10 @@
+import { cache } from "react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchPosts } from "@entities/post";
 import { fetchTags } from "@entities/tag";
 import { PostListItem } from "@features/post-list";
+import { buildCanonicalMetadata } from "@shared/lib/seo";
 import { buildBreadcrumbJsonLd, getSiteUrl } from "@shared/lib/structured-data";
 import { JsonLd } from "@shared/ui/json-ld";
 import { EmptyState, Pagination, ScrollToTop } from "@shared/ui/libs";
@@ -41,22 +44,42 @@ function isOutOfRangePage(page: number, totalPages: number) {
   return page > totalPages;
 }
 
+const getTagPageData = cache(async (slug: string, page: number) => {
+  const [tags, response] = await Promise.all([
+    fetchTags(),
+    fetchPosts({ tagSlug: slug, page }),
+  ]);
+  const activeTag = tags.find((tag) => tag.slug === slug);
+
+  if (!activeTag || isOutOfRangePage(page, response.meta.totalPages)) {
+    notFound();
+  }
+
+  return { activeTag, response };
+});
+
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+  searchParams,
+}: TagPostsPageProps): Promise<Metadata> {
+  const page = parsePage(getSingleValue(searchParams?.page));
+  const { activeTag } = await getTagPageData(params.slug, page);
+
+  return {
+    title: `#${activeTag.name} - 글 목록`,
+    description: `#${activeTag.name} 태그가 포함된 글 목록`,
+    ...buildCanonicalMetadata(`/tags/${activeTag.slug}`, { page }),
+  };
+}
 
 export default async function TagPostsPage({
   params,
   searchParams,
 }: TagPostsPageProps) {
   const page = parsePage(getSingleValue(searchParams?.page));
-  const [tags, response] = await Promise.all([
-    fetchTags(),
-    fetchPosts({ tagSlug: params.slug, page }),
-  ]);
-  const activeTag = tags.find((tag) => tag.slug === params.slug);
-
-  if (!activeTag) {
-    notFound();
-  }
+  const { activeTag, response } = await getTagPageData(params.slug, page);
 
   const posts = response.data;
   const { meta } = response;
@@ -66,10 +89,6 @@ export default async function TagPostsPage({
     { name: "태그", href: "/tags" },
     { name: activeTag.name },
   ];
-
-  if (isOutOfRangePage(page, meta.totalPages)) {
-    notFound();
-  }
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col gap-8 px-4 py-12 md:px-6">
