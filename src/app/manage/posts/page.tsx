@@ -340,6 +340,7 @@ export default function ManagePostsPage() {
     ids: number[],
     categoryId?: number,
     commentStatus?: "open" | "locked" | "disabled",
+    visibility?: "public" | "private",
   ) {
     try {
       await bulkUpdatePosts({
@@ -347,6 +348,7 @@ export default function ManagePostsPage() {
         action: "update",
         categoryId,
         commentStatus,
+        visibility,
       });
       await invalidatePostQueries();
       toast.success(`${ids.length}개 글이 업데이트되었습니다.`);

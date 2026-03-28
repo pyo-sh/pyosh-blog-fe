@@ -93,6 +93,7 @@ export interface BulkPostAction {
   action: "update" | "soft_delete" | "restore" | "hard_delete";
   categoryId?: number;
   commentStatus?: "open" | "locked" | "disabled";
+  visibility?: "public" | "private";
 }
 
 export interface BulkPostErrorDetail {
