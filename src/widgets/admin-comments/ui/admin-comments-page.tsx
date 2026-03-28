@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
@@ -58,6 +58,20 @@ function getAllowedActionsForStatus(status: AdminCommentItem["status"]) {
   return ["soft_delete", "hard_delete"] as const;
 }
 
+function getBulkAllowedActions(items: AdminCommentItem[]) {
+  return items.reduce<readonly CommentManageAction[]>((current, item) => {
+    const allowedActions = [
+      ...getAllowedActionsForStatus(item.status),
+    ] as readonly CommentManageAction[];
+
+    if (current.length === 0) {
+      return [...allowedActions];
+    }
+
+    return current.filter((action) => allowedActions.includes(action));
+  }, []);
+}
+
 export function AdminCommentsPage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
@@ -78,6 +92,7 @@ export function AdminCommentsPage() {
   const [cascadeCount, setCascadeCount] = useState<number | undefined>(
     undefined,
   );
+  const cascadeRequestSeqRef = useRef(0);
 
   const queryParams = useMemo(
     () => ({
@@ -285,8 +300,21 @@ export function AdminCommentsPage() {
         return;
       }
 
+      const allowedActions = getBulkAllowedActions(selectedList);
+      const nextDefaultAction = allowedActions.includes(defaultAction)
+        ? defaultAction
+        : allowedActions[0];
+
+      if (!nextDefaultAction) {
+        return;
+      }
+
       setActionError(null);
-      setActionContext({ type: "bulk", items: selectedList, defaultAction });
+      setActionContext({
+        type: "bulk",
+        items: selectedList,
+        defaultAction: nextDefaultAction,
+      });
       setCascadeCount(undefined);
     },
     [selectedList],
@@ -308,25 +336,50 @@ export function AdminCommentsPage() {
   useEffect(() => {
     async function loadCascade() {
       if (!actionContext || actionContext.type !== "single") {
+        cascadeRequestSeqRef.current += 1;
         setCascadeCount(undefined);
 
         return;
       }
 
+      const requestSeq = ++cascadeRequestSeqRef.current;
+      const targetCommentId = actionContext.item.id;
+
       if (actionContext.item.depth > 0) {
-        setCascadeCount(0);
+        if (
+          cascadeRequestSeqRef.current === requestSeq &&
+          actionContext.type === "single" &&
+          actionContext.item.id === targetCommentId
+        ) {
+          setCascadeCount(0);
+        }
 
         return;
       }
 
       try {
-        const thread = await fetchAdminCommentThread(actionContext.item.id);
+        const thread = await fetchAdminCommentThread(targetCommentId);
+
+        if (
+          cascadeRequestSeqRef.current !== requestSeq ||
+          actionContext.type !== "single" ||
+          actionContext.item.id !== targetCommentId
+        ) {
+          return;
+        }
+
         const nextCascadeCount = thread.filter(
-          (item) => item.parentId === actionContext.item.id,
+          (item) => item.parentId === targetCommentId,
         ).length;
         setCascadeCount(nextCascadeCount);
       } catch {
-        setCascadeCount(undefined);
+        if (
+          cascadeRequestSeqRef.current === requestSeq &&
+          actionContext.type === "single" &&
+          actionContext.item.id === targetCommentId
+        ) {
+          setCascadeCount(undefined);
+        }
       }
     }
 
@@ -343,7 +396,7 @@ export function AdminCommentsPage() {
     actionContext?.type === "bulk" ? actionContext.items.length : 1;
   const actionModalActions =
     actionContext?.type === "bulk"
-      ? (["restore", "soft_delete", "hard_delete"] as const)
+      ? getBulkAllowedActions(actionContext.items)
       : actionContext
         ? getAllowedActionsForStatus(actionContext.item.status)
         : [];
@@ -355,6 +408,7 @@ export function AdminCommentsPage() {
         : [];
   const isSingleActionModalOpen =
     actionContext !== null && actionContext.type === "single";
+  const bulkAllowedActions = getBulkAllowedActions(selectedList);
 
   return (
     <div className="space-y-6">
@@ -429,6 +483,7 @@ export function AdminCommentsPage() {
             <button
               type="button"
               onClick={() => handleOpenBulkAction("restore")}
+              disabled={!bulkAllowedActions.includes("restore")}
               className="rounded-[0.6rem] border border-border-3 px-3 py-1.5 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
             >
               복원
@@ -436,6 +491,7 @@ export function AdminCommentsPage() {
             <button
               type="button"
               onClick={() => handleOpenBulkAction("soft_delete")}
+              disabled={!bulkAllowedActions.includes("soft_delete")}
               className="rounded-[0.6rem] border border-border-3 px-3 py-1.5 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
             >
               소프트 삭제
@@ -443,6 +499,7 @@ export function AdminCommentsPage() {
             <button
               type="button"
               onClick={() => handleOpenBulkAction("hard_delete")}
+              disabled={!bulkAllowedActions.includes("hard_delete")}
               className="rounded-[0.6rem] border border-negative-1/30 px-3 py-1.5 text-sm text-negative-1 transition-colors hover:bg-negative-1/10"
             >
               영구 삭제
