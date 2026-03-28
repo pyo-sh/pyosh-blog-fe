@@ -57,6 +57,17 @@ function normalizeGuestName(guestName: string) {
   return guestName.trim().toLowerCase();
 }
 
+function createGuestAuthorKey(guestName: string, guestPassword: string) {
+  const source = `${normalizeGuestName(guestName)}:${guestPassword.trim()}`;
+  let hash = 5381;
+
+  for (const character of source) {
+    hash = (hash * 33) ^ character.charCodeAt(0);
+  }
+
+  return String(hash >>> 0);
+}
+
 function trimToMaxEntries(store: GuestSecretMap) {
   const orderedEntries = Object.entries(store);
 
@@ -121,16 +132,13 @@ function readActiveAuthor() {
   }
 }
 
-function writeActiveAuthor(guestName: string) {
+function writeActiveAuthor(authorKey: string) {
   if (!isBrowser()) {
     return;
   }
 
   try {
-    window.sessionStorage.setItem(
-      ACTIVE_AUTHOR_KEY,
-      JSON.stringify(normalizeGuestName(guestName)),
-    );
+    window.sessionStorage.setItem(ACTIVE_AUTHOR_KEY, JSON.stringify(authorKey));
   } catch {
     // Ignore storage failures so comment UX degrades gracefully.
   }
@@ -140,10 +148,11 @@ export function rememberGuestSecretComment(
   commentId: number,
   body: string,
   guestName: string,
+  guestPassword: string,
 ) {
-  const normalizedGuestName = normalizeGuestName(guestName);
+  const authorKey = createGuestAuthorKey(guestName, guestPassword);
 
-  if (!body.trim() || !normalizedGuestName) {
+  if (!body.trim() || !guestPassword.trim()) {
     return;
   }
 
@@ -155,18 +164,22 @@ export function rememberGuestSecretComment(
   const currentAuthorStore = readAuthorStore();
   const nextAuthorStore = { ...currentAuthorStore };
   delete nextAuthorStore[String(commentId)];
-  nextAuthorStore[String(commentId)] = normalizedGuestName;
+  nextAuthorStore[String(commentId)] = authorKey;
 
   writeStore(trimToMaxEntries(nextStore));
   writeAuthorStore(trimToMaxEntries(nextAuthorStore));
-  writeActiveAuthor(guestName);
+  writeActiveAuthor(authorKey);
 }
 
 export function readGuestSecretComment(
   commentId: number,
   guestName?: string | null,
+  guestPassword?: string | null,
 ) {
-  const normalizedGuestName = normalizeGuestName(guestName ?? "");
+  const currentAuthorKey =
+    guestName && guestPassword
+      ? createGuestAuthorKey(guestName, guestPassword)
+      : null;
   const activeAuthor = readActiveAuthor();
   const authorKey = readAuthorStore()[String(commentId)];
 
@@ -174,8 +187,8 @@ export function readGuestSecretComment(
     return null;
   }
 
-  if (normalizedGuestName) {
-    if (normalizedGuestName !== authorKey) {
+  if (currentAuthorKey) {
+    if (currentAuthorKey !== authorKey) {
       return null;
     }
   } else if (activeAuthor !== authorKey) {
