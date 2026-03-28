@@ -18,6 +18,11 @@ interface LegacyGuestSecretEntry {
   guestEmailKey: string;
 }
 
+interface LegacyGuestIdentity {
+  guestName?: string | null;
+  guestEmail?: string | null;
+}
+
 function isBrowser() {
   return typeof window !== "undefined";
 }
@@ -153,6 +158,17 @@ function normalizeGuestEmail(guestEmail: string) {
   return guestEmail.trim().toLowerCase();
 }
 
+function createLegacyAuthorKey(
+  guestName?: string | null,
+  guestEmail?: string | null,
+) {
+  if (!guestName?.trim() || !guestEmail?.trim()) {
+    return null;
+  }
+
+  return `${normalizeGuestName(guestName)}:${normalizeGuestEmail(guestEmail)}`;
+}
+
 function readLegacyStore() {
   if (!isBrowser()) {
     return {};
@@ -210,10 +226,26 @@ function readLegacyActiveAuthor() {
       return null;
     }
 
-    return `${normalizeGuestName(parsed.guestName)}:${normalizeGuestEmail(parsed.guestEmail)}`;
+    return createLegacyAuthorKey(parsed.guestName, parsed.guestEmail);
   } catch {
     return null;
   }
+}
+
+function getLegacyEntryAuthorKey(entry: LegacyGuestSecretEntry) {
+  return createLegacyAuthorKey(entry.guestNameKey, entry.guestEmailKey);
+}
+
+function resolveSingleLegacyAuthorKey(
+  store: Record<string, LegacyGuestSecretEntry>,
+) {
+  const authorKeys = new Set(
+    Object.values(store)
+      .map((entry) => getLegacyEntryAuthorKey(entry))
+      .filter((authorKey): authorKey is string => Boolean(authorKey)),
+  );
+
+  return authorKeys.size === 1 ? [...authorKeys][0] : null;
 }
 
 export function rememberGuestSecretRevealToken(
@@ -248,23 +280,40 @@ export function removeGuestSecretRevealToken(commentId: number) {
   writeTokenStore(nextStore);
 }
 
-export function readLegacyGuestSecretComment(commentId: number) {
+export function readLegacyGuestSecretComment(
+  commentId: number,
+  identity?: LegacyGuestIdentity,
+) {
   const activeIdentity = readLegacyActiveAuthor();
+  const profileIdentity = createLegacyAuthorKey(
+    identity?.guestName,
+    identity?.guestEmail,
+  );
   const cachedEntry = readLegacyBodyCache()[String(commentId)];
 
-  if (cachedEntry && activeIdentity === cachedEntry.authorKey) {
+  if (
+    cachedEntry &&
+    (cachedEntry.authorKey === activeIdentity ||
+      cachedEntry.authorKey === profileIdentity ||
+      (!activeIdentity && !profileIdentity))
+  ) {
     return cachedEntry.body;
   }
 
-  const legacyEntry = readLegacyStore()[String(commentId)];
+  const legacyStore = readLegacyStore();
+  const legacyEntry = legacyStore[String(commentId)];
 
-  if (!activeIdentity || !legacyEntry) {
+  if (!legacyEntry) {
     return null;
   }
 
-  const legacyAuthorKey = `${legacyEntry.guestNameKey}:${legacyEntry.guestEmailKey}`;
+  const legacyAuthorKey = getLegacyEntryAuthorKey(legacyEntry);
+  const fallbackIdentity =
+    activeIdentity ??
+    profileIdentity ??
+    resolveSingleLegacyAuthorKey(legacyStore);
 
-  if (legacyAuthorKey !== activeIdentity) {
+  if (!legacyAuthorKey || legacyAuthorKey !== fallbackIdentity) {
     return null;
   }
 

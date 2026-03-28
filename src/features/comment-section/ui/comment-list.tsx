@@ -266,7 +266,10 @@ export function CommentList({
     const legacyBodies = Object.fromEntries(
       secretComments
         .map((comment) => {
-          const body = readLegacyGuestSecretComment(comment.id);
+          const body = readLegacyGuestSecretComment(comment.id, {
+            guestName: profile.guestName,
+            guestEmail: profile.guestEmail,
+          });
 
           return body ? [comment.id, body] : null;
         })
@@ -373,7 +376,7 @@ export function CommentList({
     return () => {
       isCancelled = true;
     };
-  }, [comments]);
+  }, [comments, profile.guestEmail, profile.guestName]);
 
   useEffect(() => {
     setExpandedRoots((current) => {
