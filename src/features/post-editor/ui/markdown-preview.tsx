@@ -1,12 +1,22 @@
 "use client";
 
+import type { RefObject } from "react";
 import { useEffect, useRef, useState } from "react";
+import { cn } from "@shared/lib/style-utils";
 
 interface MarkdownPreviewProps {
   value: string;
+  containerRef?: RefObject<HTMLDivElement>;
+  className?: string;
+  headerTitle?: string;
 }
 
-export function MarkdownPreview({ value }: MarkdownPreviewProps) {
+export function MarkdownPreview({
+  value,
+  containerRef,
+  className,
+  headerTitle = "Preview",
+}: MarkdownPreviewProps) {
   const [html, setHtml] = useState("");
   const [isRendering, setIsRendering] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,19 +72,26 @@ export function MarkdownPreview({ value }: MarkdownPreviewProps) {
   }, [value]);
 
   return (
-    <div className="relative min-h-[60vh] overflow-hidden rounded-[1.25rem] border border-border-3 bg-background-1">
+    <div
+      className={cn(
+        "relative flex min-h-[60vh] flex-col overflow-hidden rounded-[1.25rem] border border-border-3 bg-background-1",
+        className,
+      )}
+    >
       <div className="flex items-center justify-between border-b border-border-3 px-4 py-3 text-xs uppercase tracking-[0.2em] text-text-4">
-        <span>Preview</span>
+        <span>{headerTitle}</span>
         <span>{isRendering ? "렌더링 중" : "실시간 반영"}</span>
       </div>
 
       {error ? (
         <div className="p-6 text-sm text-negative-1">{error}</div>
       ) : (
-        <div
-          className="markdown-content prose max-w-none px-4 py-6"
-          dangerouslySetInnerHTML={{ __html: html }}
-        />
+        <div ref={containerRef} className="min-h-0 flex-1 overflow-y-auto">
+          <div
+            className="markdown-content prose max-w-none px-4 py-6"
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+        </div>
       )}
     </div>
   );

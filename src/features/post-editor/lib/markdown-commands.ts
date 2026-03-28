@@ -235,15 +235,23 @@ export function insertLink(view: EditorView): void {
 }
 
 export function insertImageTemplate(view: EditorView): void {
+  insertMarkdownImage(view, "이미지 설명", "url");
+}
+
+export function insertMarkdownImage(
+  view: EditorView,
+  alt: string,
+  src: string,
+): void {
   const { from, to } = view.state.selection.main;
   const selected = view.state.sliceDoc(from, to);
-  const alt = selected || "이미지 설명";
+  const nextAlt = selected || alt;
 
   view.dispatch({
-    changes: { from, to, insert: `![${alt}](url)` },
+    changes: { from, to, insert: `![${nextAlt}](${src})` },
     selection: EditorSelection.range(
-      from + alt.length + 4,
-      from + alt.length + 4 + 3,
+      from + nextAlt.length + 4,
+      from + nextAlt.length + 4 + src.length,
     ),
   });
 

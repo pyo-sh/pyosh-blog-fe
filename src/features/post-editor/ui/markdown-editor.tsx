@@ -108,6 +108,10 @@ interface MarkdownEditorProps {
   value: string;
   onChange: (value: string) => void;
   onBlur?: (value: string) => void;
+  onEditorReady?: (view: EditorView | null) => void;
+  onImageButtonClick?: () => void;
+  onImageFiles?: (files: File[]) => void;
+  pendingImageCount?: number;
   /**
    * Sets the `id` attribute on the CM6 content element. Read once at mount;
    * changes after initial render are ignored.
@@ -128,6 +132,10 @@ export function MarkdownEditor({
   value,
   onChange,
   onBlur,
+  onEditorReady,
+  onImageButtonClick,
+  onImageFiles,
+  pendingImageCount = 0,
   id = "contentMd",
   name = "contentMd",
   labelId,
@@ -140,8 +148,12 @@ export function MarkdownEditor({
   const contentAttributesCompartmentRef = useRef(new Compartment());
   const onChangeRef = useRef(onChange);
   const onBlurRef = useRef(onBlur);
+  const onEditorReadyRef = useRef(onEditorReady);
+  const onImageFilesRef = useRef(onImageFiles);
   onChangeRef.current = onChange;
   onBlurRef.current = onBlur;
+  onEditorReadyRef.current = onEditorReady;
+  onImageFilesRef.current = onImageFiles;
   const initialValueRef = useRef(value);
   const effectivePlaceholder =
     placeholderText ?? legacyPlaceholder ?? "# 글 내용을 작성하세요";
@@ -188,6 +200,34 @@ export function MarkdownEditor({
         blur: (_event, view) => {
           onBlurRef.current?.(view.state.doc.toString());
         },
+        drop: (event) => {
+          const files = Array.from(event.dataTransfer?.files ?? []).filter(
+            (file) => file.type.startsWith("image/"),
+          );
+
+          if (files.length === 0) {
+            return false;
+          }
+
+          event.preventDefault();
+          onImageFilesRef.current?.(files);
+
+          return true;
+        },
+        paste: (event) => {
+          const files = Array.from(event.clipboardData?.files ?? []).filter(
+            (file) => file.type.startsWith("image/"),
+          );
+
+          if (files.length === 0) {
+            return false;
+          }
+
+          event.preventDefault();
+          onImageFilesRef.current?.(files);
+
+          return true;
+        },
       }),
       contentAttributesCompartmentRef.current.of(
         EditorView.contentAttributes.of(getContentAttributes(id, labelId)),
@@ -205,8 +245,10 @@ export function MarkdownEditor({
     });
 
     setEditorView(view);
+    onEditorReadyRef.current?.(view);
 
     return () => {
+      onEditorReadyRef.current?.(null);
       view.destroy();
       setEditorView(null);
     };
@@ -258,7 +300,11 @@ export function MarkdownEditor({
         tabIndex={-1}
         value={value}
       />
-      <MarkdownToolbar editorView={editorView} />
+      <MarkdownToolbar
+        editorView={editorView}
+        onImageButtonClick={onImageButtonClick}
+        pendingImageCount={pendingImageCount}
+      />
       <div
         ref={containerRef}
         className={cn(

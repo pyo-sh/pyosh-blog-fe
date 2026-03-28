@@ -5,13 +5,27 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { CategoryTreeSelect } from "./category-tree-select";
+import { ImageGalleryModal } from "./image-gallery-modal";
 import { MarkdownEditor } from "./markdown-editor";
 import { MarkdownPreview } from "./markdown-preview";
 import { PostCardPreview } from "./post-card-preview";
+import { PreviewModal } from "./preview-modal";
 import { PublishConfirmModal } from "./publish-confirm-modal";
 import { TagChipInput } from "./tag-chip-input";
 import { ThumbnailUploader } from "./thumbnail-uploader";
 import { extractPlainText } from "../lib/extract-plain-text";
+import {
+  createPendingImage,
+  resolvePreviewContent,
+  syncPendingImagesWithContent,
+  uploadPendingImages,
+  validatePendingImageFile,
+  type PendingImage,
+} from "../lib/image-handler";
+import { insertMarkdownImage } from "../lib/markdown-commands";
+import { attachScrollSync } from "../lib/scroll-sync";
+import type { EditorView } from "@codemirror/view";
+import { type Asset } from "@entities/asset";
 import { fetchCategoriesAdmin, type Category } from "@entities/category";
 import {
   createPost,
@@ -24,6 +38,7 @@ import { cn } from "@shared/lib/style-utils";
 import { Spinner } from "@shared/ui/libs";
 
 type EditorTab = "all" | "meta" | "content";
+type PreviewMode = "split" | "editor";
 type SubmitIntent =
   | "save"
   | "publish"
@@ -203,9 +218,23 @@ export function PostForm({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [pendingIntent, setPendingIntent] = useState<SubmitIntent | null>(null);
   const [showPublishConfirm, setShowPublishConfirm] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [showImageGallery, setShowImageGallery] = useState(false);
+  const [previewMode, setPreviewMode] = useState<PreviewMode>("split");
+  const [isDesktopPreview, setIsDesktopPreview] = useState(false);
+  const [editorView, setEditorView] = useState<EditorView | null>(null);
+  const [pendingImages, setPendingImages] = useState<Map<string, PendingImage>>(
+    () => new Map(),
+  );
   const [isSummaryManuallyEdited, setIsSummaryManuallyEdited] = useState(
     Boolean(nextInitialValues.summary.trim()),
   );
+  const previewRef = useRef<HTMLDivElement | null>(null);
+  const pendingImagesRef = useRef(pendingImages);
+
+  useEffect(() => {
+    pendingImagesRef.current = pendingImages;
+  }, [pendingImages]);
 
   useEffect(() => {
     const recordChanged =
@@ -241,6 +270,51 @@ export function PostForm({
     };
   }, [isDirty]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia("(min-width: 1280px)");
+    const updateViewport = () => {
+      setIsDesktopPreview(mediaQuery.matches);
+      setPreviewMode((current) => (mediaQuery.matches ? current : "editor"));
+    };
+
+    updateViewport();
+    mediaQuery.addEventListener("change", updateViewport);
+
+    return () => {
+      mediaQuery.removeEventListener("change", updateViewport);
+    };
+  }, []);
+
+  useEffect(() => {
+    setPendingImages((current) =>
+      syncPendingImagesWithContent(values.contentMd, current),
+    );
+  }, [values.contentMd]);
+
+  useEffect(() => {
+    return () => {
+      pendingImagesRef.current.forEach((image) => {
+        URL.revokeObjectURL(image.blobUrl);
+      });
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!editorView || !previewRef.current || !isDesktopPreview) {
+      return;
+    }
+
+    if (previewMode !== "split" || activeTab === "meta") {
+      return;
+    }
+
+    return attachScrollSync(editorView, previewRef.current);
+  }, [activeTab, editorView, isDesktopPreview, previewMode]);
+
   const categoriesQuery = useQuery({
     queryKey: ["categories", "admin"],
     queryFn: () => fetchCategoriesAdmin(),
@@ -248,7 +322,15 @@ export function PostForm({
 
   const mutation = useMutation({
     mutationFn: async (nextValues: PostFormValues) => {
-      const payload = buildPayload(nextValues);
+      const uploaded = await uploadPendingImages(
+        nextValues.contentMd,
+        pendingImages,
+        setPendingImages,
+      );
+      const payload = buildPayload({
+        ...nextValues,
+        contentMd: uploaded.contentMd,
+      });
 
       if (mode === "edit") {
         if (postId === undefined) {
@@ -264,6 +346,7 @@ export function PostForm({
       const persistedValues = mapPostToFormValues(post);
 
       setValues(persistedValues);
+      setPendingImages((current) => syncPendingImagesWithContent("", current));
       setIsDirty(false);
       setIsSummaryManuallyEdited(Boolean(persistedValues.summary.trim()));
       setPendingIntent(null);
@@ -307,6 +390,11 @@ export function PostForm({
   const isCategoryUnavailable =
     categoriesQuery.isPending ||
     (!categoriesQuery.isError && categories.length === 0);
+  const previewContent = useMemo(
+    () => resolvePreviewContent(values.contentMd, pendingImages),
+    [pendingImages, values.contentMd],
+  );
+  const pendingImageCount = useMemo(() => pendingImages.size, [pendingImages]);
 
   const handleFieldChange = <Key extends keyof PostFormValues>(
     key: Key,
@@ -318,6 +406,61 @@ export function PostForm({
       [key]: value,
     }));
   };
+
+  function handlePreviewModeChange(mode: PreviewMode) {
+    if (mode === "split" && !isDesktopPreview) {
+      return;
+    }
+
+    setPreviewMode(mode);
+  }
+
+  function insertPendingFiles(files: FileList | File[]) {
+    if (!editorView) {
+      return;
+    }
+
+    const fileList = Array.from(files);
+
+    for (const file of fileList) {
+      const validationError = validatePendingImageFile(file);
+
+      if (validationError) {
+        toast.error(validationError);
+        continue;
+      }
+
+      const pending = createPendingImage(file);
+
+      setPendingImages((current) => {
+        const next = new Map(current);
+        next.set(pending.id, pending);
+
+        return next;
+      });
+      insertMarkdownImage(
+        editorView,
+        pending.alt,
+        `pending-upload:${pending.id}`,
+      );
+    }
+
+    setShowImageGallery(false);
+  }
+
+  function insertExistingAsset(asset: Asset) {
+    if (!editorView) {
+      return;
+    }
+
+    const alt =
+      asset.url
+        .split("/")
+        .pop()
+        ?.replace(/\.[^./\\]+$/, "") || "이미지";
+    insertMarkdownImage(editorView, alt, asset.url);
+    setShowImageGallery(false);
+  }
 
   function submitWithIntent(intent: SubmitIntent) {
     const nextValues: PostFormValues = {
@@ -638,45 +781,111 @@ export function PostForm({
         ) : null}
 
         {activeTab !== "meta" ? (
-          <section className="grid gap-4 xl:grid-cols-2">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <label
-                  id="contentMdLabel"
-                  onClick={() => document.getElementById("contentMd")?.focus()}
-                  className="text-sm font-medium text-text-1"
-                >
-                  본문
-                </label>
-                <span className="text-xs uppercase tracking-[0.2em] text-text-4">
-                  Markdown
-                </span>
+          <section className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-[1.25rem] border border-border-3 bg-background-1 px-4 py-3">
+              <div>
+                <p className="text-xs uppercase tracking-[0.24em] text-text-4">
+                  Preview Mode
+                </p>
+                <p className="mt-1 text-sm text-text-3">
+                  XL 이상에서는 분할 미리보기를, 작은 화면에서는 모달 미리보기를
+                  사용합니다.
+                </p>
               </div>
-              <MarkdownEditor
-                labelId="contentMdLabel"
-                value={values.contentMd}
-                onChange={(value) => handleFieldChange("contentMd", value)}
-                onBlur={(contentMd) => {
-                  if (!isSummaryManuallyEdited) {
-                    handleFieldChange(
-                      "summary",
-                      extractPlainText(contentMd, 200),
-                    );
-                  }
-                }}
-              />
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  disabled={!isDesktopPreview}
+                  onClick={() => handlePreviewModeChange("split")}
+                  className={cn(
+                    "rounded-[0.9rem] border px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+                    previewMode === "split"
+                      ? "border-primary-1 bg-primary-1 text-white"
+                      : "border-border-3 bg-background-2 text-text-2 hover:border-border-2 hover:text-text-1",
+                  )}
+                >
+                  에디터 + 프리뷰
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handlePreviewModeChange("editor")}
+                  className={cn(
+                    "rounded-[0.9rem] border px-4 py-2 text-sm font-medium transition-colors",
+                    previewMode === "editor"
+                      ? "border-primary-1 bg-primary-1 text-white"
+                      : "border-border-3 bg-background-2 text-text-2 hover:border-border-2 hover:text-text-1",
+                  )}
+                >
+                  에디터만
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowPreviewModal(true)}
+                  className="rounded-[0.9rem] border border-border-3 bg-background-2 px-4 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+                >
+                  미리보기
+                </button>
+              </div>
             </div>
 
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-text-1">
-                  미리보기
-                </span>
-                <span className="text-xs uppercase tracking-[0.2em] text-text-4">
-                  실시간 반영
-                </span>
+            <div
+              className={cn(
+                "grid gap-4",
+                previewMode === "split" && isDesktopPreview
+                  ? "xl:grid-cols-2"
+                  : "grid-cols-1",
+              )}
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label
+                    id="contentMdLabel"
+                    onClick={() =>
+                      document.getElementById("contentMd")?.focus()
+                    }
+                    className="text-sm font-medium text-text-1"
+                  >
+                    본문
+                  </label>
+                  <span className="text-xs uppercase tracking-[0.2em] text-text-4">
+                    Markdown
+                  </span>
+                </div>
+                <MarkdownEditor
+                  pendingImageCount={pendingImageCount}
+                  labelId="contentMdLabel"
+                  value={values.contentMd}
+                  onEditorReady={setEditorView}
+                  onChange={(value) => handleFieldChange("contentMd", value)}
+                  onImageButtonClick={() => setShowImageGallery(true)}
+                  onImageFiles={insertPendingFiles}
+                  onBlur={(contentMd) => {
+                    if (!isSummaryManuallyEdited) {
+                      handleFieldChange(
+                        "summary",
+                        extractPlainText(contentMd, 200),
+                      );
+                    }
+                  }}
+                />
               </div>
-              <MarkdownPreview value={values.contentMd} />
+
+              {previewMode === "split" && isDesktopPreview ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-text-1">
+                      미리보기
+                    </span>
+                    <span className="text-xs uppercase tracking-[0.2em] text-text-4">
+                      실시간 반영
+                    </span>
+                  </div>
+                  <MarkdownPreview
+                    value={previewContent}
+                    containerRef={previewRef}
+                  />
+                </div>
+              ) : null}
             </div>
           </section>
         ) : null}
@@ -736,6 +945,19 @@ export function PostForm({
           }
         }}
         onConfirm={() => submitWithIntent("publish")}
+      />
+
+      <PreviewModal
+        isOpen={showPreviewModal}
+        value={previewContent}
+        onClose={() => setShowPreviewModal(false)}
+      />
+
+      <ImageGalleryModal
+        isOpen={showImageGallery}
+        onClose={() => setShowImageGallery(false)}
+        onSelectAsset={insertExistingAsset}
+        onSelectLocalFiles={insertPendingFiles}
       />
     </>
   );
