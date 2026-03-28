@@ -61,6 +61,7 @@ export function CategoryTree({
   const [mode, setMode] = useState<CategoryTreeMode>("view");
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
   const [showHidden, setShowHidden] = useState(false);
+  const [restoreShowHidden, setRestoreShowHidden] = useState(false);
   const [workingCategories, setWorkingCategories] = useState<Category[]>(
     cloneCategoryTree(categories),
   );
@@ -130,19 +131,24 @@ export function CategoryTree({
   }, []);
 
   const handleEnterSelectMode = () => {
+    setRestoreShowHidden(showHidden);
+    setShowHidden(true);
     setSelectedIds(new Set());
     setMode("select");
   };
 
   const handleEnterEditMode = () => {
     setRestoreExpandedIds(new Set(expandedIds));
+    setRestoreShowHidden(showHidden);
+    setShowHidden(true);
     setOriginalTree(cloneCategoryTree(workingCategories));
-    setExpandedIds(collectExpandableIds(workingCategories, showHidden));
+    setExpandedIds(collectExpandableIds(workingCategories, true));
     setSelectedIds(new Set());
     setMode("edit");
   };
 
   const handleExitSelectMode = () => {
+    setShowHidden(restoreShowHidden);
     setSelectedIds(new Set());
     setMode("view");
   };
@@ -153,6 +159,7 @@ export function CategoryTree({
     }
 
     setMode("view");
+    setShowHidden(restoreShowHidden);
     setExpandedIds(new Set(restoreExpandedIds));
     setOriginalTree(null);
     setActiveDragId(null);
