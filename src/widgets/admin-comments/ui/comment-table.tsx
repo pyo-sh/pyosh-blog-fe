@@ -23,10 +23,10 @@ interface CommentTableProps {
   rows: AdminCommentItem[];
   selectedIds: Set<number>;
   deletingId: number | null;
-  onToggleSelect: (id: number) => void;
+  onToggleSelect: (item: AdminCommentItem) => void;
   onToggleSelectPage: (ids: number[]) => void;
   onClickComment: (comment: AdminCommentItem) => void;
-  onDelete: (id: number) => void;
+  onManage: (item: AdminCommentItem) => void;
 }
 
 export function CommentTable({
@@ -36,7 +36,7 @@ export function CommentTable({
   onToggleSelect,
   onToggleSelectPage,
   onClickComment,
-  onDelete,
+  onManage,
 }: CommentTableProps) {
   const pageIds = rows.map((r) => r.id);
   const allPageSelected =
@@ -94,7 +94,7 @@ export function CommentTable({
                     <input
                       type="checkbox"
                       checked={isSelected}
-                      onChange={() => onToggleSelect(item.id)}
+                      onChange={() => onToggleSelect(item)}
                       className="h-4 w-4 rounded border-border-3 accent-primary-1"
                       aria-label={`댓글 ${item.id} 선택`}
                     />
@@ -184,20 +184,23 @@ export function CommentTable({
 
                   {/* Delete action */}
                   <td className="px-4 py-4">
-                    {item.status === "deleted" ? (
-                      <span className="inline-flex items-center rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm text-text-4">
-                        삭제됨
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        disabled={deletingId === item.id}
-                        onClick={() => onDelete(item.id)}
-                        className="inline-flex items-center justify-center rounded-[0.75rem] border border-negative-1/30 px-3 py-2 text-sm font-medium text-negative-1 transition-colors hover:bg-negative-1/10 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {deletingId === item.id ? "삭제 중" : "삭제"}
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      disabled={deletingId === item.id}
+                      onClick={() => onManage(item)}
+                      className={cn(
+                        "inline-flex items-center justify-center rounded-[0.75rem] border px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+                        item.status === "deleted"
+                          ? "border-border-3 text-text-2 hover:border-border-2 hover:text-text-1"
+                          : "border-negative-1/30 text-negative-1 hover:bg-negative-1/10",
+                      )}
+                    >
+                      {deletingId === item.id
+                        ? "처리 중"
+                        : item.status === "deleted"
+                          ? "관리"
+                          : "삭제"}
+                    </button>
                   </td>
                 </tr>
               );

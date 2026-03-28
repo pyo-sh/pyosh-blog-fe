@@ -26,6 +26,10 @@ export interface AdminCommentItem {
   updatedAt: string;
 }
 
+export type AdminCommentStatus = AdminCommentItem["status"];
+export type AdminCommentDeleteAction = "soft_delete" | "hard_delete";
+export type AdminCommentBulkAction = "restore" | AdminCommentDeleteAction;
+
 export interface FetchAdminCommentsParams {
   page?: number;
   limit?: number;
@@ -216,9 +220,28 @@ export async function fetchAdminComments(
     : clientFetch<PaginatedResponse<AdminCommentItem>>(path);
 }
 
-export async function adminDeleteComment(id: number): Promise<void> {
-  await clientMutate<void>(`/api/admin/comments/${id}`, {
+export async function adminDeleteComment(
+  id: number,
+  action: AdminCommentDeleteAction = "soft_delete",
+): Promise<void> {
+  await clientMutate<void>(`/api/admin/comments/${id}?action=${action}`, {
     method: "DELETE",
+  });
+}
+
+export async function adminRestoreComment(id: number): Promise<void> {
+  await clientMutate<void>(`/api/admin/comments/${id}/restore`, {
+    method: "PUT",
+  });
+}
+
+export async function adminBulkOperateComments(
+  ids: number[],
+  action: AdminCommentBulkAction,
+): Promise<void> {
+  await clientMutate<void>("/api/admin/comments/bulk", {
+    method: "DELETE",
+    body: JSON.stringify({ ids, action }),
   });
 }
 

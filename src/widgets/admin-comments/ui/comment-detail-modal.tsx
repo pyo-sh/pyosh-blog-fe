@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { AdminCommentItem } from "@entities/comment";
 import { fetchAdminCommentThread } from "@entities/comment";
 import { cn } from "@shared/lib/style-utils";
+import { Modal } from "@shared/ui/libs";
 
 const detailDateFormatter = new Intl.DateTimeFormat("ko-KR", {
   year: "numeric",
@@ -38,13 +39,22 @@ interface ThreadState {
 interface CommentDetailModalProps {
   comment: AdminCommentItem | null;
   isOpen: boolean;
+  isActionPending?: boolean;
   onClose: () => void;
+  onCommentChange?: (comment: AdminCommentItem) => void;
+  onSelectAction: (
+    comment: AdminCommentItem,
+    action: "restore" | "soft_delete" | "hard_delete",
+  ) => void;
 }
 
 export function CommentDetailModal({
   comment,
   isOpen,
+  isActionPending = false,
   onClose,
+  onCommentChange,
+  onSelectAction,
 }: CommentDetailModalProps) {
   const [mode, setMode] = useState<ModalMode>("detail");
   const [currentComment, setCurrentComment] = useState<AdminCommentItem | null>(
@@ -79,33 +89,10 @@ export function CommentDetailModal({
 
   useEffect(() => {
     activeCommentIdRef.current = currentComment?.id ?? null;
-  }, [currentComment]);
-
-  // ESC key close
-  useEffect(() => {
-    if (!isOpen) return;
-
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+    if (currentComment) {
+      onCommentChange?.(currentComment);
     }
-
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
-
-  // Body scroll lock
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
+  }, [currentComment, onCommentChange]);
 
   const loadThread = useCallback(
     async (commentId: number) => {
@@ -199,18 +186,13 @@ export function CommentDetailModal({
   const threadCount = thread.items.length > 0 ? thread.items.length : undefined;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-grey-2/50 p-4"
-      onClick={onClose}
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      withBackground
+      className="w-full max-w-xl overflow-hidden rounded-[1.5rem] border border-border-3 bg-background-2"
     >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={mode === "thread" ? "관련 댓글" : "댓글 상세"}
-        className="relative flex max-h-[85vh] w-full max-w-xl flex-col overflow-hidden rounded-[1.5rem] border border-border-3 bg-background-2 shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Modal header */}
+      <div className="relative flex max-h-[85vh] flex-col">
         <div className="flex items-center justify-between border-b border-border-3 px-6 py-4">
           <h2 className="text-base font-semibold text-text-1">
             {mode === "thread" ? "관련 댓글" : "댓글 상세"}
@@ -225,7 +207,6 @@ export function CommentDetailModal({
           </button>
         </div>
 
-        {/* Modal body */}
         <div className="min-h-0 flex-1 overflow-y-auto">
           {mode === "detail" ? (
             <DetailView
@@ -235,8 +216,12 @@ export function CommentDetailModal({
               threadCount={threadCount}
               threadLoading={thread.isLoading}
               threadError={threadError}
+              isActionPending={isActionPending}
               onToggleParent={() => void handleToggleParent()}
               onOpenThread={() => void handleOpenThread()}
+              onSelectAction={(action) =>
+                onSelectAction(currentComment, action)
+              }
             />
           ) : (
             <ThreadView
@@ -250,7 +235,7 @@ export function CommentDetailModal({
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 
@@ -261,8 +246,10 @@ interface DetailViewProps {
   threadCount: number | undefined;
   threadLoading: boolean;
   threadError: string | null;
+  isActionPending: boolean;
   onToggleParent: () => void;
   onOpenThread: () => void;
+  onSelectAction: (action: "restore" | "soft_delete" | "hard_delete") => void;
 }
 
 function DetailView({
@@ -272,10 +259,38 @@ function DetailView({
   threadCount,
   threadLoading,
   threadError,
+  isActionPending,
   onToggleParent,
   onOpenThread,
+  onSelectAction,
 }: DetailViewProps) {
   const isReply = comment.depth > 0;
+  const actionButtons =
+    comment.status === "deleted"
+      ? [
+          {
+            value: "restore" as const,
+            label: "복원",
+            tone: "default" as const,
+          },
+          {
+            value: "hard_delete" as const,
+            label: "영구 삭제",
+            tone: "danger" as const,
+          },
+        ]
+      : [
+          {
+            value: "soft_delete" as const,
+            label: "소프트 삭제",
+            tone: "default" as const,
+          },
+          {
+            value: "hard_delete" as const,
+            label: "영구 삭제",
+            tone: "danger" as const,
+          },
+        ];
 
   return (
     <div className="space-y-5 p-6">
@@ -428,6 +443,25 @@ function DetailView({
               ? `관련 댓글 모두 보기 (${threadCount}개)`
               : "관련 댓글 모두 보기"}
         </button>
+      </div>
+
+      <div className="flex flex-wrap justify-end gap-3 border-t border-border-3 pt-4">
+        {actionButtons.map((action) => (
+          <button
+            key={action.value}
+            type="button"
+            onClick={() => onSelectAction(action.value)}
+            disabled={isActionPending}
+            className={cn(
+              "inline-flex items-center justify-center rounded-[0.75rem] px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+              action.tone === "danger"
+                ? "border border-negative-1/30 text-negative-1 hover:bg-negative-1/10"
+                : "border border-border-3 text-text-2 hover:border-border-2 hover:text-text-1",
+            )}
+          >
+            {action.label}
+          </button>
+        ))}
       </div>
     </div>
   );

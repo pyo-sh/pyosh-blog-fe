@@ -9,9 +9,17 @@ export type {
   DeleteCommentGuestBody,
   DeleteCommentOAuthBody,
 } from "./model";
-export type { AdminCommentItem, FetchAdminCommentsParams } from "./api";
+export type {
+  AdminCommentBulkAction,
+  AdminCommentDeleteAction,
+  AdminCommentItem,
+  AdminCommentStatus,
+  FetchAdminCommentsParams,
+} from "./api";
 export {
+  adminBulkOperateComments,
   adminDeleteComment,
+  adminRestoreComment,
   createComment,
   deleteComment,
   fetchAdminCommentThread,
