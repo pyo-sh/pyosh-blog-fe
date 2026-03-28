@@ -60,6 +60,10 @@ const sanitizeSchema = {
     "input", // GFM 체크박스
     "del", // GFM 취소선
   ],
+  protocols: {
+    ...defaultSchema.protocols,
+    src: [...(defaultSchema.protocols?.src ?? []), "blob"],
+  },
 };
 
 // Create once at module level so rehypeShiki's highlighter is not re-initialized per call
