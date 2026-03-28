@@ -230,6 +230,7 @@ export function CommentList({
   const commentRefs = useRef<Record<number, HTMLLIElement | null>>({});
   const revealedSecretBodiesRef = useRef<Record<number, string>>({});
   const inFlightRevealIdsRef = useRef<Set<number>>(new Set());
+  const secretCommentIdsRef = useRef<Set<number>>(new Set());
 
   const safeMeta = meta ?? createFallbackMeta(comments);
   const currentPage = meta.page;
@@ -269,11 +270,11 @@ export function CommentList({
   }, [revealedSecretBodies]);
 
   useEffect(() => {
-    let isCancelled = false;
     const secretComments = collectSecretComments(comments);
     const secretCommentIdSet = new Set(
       secretComments.map((comment) => comment.id),
     );
+    secretCommentIdsRef.current = secretCommentIdSet;
     const legacyBodies = Object.fromEntries(
       secretComments
         .map((comment) => {
@@ -286,21 +287,6 @@ export function CommentList({
         })
         .filter((entry): entry is [number, string] => entry !== null),
     );
-    const revealTargets = secretComments
-      .map((comment) => {
-        if (
-          legacyBodies[comment.id] ||
-          revealedSecretBodiesRef.current[comment.id] ||
-          inFlightRevealIdsRef.current.has(comment.id)
-        ) {
-          return null;
-        }
-
-        const revealToken = readGuestSecretRevealToken(comment.id);
-
-        return revealToken ? [comment.id, revealToken] : null;
-      })
-      .filter((entry): entry is [number, string] => entry !== null);
 
     setRevealedSecretBodies((current) => {
       const nextBodies: Record<number, string> = {};
@@ -318,11 +304,31 @@ export function CommentList({
 
       return nextBodies;
     });
+  }, [comments, profile.guestEmail, profile.guestName]);
+
+  useEffect(() => {
+    const secretComments = collectSecretComments(comments);
+    const secretCommentIdSet = new Set(
+      secretComments.map((comment) => comment.id),
+    );
+    secretCommentIdsRef.current = secretCommentIdSet;
+    const revealTargets = secretComments
+      .map((comment) => {
+        if (
+          revealedSecretBodiesRef.current[comment.id] ||
+          inFlightRevealIdsRef.current.has(comment.id)
+        ) {
+          return null;
+        }
+
+        const revealToken = readGuestSecretRevealToken(comment.id);
+
+        return revealToken ? [comment.id, revealToken] : null;
+      })
+      .filter((entry): entry is [number, string] => entry !== null);
 
     if (revealTargets.length === 0) {
-      return () => {
-        isCancelled = true;
-      };
+      return;
     }
 
     for (const [commentId] of revealTargets) {
@@ -354,13 +360,10 @@ export function CommentList({
         inFlightRevealIdsRef.current.delete(commentId);
       }
 
-      if (isCancelled) {
-        return;
-      }
-
       const revealedBodies = Object.fromEntries(
         entries.filter(
-          (entry): entry is readonly [number, string] => entry !== null,
+          (entry): entry is readonly [number, string] =>
+            entry !== null && secretCommentIdsRef.current.has(entry[0]),
         ),
       );
 
@@ -375,7 +378,7 @@ export function CommentList({
         };
 
         for (const commentId of Object.keys(nextBodies).map(Number)) {
-          if (!secretCommentIdSet.has(commentId)) {
+          if (!secretCommentIdsRef.current.has(commentId)) {
             delete nextBodies[commentId];
           }
         }
@@ -383,11 +386,7 @@ export function CommentList({
         return nextBodies;
       });
     });
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [comments, profile.guestEmail, profile.guestName]);
+  }, [comments]);
 
   useEffect(() => {
     setExpandedRoots((current) => {
