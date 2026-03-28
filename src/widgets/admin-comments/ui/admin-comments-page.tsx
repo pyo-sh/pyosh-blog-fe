@@ -174,9 +174,6 @@ export function AdminCommentsPage() {
       }
       setActionContext(null);
       setCascadeCount(undefined);
-      setPage((currentPage) =>
-        currentPage > 1 && rows.length === 1 ? currentPage - 1 : currentPage,
-      );
       await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
       const actionLabel =
         variables.action === "restore"
