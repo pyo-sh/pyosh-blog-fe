@@ -76,11 +76,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   if (!query) {
     return (
-      <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col gap-6 px-4 pb-16 pt-8 md:px-6">
+      <main className="mx-auto flex min-h-[100dvh] w-full max-w-[67.5rem] flex-col gap-6 px-4 pb-16 pt-8 md:px-6">
         <Suspense>
           <SearchForm currentFilter={filter} initialQuery="" />
         </Suspense>
         <SearchEmptyState
+          icon="search"
           title="검색어를 입력해 주세요"
           description="제목, 내용, 태그, 카테고리, 댓글로 검색할 수 있습니다"
         />
@@ -94,19 +95,20 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const { meta } = response;
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col gap-6 px-4 pb-16 pt-8 md:px-6">
+    <main className="mx-auto flex min-h-[100dvh] w-full max-w-[67.5rem] flex-col gap-6 px-4 pb-16 pt-8 md:px-6">
       <Suspense>
         <SearchForm currentFilter={filter} initialQuery={query} />
       </Suspense>
 
       <header className="text-ui-base font-semibold text-text-2">
         <span className="font-bold text-primary-1">&quot;{query}&quot;</span>{" "}
-        <span className="text-text-3">검색 결과 ({meta.total}건)</span>
+        검색 결과{" "}
+        <span className="font-normal text-text-3">({meta.total}건)</span>
       </header>
 
       {posts.length > 0 ? (
         <>
-          <section className="flex flex-col gap-3" aria-label="검색 결과">
+          <section aria-label="검색 결과">
             {posts.map((post) => (
               <SearchResultItem key={post.id} post={post} query={query} />
             ))}
@@ -121,6 +123,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         </>
       ) : (
         <SearchEmptyState
+          icon="search-zoom-in"
           title="검색 결과가 없습니다"
           description="다른 검색어나 필터로 다시 시도해 보세요"
         />
