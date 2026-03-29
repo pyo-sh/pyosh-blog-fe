@@ -81,7 +81,7 @@ export function PostListItem({ post }: PostListItemProps) {
             </time>
           </div>
 
-          <h2 className="overflow-hidden text-ellipsis whitespace-nowrap break-keep text-base font-extrabold leading-snug text-text-1 sm:text-lg">
+          <h2 className="overflow-hidden text-ellipsis whitespace-nowrap break-keep text-base font-bold leading-snug text-text-1 sm:text-lg">
             {post.title}
           </h2>
 
