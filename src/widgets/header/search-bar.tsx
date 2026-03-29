@@ -129,16 +129,6 @@ const SearchBar: React.FC = () => {
       )}
       onSubmit={handleSubmit}
     >
-      <span
-        aria-hidden="true"
-        className={cn(
-          "pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-4 transition-opacity duration-200",
-          isExpanded ? "opacity-100" : "opacity-0",
-        )}
-      >
-        <Icon icon={magniferLinear} width="15" />
-      </span>
-
       {!isExpanded ? (
         <button
           type="button"
@@ -166,7 +156,7 @@ const SearchBar: React.FC = () => {
         maxLength={200}
         aria-label="검색어 입력"
         className={cn(
-          "min-w-0 bg-transparent pl-9 pr-2 text-[0.813rem] leading-[1.125rem] font-normal text-text-1 outline-none placeholder:text-text-4 transition-[max-width,opacity] duration-300",
+          "min-w-0 bg-transparent pl-3 pr-2 text-[0.813rem] leading-[1.125rem] font-normal text-text-1 outline-none placeholder:text-text-4 transition-[max-width,opacity] duration-300",
           isExpanded
             ? "max-w-[12rem] opacity-100 md:max-w-[14rem]"
             : "max-w-0 opacity-0 pointer-events-none",
