@@ -16,7 +16,7 @@ const meta: Meta<typeof PostListItem> = {
 export default meta;
 type Story = StoryObj<typeof PostListItem>;
 
-export const Default: Story = {};
+export const WithThumbnail: Story = {};
 
 export const WithoutThumbnail: Story = {
   args: {
@@ -25,6 +25,20 @@ export const WithoutThumbnail: Story = {
       thumbnailUrl: null,
     },
   },
+};
+
+export const Comparison: Story = {
+  render: () => (
+    <div className="grid max-w-4xl gap-3">
+      <PostListItem post={mockPosts[0]} />
+      <PostListItem
+        post={{
+          ...mockPosts[1],
+          thumbnailUrl: null,
+        }}
+      />
+    </div>
+  ),
 };
 
 export const ZeroViews: Story = {

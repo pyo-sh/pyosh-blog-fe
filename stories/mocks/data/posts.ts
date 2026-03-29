@@ -7,7 +7,7 @@ export const mockPosts: Post[] = [
     title: "Next.js App Router 완전 가이드",
     slug: "nextjs-app-router-guide",
     contentMd: "# Next.js App Router\n\nApp Router는 React Server Components를 기반으로 합니다.",
-    thumbnailUrl: null,
+    thumbnailUrl: "https://picsum.photos/seed/nextjs-app-router/256/192",
     visibility: "public",
     status: "published",
     publishedAt: "2026-01-15T09:00:00.000Z",
