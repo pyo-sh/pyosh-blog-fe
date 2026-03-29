@@ -303,10 +303,12 @@ function GuestbookEntryItem({
               ) : (
                 <TrashIcon className="h-[0.875rem] w-[0.875rem] shrink-0" />
               )}
-              <span className="break-keep leading-[0.875rem]">{body.text}</span>
+              <span className="break-words leading-[0.875rem]">
+                {body.text}
+              </span>
             </div>
           ) : (
-            <p className="whitespace-pre-wrap break-keep text-[0.875rem] leading-relaxed text-text-2">
+            <p className="whitespace-pre-wrap break-words text-[0.875rem] leading-relaxed text-text-2">
               {body.text}
             </p>
           )}
