@@ -13,6 +13,11 @@ interface RecentPopularPostsProps {
   onItemClick?: () => void;
 }
 
+const POPULAR_PERIOD_OPTIONS = [
+  { days: 7, label: "7일" },
+  { days: 30, label: "30일" },
+] as const;
+
 const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
   year: "numeric",
   month: "2-digit",
@@ -32,27 +37,60 @@ export function RecentPopularPosts({
   onItemClick,
 }: RecentPopularPostsProps) {
   const [activeTab, setActiveTab] = useState<"recent" | "popular">("recent");
+  const [selectedPopularDays, setSelectedPopularDays] = useState<7 | 30>(7);
 
   return (
     <div>
-      <div className="mb-3 flex items-center gap-1" role="tablist">
-        {(["recent", "popular"] as const).map((tab) => (
-          <button
-            key={tab}
-            type="button"
-            role="tab"
-            aria-selected={activeTab === tab}
-            onClick={() => setActiveTab(tab)}
-            className={cn(
-              "rounded-md px-3 py-1 text-[0.8rem] font-medium transition-colors",
-              activeTab === tab
-                ? "bg-primary-1/12 font-semibold text-primary-1"
-                : "text-text-3 hover:text-text-2",
-            )}
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-1" role="tablist">
+          {(["recent", "popular"] as const).map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab}
+              onClick={() => setActiveTab(tab)}
+              className={cn(
+                "rounded-md px-3 py-1 text-[0.8rem] font-medium transition-colors",
+                activeTab === tab
+                  ? "bg-primary-1/12 font-semibold text-primary-1"
+                  : "text-text-3 hover:text-text-2",
+              )}
+            >
+              {tab === "recent" ? "최근글" : "인기글"}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === "popular" ? (
+          <div
+            className="flex items-center gap-1.5"
+            role="tablist"
+            aria-label="인기 글 기간 선택"
           >
-            {tab === "recent" ? "최근글" : "인기글"}
-          </button>
-        ))}
+            {POPULAR_PERIOD_OPTIONS.map((option) => {
+              const isActive = option.days === selectedPopularDays;
+
+              return (
+                <button
+                  key={option.days}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  onClick={() => setSelectedPopularDays(option.days)}
+                  className={cn(
+                    "inline-flex rounded-full border px-2.5 py-1 text-ui-xs font-medium transition-colors",
+                    isActive
+                      ? "border-primary-1 bg-primary-1/6 text-primary-1"
+                      : "border-border-3 text-text-3 hover:border-primary-1 hover:bg-primary-1/6 hover:text-primary-1",
+                  )}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
       </div>
 
       {activeTab === "recent" ? (
@@ -69,10 +107,10 @@ export function RecentPopularPosts({
                   onClick={onItemClick}
                   className="group block rounded-md px-0.5 py-1 transition-colors hover:text-primary-1"
                 >
-                  <span className="line-clamp-2 text-body-sm leading-5 text-text-1 transition-colors group-hover:text-primary-1">
+                  <span className="line-clamp-2 text-ui-sm font-medium leading-[1.4] text-text-2 transition-colors group-hover:text-primary-1">
                     {post.title}
                   </span>
-                  <span className="mt-0.5 text-ui-xs text-text-4">
+                  <span className="mt-0.5 text-[0.688rem] text-text-4">
                     {formatDate(post.publishedAt ?? post.createdAt)}
                   </span>
                 </Link>
@@ -83,6 +121,8 @@ export function RecentPopularPosts({
       ) : (
         <PopularPostList
           initialPosts={popularPosts}
+          selectedDays={selectedPopularDays}
+          onSelectedDaysChange={setSelectedPopularDays}
           onItemClick={onItemClick}
         />
       )}

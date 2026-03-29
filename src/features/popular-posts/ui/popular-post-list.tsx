@@ -1,22 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { fetchPopularPostsClient, type PopularPost } from "@entities/stat";
-import { cn } from "@shared/lib/style-utils";
 
 type PopularPeriod = 7 | 30;
 
 interface PopularPostListProps {
   initialPosts: PopularPost[] | null;
   initialDays?: PopularPeriod;
+  selectedDays?: PopularPeriod;
+  onSelectedDaysChange?: (days: PopularPeriod) => void;
   onItemClick?: () => void;
 }
-
-const PERIOD_OPTIONS = [
-  { days: 7, label: "7일" },
-  { days: 30, label: "30일" },
-] as const;
 
 const POPULAR_POST_LIMIT = 5;
 const FETCH_ERROR_MESSAGE =
@@ -25,36 +21,38 @@ const FETCH_ERROR_MESSAGE =
 export function PopularPostList({
   initialPosts,
   initialDays = 7,
+  selectedDays,
+  onSelectedDaysChange,
   onItemClick,
 }: PopularPostListProps) {
-  const [selectedDays, setSelectedDays] = useState<PopularPeriod>(initialDays);
+  const [internalSelectedDays, setInternalSelectedDays] =
+    useState<PopularPeriod>(initialDays);
   const [postsByDays, setPostsByDays] = useState<
     Partial<Record<PopularPeriod, PopularPost[]>>
   >(() => (initialPosts === null ? {} : { [initialDays]: initialPosts }));
-  const [failedDays, setFailedDays] = useState<
-    Partial<Record<PopularPeriod, true>>
-  >(() => (initialPosts === null ? { [initialDays]: true } : {}));
+  const [, setFailedDays] = useState<Partial<Record<PopularPeriod, true>>>(
+    () => (initialPosts === null ? { [initialDays]: true } : {}),
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(
     initialPosts === null ? FETCH_ERROR_MESSAGE : null,
   );
+  const prevControlledDaysRef = useRef<PopularPeriod | undefined>(selectedDays);
 
-  const posts = postsByDays[selectedDays];
+  const activeDays = selectedDays ?? internalSelectedDays;
+  const posts = postsByDays[activeDays];
 
-  async function handlePeriodChange(nextDays: PopularPeriod) {
-    const isRetryingFailedSelection =
-      nextDays === selectedDays && failedDays[nextDays];
-
-    if (
-      (nextDays === selectedDays && !isRetryingFailedSelection) ||
-      isLoading
-    ) {
-      return;
+  function updateSelectedDays(nextDays: PopularPeriod) {
+    if (selectedDays === undefined) {
+      setInternalSelectedDays(nextDays);
     }
+    onSelectedDaysChange?.(nextDays);
+  }
 
+  async function loadDays(nextDays: PopularPeriod) {
     const cachedPosts = postsByDays[nextDays];
     if (cachedPosts !== undefined) {
-      setSelectedDays(nextDays);
+      updateSelectedDays(nextDays);
       setErrorMessage(null);
 
       return;
@@ -75,7 +73,7 @@ export function PopularPostList({
 
         return next;
       });
-      setSelectedDays(nextDays);
+      updateSelectedDays(nextDays);
     } catch {
       setFailedDays((current) => ({ ...current, [nextDays]: true }));
       setErrorMessage(FETCH_ERROR_MESSAGE);
@@ -84,38 +82,20 @@ export function PopularPostList({
     }
   }
 
+  useEffect(() => {
+    if (
+      selectedDays === undefined ||
+      prevControlledDaysRef.current === selectedDays
+    ) {
+      return;
+    }
+
+    prevControlledDaysRef.current = selectedDays;
+    void loadDays(selectedDays);
+  }, [selectedDays]);
+
   return (
     <div>
-      <div
-        className="mb-3 flex items-center gap-1"
-        role="tablist"
-        aria-label="인기 글 기간 선택"
-      >
-        {PERIOD_OPTIONS.map((option) => {
-          const isActive = option.days === selectedDays;
-
-          return (
-            <button
-              key={option.days}
-              type="button"
-              role="tab"
-              aria-selected={isActive}
-              onClick={() => void handlePeriodChange(option.days)}
-              disabled={isLoading}
-              className={cn(
-                "rounded-md px-3 py-1 text-[0.8rem] font-medium transition-colors",
-                isActive
-                  ? "bg-primary-1/12 font-semibold text-primary-1"
-                  : "text-text-3 hover:text-text-2",
-                isLoading && "cursor-wait",
-              )}
-            >
-              {option.label}
-            </button>
-          );
-        })}
-      </div>
-
       {errorMessage ? (
         <p className="mb-3 text-body-xs text-negative-1" role="alert">
           {errorMessage}
@@ -132,23 +112,18 @@ export function PopularPostList({
           aria-live="polite"
           aria-busy={isLoading}
         >
-          {posts.map((post, index) => (
+          {posts.map((post) => (
             <li key={post.postId}>
               <Link
                 href={`/posts/${post.slug}`}
                 onClick={onItemClick}
-                className="group grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-3 rounded-md px-0.5 py-1 transition-colors hover:text-primary-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-1"
+                className="group block rounded-md px-0.5 py-1 transition-colors hover:text-primary-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-1"
               >
-                <span className="pt-0.5 text-body-sm text-text-3">
-                  {index + 1}.
+                <span className="line-clamp-2 block text-ui-sm font-medium leading-[1.4] text-text-2 transition-colors group-hover:text-primary-1">
+                  {post.title}
                 </span>
-                <span className="min-w-0">
-                  <span className="line-clamp-2 block text-body-sm leading-5 text-text-1 transition-colors group-hover:text-primary-1">
-                    {post.title}
-                  </span>
-                  <span className="mt-0.5 block text-ui-xs text-text-4">
-                    {post.pageviews.toLocaleString("ko-KR")} views
-                  </span>
+                <span className="mt-0.5 block text-[0.688rem] text-text-4">
+                  조회 {post.pageviews.toLocaleString("ko-KR")}
                 </span>
               </Link>
             </li>
