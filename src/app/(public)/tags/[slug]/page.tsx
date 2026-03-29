@@ -96,17 +96,11 @@ export default async function TagPostsPage({
   ];
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col gap-8 px-4 pb-16 md:px-6">
+    <main className="flex min-h-screen flex-col pt-8 pb-16">
       {siteUrl ? (
         <JsonLd data={buildBreadcrumbJsonLd(breadcrumbItems, siteUrl)} />
       ) : null}
-      <ArchiveHeader
-        label="Tag Archive"
-        title={activeTag.name}
-        titlePrefix="#"
-        count={meta.total}
-        countLabel="개의 글"
-      />
+      <ArchiveHeader variant="tag" title={activeTag.name} count={meta.total} />
 
       {posts.length > 0 ? (
         <section className="grid gap-5">
@@ -121,11 +115,13 @@ export default async function TagPostsPage({
         />
       )}
 
-      <Pagination
-        currentPage={meta.page}
-        totalPages={meta.totalPages}
-        basePath={`/tags/${activeTag.slug}`}
-      />
+      <div className="mt-10">
+        <Pagination
+          currentPage={meta.page}
+          totalPages={meta.totalPages}
+          basePath={`/tags/${activeTag.slug}`}
+        />
+      </div>
       <ScrollToTop />
     </main>
   );

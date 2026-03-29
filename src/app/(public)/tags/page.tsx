@@ -18,8 +18,8 @@ export default async function TagsPage() {
   );
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col gap-8 px-4 pb-16 md:px-6">
-      <header className="motion-reveal pt-7">
+    <main className="flex min-h-screen flex-col pt-8 pb-16">
+      <header className="mb-8 motion-reveal">
         <div className="flex flex-wrap items-baseline justify-between gap-4">
           <h1 className="break-keep text-body-lg font-bold tracking-tight text-text-1 sm:text-h1">
             태그
@@ -28,11 +28,11 @@ export default async function TagsPage() {
             총 {sortedTags.length.toLocaleString("ko-KR")}개 태그
           </span>
         </div>
-        <div className="mt-4 mb-8 h-px bg-border-4" />
+        <div className="mt-4 h-px bg-border-4" />
       </header>
 
       {sortedTags.length > 0 ? (
-        <section aria-label="태그 목록" className="motion-reveal">
+        <section aria-label="태그 목록">
           <div className="flex flex-wrap gap-3">
             {sortedTags.map((tag) => (
               <ArchiveTagBadge

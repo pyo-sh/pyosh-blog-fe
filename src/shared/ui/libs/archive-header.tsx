@@ -1,3 +1,5 @@
+import { Icon } from "@iconify/react";
+import altArrowRightLinear from "@iconify-icons/solar/alt-arrow-right-linear";
 import Link from "next/link";
 import { formatNumber } from "@shared/lib/format-number";
 import { cn } from "@shared/lib/style-utils";
@@ -8,32 +10,28 @@ interface ArchiveBreadcrumbItem {
 }
 
 interface ArchiveHeaderProps {
-  label?: string;
+  variant: "category" | "tag";
   title: string;
   count: number;
-  countLabel: string;
   breadcrumbs?: ArchiveBreadcrumbItem[];
-  titlePrefix?: string;
   className?: string;
 }
 
 export function ArchiveHeader({
-  label,
+  variant,
   title,
   count,
-  countLabel,
   breadcrumbs,
-  titlePrefix,
   className,
 }: ArchiveHeaderProps) {
   const hasBreadcrumbs = Boolean(breadcrumbs && breadcrumbs.length > 0);
 
   return (
-    <header className={cn("motion-reveal pt-7", className)}>
-      {label ? (
+    <header className={cn("mb-8 motion-reveal", className)}>
+      {variant === "category" ? (
         <div className="mb-5 flex flex-wrap items-center gap-2">
-          <span className="text-[0.688rem] font-bold uppercase tracking-[0.18em] text-text-4">
-            {label}
+          <span className="text-body-xs font-bold uppercase tracking-[0.18em] text-text-4">
+            Category Archive
           </span>
           {hasBreadcrumbs ? (
             <>
@@ -44,7 +42,7 @@ export function ArchiveHeader({
                 ·
               </span>
               <nav
-                aria-label="현재 위치"
+                aria-label="카테고리 경로"
                 className="flex flex-wrap items-center gap-1 text-ui-xs text-text-4"
               >
                 {breadcrumbs?.map((item, index) => {
@@ -56,12 +54,14 @@ export function ArchiveHeader({
                       {item.href && !isLast ? (
                         <Link
                           href={item.href}
-                          className="transition-colors hover:text-text-3 hover:underline hover:underline-offset-4"
+                          className="text-text-4 transition-colors hover:underline hover:underline-offset-4"
                         >
                           {item.label}
                         </Link>
                       ) : (
-                        <span className={isLast ? "text-text-3" : undefined}>
+                        <span
+                          className={isLast ? "text-text-3" : "text-text-4"}
+                        >
                           {item.label}
                         </span>
                       )}
@@ -72,39 +72,36 @@ export function ArchiveHeader({
             </>
           ) : null}
         </div>
-      ) : null}
+      ) : (
+        <div className="mb-5">
+          <span className="text-body-xs font-bold uppercase tracking-[0.18em] text-text-4">
+            Tag Archive
+          </span>
+        </div>
+      )}
 
       <div className="flex flex-wrap items-baseline justify-between gap-4">
         <h1 className="break-keep text-[2.25rem] leading-[1.1] font-bold tracking-[-0.025em] text-text-1 sm:text-[2.875rem]">
-          {titlePrefix ? (
-            <span className="text-primary-1">{titlePrefix}</span>
-          ) : null}
+          {variant === "tag" ? <span className="text-primary-1">#</span> : null}
           {title}
         </h1>
         <span className="text-body-sm text-text-4">
-          총 {formatNumber(count)}
-          {countLabel}
+          총 {formatNumber(count)}개의 글
         </span>
       </div>
 
-      <div className="mt-6 mb-8 h-px bg-border-4" />
+      <div className="mt-6 h-px bg-border-4" />
     </header>
   );
 }
 
 function BreadcrumbChevron() {
   return (
-    <svg
+    <span
       aria-hidden="true"
-      viewBox="0 0 16 16"
-      className="mx-px h-2.5 w-2.5 shrink-0 text-text-4"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      className="mx-px inline-flex h-2.5 w-2.5 shrink-0 items-center justify-center text-text-4"
     >
-      <path d="m6 3 4 5-4 5" />
-    </svg>
+      <Icon icon={altArrowRightLinear} width="10" aria-hidden="true" />
+    </span>
   );
 }
