@@ -15,6 +15,13 @@ const meta: Meta<typeof GuestbookPageContent> = {
   component: GuestbookPageContent,
   parameters: {
     layout: "fullscreen",
+    nextjs: {
+      appDirectory: true,
+      navigation: {
+        pathname: "/guestbook",
+        query: {},
+      },
+    },
   },
   args: {
     initialEntries: mockGuestbookEntries,
@@ -66,11 +73,25 @@ export const Empty: Story = {
 export const Mobile: Story = {
   parameters: {
     viewport: { defaultViewport: "mobile" },
+    nextjs: {
+      appDirectory: true,
+      navigation: {
+        pathname: "/guestbook",
+        query: {},
+      },
+    },
   },
 };
 
 export const DarkMode: Story = {
   parameters: {
     themes: { themeOverride: "dark" },
+    nextjs: {
+      appDirectory: true,
+      navigation: {
+        pathname: "/guestbook",
+        query: {},
+      },
+    },
   },
 };
