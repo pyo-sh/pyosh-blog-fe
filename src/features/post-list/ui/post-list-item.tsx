@@ -86,7 +86,7 @@ export function PostListItem({ post }: PostListItemProps) {
           </h2>
 
           {post.summary ? (
-            <p className="mt-1 hidden line-clamp-2 break-keep text-sm leading-relaxed text-text-3 sm:block">
+            <p className="mt-1 hidden line-clamp-2 break-keep text-body-sm leading-relaxed text-text-3 sm:block">
               {post.summary}
             </p>
           ) : null}

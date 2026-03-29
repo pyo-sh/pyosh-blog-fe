@@ -47,6 +47,7 @@ const preview: Preview = {
   parameters: {
     layout: "fullscreen",
     viewport: {
+      defaultViewport: "desktop",
       viewports: {
         mobile: { name: "Mobile", styles: { width: "375px", height: "812px" } },
         desktop: {

@@ -59,8 +59,8 @@
   isolation: isolate;
   overflow: hidden;
   background: rgba(138, 111, 224, 0.12);
-  background: color-mix(in srgb, var(--primary1) 12%, transparent);
-  color: var(--primary1);
+  background: color-mix(in srgb, var(--color-primary-1) 12%, transparent);
+  color: var(--color-primary-1);
 }
 
 .accent-badge::after {
