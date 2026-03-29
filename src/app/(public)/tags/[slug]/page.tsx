@@ -7,7 +7,12 @@ import { PostListItem } from "@features/post-list";
 import { buildCanonicalMetadata } from "@shared/lib/seo";
 import { buildBreadcrumbJsonLd, getSiteUrl } from "@shared/lib/structured-data";
 import { JsonLd } from "@shared/ui/json-ld";
-import { EmptyState, Pagination, ScrollToTop } from "@shared/ui/libs";
+import {
+  ArchiveHeader,
+  EmptyState,
+  Pagination,
+  ScrollToTop,
+} from "@shared/ui/libs";
 
 interface TagPostsPageProps {
   params: {
@@ -91,20 +96,17 @@ export default async function TagPostsPage({
   ];
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col gap-8 px-4 py-12 md:px-6">
+    <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col gap-8 px-4 pb-16 md:px-6">
       {siteUrl ? (
         <JsonLd data={buildBreadcrumbJsonLd(breadcrumbItems, siteUrl)} />
       ) : null}
-      <header className="rounded-[2rem] border border-border-3 bg-background-2 p-8 md:p-10">
-        <p className="text-body-xs uppercase tracking-[0.24em] text-text-4">
-          Tag Archive
-        </p>
-        <h1 className="mt-3 text-heading-md text-text-1">#{activeTag.name}</h1>
-        <p className="mt-4 text-body-md text-text-3">
-          총 {meta.total.toLocaleString("ko-KR")}개의 글이 이 태그와 연결되어
-          있습니다.
-        </p>
-      </header>
+      <ArchiveHeader
+        label="Tag Archive"
+        title={activeTag.name}
+        titlePrefix="#"
+        count={meta.total}
+        countLabel="개의 글"
+      />
 
       {posts.length > 0 ? (
         <section className="grid gap-5">
