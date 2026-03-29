@@ -128,6 +128,42 @@ function UnlockIcon() {
   );
 }
 
+function PenIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="m12 20 7-7" />
+      <path d="M16.5 3.5a2.1 2.1 0 1 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
+  );
+}
+
+function UserIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M18 20a6 6 0 0 0-12 0" />
+      <circle cx="12" cy="8" r="4" />
+    </svg>
+  );
+}
+
 export function CommentForm<TPayload extends CommentFormPayload>({
   variant = "comment",
   viewerType,
@@ -153,6 +189,8 @@ export function CommentForm<TPayload extends CommentFormPayload>({
     (!isCommentVariant ||
       forceGuestEmailField ||
       Boolean(profile.guestEmail.trim()));
+
+  const isGuestbookVariant = variant === "guestbook";
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -210,6 +248,174 @@ export function CommentForm<TPayload extends CommentFormPayload>({
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  if (isGuestbookVariant) {
+    return (
+      <form
+        onSubmit={handleSubmit}
+        className={cn(
+          "rounded-[1.5rem] border border-border-3 bg-background-2 p-5 sm:p-6",
+          className,
+        )}
+      >
+        {viewerType === "guest" ? (
+          <div
+            className={cn(
+              "grid gap-3",
+              showGuestEmailField ? "sm:grid-cols-3" : "sm:grid-cols-2",
+            )}
+          >
+            <label className="block">
+              <span className="text-[0.75rem] font-semibold leading-4 tracking-[0.02em] text-text-3">
+                이름 <span className="text-negative-1">*</span>
+              </span>
+              <input
+                type="text"
+                value={profile.guestName}
+                onChange={(event) =>
+                  onProfileChange("guestName", event.target.value)
+                }
+                disabled={isSubmitting}
+                className="mt-1.5 w-full rounded-[0.875rem] border border-border-3 bg-background-1 px-3 py-[0.5625rem] text-[0.875rem] leading-[1.1875rem] text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+                placeholder="이름을 입력하세요"
+                autoComplete="name"
+                required
+              />
+            </label>
+
+            {showGuestEmailField ? (
+              <label className="block">
+                <span className="text-[0.75rem] font-semibold leading-4 tracking-[0.02em] text-text-3">
+                  이메일
+                </span>
+                <input
+                  type="email"
+                  value={profile.guestEmail}
+                  onChange={(event) =>
+                    onProfileChange("guestEmail", event.target.value)
+                  }
+                  disabled={isSubmitting}
+                  className="mt-1.5 w-full rounded-[0.875rem] border border-border-3 bg-background-1 px-3 py-[0.5625rem] text-[0.875rem] leading-[1.1875rem] text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+                  placeholder="이메일 (선택)"
+                  autoComplete="email"
+                />
+              </label>
+            ) : null}
+
+            <label className="block">
+              <span className="text-[0.75rem] font-semibold leading-4 tracking-[0.02em] text-text-3">
+                비밀번호 <span className="text-negative-1">*</span>
+              </span>
+              <input
+                type="password"
+                value={profile.guestPassword}
+                onChange={(event) =>
+                  onProfileChange("guestPassword", event.target.value)
+                }
+                disabled={isSubmitting}
+                className="mt-1.5 w-full rounded-[0.875rem] border border-border-3 bg-background-1 px-3 py-[0.5625rem] text-[0.875rem] leading-[1.1875rem] text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+                placeholder="삭제 시 필요합니다"
+                minLength={4}
+                required
+              />
+            </label>
+          </div>
+        ) : (
+          <div className="mb-4 flex items-center gap-2.5 border-b border-border-4 pb-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-background-3 text-text-4">
+              <UserIcon />
+            </div>
+            <div>
+              <p className="text-[0.875rem] font-semibold leading-[1.1875rem] text-text-1">
+                로그인 사용자
+              </p>
+              <p className="text-[0.75rem] leading-4 text-text-4">
+                로그인 중 · OAuth
+              </p>
+            </div>
+          </div>
+        )}
+
+        <label className="mt-3 block">
+          <span className="text-[0.75rem] font-semibold leading-4 tracking-[0.02em] text-text-3">
+            내용 <span className="text-negative-1">*</span>
+          </span>
+          <textarea
+            value={body}
+            onChange={(event) => setBody(event.target.value)}
+            disabled={isSubmitting}
+            className="mt-1.5 min-h-24 w-full rounded-[0.875rem] border border-border-3 bg-background-1 px-3 py-[0.5625rem] text-[0.875rem] leading-[1.6] text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+            placeholder="방명록을 남겨주세요 (최대 2,000자)"
+            maxLength={2000}
+            required
+          />
+        </label>
+
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+          <label
+            className={cn(
+              "inline-flex cursor-pointer items-center gap-2 text-[0.8125rem] leading-[1.125rem] transition-colors",
+              isSecret ? "text-primary-1" : "text-text-3",
+            )}
+          >
+            <input
+              type="checkbox"
+              checked={isSecret}
+              onChange={(event) => setIsSecret(event.target.checked)}
+              disabled={isSubmitting}
+              className="h-[0.9375rem] w-[0.9375rem] rounded border-border-3 accent-primary-1"
+              aria-label={
+                isSecret ? "비밀 방명록 해제" : "비밀 방명록으로 작성"
+              }
+            />
+            {isSecret ? <LockIcon /> : <UnlockIcon />}
+            비밀글
+          </label>
+
+          <div className="flex items-center gap-3">
+            <span
+              className={cn(
+                "text-[0.75rem] leading-4 text-text-4",
+                bodyLength >= 2000
+                  ? "text-negative-1"
+                  : bodyLength >= 1500
+                    ? "text-warning-1"
+                    : null,
+              )}
+            >
+              {bodyLength}/2000
+            </span>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="inline-flex items-center justify-center gap-2 rounded-[0.625rem] bg-primary-1 px-5 py-[0.5625rem] text-[0.875rem] font-semibold leading-[1.1875rem] text-white transition-all hover:-translate-y-0.5 hover:bg-secondary-1 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isSubmitting ? (
+                <>
+                  <Spinner size="sm" /> 저장 중
+                </>
+              ) : (
+                <>
+                  <PenIcon />
+                  {submitLabel}
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {errorMessage ? (
+          <div
+            role="alert"
+            className="mt-4 rounded-[1rem] border border-negative-1/30 bg-negative-1/5 px-4 py-3 text-body-sm text-negative-1"
+          >
+            {errorMessage}
+          </div>
+        ) : null}
+      </form>
+    );
   }
 
   return (
@@ -327,15 +533,7 @@ export function CommentForm<TPayload extends CommentFormPayload>({
           isSecret ? "text-primary-1" : "text-text-4",
         )}
         aria-pressed={isSecret}
-        aria-label={
-          variant === "guestbook"
-            ? isSecret
-              ? "비밀 방명록 해제"
-              : "비밀 방명록으로 작성"
-            : isSecret
-              ? "비밀 댓글 해제"
-              : "비밀 댓글로 작성"
-        }
+        aria-label={isSecret ? "비밀 댓글 해제" : "비밀 댓글로 작성"}
       >
         {isSecret ? <LockIcon /> : <UnlockIcon />}
         {getSecretLabel(variant)}

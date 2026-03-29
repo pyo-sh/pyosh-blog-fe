@@ -40,6 +40,32 @@ function parsePage(value?: string): number {
   return page;
 }
 
+function GuestbookPageStatus({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
+  return (
+    <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col px-4 py-12 md:px-6">
+      <header>
+        <div className="flex flex-wrap items-baseline justify-between gap-4">
+          <h1 className="text-body-lg font-bold tracking-tight text-text-1 sm:text-h1">
+            방명록
+          </h1>
+          <span className="text-body-sm text-text-4">상태 안내</span>
+        </div>
+        <div className="mt-4 h-px bg-border-4" />
+      </header>
+
+      <section className="mt-8">
+        <EmptyState variant="page" title={title} description={description} />
+      </section>
+    </main>
+  );
+}
+
 export function generateMetadata({
   searchParams,
 }: GuestbookPageProps): Metadata {
@@ -106,23 +132,37 @@ export default async function GuestbookPage({
 
     if (!settings.enabled) {
       return (
-        <section className="py-16">
-          <EmptyState message="현재 방명록 기능이 비활성화되어 있습니다." />
-        </section>
+        <GuestbookPageStatus
+          title="현재 방명록 기능이 비활성화되어 있습니다."
+          description="운영 설정이 다시 켜지면 이 페이지에서 방명록을 남길 수 있습니다."
+        />
       );
     }
   } catch {
     return (
-      <section className="py-16">
-        <EmptyState message="방명록 설정을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요." />
-      </section>
+      <GuestbookPageStatus
+        title="방명록 설정을 불러오지 못했습니다."
+        description="잠시 후 다시 시도해 주세요."
+      />
     );
   }
 
-  const [response, viewer] = await Promise.all([
-    fetchGuestbook(page, cookieHeader),
-    getCurrentViewer(cookieHeader),
-  ]);
+  let response;
+  let viewer;
+
+  try {
+    [response, viewer] = await Promise.all([
+      fetchGuestbook(page, cookieHeader),
+      getCurrentViewer(cookieHeader),
+    ]);
+  } catch {
+    return (
+      <GuestbookPageStatus
+        title="방명록 목록을 불러오지 못했습니다."
+        description="네트워크 상태를 확인한 뒤 다시 시도해 주세요."
+      />
+    );
+  }
 
   return (
     <GuestbookPageContent
