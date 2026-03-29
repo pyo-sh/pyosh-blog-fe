@@ -35,8 +35,7 @@ export function RecentPopularPosts({
 
   return (
     <div>
-      {/* Tabs */}
-      <div className="mb-3 flex border-b border-border-3" role="tablist">
+      <div className="mb-3 flex items-center gap-1" role="tablist">
         {(["recent", "popular"] as const).map((tab) => (
           <button
             key={tab}
@@ -45,10 +44,10 @@ export function RecentPopularPosts({
             aria-selected={activeTab === tab}
             onClick={() => setActiveTab(tab)}
             className={cn(
-              "flex-1 pb-2 text-body-sm transition-colors",
+              "rounded-md px-3 py-1 text-[0.8rem] font-medium transition-colors",
               activeTab === tab
-                ? "border-b-2 border-primary-1 font-medium text-primary-1"
-                : "text-text-3 hover:text-text-1",
+                ? "bg-primary-1/12 font-semibold text-primary-1"
+                : "text-text-3 hover:text-text-2",
             )}
           >
             {tab === "recent" ? "최근글" : "인기글"}
@@ -62,18 +61,18 @@ export function RecentPopularPosts({
             글이 없습니다.
           </p>
         ) : (
-          <ul className="flex flex-col gap-2">
+          <ul className="flex flex-col gap-1.5">
             {recentPosts.map((post) => (
               <li key={post.id}>
                 <Link
                   href={`/posts/${post.slug}`}
                   onClick={onItemClick}
-                  className="group flex flex-col gap-0.5 rounded-lg px-1 py-1 transition-colors hover:bg-background-2"
+                  className="group block rounded-md px-0.5 py-1 transition-colors hover:text-primary-1"
                 >
-                  <span className="line-clamp-2 text-body-sm text-text-1 transition-colors group-hover:text-primary-1">
+                  <span className="line-clamp-2 text-body-sm leading-5 text-text-1 transition-colors group-hover:text-primary-1">
                     {post.title}
                   </span>
-                  <span className="text-body-xs text-text-4">
+                  <span className="mt-0.5 text-ui-xs text-text-4">
                     {formatDate(post.publishedAt ?? post.createdAt)}
                   </span>
                 </Link>

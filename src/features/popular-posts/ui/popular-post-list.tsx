@@ -87,7 +87,7 @@ export function PopularPostList({
   return (
     <div>
       <div
-        className="mb-3 inline-flex rounded-full border border-border-3 bg-background-2 p-1"
+        className="mb-3 flex items-center gap-1"
         role="tablist"
         aria-label="인기 글 기간 선택"
       >
@@ -103,10 +103,10 @@ export function PopularPostList({
               onClick={() => void handlePeriodChange(option.days)}
               disabled={isLoading}
               className={cn(
-                "rounded-full px-3 py-1.5 text-body-xs font-medium transition-colors",
+                "rounded-md px-3 py-1 text-[0.8rem] font-medium transition-colors",
                 isActive
-                  ? "bg-background-1 text-text-1"
-                  : "text-text-3 hover:text-text-1",
+                  ? "bg-primary-1/12 font-semibold text-primary-1"
+                  : "text-text-3 hover:text-text-2",
                 isLoading && "cursor-wait",
               )}
             >
@@ -128,7 +128,7 @@ export function PopularPostList({
         </p>
       ) : (
         <ol
-          className="flex flex-col gap-2"
+          className="flex flex-col gap-1.5"
           aria-live="polite"
           aria-busy={isLoading}
         >
@@ -137,16 +137,16 @@ export function PopularPostList({
               <Link
                 href={`/posts/${post.slug}`}
                 onClick={onItemClick}
-                className="group grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-3 rounded-lg px-1 py-1 transition-colors hover:bg-background-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-1"
+                className="group grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-3 rounded-md px-0.5 py-1 transition-colors hover:text-primary-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-1"
               >
                 <span className="pt-0.5 text-body-sm text-text-3">
                   {index + 1}.
                 </span>
                 <span className="min-w-0">
-                  <span className="line-clamp-1 block text-body-sm text-text-1 transition-colors group-hover:text-primary-1">
+                  <span className="line-clamp-2 block text-body-sm leading-5 text-text-1 transition-colors group-hover:text-primary-1">
                     {post.title}
                   </span>
-                  <span className="mt-1 block text-body-xs text-text-4">
+                  <span className="mt-0.5 block text-ui-xs text-text-4">
                     {post.pageviews.toLocaleString("ko-KR")} views
                   </span>
                 </span>

@@ -4,11 +4,11 @@ interface TotalViewCountProps {
 
 export function TotalViewCount({ totalPageviews }: TotalViewCountProps) {
   return (
-    <div className="flex items-center justify-between">
-      <span className="text-body-sm text-text-3">블로그 조회수</span>
-      <span className="text-body-sm font-medium text-text-1">
+    <div>
+      <div className="font-['Outfit','Gothic_A1',ui-sans-serif,sans-serif] text-[1.5rem] font-bold tracking-[-0.02em] text-text-1">
         {totalPageviews.toLocaleString("ko-KR")}
-      </span>
+      </div>
+      <div className="mt-0.5 text-ui-xs text-text-4">Total Visitors</div>
     </div>
   );
 }

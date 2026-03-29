@@ -8,6 +8,7 @@ import { cn } from "@shared/lib/style-utils";
 interface CategoryTreeProps {
   categories: Category[];
   onItemClick?: () => void;
+  showOverviewLink?: boolean;
 }
 
 function countTotal(categories: Category[]): number {
@@ -85,7 +86,11 @@ function CategoryItem({
   );
 }
 
-export function CategoryTree({ categories, onItemClick }: CategoryTreeProps) {
+export function CategoryTree({
+  categories,
+  onItemClick,
+  showOverviewLink = true,
+}: CategoryTreeProps) {
   const visible = categories.filter((c) => c.isVisible);
 
   if (visible.length === 0) return null;
@@ -94,14 +99,16 @@ export function CategoryTree({ categories, onItemClick }: CategoryTreeProps) {
 
   return (
     <div>
-      <Link
-        href="/categories"
-        onClick={onItemClick}
-        className="mb-2 flex items-center justify-between rounded px-1 py-1 text-body-sm font-medium text-text-2 transition-colors hover:text-primary-1"
-      >
-        <span>분류 전체보기</span>
-        <span className="text-body-xs text-text-4">({totalCount})</span>
-      </Link>
+      {showOverviewLink && (
+        <Link
+          href="/categories"
+          onClick={onItemClick}
+          className="mb-2 flex items-center justify-between rounded px-1 py-1 text-body-sm font-medium text-text-2 transition-colors hover:text-primary-1"
+        >
+          <span>분류 전체보기</span>
+          <span className="text-body-xs text-text-4">({totalCount})</span>
+        </Link>
+      )}
       <ul>
         {visible.map((category) => (
           <CategoryItem
@@ -114,6 +121,10 @@ export function CategoryTree({ categories, onItemClick }: CategoryTreeProps) {
       </ul>
     </div>
   );
+}
+
+export function countVisibleCategories(categories: Category[]) {
+  return countTotal(categories.filter((category) => category.isVisible));
 }
 
 function ChevronIcon({ className }: { className?: string }) {
