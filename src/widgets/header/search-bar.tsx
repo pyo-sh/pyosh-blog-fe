@@ -121,54 +121,49 @@ const SearchBar: React.FC = () => {
   return (
     <form
       ref={containerRef}
-      className="flex items-center justify-end gap-1"
+      className={cn(
+        "flex items-center overflow-hidden rounded-[0.625rem] transition-[width,min-width,padding,border-color,background-color,box-shadow] duration-300",
+        isExpanded
+          ? "h-[2.125rem] min-w-[10rem] gap-1.5 border border-border-3 bg-background-2 px-3 focus-within:border-primary-1 focus-within:shadow-[0_0_0_3px_rgba(138,111,224,0.12)] md:min-w-[12.5rem]"
+          : "h-[2.125rem] w-[2.125rem] min-w-[2.125rem] cursor-pointer border border-transparent bg-transparent px-0 hover:bg-background-3",
+      )}
       onSubmit={handleSubmit}
+      onClick={!isExpanded ? handleOpen : undefined}
     >
-      <div
-        aria-hidden={!isExpanded}
-        className={cn(
-          "flex items-center gap-1.5 overflow-hidden rounded-[0.625rem] border border-border-3 bg-background-2 px-3 transition-[border-color,box-shadow,width,opacity,min-width,padding] duration-300 focus-within:border-primary-1 focus-within:shadow-[0_0_0_3px_rgba(138,111,224,0.12)]",
-          isExpanded
-            ? "h-[2.125rem] min-w-[10rem] opacity-100 md:min-w-[12.5rem]"
-            : "h-[2.125rem] w-[2.125rem] min-w-0 border-transparent bg-transparent px-0 opacity-0 pointer-events-none",
-        )}
-      >
-        <Icon
-          icon={magniferLinear}
-          width="15"
-          aria-hidden="true"
-          className="shrink-0 text-text-4"
-        />
-        <span className="sr-only">검색어 입력</span>
-        <input
-          id="header-search-input"
-          ref={inputRef}
-          type="search"
-          disabled={!isExpanded}
-          tabIndex={isExpanded ? 0 : -1}
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="검색어 입력"
-          maxLength={200}
-          aria-label="검색어 입력"
-          className="w-full min-w-0 bg-transparent text-ui-sm text-text-1 outline-none placeholder:text-text-4"
-        />
-      </div>
-
       <button
         type={isExpanded ? "submit" : "button"}
-        onClick={isExpanded ? undefined : handleOpen}
+        onClick={!isExpanded ? handleOpen : undefined}
         aria-label="검색"
         aria-expanded={isExpanded}
         aria-controls="header-search-input"
         className={cn(
-          "flex h-9 w-9 items-center justify-center rounded-lg text-text-3 transition-colors hover:bg-background-3",
-          isExpanded && "hidden",
+          "flex h-[2.125rem] shrink-0 items-center justify-center text-text-3 transition-transform duration-200",
+          isExpanded ? "w-[0.9375rem]" : "w-[2.125rem] hover:scale-110",
         )}
       >
         <Icon icon={magniferLinear} width="18" aria-hidden="true" />
       </button>
+
+      <span className="sr-only">검색어 입력</span>
+      <input
+        id="header-search-input"
+        ref={inputRef}
+        type="search"
+        disabled={!isExpanded}
+        tabIndex={isExpanded ? 0 : -1}
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder="검색어 입력"
+        maxLength={200}
+        aria-label="검색어 입력"
+        className={cn(
+          "min-w-0 bg-transparent text-ui-sm text-text-1 outline-none placeholder:text-text-4 transition-[width,opacity] duration-300",
+          isExpanded
+            ? "w-full opacity-100"
+            : "w-0 opacity-0 pointer-events-none",
+        )}
+      />
     </form>
   );
 };
