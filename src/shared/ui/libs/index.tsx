@@ -1,4 +1,6 @@
 export { ArchiveHeader } from "./archive-header";
+export { ArchivePagination } from "./archive-pagination";
+export { ArchivePostItem } from "./archive-post-item";
 export { ArchiveTagBadge } from "./archive-tag-badge";
 export { Button } from "./button";
 export { EmptyState } from "./empty-state";

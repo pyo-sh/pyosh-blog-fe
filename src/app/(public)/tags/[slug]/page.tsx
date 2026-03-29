@@ -3,14 +3,14 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchPosts } from "@entities/post";
 import { fetchTags } from "@entities/tag";
-import { PostListItem } from "@features/post-list";
 import { buildCanonicalMetadata } from "@shared/lib/seo";
 import { buildBreadcrumbJsonLd, getSiteUrl } from "@shared/lib/structured-data";
 import { JsonLd } from "@shared/ui/json-ld";
 import {
   ArchiveHeader,
+  ArchivePagination,
+  ArchivePostItem,
   EmptyState,
-  Pagination,
   ScrollToTop,
 } from "@shared/ui/libs";
 
@@ -104,8 +104,12 @@ export default async function TagPostsPage({
 
       {posts.length > 0 ? (
         <section className="grid gap-5">
-          {posts.map((post) => (
-            <PostListItem key={post.id} post={post} />
+          {posts.map((post, index) => (
+            <ArchivePostItem
+              key={post.id}
+              post={post}
+              animationDelayMs={160 + index * 40}
+            />
           ))}
         </section>
       ) : (
@@ -116,7 +120,7 @@ export default async function TagPostsPage({
       )}
 
       <div className="mt-10">
-        <Pagination
+        <ArchivePagination
           currentPage={meta.page}
           totalPages={meta.totalPages}
           basePath={`/tags/${activeTag.slug}`}
