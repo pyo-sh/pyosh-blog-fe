@@ -295,16 +295,15 @@ function GuestbookEntryItem({
           {body.masked ? (
             <div
               className={cn(
-                "inline-flex max-w-full items-center gap-2 rounded-xl px-4 py-3 text-[0.875rem] italic leading-[1.1875rem]",
-                isDeleted ? "text-text-4" : "bg-background-2 text-text-4",
+                "inline-flex max-w-full items-center gap-2 rounded-xl bg-background-2 px-4 py-3 text-[0.875rem] italic leading-[0.875rem] text-text-4",
               )}
             >
               {entry.isSecret && !isDeleted ? (
-                <LockIcon className="shrink-0" />
+                <LockIcon className="h-[0.875rem] w-[0.875rem] shrink-0" />
               ) : (
-                <TrashIcon className="shrink-0" />
+                <TrashIcon className="h-[0.875rem] w-[0.875rem] shrink-0" />
               )}
-              <span className="break-keep">{body.text}</span>
+              <span className="break-keep leading-[0.875rem]">{body.text}</span>
             </div>
           ) : (
             <p className="whitespace-pre-wrap break-keep text-[0.875rem] leading-relaxed text-text-2">
