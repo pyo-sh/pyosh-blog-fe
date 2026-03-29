@@ -163,7 +163,7 @@ const SearchBar: React.FC = () => {
         )}
       />
 
-      {isExpanded && query ? (
+      {isExpanded ? (
         <button
           type="button"
           onClick={() => {
@@ -171,7 +171,13 @@ const SearchBar: React.FC = () => {
             inputRef.current?.focus();
           }}
           aria-label="검색어 지우기"
-          className="flex h-[1.375rem] w-[1.375rem] shrink-0 items-center justify-center rounded-full text-text-4 transition-colors hover:bg-background-3 hover:text-text-2"
+          disabled={!query}
+          className={cn(
+            "flex h-[1.375rem] w-[1.375rem] shrink-0 items-center justify-center rounded-full transition-colors",
+            query
+              ? "text-text-4 hover:bg-background-3 hover:text-text-2"
+              : "pointer-events-none text-transparent",
+          )}
         >
           <ClearIcon />
         </button>
