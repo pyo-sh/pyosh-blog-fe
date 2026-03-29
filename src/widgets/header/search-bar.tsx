@@ -128,21 +128,26 @@ const SearchBar: React.FC = () => {
           : "h-[2.125rem] w-[2.125rem] min-w-[2.125rem] cursor-pointer border border-transparent bg-transparent px-0 hover:bg-background-3",
       )}
       onSubmit={handleSubmit}
-      onClick={!isExpanded ? handleOpen : undefined}
     >
-      <button
-        type={isExpanded ? "submit" : "button"}
-        onClick={!isExpanded ? handleOpen : undefined}
-        aria-label="검색"
-        aria-expanded={isExpanded}
-        aria-controls="header-search-input"
-        className={cn(
-          "flex h-[2.125rem] shrink-0 items-center justify-center text-text-3 transition-transform duration-200",
-          isExpanded ? "w-[0.9375rem]" : "w-[2.125rem] hover:scale-110",
-        )}
-      >
-        <Icon icon={magniferLinear} width="18" aria-hidden="true" />
-      </button>
+      {isExpanded ? (
+        <Icon
+          icon={magniferLinear}
+          width="15"
+          aria-hidden="true"
+          className="shrink-0 text-text-4"
+        />
+      ) : (
+        <button
+          type="button"
+          onClick={handleOpen}
+          aria-label="검색"
+          aria-expanded={false}
+          aria-controls="header-search-input"
+          className="flex h-[2.125rem] w-[2.125rem] shrink-0 items-center justify-center text-text-3 transition-transform duration-200 hover:scale-110"
+        >
+          <Icon icon={magniferLinear} width="18" aria-hidden="true" />
+        </button>
+      )}
 
       <span className="sr-only">검색어 입력</span>
       <input
@@ -164,6 +169,16 @@ const SearchBar: React.FC = () => {
             : "w-0 opacity-0 pointer-events-none",
         )}
       />
+
+      {isExpanded ? (
+        <button
+          type="submit"
+          aria-label="검색 실행"
+          className="flex h-[2.125rem] w-[2.125rem] shrink-0 items-center justify-center rounded-[0.5rem] text-text-3 transition-colors hover:bg-background-3"
+        >
+          <Icon icon={magniferLinear} width="16" aria-hidden="true" />
+        </button>
+      ) : null}
     </form>
   );
 };
