@@ -32,18 +32,26 @@ export function ThemeProvider({ children, initialTheme }: TProviderProps) {
     const isDefaultDark = window.matchMedia(
       "(prefers-color-scheme: dark)",
     ).matches;
-    const bodyThemeData = document.body.dataset.theme;
+    const rootThemeData = document.documentElement.dataset.theme;
 
-    if (bodyThemeData && bodyThemeData.length !== 0) {
-      setThemeType(bodyThemeData as TThemeType);
+    if (rootThemeData && rootThemeData.length !== 0) {
+      setThemeType(rootThemeData as TThemeType);
     } else if (isDefaultDark) {
       setThemeType("dark");
     }
   }, [themeType]);
 
   React.useEffect(() => {
-    if (themeType !== "default" && document.body.dataset.theme !== themeType) {
-      document.body.dataset.theme = themeType;
+    const root = document.documentElement;
+
+    if (themeType === "default") {
+      delete root.dataset.theme;
+
+      return;
+    }
+
+    if (root.dataset.theme !== themeType) {
+      root.dataset.theme = themeType;
       setCookie(COOKIE_THEME_KEY, themeType, { maxAge: 60 * 60 * 24 * 365 });
     }
   }, [themeType]);
