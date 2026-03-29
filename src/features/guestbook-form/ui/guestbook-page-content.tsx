@@ -251,7 +251,7 @@ function GuestbookEntryItem({
             <div className="flex flex-wrap items-center gap-2">
               <span
                 className={cn(
-                  "text-body-sm font-semibold",
+                  "text-[0.875rem] font-semibold leading-[1.1875rem]",
                   isDeleted ? "text-text-4" : "text-text-1",
                 )}
               >
@@ -274,7 +274,7 @@ function GuestbookEntryItem({
 
               <time
                 dateTime={entry.createdAt}
-                className="text-body-xs text-text-4"
+                className="text-[0.75rem] leading-4 text-text-4"
               >
                 {formatRelativeTime(entry.createdAt)}
               </time>
@@ -284,7 +284,7 @@ function GuestbookEntryItem({
               <button
                 type="button"
                 onClick={() => onDelete(entry)}
-                className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-body-xs font-medium text-text-4 transition-colors hover:bg-negative-1/8 hover:text-negative-1"
+                className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[0.75rem] font-medium leading-4 text-text-4 transition-colors hover:bg-negative-1/8 hover:text-negative-1"
               >
                 <TrashIcon className="h-[0.8125rem] w-[0.8125rem]" />
                 삭제
@@ -295,7 +295,7 @@ function GuestbookEntryItem({
           {body.masked ? (
             <div
               className={cn(
-                "inline-flex max-w-full items-center gap-2 rounded-xl px-4 py-3 text-body-sm italic",
+                "inline-flex max-w-full items-center gap-2 rounded-xl px-4 py-3 text-[0.875rem] italic leading-[1.1875rem]",
                 isDeleted ? "text-text-4" : "bg-background-2 text-text-4",
               )}
             >
@@ -307,7 +307,7 @@ function GuestbookEntryItem({
               <span className="break-keep">{body.text}</span>
             </div>
           ) : (
-            <p className="whitespace-pre-wrap break-keep text-body-sm leading-relaxed text-text-2">
+            <p className="whitespace-pre-wrap break-keep text-[0.875rem] leading-relaxed text-text-2">
               {body.text}
             </p>
           )}
@@ -446,10 +446,10 @@ export function GuestbookPageContent({
     <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col px-4 py-12 md:px-6">
       <header className="motion-reveal">
         <div className="flex flex-wrap items-baseline justify-between gap-4">
-          <h1 className="text-body-lg font-bold tracking-tight text-text-1 sm:text-h1">
+          <h1 className="text-[1.5rem] font-bold leading-[1.9375rem] tracking-tight text-text-1 sm:text-[1.875rem] sm:leading-[2.375rem]">
             방명록
           </h1>
-          <span className="text-body-sm text-text-4">
+          <span className="text-[0.875rem] leading-[1.1875rem] text-text-4">
             총 {meta.total.toLocaleString("ko-KR")}개 방명록
           </span>
         </div>
@@ -459,7 +459,7 @@ export function GuestbookPageContent({
       {viewer.authErrorMessage ? (
         <div
           role="status"
-          className="mt-6 flex items-start gap-3 rounded-2xl border border-warning-1/25 bg-warning-2 px-4 py-4 text-body-sm text-text-3 motion-reveal"
+          className="mt-6 flex items-start gap-3 rounded-2xl border border-warning-1/25 bg-warning-2 px-4 py-4 text-[0.875rem] leading-[1.1875rem] text-text-3 motion-reveal"
         >
           <span className="mt-0.5 shrink-0 text-warning-1">
             <AlertIcon />

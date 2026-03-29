@@ -71,6 +71,13 @@ export const Empty: Story = {
 };
 
 export const Mobile: Story = {
+  decorators: [
+    (Story) => (
+      <div className="mx-auto w-full max-w-[23.4375rem] px-4 py-6">
+        <Story />
+      </div>
+    ),
+  ],
   parameters: {
     viewport: { defaultViewport: "mobile" },
     nextjs: {
