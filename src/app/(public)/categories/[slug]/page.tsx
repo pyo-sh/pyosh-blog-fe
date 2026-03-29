@@ -7,14 +7,14 @@ import {
   getCategoryAncestors,
 } from "@entities/category";
 import { fetchPosts } from "@entities/post";
+import { PostListItem } from "@features/post-list";
 import { buildCanonicalMetadata } from "@shared/lib/seo";
 import { buildBreadcrumbJsonLd, getSiteUrl } from "@shared/lib/structured-data";
 import { JsonLd } from "@shared/ui/json-ld";
 import {
   ArchiveHeader,
-  ArchivePagination,
-  ArchivePostItem,
   EmptyState,
+  Pagination,
   ScrollToTop,
 } from "@shared/ui/libs";
 
@@ -137,12 +137,8 @@ export default async function CategoryPage({
 
       {posts.length > 0 ? (
         <section className="grid gap-5">
-          {posts.map((post, index) => (
-            <ArchivePostItem
-              key={post.id}
-              post={post}
-              animationDelayMs={160 + index * 40}
-            />
+          {posts.map((post) => (
+            <PostListItem key={post.id} post={post} />
           ))}
         </section>
       ) : (
@@ -153,7 +149,7 @@ export default async function CategoryPage({
       )}
 
       <div className="mt-10">
-        <ArchivePagination
+        <Pagination
           currentPage={meta.page}
           totalPages={meta.totalPages}
           basePath={`/categories/${activeCategory.slug}`}
