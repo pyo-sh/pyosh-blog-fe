@@ -1,7 +1,9 @@
-import Image from "next/image";
+import { Icon } from "@iconify/react";
+import chatRoundDotsLinear from "@iconify-icons/solar/chat-round-dots-linear";
+import eyeLinear from "@iconify-icons/solar/eye-linear";
+import pinBold from "@iconify-icons/solar/pin-bold";
 import Link from "next/link";
 import type { Post } from "@entities/post";
-import { cn } from "@shared/lib/style-utils";
 
 interface PostListItemProps {
   post: Post;
@@ -9,8 +11,8 @@ interface PostListItemProps {
 
 const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
   year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
+  month: "numeric",
+  day: "numeric",
   timeZone: "UTC",
 });
 
@@ -18,148 +20,89 @@ function formatDate(value: string) {
   return dateFormatter.format(new Date(value));
 }
 
-function supportsNextImage(src: string | null): boolean {
-  if (!src) return false;
-  if (src.startsWith("/")) return true;
-
-  try {
-    const url = new URL(src);
-
-    return url.protocol === "https:" && url.hostname === "github.com";
-  } catch {
-    return false;
-  }
-}
-
 export function PostListItem({ post }: PostListItemProps) {
   const publishedDate = formatDate(post.publishedAt ?? post.createdAt);
-  const modifiedDate = post.contentModifiedAt
-    ? formatDate(post.contentModifiedAt)
-    : null;
-  const canUseNextImage = supportsNextImage(post.thumbnailUrl);
   const formattedPageviews = post.totalPageviews.toLocaleString("ko-KR");
+  const formattedComments = post.commentCount.toLocaleString("ko-KR");
 
   return (
-    <Link
-      href={`/posts/${post.slug}`}
-      className="group flex overflow-hidden rounded-2xl border border-border-3 bg-background-1 transition-colors hover:border-border-2"
-    >
-      {/* Thumbnail — md+ only */}
-      {post.thumbnailUrl && (
-        <div className="relative hidden w-44 shrink-0 overflow-hidden bg-background-3 md:block">
-          {canUseNextImage ? (
-            <Image
-              fill
-              src={post.thumbnailUrl}
-              alt={post.title}
-              sizes="176px"
-              className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-            />
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element -- next/image cannot safely render arbitrary remote hosts here
+    <article className="post-list-item group relative rounded-xl px-4 py-5 sm:px-5 hover:bg-background-2">
+      <Link
+        href={`/posts/${post.slug}`}
+        className="absolute inset-0 z-10 rounded-xl"
+        aria-label={post.title}
+      />
+
+      <div className="flex gap-4 sm:gap-5">
+        <div className="post-list-item__thumb h-16 w-20 shrink-0 overflow-hidden rounded-lg bg-background-3 sm:h-24 sm:w-32">
+          {post.thumbnailUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- arbitrary remote thumbnail hosts are not all compatible with next/image
             <img
               src={post.thumbnailUrl}
               alt={post.title}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+              className="h-full w-full object-cover transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.05]"
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            <div
+              aria-hidden="true"
+              className="h-full w-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.16),transparent_58%)]"
             />
           )}
         </div>
-      )}
 
-      <article className="flex min-w-0 flex-1 flex-col gap-3 px-4 py-5 sm:px-5">
-        {/* Category + date row */}
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-4">
-          {post.isPinned && (
-            <PinIcon className="shrink-0 text-primary-1" aria-label="Pinned" />
-          )}
-          <span className={cn("font-medium text-primary-1")}>
-            {post.category.name}
-          </span>
-          <span aria-hidden="true">·</span>
-          <time dateTime={post.publishedAt ?? post.createdAt}>
-            {publishedDate}
-          </time>
-          <span aria-hidden="true">·</span>
-          <span aria-label={`조회수 ${formattedPageviews}회`}>
-            조회 {formattedPageviews}
-          </span>
-          {modifiedDate && (
-            <>
-              <span aria-hidden="true">·</span>
-              <span className="text-text-4">수정: {modifiedDate}</span>
-            </>
-          )}
-        </div>
-
-        {/* Title */}
-        <h2 className="line-clamp-2 break-keep text-base font-bold leading-snug text-text-1 transition-colors group-hover:text-primary-1 sm:text-lg">
-          {post.title}
-        </h2>
-
-        {/* Summary */}
-        {post.summary && (
-          <p className="line-clamp-2 break-keep text-sm leading-relaxed text-text-3">
-            {post.summary}
-          </p>
-        )}
-
-        {/* Stats */}
-        <div className="mt-auto flex items-center gap-3 text-xs text-text-4">
-          <span className="flex items-center gap-1">
-            <CommentIcon className="h-3.5 w-3.5" aria-hidden="true" />
-            {post.commentCount.toLocaleString()}
-          </span>
-        </div>
-
-        {/* Tag badges — text only, no link */}
-        {post.tags.length > 0 && (
-          <ul className="flex flex-wrap gap-2" aria-label="태그">
-            {post.tags.map((tag) => (
-              <li
-                key={tag.id}
-                className="rounded-full border border-border-3 px-3 py-1 text-body-xs text-text-4"
+        <div className="min-w-0 flex-1">
+          <div className="mb-1.5 flex flex-wrap items-center gap-2">
+            {post.isPinned ? (
+              <span
+                className="post-list-item__pin inline-flex items-center text-primary-1"
+                aria-label="고정된 글"
               >
-                #{tag.name}
-              </li>
-            ))}
-          </ul>
-        )}
-      </article>
-    </Link>
-  );
-}
+                <Icon icon={pinBold} width="14" aria-hidden="true" />
+              </span>
+            ) : null}
 
-function PinIcon({ className, ...props }: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      width="14"
-      height="14"
-      role="img"
-      className={className}
-      {...props}
-    >
-      <path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z" />
-    </svg>
-  );
-}
+            <span className="post-list-item__badge inline-flex items-center rounded-md px-2 py-0.5 text-ui-xs font-medium text-primary-1">
+              {post.category.name}
+            </span>
 
-function CommentIcon({ className, ...props }: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      {...props}
-    >
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-    </svg>
+            <time
+              dateTime={post.publishedAt ?? post.createdAt}
+              className="text-ui-xs text-text-4"
+            >
+              {publishedDate}
+            </time>
+          </div>
+
+          <h2 className="overflow-hidden text-ellipsis whitespace-nowrap break-keep text-base font-bold leading-snug text-text-1 sm:text-lg">
+            {post.title}
+          </h2>
+
+          {post.summary ? (
+            <p className="mt-1 hidden line-clamp-2 break-keep text-sm leading-relaxed text-text-3 sm:block">
+              {post.summary}
+            </p>
+          ) : null}
+
+          <div className="mt-2 flex items-center gap-3 text-ui-xs text-text-4">
+            <span
+              className="flex items-center gap-1"
+              aria-label={`조회수 ${formattedPageviews}회`}
+            >
+              <Icon icon={eyeLinear} width="14" aria-hidden="true" />
+              {formattedPageviews}
+            </span>
+            <span
+              className="flex items-center gap-1"
+              aria-label={`댓글 ${formattedComments}개`}
+            >
+              <Icon icon={chatRoundDotsLinear} width="14" aria-hidden="true" />
+              {formattedComments}
+            </span>
+          </div>
+        </div>
+      </div>
+    </article>
   );
 }

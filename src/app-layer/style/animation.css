@@ -3,6 +3,16 @@
   --animate-slide-in-right: slide-in-right 0.3s ease-out;
 }
 
+@keyframes post-list-pin-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-8deg);
+  }
+  50% {
+    transform: translateY(-3px) rotate(-8deg);
+  }
+}
+
 @keyframes shine {
   to {
     background-position-x: -400%;
@@ -15,5 +25,49 @@
   }
   to {
     transform: translateX(0);
+  }
+}
+
+@layer components {
+  .post-list-item {
+    transition:
+      transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+      background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .post-list-item:hover {
+    transform: translateX(4px);
+  }
+
+  .post-list-item__badge {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--color-primary-1) 12%, transparent);
+  }
+
+  .post-list-item__badge::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      110deg,
+      transparent 0%,
+      color-mix(in srgb, white 10%, transparent) 35%,
+      color-mix(in srgb, white 70%, transparent) 50%,
+      color-mix(in srgb, white 10%, transparent) 65%,
+      transparent 100%
+    );
+    transform: translateX(-140%);
+    transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .group:hover .post-list-item__badge::after {
+    transform: translateX(140%);
+  }
+
+  .post-list-item__pin {
+    animation: post-list-pin-float 2.5s ease-in-out infinite;
   }
 }
