@@ -129,14 +129,7 @@ const SearchBar: React.FC = () => {
       )}
       onSubmit={handleSubmit}
     >
-      {isExpanded ? (
-        <Icon
-          icon={magniferLinear}
-          width="15"
-          aria-hidden="true"
-          className="shrink-0 text-text-4"
-        />
-      ) : (
+      {isExpanded ? null : (
         <button
           type="button"
           onClick={handleOpen}
@@ -153,7 +146,7 @@ const SearchBar: React.FC = () => {
       <input
         id="header-search-input"
         ref={inputRef}
-        type="search"
+        type="text"
         disabled={!isExpanded}
         tabIndex={isExpanded ? 0 : -1}
         value={query}
@@ -163,12 +156,26 @@ const SearchBar: React.FC = () => {
         maxLength={200}
         aria-label="검색어 입력"
         className={cn(
-          "min-w-0 bg-transparent text-ui-sm text-text-1 outline-none placeholder:text-text-4 transition-[width,opacity] duration-300",
+          "min-w-0 bg-transparent text-[0.813rem] leading-[1.125rem] font-normal text-text-1 outline-none placeholder:text-text-4 transition-[width,opacity] duration-300",
           isExpanded
             ? "w-full opacity-100"
             : "w-0 opacity-0 pointer-events-none",
         )}
       />
+
+      {isExpanded && query ? (
+        <button
+          type="button"
+          onClick={() => {
+            setQuery("");
+            inputRef.current?.focus();
+          }}
+          aria-label="검색어 지우기"
+          className="flex h-[1.375rem] w-[1.375rem] shrink-0 items-center justify-center rounded-full text-text-4 transition-colors hover:bg-background-3 hover:text-text-2"
+        >
+          <ClearIcon />
+        </button>
+      ) : null}
 
       {isExpanded ? (
         <button
@@ -182,6 +189,25 @@ const SearchBar: React.FC = () => {
     </form>
   );
 };
+
+function ClearIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      width="12"
+      height="12"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <path d="M7 7 17 17" />
+      <path d="M17 7 7 17" />
+    </svg>
+  );
+}
 
 SearchBar.displayName = "SearchBar";
 
