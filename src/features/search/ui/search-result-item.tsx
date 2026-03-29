@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { highlightText } from "../lib/highlight";
 import type { Post } from "@entities/post";
-import { cn } from "@shared/lib/style-utils";
 
 interface SearchResultItemProps {
   post: Post;
@@ -68,12 +67,7 @@ export function SearchResultItem({ post, query }: SearchResultItemProps) {
       <article className="flex min-w-0 flex-1 flex-col gap-3 px-4 py-5 sm:px-5">
         {/* Category + date row */}
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-4">
-          <span
-            className={cn(
-              "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-              "bg-[color-mix(in_srgb,var(--color-primary-1)_12%,transparent)] text-primary-1",
-            )}
-          >
+          <span className="accent-badge inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium">
             {post.category.name}
           </span>
           <time dateTime={post.publishedAt ?? post.createdAt}>
