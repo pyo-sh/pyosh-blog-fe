@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { PostListItem } from "@features/post-list";
-import { EmptyState, Pagination } from "@shared/ui/libs";
-import { mockPosts, mockMeta } from "../mocks/data/posts";
+import { ArchiveHeader, EmptyState, Pagination } from "@shared/ui/libs";
+import { mockPosts } from "../mocks/data/posts";
 import { mockActiveTag } from "../mocks/data/tags";
 
 interface TagPostsPreviewProps {
@@ -20,17 +20,8 @@ function TagPostsPreview({
   totalPages,
 }: TagPostsPreviewProps) {
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col gap-8 px-4 py-12 md:px-6">
-      <header className="rounded-[2rem] border border-border-3 bg-background-2 p-8 md:p-10">
-        <p className="text-body-xs uppercase tracking-[0.24em] text-text-4">
-          Tag Archive
-        </p>
-        <h1 className="mt-3 text-heading-md text-text-1">#{tagName}</h1>
-        <p className="mt-4 text-body-md text-text-3">
-          총 {totalCount.toLocaleString("ko-KR")}개의 글이 이 태그와 연결되어
-          있습니다.
-        </p>
-      </header>
+    <main className="flex min-h-screen flex-col pt-8 pb-16">
+      <ArchiveHeader variant="tag" title={tagName} count={totalCount} />
 
       {posts.length > 0 ? (
         <section className="grid gap-5">
@@ -45,11 +36,13 @@ function TagPostsPreview({
         />
       )}
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        basePath={`/tags/${tagName.toLowerCase()}`}
-      />
+      <div className="mt-10">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          basePath={`/tags/${tagName.toLowerCase()}`}
+        />
+      </div>
     </main>
   );
 }
