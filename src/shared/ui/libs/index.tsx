@@ -1,3 +1,5 @@
+export { ArchiveHeader } from "./archive-header";
+export { ArchiveTagBadge } from "./archive-tag-badge";
 export { Button } from "./button";
 export { EmptyState } from "./empty-state";
 export { ErrorContent } from "./error-content";

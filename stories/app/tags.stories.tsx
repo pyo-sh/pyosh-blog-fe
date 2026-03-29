@@ -1,18 +1,12 @@
-import type { Metadata } from "next";
-import { fetchTags } from "@entities/tag";
-import { buildCanonicalMetadata } from "@shared/lib/seo";
-import { ArchiveTagBadge, EmptyState, ScrollToTop } from "@shared/ui/libs";
+import type { Meta, StoryObj } from "@storybook/react";
+import { ArchiveTagBadge, EmptyState } from "@shared/ui/libs";
+import { mockTags } from "../mocks/data/tags";
 
-export const dynamic = "force-dynamic";
+interface TagsPreviewProps {
+  tags: typeof mockTags;
+}
 
-export const metadata: Metadata = {
-  title: "태그 목록",
-  description: "모든 태그 목록",
-  ...buildCanonicalMetadata("/tags"),
-};
-
-export default async function TagsPage() {
-  const tags = await fetchTags();
+function TagsPreview({ tags }: TagsPreviewProps) {
   const sortedTags = [...tags].sort(
     (left, right) => right.postCount - left.postCount,
   );
@@ -51,7 +45,47 @@ export default async function TagsPage() {
           message="등록된 태그가 없습니다."
         />
       )}
-      <ScrollToTop />
     </main>
   );
 }
+
+const meta: Meta<typeof TagsPreview> = {
+  title: "App/Tags",
+  component: TagsPreview,
+  parameters: {
+    layout: "fullscreen",
+  },
+  decorators: [
+    (Story) => (
+      <div className="mx-auto w-full max-w-[51rem] px-4 py-8 md:px-6">
+        <Story />
+      </div>
+    ),
+  ],
+  args: {
+    tags: mockTags,
+  },
+};
+
+export default meta;
+type Story = StoryObj<typeof TagsPreview>;
+
+export const Default: Story = {};
+
+export const Empty: Story = {
+  args: {
+    tags: [],
+  },
+};
+
+export const Mobile: Story = {
+  parameters: {
+    viewport: { defaultViewport: "mobile" },
+  },
+};
+
+export const DarkMode: Story = {
+  parameters: {
+    themes: { themeOverride: "dark" },
+  },
+};
