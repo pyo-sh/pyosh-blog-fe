@@ -24,38 +24,33 @@ export function PopularPostList({
   initialDays = 7,
   selectedDays,
   reloadToken,
-  onSelectedDaysChange,
   onItemClick,
 }: PopularPostListProps) {
-  const [internalSelectedDays, setInternalSelectedDays] =
+  const [displayedDays, setDisplayedDays] =
     useState<PopularPeriod>(initialDays);
   const [postsByDays, setPostsByDays] = useState<
     Partial<Record<PopularPeriod, PopularPost[]>>
   >(() => (initialPosts === null ? {} : { [initialDays]: initialPosts }));
-  const [, setFailedDays] = useState<Partial<Record<PopularPeriod, true>>>(
-    () => (initialPosts === null ? { [initialDays]: true } : {}),
-  );
+  const [failedDays, setFailedDays] = useState<
+    Partial<Record<PopularPeriod, true>>
+  >(() => (initialPosts === null ? { [initialDays]: true } : {}));
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(
     initialPosts === null ? FETCH_ERROR_MESSAGE : null,
   );
   const prevControlledDaysRef = useRef<PopularPeriod | undefined>(selectedDays);
   const prevReloadTokenRef = useRef<number | undefined>(reloadToken);
+  const latestRequestIdRef = useRef(0);
 
-  const activeDays = selectedDays ?? internalSelectedDays;
-  const posts = postsByDays[activeDays];
-
-  function updateSelectedDays(nextDays: PopularPeriod) {
-    if (selectedDays === undefined) {
-      setInternalSelectedDays(nextDays);
-    }
-    onSelectedDaysChange?.(nextDays);
-  }
+  const posts = postsByDays[displayedDays];
 
   async function loadDays(nextDays: PopularPeriod) {
+    const requestId = latestRequestIdRef.current + 1;
+    latestRequestIdRef.current = requestId;
+
     const cachedPosts = postsByDays[nextDays];
     if (cachedPosts !== undefined) {
-      updateSelectedDays(nextDays);
+      setDisplayedDays(nextDays);
       setErrorMessage(null);
 
       return;
@@ -69,6 +64,8 @@ export function PopularPostList({
         nextDays,
         POPULAR_POST_LIMIT,
       );
+      const isStaleRequest = latestRequestIdRef.current !== requestId;
+
       setPostsByDays((current) => ({ ...current, [nextDays]: nextPosts }));
       setFailedDays((current) => {
         const next = { ...current };
@@ -76,12 +73,25 @@ export function PopularPostList({
 
         return next;
       });
-      updateSelectedDays(nextDays);
+      if (isStaleRequest) {
+        return;
+      }
+
+      setDisplayedDays(nextDays);
+      setErrorMessage(null);
     } catch {
+      const isStaleRequest = latestRequestIdRef.current !== requestId;
+
       setFailedDays((current) => ({ ...current, [nextDays]: true }));
+      if (isStaleRequest) {
+        return;
+      }
+
       setErrorMessage(FETCH_ERROR_MESSAGE);
     } finally {
-      setIsLoading(false);
+      if (latestRequestIdRef.current === requestId) {
+        setIsLoading(false);
+      }
     }
   }
 
@@ -100,8 +110,19 @@ export function PopularPostList({
       return;
     }
 
+    if (postsByDays[selectedDays] !== undefined) {
+      setDisplayedDays(selectedDays);
+      setErrorMessage(null);
+
+      return;
+    }
+
+    if (!isDaysChanged && !failedDays[selectedDays]) {
+      return;
+    }
+
     void loadDays(selectedDays);
-  }, [reloadToken, selectedDays]);
+  }, [failedDays, postsByDays, reloadToken, selectedDays]);
 
   return (
     <div>
