@@ -3,30 +3,44 @@ import { http, HttpResponse } from "msw";
 import { GuestbookPageContent } from "@features/guestbook-form";
 import { mockGuestbookEntries } from "../mocks/data/guestbook";
 
-const defaultMeta = { total: mockGuestbookEntries.length, page: 1, limit: 10, totalPages: 1 };
-const guestViewer = { type: "guest" as const };
+const defaultMeta = {
+  total: 42,
+  page: 1,
+  limit: 10,
+  totalPages: 5,
+};
 
 const meta: Meta<typeof GuestbookPageContent> = {
   title: "App/Guestbook",
   component: GuestbookPageContent,
   parameters: {
-    layout: "padded",
+    layout: "fullscreen",
   },
   args: {
     initialEntries: mockGuestbookEntries,
     initialMeta: defaultMeta,
-    viewer: guestViewer,
+    viewer: { type: "guest" as const },
   },
 };
 
 export default meta;
 type Story = StoryObj<typeof GuestbookPageContent>;
 
-export const Default: Story = {};
+export const GuestView: Story = {};
 
-export const LoggedIn: Story = {
+export const LoggedInView: Story = {
   args: {
     viewer: { type: "oauth", id: 1 },
+  },
+};
+
+export const AuthFallback: Story = {
+  args: {
+    viewer: {
+      type: "guest",
+      authErrorMessage:
+        "로그인 상태를 확인하지 못해 게스트 모드로 표시합니다. 잠시 후 다시 시도해 주세요.",
+    },
   },
 };
 
@@ -38,9 +52,12 @@ export const Empty: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.get("/api/guestbook", () => {
-          return HttpResponse.json({ data: [], meta: { total: 0, page: 1, limit: 10, totalPages: 0 } });
-        }),
+        http.get("/api/guestbook", () =>
+          HttpResponse.json({
+            data: [],
+            meta: { total: 0, page: 1, limit: 10, totalPages: 0 },
+          }),
+        ),
       ],
     },
   },
