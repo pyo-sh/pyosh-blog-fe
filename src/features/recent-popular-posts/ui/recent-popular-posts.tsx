@@ -41,7 +41,7 @@ export function RecentPopularPosts({
 
   return (
     <div>
-      <div className="mb-3 flex items-center justify-between gap-3">
+      <div className="mb-3 flex items-center justify-between gap-1.5">
         <div className="flex items-center gap-1" role="tablist">
           {(["recent", "popular"] as const).map((tab) => (
             <button
@@ -64,7 +64,7 @@ export function RecentPopularPosts({
 
         {activeTab === "popular" ? (
           <div
-            className="flex items-center gap-1.5"
+            className="flex items-center gap-0.75"
             role="tablist"
             aria-label="인기 글 기간 선택"
           >
@@ -79,7 +79,7 @@ export function RecentPopularPosts({
                   aria-selected={isActive}
                   onClick={() => setSelectedPopularDays(option.days)}
                   className={cn(
-                    "inline-flex min-h-6 rounded-full border px-2.5 py-[3px] text-ui-xs font-medium leading-4 transition-colors",
+                    "inline-flex min-h-6 rounded-full border px-2.5 py-[3px] text-[0.75rem] leading-4 font-normal transition-colors",
                     isActive
                       ? "border-primary-1 bg-primary-1/6 text-primary-1"
                       : "border-border-3 text-text-3 hover:border-primary-1 hover:bg-primary-1/6 hover:text-primary-1",
