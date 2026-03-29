@@ -19,6 +19,8 @@ const config: StorybookConfig = {
   },
   staticDirs: ["../public"],
   webpackFinal: async (config) => {
+    config.cache = false;
+
     if (config.resolve) {
       config.resolve.alias = {
         ...(config.resolve.alias || {}),
@@ -32,6 +34,24 @@ const config: StorybookConfig = {
         "@": path.resolve(__dirname, "../src"),
       };
     }
+
+    config.output = {
+      ...config.output,
+      chunkFilename: "[name].iframe.bundle.js",
+    };
+
+    config.optimization = {
+      ...(config.optimization || {}),
+      runtimeChunk: false,
+      splitChunks: {
+        chunks: "async",
+        cacheGroups: {
+          default: false,
+          defaultVendors: false,
+        },
+      },
+    };
+
     return config;
   },
 };
