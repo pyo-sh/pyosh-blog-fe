@@ -63,7 +63,7 @@ export function SearchForm({ currentFilter, initialQuery }: SearchFormProps) {
           value={filter}
           onChange={(event) => setFilter(event.target.value as SearchFilter)}
           aria-label="검색 필터"
-          className="h-[2.625rem] w-full appearance-none rounded-[0.625rem] border border-border-3 bg-background-2 py-0 pl-[0.875rem] pr-9 text-ui-sm text-text-1 outline-none transition-colors focus:border-primary-1 sm:w-auto"
+          className="h-[2.625rem] w-full appearance-none rounded-[0.625rem] border border-border-3 bg-background-2 py-0 pl-[0.875rem] pr-9 text-ui-sm text-text-1 outline-none transition-[border-color,box-shadow] focus:border-primary-1 sm:w-auto sm:min-w-[7.5rem]"
         >
           {FILTER_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
@@ -74,7 +74,7 @@ export function SearchForm({ currentFilter, initialQuery }: SearchFormProps) {
         <ChevronDownIcon className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-text-3" />
       </div>
 
-      <label className="flex h-[2.625rem] flex-1 items-center gap-2 rounded-[0.625rem] border border-border-3 bg-background-2 px-[0.875rem] focus-within:border-primary-1 focus-within:shadow-[0_0_0_3px_rgba(138,111,224,0.12)]">
+      <label className="flex h-[2.625rem] flex-1 items-center gap-2 rounded-[0.625rem] border border-border-3 bg-background-2 px-[0.875rem] transition-[border-color,box-shadow] focus-within:border-primary-1 focus-within:shadow-[0_0_0_3px_rgba(138,111,224,0.12)]">
         <Icon
           icon={magniferLinear}
           width="16"
@@ -95,7 +95,7 @@ export function SearchForm({ currentFilter, initialQuery }: SearchFormProps) {
       <button
         type="submit"
         aria-label="검색"
-        className="flex h-[2.625rem] w-[2.625rem] shrink-0 items-center justify-center rounded-[0.625rem] bg-primary-1 text-background-1 transition-all hover:-translate-y-px hover:opacity-90"
+        className="flex h-[2.625rem] w-[2.625rem] shrink-0 items-center justify-center rounded-[0.625rem] bg-primary-1 text-white transition-all hover:-translate-y-px hover:opacity-90"
       >
         <Icon icon={magniferLinear} width="18" aria-hidden="true" />
       </button>
