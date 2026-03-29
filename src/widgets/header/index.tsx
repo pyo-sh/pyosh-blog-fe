@@ -95,7 +95,7 @@ const Header: React.FC<HeaderProps> = ({
               height="1.75rem"
               className="text-primary-1"
             />
-            <span className="text-body-sm font-bold tracking-tight text-text-1">
+            <span className="text-[0.875rem] leading-[1.188rem] font-bold tracking-tight text-text-1">
               pyosh blog
             </span>
           </Link>
