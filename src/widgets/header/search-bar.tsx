@@ -1,12 +1,10 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { Icon } from "@iconify/react";
+import magniferLinear from "@iconify-icons/solar/magnifer-linear";
 import { useRouter } from "next/navigation";
 import { cn } from "@shared/lib/style-utils";
-import { Button } from "@shared/ui/libs";
-
-const ICON_WIDTH = "1.5rem";
-const ICON_HEIGHT = "1.5rem";
 
 const SearchBar: React.FC = () => {
   const router = useRouter();
@@ -119,55 +117,21 @@ const SearchBar: React.FC = () => {
           placeholder="검색어 입력"
           maxLength={200}
           aria-label="검색어 입력"
-          className="h-10 w-full rounded-full border border-border-3 bg-background-2 px-4 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
+          className="h-9 w-full rounded-lg border border-border-3 bg-background-2 px-3 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
         />
       </label>
 
-      <Button
+      <button
         type={isOpen ? "submit" : "button"}
         onClick={isOpen ? undefined : handleOpen}
-        showShadow={false}
-        fill="weak"
         aria-label="검색"
         aria-expanded={isOpen}
         aria-controls="header-search-input"
+        className="flex h-9 w-9 items-center justify-center rounded-lg text-text-3 transition-colors hover:bg-background-3"
       >
-        <SearchIcon
-          className="text-text-1"
-          width={ICON_WIDTH}
-          height={ICON_HEIGHT}
-        />
-      </Button>
+        <Icon icon={magniferLinear} width="18" aria-hidden="true" />
+      </button>
     </form>
-  );
-};
-
-type SearchIconProps = {
-  className?: string;
-  width?: number | string;
-  height?: number | string;
-};
-
-const SearchIcon: React.FC<SearchIconProps> = ({
-  className,
-  width,
-  height,
-}) => {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      className={className}
-      width={width}
-      height={height}
-      aria-hidden="true"
-    >
-      <circle cx="11" cy="11" r="6.5" />
-      <path d="m16 16 4.5 4.5" strokeLinecap="round" />
-    </svg>
   );
 };
 

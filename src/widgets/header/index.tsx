@@ -1,11 +1,14 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { Icon } from "@iconify/react";
+import hamburgerMenuLinear from "@iconify-icons/solar/hamburger-menu-linear";
+import Link from "next/link";
 import { cn } from "@shared/lib/style-utils";
 import throttle from "@shared/lib/throttle";
 import { SearchBar } from "@widgets/header/search-bar";
 import { ThemeButton } from "@widgets/header/theme-button";
-import { Logo } from "@widgets/logo";
+import { LogoIcon } from "@widgets/logo/ui/logo-icon";
 
 interface HeaderProps {
   onHamburgerClick?: () => void;
@@ -65,24 +68,39 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <div
-      className="pt-[4.5rem]"
+      className="pt-14"
       style={headerHeight > 0 ? { paddingTop: `${headerHeight}px` } : undefined}
     >
       <header
         ref={headerRef}
         className={cn(
-          "w-full h-[4.5rem]",
+          "w-full h-14",
           "fixed top-0 z-[1000]",
           "flex justify-center",
-          "text-text-1 bg-background-1 border-b border-border-3",
+          "border-b text-text-1",
+          "bg-[rgba(249,249,250,0.8)] border-[rgba(219,221,224,0.5)] shadow-[0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-[16px] backdrop-saturate-[1.4]",
+          "dark:bg-[rgba(19,20,21,0.85)] dark:border-[rgba(62,66,69,0.5)] dark:shadow-[0_1px_0_rgba(0,0,0,0.15)]",
           "transition-all duration-300",
           isShown ? "translate-y-0" : "-translate-y-full",
         )}
       >
-        <div className="max-w-[67.5rem] w-full mx-auto px-4 h-full flex items-center justify-between md:px-6">
-          <Logo />
+        <div className="mx-auto flex h-full w-full max-w-[67.5rem] items-center justify-between px-4 md:px-6 lg:px-8">
+          <Link
+            href="/"
+            aria-label="pyosh blog 홈"
+            className="flex items-center gap-2"
+          >
+            <LogoIcon
+              width="1.75rem"
+              height="1.75rem"
+              className="text-primary-1"
+            />
+            <span className="text-body-sm font-bold tracking-tight text-text-1">
+              pyosh blog
+            </span>
+          </Link>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <SearchBar />
             <ThemeButton />
             {onHamburgerClick && (
@@ -93,9 +111,13 @@ const Header: React.FC<HeaderProps> = ({
                 aria-label="메뉴 열기"
                 aria-expanded={isSidebarOpen}
                 aria-controls="public-sidebar-panel"
-                className="flex lg:hidden items-center justify-center rounded-md p-2 text-text-3 transition-colors hover:bg-background-2 hover:text-text-1"
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-text-3 transition-colors hover:bg-background-3 lg:hidden"
               >
-                <HamburgerIcon />
+                <Icon
+                  icon={hamburgerMenuLinear}
+                  width="20"
+                  aria-hidden="true"
+                />
               </button>
             )}
           </div>
@@ -106,24 +128,5 @@ const Header: React.FC<HeaderProps> = ({
 };
 
 Header.displayName = "Header";
-
-function HamburgerIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M4 6h16M4 12h16M4 18h16" />
-    </svg>
-  );
-}
 
 export { Header };
