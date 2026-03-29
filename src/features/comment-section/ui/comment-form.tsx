@@ -323,7 +323,7 @@ export function CommentForm<TPayload extends CommentFormPayload>({
           </div>
         ) : (
           <div className="mb-4 flex items-center gap-2.5 border-b border-border-4 pb-4">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-background-3 text-text-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-background-3 text-text-4">
               <UserIcon />
             </div>
             <div>
