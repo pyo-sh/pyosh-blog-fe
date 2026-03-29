@@ -1,52 +1,62 @@
 import React from "react";
+import { Icon } from "@iconify/react";
+import letterLinear from "@iconify-icons/solar/letter-linear";
+import linkMinimalistic2Linear from "@iconify-icons/solar/link-minimalistic-2-linear";
 import Link from "next/link";
 import { URLS } from "@shared/constant/url";
-import { GithubIcon, MailIcon } from "@shared/ui/icons";
-import { Text } from "@shared/ui/libs";
+import { LogoIcon } from "@widgets/logo/ui/logo-icon";
 
 const Footer: React.FC = () => {
   return (
-    <footer className="w-full flex flex-col justify-center items-center border-t border-border-3 bg-background-1 py-8">
-      <nav aria-label="소셜 링크">
-        <ul className="flex flex-col justify-center items-center gap-2">
-          <li>
-            <Link
-              href={URLS.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="GitHub 프로필 pyo-sh"
-              className="flex justify-center items-center gap-2.5 text-text-4 hover:text-text-1 transition-colors"
-            >
-              <GithubIcon
-                className="transition-colors"
-                width="1.5rem"
-                height="1.5rem"
-              />
-              <Text fontSize="body-xs">pyo-sh</Text>
-            </Link>
-          </li>
+    <footer className="border-t border-border-4 bg-background-2">
+      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-8 sm:flex-row sm:px-6 lg:px-8">
+        <div className="flex items-center gap-2">
+          <LogoIcon width="1.25rem" height="1.25rem" className="text-text-4" />
+          <span className="text-ui-xs text-text-4">
+            © {new Date().getFullYear()} pyosh. All rights reserved.
+          </span>
+        </div>
 
-          <li>
-            <Link
-              href={`mailto:${URLS.mail}`}
-              aria-label={`이메일 ${URLS.mail}`}
-              className="flex justify-center items-center gap-2.5 text-text-4 hover:text-text-1 transition-colors"
-            >
-              <MailIcon
-                className="transition-colors"
-                width="1.5rem"
-                height="1.5rem"
-              />
-              <Text fontSize="body-xs">{URLS.mail}</Text>
-            </Link>
-          </li>
-        </ul>
-      </nav>
+        <nav aria-label="푸터 링크">
+          <ul className="flex items-center gap-4">
+            <li>
+              <Link
+                href="/guestbook"
+                className="text-ui-xs text-text-3 underline-offset-4 transition-colors hover:text-text-1 hover:underline"
+              >
+                방명록
+              </Link>
+            </li>
 
-      <div className="mt-4">
-        <Text fontSize="body-xs" className="text-text-4">
-          © {new Date().getFullYear()} pyo-sh
-        </Text>
+            <li>
+              <Link
+                href={URLS.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="GitHub 프로필 pyo-sh"
+                className="flex items-center gap-1 text-ui-xs text-text-3 underline-offset-4 transition-colors hover:text-text-1 hover:underline"
+              >
+                <Icon
+                  icon={linkMinimalistic2Linear}
+                  width="12"
+                  aria-hidden="true"
+                />
+                GitHub
+              </Link>
+            </li>
+
+            <li>
+              <Link
+                href={`mailto:${URLS.mail}`}
+                aria-label={`이메일 ${URLS.mail}`}
+                className="flex items-center gap-1 text-ui-xs text-text-3 underline-offset-4 transition-colors hover:text-text-1 hover:underline"
+              >
+                <Icon icon={letterLinear} width="12" aria-hidden="true" />
+                Email
+              </Link>
+            </li>
+          </ul>
+        </nav>
       </div>
     </footer>
   );
