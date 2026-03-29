@@ -66,22 +66,45 @@ function PostListInner({
       {posts.length === 0 ? (
         <EmptyState variant="page" message="찾으시는 게시물은 없습니다." />
       ) : (
-        <section className="grid gap-3">
-          {/* Pinned posts */}
-          {pinnedPosts.map((post) => (
-            <PostListItem key={post.id} post={post} />
-          ))}
+        <div>
+          {pinnedPosts.length > 0 ? (
+            <section
+              aria-label="고정된 글"
+              className="motion-reveal mb-2"
+              style={{ animationDelay: "180ms" }}
+            >
+              <div className="grid gap-3">
+                {pinnedPosts.map((post) => (
+                  <PostListItem key={post.id} post={post} />
+                ))}
+              </div>
+            </section>
+          ) : null}
 
-          {/* Divider between pinned and regular */}
-          {pinnedPosts.length > 0 && regularPosts.length > 0 && (
-            <hr className="border-border-3" />
-          )}
+          {pinnedPosts.length > 0 && regularPosts.length > 0 ? (
+            <div
+              className="motion-reveal mx-4 mb-2 sm:mx-5"
+              style={{ animationDelay: "220ms" }}
+              aria-hidden="true"
+            >
+              <div className="h-px bg-border-3" />
+            </div>
+          ) : null}
 
-          {/* Regular posts */}
-          {regularPosts.map((post) => (
-            <PostListItem key={post.id} post={post} />
-          ))}
-        </section>
+          <section
+            aria-label="글 목록"
+            className="motion-reveal"
+            style={{
+              animationDelay: pinnedPosts.length > 0 ? "260ms" : "180ms",
+            }}
+          >
+            <div className="grid gap-3">
+              {regularPosts.map((post) => (
+                <PostListItem key={post.id} post={post} />
+              ))}
+            </div>
+          </section>
+        </div>
       )}
 
       {meta && (

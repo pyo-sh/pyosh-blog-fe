@@ -44,16 +44,13 @@ export async function HomePage({ searchParams }: HomePageProps) {
 
   return (
     <main className="mx-auto flex w-full max-w-[67.5rem] flex-col gap-8 px-4 pb-16 pt-8 md:px-6">
-      <header>
-        <p className="text-xs uppercase tracking-[0.24em] text-text-4">
-          Latest Posts
-        </p>
-        <h1 className="mt-2 text-2xl font-bold tracking-tight text-text-1 md:text-3xl">
-          블로그
+      <header
+        className="motion-reveal mb-8"
+        style={{ animationDelay: "100ms" }}
+      >
+        <h1 className="break-keep text-[1.5rem] leading-[1.938rem] font-bold tracking-tight text-text-1 md:text-[1.875rem] md:leading-[2.375rem]">
+          최근 글
         </h1>
-        <p className="mt-2 text-sm text-text-3">
-          최신 게시글을 페이지별로 살펴볼 수 있습니다.
-        </p>
       </header>
 
       <PostList initialData={initialData} initialPage={page} />
