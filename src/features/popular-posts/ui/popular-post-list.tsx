@@ -10,6 +10,7 @@ interface PopularPostListProps {
   initialPosts: PopularPost[] | null;
   initialDays?: PopularPeriod;
   selectedDays?: PopularPeriod;
+  reloadToken?: number;
   onSelectedDaysChange?: (days: PopularPeriod) => void;
   onItemClick?: () => void;
 }
@@ -22,6 +23,7 @@ export function PopularPostList({
   initialPosts,
   initialDays = 7,
   selectedDays,
+  reloadToken,
   onSelectedDaysChange,
   onItemClick,
 }: PopularPostListProps) {
@@ -38,6 +40,7 @@ export function PopularPostList({
     initialPosts === null ? FETCH_ERROR_MESSAGE : null,
   );
   const prevControlledDaysRef = useRef<PopularPeriod | undefined>(selectedDays);
+  const prevReloadTokenRef = useRef<number | undefined>(reloadToken);
 
   const activeDays = selectedDays ?? internalSelectedDays;
   const posts = postsByDays[activeDays];
@@ -83,16 +86,22 @@ export function PopularPostList({
   }
 
   useEffect(() => {
-    if (
-      selectedDays === undefined ||
-      prevControlledDaysRef.current === selectedDays
-    ) {
+    if (selectedDays === undefined) {
       return;
     }
 
+    const isDaysChanged = prevControlledDaysRef.current !== selectedDays;
+    const isRetryRequested = prevReloadTokenRef.current !== reloadToken;
+
     prevControlledDaysRef.current = selectedDays;
+    prevReloadTokenRef.current = reloadToken;
+
+    if (!isDaysChanged && !isRetryRequested) {
+      return;
+    }
+
     void loadDays(selectedDays);
-  }, [selectedDays]);
+  }, [reloadToken, selectedDays]);
 
   return (
     <div>

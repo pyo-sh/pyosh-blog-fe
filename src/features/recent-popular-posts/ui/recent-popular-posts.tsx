@@ -38,6 +38,7 @@ export function RecentPopularPosts({
 }: RecentPopularPostsProps) {
   const [activeTab, setActiveTab] = useState<"recent" | "popular">("recent");
   const [selectedPopularDays, setSelectedPopularDays] = useState<7 | 30>(7);
+  const [popularReloadToken, setPopularReloadToken] = useState(0);
 
   return (
     <div>
@@ -77,7 +78,15 @@ export function RecentPopularPosts({
                   type="button"
                   role="tab"
                   aria-selected={isActive}
-                  onClick={() => setSelectedPopularDays(option.days)}
+                  onClick={() => {
+                    if (option.days === selectedPopularDays) {
+                      setPopularReloadToken((current) => current + 1);
+
+                      return;
+                    }
+
+                    setSelectedPopularDays(option.days);
+                  }}
                   className={cn(
                     "inline-flex min-h-6 rounded-full border px-2.5 py-[3px] text-[0.75rem] leading-4 font-normal transition-colors",
                     isActive
@@ -122,6 +131,7 @@ export function RecentPopularPosts({
         <PopularPostList
           initialPosts={popularPosts}
           selectedDays={selectedPopularDays}
+          reloadToken={popularReloadToken}
           onSelectedDaysChange={setSelectedPopularDays}
           onItemClick={onItemClick}
         />

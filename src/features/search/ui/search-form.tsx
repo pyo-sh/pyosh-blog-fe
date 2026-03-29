@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
 import magniferLinear from "@iconify-icons/solar/magnifer-linear";
 import { useRouter } from "next/navigation";
@@ -24,6 +24,14 @@ export function SearchForm({ currentFilter, initialQuery }: SearchFormProps) {
   const router = useRouter();
   const [query, setQuery] = useState(initialQuery);
   const [filter, setFilter] = useState<SearchFilter>(currentFilter);
+
+  useEffect(() => {
+    setQuery(initialQuery);
+  }, [initialQuery]);
+
+  useEffect(() => {
+    setFilter(currentFilter);
+  }, [currentFilter]);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
