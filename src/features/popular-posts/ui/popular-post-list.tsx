@@ -117,12 +117,12 @@ export function PopularPostList({
               <Link
                 href={`/posts/${post.slug}`}
                 onClick={onItemClick}
-                className="group block rounded-md px-0.5 py-1 transition-colors hover:text-primary-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-1"
+                className="group block min-h-[3rem] rounded-md px-0.5 py-1 transition-colors hover:text-primary-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-1"
               >
                 <span className="line-clamp-2 block text-ui-sm font-medium leading-[1.4] text-text-2 transition-colors group-hover:text-primary-1">
                   {post.title}
                 </span>
-                <span className="mt-0.5 block text-[0.688rem] text-text-4">
+                <span className="mt-0.5 block text-[0.688rem] leading-4 text-text-4">
                   조회 {post.pageviews.toLocaleString("ko-KR")}
                 </span>
               </Link>
