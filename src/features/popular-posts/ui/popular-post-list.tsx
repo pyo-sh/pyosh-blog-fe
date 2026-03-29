@@ -111,6 +111,8 @@ export function PopularPostList({
     }
 
     if (postsByDays[selectedDays] !== undefined) {
+      latestRequestIdRef.current += 1;
+      setIsLoading(false);
       setDisplayedDays(selectedDays);
       setErrorMessage(null);
 
