@@ -60,7 +60,12 @@ export function PostListItem({ post }: PostListItemProps) {
                 className="motion-pin-float inline-flex items-center text-primary-1"
                 aria-label="고정된 글"
               >
-                <Icon icon={pinBold} width="14" aria-hidden="true" />
+                <Icon
+                  icon={pinBold}
+                  width="14"
+                  aria-hidden="true"
+                  className="text-primary-1"
+                />
               </span>
             ) : null}
 
@@ -76,7 +81,7 @@ export function PostListItem({ post }: PostListItemProps) {
             </time>
           </div>
 
-          <h2 className="overflow-hidden text-ellipsis whitespace-nowrap break-keep text-base font-bold leading-snug text-text-1 sm:text-lg">
+          <h2 className="overflow-hidden text-ellipsis whitespace-nowrap break-keep text-base font-extrabold leading-snug text-text-1 sm:text-lg">
             {post.title}
           </h2>
 

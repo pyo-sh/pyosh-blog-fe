@@ -20,7 +20,16 @@ const preview: Preview = {
       );
       return (
         <QueryClientProvider client={queryClient}>
-          <Story />
+          <div
+            className="min-h-screen bg-background-1 text-text-1 transition-theme"
+            style={{
+              fontFamily: '"Gothic A1", ui-sans-serif, system-ui, sans-serif',
+            }}
+          >
+            <div className="mx-auto w-full max-w-[96rem] px-4 py-6 md:px-6">
+              <Story />
+            </div>
+          </div>
         </QueryClientProvider>
       );
     },
@@ -36,6 +45,7 @@ const preview: Preview = {
   ],
   loaders: [mswLoader],
   parameters: {
+    layout: "fullscreen",
     viewport: {
       viewports: {
         mobile: { name: "Mobile", styles: { width: "375px", height: "812px" } },
