@@ -122,14 +122,24 @@ const SearchBar: React.FC = () => {
     <form
       ref={containerRef}
       className={cn(
-        "flex items-center overflow-hidden rounded-[0.625rem] transition-[width,min-width,padding,border-color,background-color,box-shadow] duration-300",
+        "relative flex items-center overflow-hidden rounded-[0.625rem] transition-[width,min-width,border-color,background-color,box-shadow] duration-300",
         isExpanded
-          ? "h-[2.125rem] min-w-[10rem] gap-1.5 border border-border-3 bg-background-2 px-3 focus-within:border-primary-1 focus-within:shadow-[0_0_0_3px_rgba(138,111,224,0.12)] md:min-w-[12.5rem]"
+          ? "h-[2.125rem] min-w-[10rem] border border-border-3 bg-background-2 focus-within:border-primary-1 focus-within:shadow-[0_0_0_3px_rgba(138,111,224,0.12)] md:min-w-[12.5rem]"
           : "h-[2.125rem] w-[2.125rem] min-w-[2.125rem] cursor-pointer border border-transparent bg-transparent px-0 hover:bg-background-3",
       )}
       onSubmit={handleSubmit}
     >
-      {isExpanded ? null : (
+      <span
+        aria-hidden="true"
+        className={cn(
+          "pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-4 transition-opacity duration-200",
+          isExpanded ? "opacity-100" : "opacity-0",
+        )}
+      >
+        <Icon icon={magniferLinear} width="15" />
+      </span>
+
+      {!isExpanded ? (
         <button
           type="button"
           onClick={handleOpen}
@@ -140,7 +150,7 @@ const SearchBar: React.FC = () => {
         >
           <Icon icon={magniferLinear} width="18" aria-hidden="true" />
         </button>
-      )}
+      ) : null}
 
       <span className="sr-only">검색어 입력</span>
       <input
@@ -156,41 +166,48 @@ const SearchBar: React.FC = () => {
         maxLength={200}
         aria-label="검색어 입력"
         className={cn(
-          "min-w-0 bg-transparent text-[0.813rem] leading-[1.125rem] font-normal text-text-1 outline-none placeholder:text-text-4 transition-[width,opacity] duration-300",
+          "min-w-0 bg-transparent pl-9 pr-2 text-[0.813rem] leading-[1.125rem] font-normal text-text-1 outline-none placeholder:text-text-4 transition-[max-width,opacity] duration-300",
           isExpanded
-            ? "w-full opacity-100"
-            : "w-0 opacity-0 pointer-events-none",
+            ? "max-w-[12rem] opacity-100 md:max-w-[14rem]"
+            : "max-w-0 opacity-0 pointer-events-none",
         )}
       />
 
       {isExpanded ? (
-        <button
-          type="button"
-          onClick={() => {
-            setQuery("");
-            inputRef.current?.focus();
-          }}
-          aria-label="검색어 지우기"
-          disabled={!query}
-          className={cn(
-            "flex h-[1.375rem] w-[1.375rem] shrink-0 items-center justify-center rounded-full transition-colors",
-            query
-              ? "text-text-4 hover:bg-background-3 hover:text-text-2"
-              : "pointer-events-none text-transparent",
-          )}
+        <span
+          className="flex h-[1.375rem] w-[1.375rem] shrink-0 items-center justify-center"
+          aria-hidden={!query}
         >
-          <ClearIcon />
-        </button>
+          <button
+            type="button"
+            onClick={() => {
+              setQuery("");
+              inputRef.current?.focus();
+            }}
+            aria-label="검색어 지우기"
+            disabled={!query}
+            className={cn(
+              "flex h-[1.375rem] w-[1.375rem] items-center justify-center rounded-full transition-colors",
+              query
+                ? "text-text-4 hover:bg-background-3 hover:text-text-2"
+                : "pointer-events-none text-transparent",
+            )}
+          >
+            <ClearIcon />
+          </button>
+        </span>
       ) : null}
 
       {isExpanded ? (
-        <button
-          type="submit"
-          aria-label="검색 실행"
-          className="flex h-[2.125rem] w-[2.125rem] shrink-0 items-center justify-center rounded-[0.5rem] text-text-3 transition-colors hover:bg-background-3"
-        >
-          <Icon icon={magniferLinear} width="16" aria-hidden="true" />
-        </button>
+        <span className="flex h-[2.125rem] w-[2.125rem] shrink-0 items-center justify-center">
+          <button
+            type="submit"
+            aria-label="검색 실행"
+            className="flex h-[2.125rem] w-[2.125rem] items-center justify-center rounded-[0.5rem] text-text-3 transition-colors hover:bg-background-3"
+          >
+            <Icon icon={magniferLinear} width="16" aria-hidden="true" />
+          </button>
+        </span>
       ) : null}
     </form>
   );
