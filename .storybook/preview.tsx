@@ -44,6 +44,13 @@ const preview: Preview = {
   loaders: [mswLoader],
   parameters: {
     layout: "fullscreen",
+    nextjs: {
+      appDirectory: true,
+      navigation: {
+        pathname: "/",
+        query: {},
+      },
+    },
     viewport: {
       defaultViewport: "desktop",
       viewports: {

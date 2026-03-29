@@ -6,6 +6,13 @@ const meta: Meta<typeof Header> = {
   component: Header,
   parameters: {
     layout: "fullscreen",
+    nextjs: {
+      appDirectory: true,
+      navigation: {
+        pathname: "/",
+        query: {},
+      },
+    },
   },
 };
 
@@ -23,5 +30,20 @@ export const DarkMode: Story = {
 export const Mobile: Story = {
   parameters: {
     viewport: { defaultViewport: "mobile" },
+  },
+};
+
+export const SearchPage: Story = {
+  parameters: {
+    nextjs: {
+      appDirectory: true,
+      navigation: {
+        pathname: "/search",
+        query: {
+          q: "nextjs",
+          filter: "title_content",
+        },
+      },
+    },
   },
 };
