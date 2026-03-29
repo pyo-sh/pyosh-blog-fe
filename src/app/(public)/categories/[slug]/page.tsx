@@ -1,5 +1,7 @@
 import { cache } from "react";
 import type { Metadata } from "next";
+import { Icon } from "@iconify/react";
+import documentTextLinear from "@iconify-icons/solar/document-text-linear";
 import { notFound } from "next/navigation";
 import {
   fetchCategories,
@@ -144,7 +146,18 @@ export default async function CategoryPage({
       ) : (
         <EmptyState
           variant="page"
-          message="아직 이 카테고리에 등록된 공개 글이 없습니다."
+          icon={
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-background-3">
+              <Icon
+                icon={documentTextLinear}
+                width="28"
+                aria-hidden="true"
+                className="text-text-4"
+              />
+            </div>
+          }
+          title="아직 이 카테고리에 등록된 공개 글이 없습니다."
+          description="곧 새로운 글로 찾아올게요."
         />
       )}
 

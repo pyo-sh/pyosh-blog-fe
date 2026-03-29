@@ -55,6 +55,13 @@ const meta: Meta<typeof TagsPreview> = {
   parameters: {
     layout: "fullscreen",
   },
+  decorators: [
+    (Story) => (
+      <div className="mx-auto w-full max-w-[51rem] px-4 py-8 md:px-6">
+        <Story />
+      </div>
+    ),
+  ],
   args: {
     tags: mockTags,
   },

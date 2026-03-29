@@ -27,7 +27,7 @@ export function ArchiveHeader({
   const hasBreadcrumbs = Boolean(breadcrumbs && breadcrumbs.length > 0);
 
   return (
-    <header className={cn("mb-8 motion-reveal", className)}>
+    <header className={cn("mb-8 w-full min-w-0 motion-reveal", className)}>
       {variant === "category" ? (
         <div className="mb-5 flex flex-wrap items-center gap-2">
           <span className="text-body-xs font-bold uppercase tracking-[0.18em] text-text-4">
@@ -81,11 +81,11 @@ export function ArchiveHeader({
       )}
 
       <div className="flex flex-wrap items-baseline justify-between gap-4">
-        <h1 className="break-keep text-[2.25rem] leading-[1.1] font-bold tracking-[-0.025em] text-text-1 sm:text-[2.875rem]">
+        <h1 className="min-w-0 flex-1 break-keep text-[2.25rem] leading-[1.1] font-bold tracking-[-0.025em] text-text-1 sm:text-[2.875rem]">
           {variant === "tag" ? <span className="text-primary-1">#</span> : null}
           {title}
         </h1>
-        <span className="text-body-sm text-text-4">
+        <span className="shrink-0 whitespace-nowrap text-body-sm text-text-4">
           총 {formatNumber(count)}개의 글
         </span>
       </div>

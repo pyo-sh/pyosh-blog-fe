@@ -1,4 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { Icon } from "@iconify/react";
+import documentTextLinear from "@iconify-icons/solar/document-text-linear";
 import type { Category } from "@entities/category";
 import { getCategoryAncestors } from "@entities/category";
 import { PostListItem } from "@features/post-list";
@@ -59,7 +61,18 @@ function CategoryPostsPreview({
       ) : (
         <EmptyState
           variant="page"
-          message="아직 이 카테고리에 등록된 공개 글이 없습니다."
+          icon={
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-background-3">
+              <Icon
+                icon={documentTextLinear}
+                width="28"
+                aria-hidden="true"
+                className="text-text-4"
+              />
+            </div>
+          }
+          title="아직 이 카테고리에 등록된 공개 글이 없습니다."
+          description="곧 새로운 글로 찾아올게요."
         />
       )}
 
@@ -98,6 +111,13 @@ const meta: Meta<typeof CategoryPostsPreview> = {
   parameters: {
     layout: "fullscreen",
   },
+  decorators: [
+    (Story) => (
+      <div className="mx-auto w-full max-w-[51rem] px-4 py-8 md:px-6">
+        <Story />
+      </div>
+    ),
+  ],
   args: {
     categories: mockCategories,
     activeCategoryId: 3,

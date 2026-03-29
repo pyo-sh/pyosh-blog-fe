@@ -1,5 +1,7 @@
 import { cache } from "react";
 import type { Metadata } from "next";
+import { Icon } from "@iconify/react";
+import tagLinear from "@iconify-icons/solar/tag-linear";
 import { notFound } from "next/navigation";
 import { fetchPosts } from "@entities/post";
 import { fetchTags } from "@entities/tag";
@@ -111,7 +113,18 @@ export default async function TagPostsPage({
       ) : (
         <EmptyState
           variant="page"
-          message="아직 이 태그에 연결된 공개 글이 없습니다."
+          icon={
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-background-3">
+              <Icon
+                icon={tagLinear}
+                width="28"
+                aria-hidden="true"
+                className="text-text-4"
+              />
+            </div>
+          }
+          title="아직 이 태그에 연결된 공개 글이 없습니다."
+          description="곧 새로운 글로 찾아올게요."
         />
       )}
 
