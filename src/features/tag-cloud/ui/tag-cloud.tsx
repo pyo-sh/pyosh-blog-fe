@@ -5,9 +5,10 @@ const MAX_SIDEBAR_TAGS = 20;
 
 interface TagCloudProps {
   tags: Tag[];
+  showViewAllLink?: boolean;
 }
 
-export function TagCloud({ tags }: TagCloudProps) {
+export function TagCloud({ tags, showViewAllLink = true }: TagCloudProps) {
   const displayTags = tags.slice(0, MAX_SIDEBAR_TAGS);
 
   if (displayTags.length === 0) {
@@ -21,19 +22,21 @@ export function TagCloud({ tags }: TagCloudProps) {
           <li key={tag.id}>
             <Link
               href={`/tags/${tag.slug}`}
-              className="inline-flex rounded-full border border-border-3 px-2.5 py-1 text-body-xs text-text-3 transition-colors hover:border-primary-1 hover:text-primary-1"
+              className="inline-flex rounded-full border border-border-3 px-2.5 py-1 text-ui-xs font-medium text-text-3 transition-colors hover:border-primary-1 hover:bg-primary-1/5 hover:text-primary-1"
             >
-              #{tag.name}
+              {tag.name}
             </Link>
           </li>
         ))}
       </ul>
-      <Link
-        href="/tags"
-        className="mt-3 inline-flex items-center text-body-xs text-primary-1 hover:underline"
-      >
-        태그 전체보기 →
-      </Link>
+      {showViewAllLink && (
+        <Link
+          href="/tags"
+          className="mt-3 inline-flex items-center text-body-xs text-primary-1 hover:underline"
+        >
+          태그 전체보기 →
+        </Link>
+      )}
     </div>
   );
 }

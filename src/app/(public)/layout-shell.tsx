@@ -9,6 +9,7 @@ import { SlideInPanel } from "@shared/ui/libs";
 import { Header } from "@widgets/header";
 import {
   PublicSidebarContent,
+  PublicSidebarPanel,
   StickySidebarWrapper,
 } from "@widgets/public-sidebar";
 
@@ -71,7 +72,7 @@ export function PublicLayoutShell({
         {/* Desktop sidebar */}
         <aside aria-label="사이드바" className="hidden w-56 shrink-0 lg:block">
           <StickySidebarWrapper>
-            <div className="rounded-2xl border border-border-3 bg-background-1">
+            <div className="pr-6 pt-8 pb-16">
               <PublicSidebarContent
                 recentPosts={recentPosts}
                 popularPosts={popularPosts}
@@ -93,46 +94,18 @@ export function PublicLayoutShell({
         onClose={closeSidebar}
         id="public-sidebar-panel"
         label="사이드바 내비게이션"
+        className="w-[min(320px,85vw)] border-l-0 shadow-[-4px_0_24px_rgba(0,0,0,0.1)]"
       >
-        <div className="flex items-center justify-between border-b border-border-3 px-4 py-3">
-          <span className="text-body-sm font-medium text-text-1">메뉴</span>
-          <button
-            type="button"
-            onClick={closeSidebar}
-            aria-label="메뉴 닫기"
-            className="rounded-md p-2 text-text-3 transition-colors hover:bg-background-2 hover:text-text-1"
-          >
-            <CloseIcon />
-          </button>
-        </div>
-        <PublicSidebarContent
+        <PublicSidebarPanel
           recentPosts={recentPosts}
           popularPosts={popularPosts}
           categories={categories}
           tags={tags}
           totalViews={totalViews}
           onItemClick={closeSidebar}
+          onClose={closeSidebar}
         />
       </SlideInPanel>
     </>
-  );
-}
-
-function CloseIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M18 6 6 18M6 6l12 12" />
-    </svg>
   );
 }

@@ -1,12 +1,10 @@
 "use client";
 
 import React from "react";
+import { Icon } from "@iconify/react";
+import moonLinear from "@iconify-icons/solar/moon-linear";
+import sun2Linear from "@iconify-icons/solar/sun-2-linear";
 import { useTheme } from "@app-layer/theme";
-import { NightIcon, SunIcon } from "@shared/ui/icons";
-import { Button } from "@shared/ui/libs";
-
-const ICON_WIDTH = "1.75rem";
-const ICON_HEIGHT = "1.75rem";
 
 const ThemeButton: React.FC = () => {
   const { isMounted, themeType, toggleTheme } = useTheme();
@@ -17,35 +15,25 @@ const ThemeButton: React.FC = () => {
 
   if (themeType === "light") {
     return (
-      <Button
+      <button
         onClick={toggleTheme}
-        showShadow={false}
-        fill={"weak"}
         aria-label="다크 모드로 전환"
+        className="flex h-9 w-9 items-center justify-center rounded-lg text-text-3 transition-transform duration-300 hover:scale-110 hover:rotate-[30deg] hover:bg-background-3"
       >
-        <SunIcon
-          className="text-text-1"
-          width={ICON_WIDTH}
-          height={ICON_HEIGHT}
-        />
-      </Button>
+        <Icon icon={sun2Linear} width="18" aria-hidden="true" />
+      </button>
     );
   }
 
   if (themeType === "dark") {
     return (
-      <Button
+      <button
         onClick={toggleTheme}
-        showShadow={false}
-        fill={"weak"}
         aria-label="라이트 모드로 전환"
+        className="flex h-9 w-9 items-center justify-center rounded-lg text-text-3 transition-transform duration-300 hover:scale-110 hover:rotate-[30deg] hover:bg-background-3"
       >
-        <NightIcon
-          className="text-text-1"
-          width={ICON_WIDTH}
-          height={ICON_HEIGHT}
-        />
-      </Button>
+        <Icon icon={moonLinear} width="18" aria-hidden="true" />
+      </button>
     );
   }
 

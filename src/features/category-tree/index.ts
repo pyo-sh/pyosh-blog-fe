@@ -1,1 +1,1 @@
-export { CategoryTree } from "./ui/category-tree";
+export { CategoryTree, countVisibleCategories } from "./ui/category-tree";

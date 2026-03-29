@@ -1,22 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { fetchPopularPostsClient, type PopularPost } from "@entities/stat";
-import { cn } from "@shared/lib/style-utils";
 
 type PopularPeriod = 7 | 30;
 
 interface PopularPostListProps {
   initialPosts: PopularPost[] | null;
   initialDays?: PopularPeriod;
+  selectedDays?: PopularPeriod;
+  reloadToken?: number;
+  onSelectedDaysChange?: (days: PopularPeriod) => void;
   onItemClick?: () => void;
 }
-
-const PERIOD_OPTIONS = [
-  { days: 7, label: "7일" },
-  { days: 30, label: "30일" },
-] as const;
 
 const POPULAR_POST_LIMIT = 5;
 const FETCH_ERROR_MESSAGE =
@@ -25,9 +22,12 @@ const FETCH_ERROR_MESSAGE =
 export function PopularPostList({
   initialPosts,
   initialDays = 7,
+  selectedDays,
+  reloadToken,
   onItemClick,
 }: PopularPostListProps) {
-  const [selectedDays, setSelectedDays] = useState<PopularPeriod>(initialDays);
+  const [displayedDays, setDisplayedDays] =
+    useState<PopularPeriod>(initialDays);
   const [postsByDays, setPostsByDays] = useState<
     Partial<Record<PopularPeriod, PopularPost[]>>
   >(() => (initialPosts === null ? {} : { [initialDays]: initialPosts }));
@@ -38,23 +38,19 @@ export function PopularPostList({
   const [errorMessage, setErrorMessage] = useState<string | null>(
     initialPosts === null ? FETCH_ERROR_MESSAGE : null,
   );
+  const prevControlledDaysRef = useRef<PopularPeriod | undefined>(selectedDays);
+  const prevReloadTokenRef = useRef<number | undefined>(reloadToken);
+  const latestRequestIdRef = useRef(0);
 
-  const posts = postsByDays[selectedDays];
+  const posts = postsByDays[displayedDays];
 
-  async function handlePeriodChange(nextDays: PopularPeriod) {
-    const isRetryingFailedSelection =
-      nextDays === selectedDays && failedDays[nextDays];
-
-    if (
-      (nextDays === selectedDays && !isRetryingFailedSelection) ||
-      isLoading
-    ) {
-      return;
-    }
+  async function loadDays(nextDays: PopularPeriod) {
+    const requestId = latestRequestIdRef.current + 1;
+    latestRequestIdRef.current = requestId;
 
     const cachedPosts = postsByDays[nextDays];
     if (cachedPosts !== undefined) {
-      setSelectedDays(nextDays);
+      setDisplayedDays(nextDays);
       setErrorMessage(null);
 
       return;
@@ -68,6 +64,8 @@ export function PopularPostList({
         nextDays,
         POPULAR_POST_LIMIT,
       );
+      const isStaleRequest = latestRequestIdRef.current !== requestId;
+
       setPostsByDays((current) => ({ ...current, [nextDays]: nextPosts }));
       setFailedDays((current) => {
         const next = { ...current };
@@ -75,47 +73,61 @@ export function PopularPostList({
 
         return next;
       });
-      setSelectedDays(nextDays);
+      if (isStaleRequest) {
+        return;
+      }
+
+      setDisplayedDays(nextDays);
+      setErrorMessage(null);
     } catch {
+      const isStaleRequest = latestRequestIdRef.current !== requestId;
+
       setFailedDays((current) => ({ ...current, [nextDays]: true }));
+      if (isStaleRequest) {
+        return;
+      }
+
       setErrorMessage(FETCH_ERROR_MESSAGE);
     } finally {
-      setIsLoading(false);
+      if (latestRequestIdRef.current === requestId) {
+        setIsLoading(false);
+      }
     }
   }
 
+  useEffect(() => {
+    if (selectedDays === undefined) {
+      return;
+    }
+
+    const isDaysChanged = prevControlledDaysRef.current !== selectedDays;
+    const isRetryRequested = prevReloadTokenRef.current !== reloadToken;
+
+    prevControlledDaysRef.current = selectedDays;
+    prevReloadTokenRef.current = reloadToken;
+
+    if (!isDaysChanged && !isRetryRequested) {
+      return;
+    }
+
+    if (postsByDays[selectedDays] !== undefined) {
+      latestRequestIdRef.current += 1;
+      setIsLoading(false);
+      setDisplayedDays(selectedDays);
+      setErrorMessage(null);
+
+      return;
+    }
+
+    if (!isDaysChanged && !failedDays[selectedDays]) {
+      return;
+    }
+
+    void loadDays(selectedDays);
+  }, [failedDays, postsByDays, reloadToken, selectedDays]);
+
   return (
     <div>
-      <div
-        className="mb-3 inline-flex rounded-full border border-border-3 bg-background-2 p-1"
-        role="tablist"
-        aria-label="인기 글 기간 선택"
-      >
-        {PERIOD_OPTIONS.map((option) => {
-          const isActive = option.days === selectedDays;
-
-          return (
-            <button
-              key={option.days}
-              type="button"
-              role="tab"
-              aria-selected={isActive}
-              onClick={() => void handlePeriodChange(option.days)}
-              disabled={isLoading}
-              className={cn(
-                "rounded-full px-3 py-1.5 text-body-xs font-medium transition-colors",
-                isActive
-                  ? "bg-background-1 text-text-1"
-                  : "text-text-3 hover:text-text-1",
-                isLoading && "cursor-wait",
-              )}
-            >
-              {option.label}
-            </button>
-          );
-        })}
-      </div>
-
       {errorMessage ? (
         <p className="mb-3 text-body-xs text-negative-1" role="alert">
           {errorMessage}
@@ -128,27 +140,22 @@ export function PopularPostList({
         </p>
       ) : (
         <ol
-          className="flex flex-col gap-2"
+          className="flex flex-col gap-1.5"
           aria-live="polite"
           aria-busy={isLoading}
         >
-          {posts.map((post, index) => (
+          {posts.map((post) => (
             <li key={post.postId}>
               <Link
                 href={`/posts/${post.slug}`}
                 onClick={onItemClick}
-                className="group grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-3 rounded-lg px-1 py-1 transition-colors hover:bg-background-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-1"
+                className="group block min-h-[3rem] rounded-md px-0.5 py-1 transition-colors hover:text-primary-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-1"
               >
-                <span className="pt-0.5 text-body-sm text-text-3">
-                  {index + 1}.
+                <span className="line-clamp-2 block text-ui-sm font-medium leading-[1.4] text-text-2 transition-colors group-hover:text-primary-1">
+                  {post.title}
                 </span>
-                <span className="min-w-0">
-                  <span className="line-clamp-1 block text-body-sm text-text-1 transition-colors group-hover:text-primary-1">
-                    {post.title}
-                  </span>
-                  <span className="mt-1 block text-body-xs text-text-4">
-                    {post.pageviews.toLocaleString("ko-KR")} views
-                  </span>
+                <span className="mt-0.5 block text-[0.688rem] leading-4 text-text-4">
+                  조회 {post.pageviews.toLocaleString("ko-KR")}
                 </span>
               </Link>
             </li>

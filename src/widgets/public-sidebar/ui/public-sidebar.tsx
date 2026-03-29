@@ -1,17 +1,25 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Icon } from "@iconify/react";
+import altArrowRightLinear from "@iconify-icons/solar/alt-arrow-right-linear";
+import closeCircleLinear from "@iconify-icons/solar/close-circle-linear";
+import eyeLinear from "@iconify-icons/solar/eye-linear";
+import folder2Linear from "@iconify-icons/solar/folder-2-linear";
+import tagLinear from "@iconify-icons/solar/tag-linear";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { Category } from "@entities/category";
 import type { Post } from "@entities/post";
 import type { PopularPost, TotalViewsStats } from "@entities/stat";
 import type { Tag } from "@entities/tag";
 import type { TocItem } from "@shared/lib/markdown";
-import { CategoryTree } from "@features/category-tree";
+import { CategoryTree, countVisibleCategories } from "@features/category-tree";
 import { RecentPopularPosts } from "@features/recent-popular-posts";
 import { TagCloud } from "@features/tag-cloud";
 import { TocSection } from "@features/toc";
 import { TotalViewCount } from "@features/total-view-count";
+import { cn } from "@shared/lib/style-utils";
 
 interface PublicSidebarContentProps {
   recentPosts: Post[];
@@ -23,29 +31,42 @@ interface PublicSidebarContentProps {
   onItemClick?: () => void;
 }
 
+interface PublicSidebarPanelProps extends PublicSidebarContentProps {
+  onClose?: () => void;
+  className?: string;
+}
+
 const POST_TOC_DATA_ID = "post-toc-data";
 
 function SidebarSection({
   title,
+  icon,
+  action,
+  className,
   children,
 }: {
   title?: string;
-  children: React.ReactNode;
+  icon?: ReactNode;
+  action?: ReactNode;
+  className?: string;
+  children: ReactNode;
 }) {
   return (
-    <section className="px-4 py-4">
+    <section
+      className={cn("border-b border-border-4 py-4 last:border-b-0", className)}
+    >
       {title && (
-        <h2 className="mb-3 text-body-xs font-semibold uppercase tracking-[0.16em] text-text-4">
-          {title}
-        </h2>
+        <div className="mb-2.5 flex items-center justify-between gap-2">
+          <h2 className="flex items-center gap-1.5 text-ui-xs font-bold uppercase tracking-[0.04em] text-text-4">
+            {icon}
+            <span>{title}</span>
+          </h2>
+          {action}
+        </div>
       )}
       {children}
     </section>
   );
-}
-
-function SidebarDivider() {
-  return <hr className="border-border-3" />;
 }
 
 export function PublicSidebarContent({
@@ -77,19 +98,17 @@ export function PublicSidebarContent({
   }, [headings, pathname]);
 
   const tocHeadings = headings ?? pageHeadings;
+  const visibleCategoryCount = countVisibleCategories(categories);
 
   return (
-    <>
+    <div>
       {tocHeadings.length > 0 && (
-        <>
-          <SidebarSection>
-            <TocSection headings={tocHeadings} onItemClick={onItemClick} />
-          </SidebarSection>
-          <SidebarDivider />
-        </>
+        <SidebarSection title="목차">
+          <TocSection headings={tocHeadings} onItemClick={onItemClick} />
+        </SidebarSection>
       )}
 
-      <SidebarSection>
+      <SidebarSection className={tocHeadings.length > 0 ? undefined : "pt-0"}>
         <RecentPopularPosts
           recentPosts={recentPosts}
           popularPosts={popularPosts}
@@ -98,32 +117,83 @@ export function PublicSidebarContent({
       </SidebarSection>
 
       {categories.some((c) => c.isVisible) && (
-        <>
-          <SidebarDivider />
-          <SidebarSection title="분류">
-            <CategoryTree categories={categories} onItemClick={onItemClick} />
-          </SidebarSection>
-        </>
+        <SidebarSection
+          title={`분류 전체보기 (${visibleCategoryCount})`}
+          icon={<Icon icon={folder2Linear} width="13" aria-hidden="true" />}
+        >
+          <CategoryTree
+            categories={categories}
+            onItemClick={onItemClick}
+            showOverviewLink={false}
+          />
+        </SidebarSection>
       )}
 
       {tags.length > 0 && (
-        <>
-          <SidebarDivider />
-          <SidebarSection title="태그">
-            <TagCloud tags={tags} />
-          </SidebarSection>
-        </>
+        <SidebarSection
+          title="태그"
+          icon={<Icon icon={tagLinear} width="13" aria-hidden="true" />}
+          action={
+            <Link
+              href="/tags"
+              className="inline-flex items-center gap-0.5 text-ui-xs font-medium text-primary-1 underline-offset-4 hover:underline"
+            >
+              전체보기
+              <Icon icon={altArrowRightLinear} width="10" aria-hidden="true" />
+            </Link>
+          }
+        >
+          <TagCloud tags={tags} showViewAllLink={false} />
+        </SidebarSection>
       )}
 
       {totalViews !== null && (
-        <>
-          <SidebarDivider />
-          <SidebarSection>
-            <TotalViewCount totalPageviews={totalViews.totalPageviews} />
-          </SidebarSection>
-        </>
+        <SidebarSection
+          title="블로그 조회수"
+          icon={<Icon icon={eyeLinear} width="13" aria-hidden="true" />}
+        >
+          <TotalViewCount totalPageviews={totalViews.totalPageviews} />
+        </SidebarSection>
       )}
-    </>
+    </div>
+  );
+}
+
+export function PublicSidebarPanel({
+  recentPosts,
+  popularPosts,
+  categories,
+  tags,
+  totalViews,
+  headings,
+  onItemClick,
+  onClose,
+  className,
+}: PublicSidebarPanelProps) {
+  return (
+    <div className={cn("bg-background-1 px-5 pb-8", className)}>
+      <div className="sticky top-0 z-10 flex h-14 items-center justify-between bg-background-1">
+        <span className="text-body-sm font-bold text-text-1">메뉴</span>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="메뉴 닫기"
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-text-3 transition-colors hover:bg-background-3"
+        >
+          <Icon icon={closeCircleLinear} width="20" aria-hidden="true" />
+        </button>
+      </div>
+
+      <PublicSidebarContent
+        recentPosts={recentPosts}
+        popularPosts={popularPosts}
+        categories={categories}
+        tags={tags}
+        totalViews={totalViews}
+        headings={headings}
+        onItemClick={onItemClick}
+      />
+    </div>
   );
 }
 

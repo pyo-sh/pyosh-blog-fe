@@ -1,5 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { PublicSidebarContent } from "@widgets/public-sidebar";
+import {
+  PublicSidebarContent,
+  PublicSidebarPanel,
+} from "@widgets/public-sidebar";
 import { mockPosts } from "../mocks/data/posts";
 import { mockTags } from "../mocks/data/tags";
 import { mockCategories } from "../mocks/data/categories";
@@ -35,11 +38,31 @@ const mockHeadings = [
   { id: "details", text: "상세 코드", level: 3 as const },
 ];
 
+function DesktopSidebarStory(args: React.ComponentProps<typeof PublicSidebarContent>) {
+  return (
+    <div className="bg-background-1 px-6">
+      <div className="w-[17.5rem] pr-6 pt-8 pb-16">
+        <PublicSidebarContent {...args} />
+      </div>
+    </div>
+  );
+}
+
+function MobileSidebarStory(args: React.ComponentProps<typeof PublicSidebarPanel>) {
+  return (
+    <div className="bg-black/5 p-4">
+      <div className="w-[min(320px,85vw)] overflow-hidden rounded-none bg-background-1 shadow-[-4px_0_24px_rgba(0,0,0,0.1)]">
+        <PublicSidebarPanel {...args} />
+      </div>
+    </div>
+  );
+}
+
 const meta: Meta<typeof PublicSidebarContent> = {
   title: "App/PublicSidebar",
   component: PublicSidebarContent,
   parameters: {
-    layout: "padded",
+    layout: "fullscreen",
   },
   args: {
     recentPosts: mockPosts,
@@ -54,21 +77,35 @@ const meta: Meta<typeof PublicSidebarContent> = {
 export default meta;
 type Story = StoryObj<typeof PublicSidebarContent>;
 
-export const Default: Story = {};
+export const Desktop: Story = {
+  render: (args) => <DesktopSidebarStory {...args} />,
+};
+
+export const MobilePanel: Story = {
+  render: (args) => (
+    <MobileSidebarStory {...args} onClose={() => undefined} />
+  ),
+  parameters: {
+    viewport: { defaultViewport: "mobile" },
+  },
+};
 
 export const NoCategories: Story = {
+  render: (args) => <DesktopSidebarStory {...args} />,
   args: {
     categories: [],
   },
 };
 
 export const NoTags: Story = {
+  render: (args) => <DesktopSidebarStory {...args} />,
   args: {
     tags: [],
   },
 };
 
 export const Empty: Story = {
+  render: (args) => <DesktopSidebarStory {...args} />,
   args: {
     recentPosts: [],
     popularPosts: [],
@@ -80,6 +117,7 @@ export const Empty: Story = {
 };
 
 export const DarkMode: Story = {
+  render: (args) => <DesktopSidebarStory {...args} />,
   parameters: {
     themes: { themeOverride: "dark" },
   },
