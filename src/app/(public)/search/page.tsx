@@ -3,9 +3,13 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { SearchFilter } from "@entities/post";
 import { SEARCH_FILTERS, fetchPosts } from "@entities/post";
-import { SearchFilterDropdown, SearchResultItem } from "@features/search";
+import {
+  SearchEmptyState,
+  SearchForm,
+  SearchResultItem,
+} from "@features/search";
 import { buildCanonicalMetadata } from "@shared/lib/seo";
-import { EmptyState, Pagination, ScrollToTop } from "@shared/ui/libs";
+import { Pagination, ScrollToTop } from "@shared/ui/libs";
 
 interface SearchPageProps {
   searchParams?: {
@@ -72,23 +76,14 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   if (!query) {
     return (
-      <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col gap-8 px-4 py-12 md:px-6">
-        <section className="rounded-[2rem] border border-border-3 bg-background-2 p-8 md:p-10">
-          <div className="mb-6 flex flex-wrap items-center gap-3">
-            <Suspense>
-              <SearchFilterDropdown currentFilter={filter} query="" />
-            </Suspense>
-          </div>
-          <p className="text-body-xs uppercase tracking-[0.24em] text-text-4">
-            Search
-          </p>
-          <h1 className="mt-3 text-heading-md text-text-1">
-            검색어를 입력해 주세요
-          </h1>
-          <p className="mt-4 max-w-2xl text-body-md text-text-3">
-            상단 검색창에서 키워드를 입력하면 관련 글을 찾아볼 수 있습니다.
-          </p>
-        </section>
+      <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col gap-6 px-4 pb-16 pt-8 md:px-6">
+        <Suspense>
+          <SearchForm currentFilter={filter} initialQuery="" />
+        </Suspense>
+        <SearchEmptyState
+          title="검색어를 입력해 주세요"
+          description="제목, 내용, 태그, 카테고리, 댓글로 검색할 수 있습니다"
+        />
       </main>
     );
   }
@@ -99,28 +94,19 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const { meta } = response;
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col gap-8 px-4 py-12 md:px-6">
-      {/* Filter + search header */}
-      <header className="rounded-[2rem] border border-border-3 bg-background-2 p-8 md:p-10">
-        <div className="mb-6 flex flex-wrap items-center gap-3">
-          <Suspense>
-            <SearchFilterDropdown currentFilter={filter} query={query} />
-          </Suspense>
-        </div>
-        <p className="text-body-xs uppercase tracking-[0.24em] text-text-4">
-          Search Results
-        </p>
-        <h1 className="mt-3 text-heading-md text-text-1">
-          <span className="font-medium text-primary-1">
-            &quot;{query}&quot;
-          </span>{" "}
-          <span className="text-text-3">검색 결과 ({meta.total}건)</span>
-        </h1>
+    <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col gap-6 px-4 pb-16 pt-8 md:px-6">
+      <Suspense>
+        <SearchForm currentFilter={filter} initialQuery={query} />
+      </Suspense>
+
+      <header className="text-ui-base font-semibold text-text-2">
+        <span className="font-bold text-primary-1">&quot;{query}&quot;</span>{" "}
+        <span className="text-text-3">검색 결과 ({meta.total}건)</span>
       </header>
 
       {posts.length > 0 ? (
         <>
-          <section className="flex flex-col gap-5">
+          <section className="flex flex-col gap-3" aria-label="검색 결과">
             {posts.map((post) => (
               <SearchResultItem key={post.id} post={post} query={query} />
             ))}
@@ -134,9 +120,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           />
         </>
       ) : (
-        <EmptyState
-          variant="page"
-          message="검색 결과가 없습니다. 다른 키워드로 다시 시도해 주세요."
+        <SearchEmptyState
+          title="검색 결과가 없습니다"
+          description="다른 검색어나 필터로 다시 시도해 보세요"
         />
       )}
       <ScrollToTop />
