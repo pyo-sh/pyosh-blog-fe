@@ -43,9 +43,9 @@ export async function HomePage({ searchParams }: HomePageProps) {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-[67.5rem] flex-col gap-8 px-4 pb-16 pt-8 md:px-6">
+    <main className="mx-auto flex w-full max-w-[67.5rem] flex-col gap-6 px-4 pb-16 pt-8 md:px-6">
       <header
-        className="motion-reveal mb-8"
+        className="motion-reveal mb-4"
         style={{ animationDelay: "100ms" }}
       >
         <h1 className="break-keep text-[1.5rem] leading-[1.938rem] font-bold tracking-tight text-text-1 md:text-[1.875rem] md:leading-[2.375rem]">

@@ -49,6 +49,25 @@ function PostListEmptyState() {
   );
 }
 
+function PostListErrorState() {
+  return (
+    <section
+      className="motion-reveal rounded-[2rem] border-2 border-dashed border-border-3 bg-background-2 px-8 py-16 text-center"
+      style={{ animationDelay: "160ms" }}
+    >
+      <div className="mb-4 flex justify-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-background-3 text-text-4">
+          <Icon icon={documentTextLinear} width="28" aria-hidden="true" />
+        </div>
+      </div>
+      <p className="mb-1 break-keep text-body-base font-medium text-text-2">
+        최근 글을 불러오는데 오류가 발생했습니다.
+      </p>
+      <p className="text-body-sm text-text-4">잠시 후 다시 시도해 주세요.</p>
+    </section>
+  );
+}
+
 function PostListInner({
   initialData,
   initialPage,
@@ -70,11 +89,7 @@ function PostListInner({
   }
 
   if (isError) {
-    return (
-      <section className="rounded-2xl border border-dashed border-border-3 bg-background-2 p-8 text-sm text-text-3 md:p-10">
-        게시글을 불러오는 중 오류가 발생했습니다
-      </section>
-    );
+    return <PostListErrorState />;
   }
 
   const posts = data?.data ?? [];
