@@ -4,6 +4,7 @@
 
 @import "./theme.css";
 @import "./animation.css";
+@import "./design-primitives.css";
 @import "./initialize.css";
 @import "./transition.css";
 @import "./typography.css";

@@ -76,8 +76,8 @@ export default async function RootLayout({
   const themeType = cookieStore.get("theme")?.value ?? "";
 
   return (
-    <html lang="ko">
-      <body data-theme={themeType}>
+    <html lang="ko" data-theme={themeType || undefined}>
+      <body>
         <div className="w-full h-full">
           <ErrorBoundaryWithReset>
             <Providers initialTheme={themeType}>{children}</Providers>

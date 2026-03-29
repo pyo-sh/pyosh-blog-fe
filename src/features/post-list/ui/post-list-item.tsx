@@ -26,7 +26,7 @@ export function PostListItem({ post }: PostListItemProps) {
   const formattedComments = post.commentCount.toLocaleString("ko-KR");
 
   return (
-    <article className="post-list-item group relative rounded-xl px-4 py-5 sm:px-5 hover:bg-background-2">
+    <article className="surface-hover-shift group relative rounded-xl px-4 py-5 sm:px-5 hover:bg-background-2">
       <Link
         href={`/posts/${post.slug}`}
         className="absolute inset-0 z-10 rounded-xl"
@@ -34,19 +34,20 @@ export function PostListItem({ post }: PostListItemProps) {
       />
 
       <div className="flex gap-4 sm:gap-5">
-        <div className="post-list-item__thumb h-16 w-20 shrink-0 overflow-hidden rounded-lg bg-background-3 sm:h-24 sm:w-32">
+        <div className="surface-thumb-zoom h-16 w-20 shrink-0 overflow-hidden rounded-lg bg-background-3 sm:h-24 sm:w-32">
           {post.thumbnailUrl ? (
             // eslint-disable-next-line @next/next/no-img-element -- arbitrary remote thumbnail hosts are not all compatible with next/image
             <img
               src={post.thumbnailUrl}
               alt={post.title}
-              className="h-full w-full object-cover transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.05]"
+              className="h-full w-full object-cover"
               loading="lazy"
               decoding="async"
             />
           ) : (
             <div
               aria-hidden="true"
+              data-thumb-zoom="true"
               className="h-full w-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.16),transparent_58%)]"
             />
           )}
@@ -56,14 +57,19 @@ export function PostListItem({ post }: PostListItemProps) {
           <div className="mb-1.5 flex flex-wrap items-center gap-2">
             {post.isPinned ? (
               <span
-                className="post-list-item__pin inline-flex items-center text-primary-1"
+                className="motion-pin-float inline-flex items-center text-primary-1"
                 aria-label="고정된 글"
               >
-                <Icon icon={pinBold} width="14" aria-hidden="true" />
+                <Icon
+                  icon={pinBold}
+                  width="14"
+                  aria-hidden="true"
+                  className="text-primary-1"
+                />
               </span>
             ) : null}
 
-            <span className="post-list-item__badge inline-flex items-center rounded-md px-2 py-0.5 text-ui-xs font-medium text-primary-1">
+            <span className="accent-badge inline-flex items-center rounded-md px-2 py-0.5 text-ui-xs font-medium">
               {post.category.name}
             </span>
 
@@ -80,7 +86,7 @@ export function PostListItem({ post }: PostListItemProps) {
           </h2>
 
           {post.summary ? (
-            <p className="mt-1 hidden line-clamp-2 break-keep text-sm leading-relaxed text-text-3 sm:block">
+            <p className="mt-1 hidden line-clamp-2 break-keep text-body-sm leading-relaxed text-text-3 sm:block">
               {post.summary}
             </p>
           ) : null}

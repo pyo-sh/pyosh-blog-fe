@@ -20,7 +20,14 @@ const preview: Preview = {
       );
       return (
         <QueryClientProvider client={queryClient}>
-          <Story />
+          <div
+            className="min-h-screen bg-background-1 text-text-1 transition-theme"
+            style={{
+              fontFamily: '"Gothic A1", ui-sans-serif, system-ui, sans-serif',
+            }}
+          >
+            <Story />
+          </div>
         </QueryClientProvider>
       );
     },
@@ -30,13 +37,15 @@ const preview: Preview = {
         dark: "dark",
       },
       defaultTheme: "light",
-      parentSelector: "body",
+      parentSelector: "html",
       attributeName: "data-theme",
     }),
   ],
   loaders: [mswLoader],
   parameters: {
+    layout: "fullscreen",
     viewport: {
+      defaultViewport: "desktop",
       viewports: {
         mobile: { name: "Mobile", styles: { width: "375px", height: "812px" } },
         desktop: {

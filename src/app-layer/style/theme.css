@@ -149,7 +149,7 @@
 }
 
 /* ─── Light Theme (default) ─── */
-body {
+html {
   /* Light 테마 색상 참조 */
   --background1: var(--light-background1);
   --background2: var(--light-background2);
@@ -193,7 +193,9 @@ body {
   --yellow2: var(--light-yellow2);
 
   --overlay1: var(--light-overlay1);
+}
 
+body {
   color: var(--text1);
   background-color: var(--background1);
   transition:
@@ -203,7 +205,7 @@ body {
 
 /* ─── Dark Theme (시스템 설정) ─── */
 @media (prefers-color-scheme: dark) {
-  body {
+  html:not([data-theme]) {
     /* Dark 테마 색상 참조 */
     --background1: var(--dark-background1);
     --background2: var(--dark-background2);
@@ -251,7 +253,7 @@ body {
 }
 
 /* ─── Light Theme (명시적) ─── */
-body[data-theme="light"] {
+html[data-theme="light"] {
   --background1: var(--light-background1);
   --background2: var(--light-background2);
   --background3: var(--light-background3);
@@ -297,7 +299,7 @@ body[data-theme="light"] {
 }
 
 /* ─── Dark Theme (명시적) ─── */
-body[data-theme="dark"] {
+html[data-theme="dark"] {
   --background1: var(--dark-background1);
   --background2: var(--dark-background2);
   --background3: var(--dark-background3);
