@@ -493,8 +493,8 @@ function DetailView({
       </div>
 
       <div className="border-t border-border-4 pt-4">
-        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-3 sm:justify-between">
-          <div className="flex max-w-full flex-wrap items-center justify-center gap-1">
+        <div className="flex flex-wrap items-center justify-center gap-y-3 min-[740px]:justify-start">
+          <div className="flex flex-wrap items-center justify-center min-[740px]:mr-auto">
             <span className="min-w-fit whitespace-nowrap text-xs text-text-4">
               상태 전환:
             </span>
@@ -504,7 +504,7 @@ function DetailView({
                 type="button"
                 onClick={() => setSelectedStatus(state.value)}
                 className={cn(
-                  "inline-flex min-w-fit cursor-pointer whitespace-nowrap rounded-md px-2 py-1 text-xs transition-colors",
+                  "ml-1 inline-flex min-w-fit cursor-pointer whitespace-nowrap rounded-md px-2 py-1 text-xs transition-colors first:ml-0",
                   selectedStatus === state.value
                     ? "bg-primary-1/10 text-primary-1"
                     : "text-text-4 hover:bg-background-3 hover:text-text-2",
@@ -515,7 +515,7 @@ function DetailView({
             ))}
           </div>
 
-          <div className="flex max-w-full flex-wrap items-center justify-center gap-2 sm:justify-end">
+          <div className="grid grid-cols-2 justify-center gap-2 min-[740px]:ml-auto min-[740px]:flex min-[740px]:flex-wrap min-[740px]:items-center min-[740px]:justify-center">
             {actionButtons.map((action) => (
               <button
                 key={action.value}
@@ -523,7 +523,7 @@ function DetailView({
                 onClick={() => onSelectAction(action.value)}
                 disabled={isActionPending}
                 className={cn(
-                  "inline-flex min-w-fit items-center justify-center gap-1 whitespace-nowrap rounded-[0.75rem] px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+                  "inline-flex min-w-fit items-center justify-center gap-1 whitespace-nowrap rounded-[0.75rem] px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 min-[740px]:ml-2 min-[740px]:first:ml-0",
                   action.tone === "primary" &&
                     "bg-primary-1 text-white hover:opacity-90",
                   action.tone === "danger"
@@ -547,7 +547,7 @@ function DetailView({
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex min-w-fit items-center justify-center whitespace-nowrap rounded-[0.75rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+              className="inline-flex min-w-fit items-center justify-center whitespace-nowrap rounded-[0.75rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 min-[740px]:ml-2"
             >
               닫기
             </button>
