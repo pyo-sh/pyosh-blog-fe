@@ -144,7 +144,7 @@ function SidebarNav({ collapsed = false, onItemClick }: SidebarNavProps) {
                 onClick={onItemClick}
                 className={cn(
                   "flex items-center rounded-lg px-3 py-2 text-sm transition-all",
-                  collapsed ? "justify-center gap-0 px-0" : "gap-2.5",
+                  collapsed ? "justify-center px-0" : "",
                   isActive
                     ? "bg-primary-1/10 font-medium text-primary-1"
                     : "text-text-2 hover:bg-background-3 hover:text-text-1",
@@ -160,8 +160,10 @@ function SidebarNav({ collapsed = false, onItemClick }: SidebarNavProps) {
                 />
                 <span
                   className={cn(
-                    "truncate transition-[opacity,width] duration-200",
-                    collapsed ? "w-0 overflow-hidden opacity-0" : "opacity-100",
+                    "truncate transition-[margin,width,opacity] duration-200",
+                    collapsed
+                      ? "ml-0 w-0 overflow-hidden opacity-0"
+                      : "ml-2.5 opacity-100",
                   )}
                 >
                   {item.label}
@@ -285,58 +287,57 @@ export function AdminSidebar({
       >
         <div
           className={cn(
-            "box-border border-b border-border-4",
-            isCollapsed
-              ? "flex justify-center px-0"
-              : "flex items-center gap-2 px-4",
+            "box-border flex items-center border-b border-border-4 px-4",
+            isCollapsed ? "justify-center" : "",
             ADMIN_CHROME_HEIGHT_CLASS,
           )}
           style={ADMIN_CHROME_STYLE}
         >
-          {isCollapsed ? (
-            <button
-              type="button"
-              onClick={onToggleCollapsed}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-text-3 transition-colors hover:bg-background-3 hover:text-text-1"
-              aria-label="사이드바 펼치기"
+          <Link
+            href="/manage"
+            className={cn(
+              "flex min-w-0 items-center text-primary-1 transition-[width] duration-200",
+              isCollapsed ? "w-0 overflow-hidden" : "w-auto",
+            )}
+            title="대시보드"
+            aria-hidden={isCollapsed}
+            tabIndex={isCollapsed ? -1 : undefined}
+          >
+            <LogoIcon
+              width={28}
+              height={28}
+              className={cn(
+                "shrink-0 text-primary-1 transition-opacity duration-200",
+                isCollapsed ? "opacity-0" : "opacity-100",
+              )}
+            />
+            <span
+              className={cn(
+                "truncate rounded bg-primary-1/10 px-1.5 py-0.5 text-xs font-medium transition-[margin,width,opacity] duration-200",
+                isCollapsed
+                  ? "ml-0 w-0 overflow-hidden opacity-0"
+                  : "ml-2 w-auto opacity-100",
+              )}
             >
-              <Icon
-                icon={sidebarMinimalisticLinear}
-                width="18"
-                aria-hidden="true"
-              />
-            </button>
-          ) : (
-            <>
-              <Link
-                href="/manage"
-                className="flex min-w-0 items-center gap-2 text-primary-1"
-                title="대시보드"
-              >
-                <LogoIcon
-                  width={28}
-                  height={28}
-                  className="shrink-0 text-primary-1"
-                />
-                <span className="rounded bg-primary-1/10 px-1.5 py-0.5 text-xs font-medium">
-                  Admin
-                </span>
-              </Link>
+              Admin
+            </span>
+          </Link>
 
-              <button
-                type="button"
-                onClick={onToggleCollapsed}
-                className="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-lg text-text-3 transition-colors hover:bg-background-3 hover:text-text-1"
-                aria-label="사이드바 접기"
-              >
-                <Icon
-                  icon={sidebarMinimalisticLinear}
-                  width="18"
-                  aria-hidden="true"
-                />
-              </button>
-            </>
-          )}
+          <button
+            type="button"
+            onClick={onToggleCollapsed}
+            className={cn(
+              "inline-flex h-8 w-8 shrink-0 items-center justify-center self-center rounded-lg text-text-3 transition-colors hover:bg-background-3 hover:text-text-1",
+              isCollapsed ? "ml-0" : "ml-auto",
+            )}
+            aria-label={isCollapsed ? "사이드바 펼치기" : "사이드바 접기"}
+          >
+            <Icon
+              icon={sidebarMinimalisticLinear}
+              width="18"
+              aria-hidden="true"
+            />
+          </button>
         </div>
 
         <SidebarNav collapsed={isCollapsed} />
@@ -346,15 +347,17 @@ export function AdminSidebar({
             href="/"
             className={cn(
               "flex items-center rounded-lg px-3 py-2 text-sm text-text-3 transition-colors hover:bg-background-3 hover:text-text-1",
-              isCollapsed ? "justify-center gap-0 px-0" : "gap-2",
+              isCollapsed ? "justify-center px-0" : "",
             )}
             title="블로그로 돌아가기"
           >
             <Icon icon={arrowLeftLinear} width="16" aria-hidden="true" />
             <span
               className={cn(
-                "truncate transition-[opacity,width] duration-200",
-                isCollapsed ? "w-0 overflow-hidden opacity-0" : "opacity-100",
+                "truncate transition-[margin,width,opacity] duration-200",
+                isCollapsed
+                  ? "ml-0 w-0 overflow-hidden opacity-0"
+                  : "ml-2 opacity-100",
               )}
             >
               블로그로 돌아가기
