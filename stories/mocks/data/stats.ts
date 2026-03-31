@@ -6,6 +6,11 @@ export const mockDashboardStats: DashboardStats = {
   monthPageviews: 4251,
   totalPosts: 3,
   totalComments: 3,
+  postsByStatus: {
+    draft: 1,
+    published: 2,
+    archived: 0,
+  },
 };
 
 export const mockPopularPosts: PopularPost[] = [
