@@ -492,61 +492,64 @@ function DetailView({
         </button>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 border-t border-border-4 pt-4">
-        <div className="flex w-full flex-wrap items-center justify-center gap-1 sm:w-auto sm:justify-start">
-          <span className="text-xs text-text-4">상태 전환:</span>
-          {stateButtons.map((state) => (
+      <div className="border-t border-border-4 pt-4">
+        <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center justify-center gap-1">
+            <span className="text-xs text-text-4">상태 전환:</span>
+            {stateButtons.map((state) => (
+              <button
+                key={state.value}
+                type="button"
+                onClick={() => setSelectedStatus(state.value)}
+                className={cn(
+                  "inline-flex cursor-pointer rounded-md px-2 py-1 text-xs transition-colors",
+                  selectedStatus === state.value
+                    ? "bg-primary-1/10 text-primary-1"
+                    : "text-text-4 hover:bg-background-3 hover:text-text-2",
+                )}
+              >
+                {state.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-center gap-2">
+            {actionButtons.map((action) => (
+              <button
+                key={action.value}
+                type="button"
+                onClick={() => onSelectAction(action.value)}
+                disabled={isActionPending}
+                className={cn(
+                  "inline-flex items-center justify-center gap-1 rounded-[0.75rem] px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+                  action.tone === "primary" &&
+                    "bg-primary-1 text-white hover:opacity-90",
+                  action.tone === "danger"
+                    ? "bg-negative-1 text-white hover:opacity-90"
+                    : "border border-border-3 text-text-2 hover:border-border-2 hover:text-text-1",
+                )}
+              >
+                {action.value === "restore" ? (
+                  <Icon icon={restartLinear} width="16" aria-hidden="true" />
+                ) : null}
+                {action.value === "hard_delete" ? (
+                  <Icon
+                    icon={trashBinMinimalisticLinear}
+                    width="16"
+                    aria-hidden="true"
+                  />
+                ) : null}
+                {action.label}
+              </button>
+            ))}
             <button
-              key={state.value}
               type="button"
-              onClick={() => setSelectedStatus(state.value)}
-              className={cn(
-                "inline-flex cursor-pointer rounded-md px-2 py-1 text-xs transition-colors",
-                selectedStatus === state.value
-                  ? "bg-primary-1/10 text-primary-1"
-                  : "text-text-4 hover:bg-background-3 hover:text-text-2",
-              )}
+              onClick={onClose}
+              className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
             >
-              {state.label}
+              닫기
             </button>
-          ))}
-        </div>
-        <div className="flex w-full flex-wrap justify-center gap-2 sm:ml-auto sm:w-auto sm:justify-end">
-          {actionButtons.map((action) => (
-            <button
-              key={action.value}
-              type="button"
-              onClick={() => onSelectAction(action.value)}
-              disabled={isActionPending}
-              className={cn(
-                "inline-flex items-center justify-center gap-1 rounded-[0.75rem] px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
-                action.tone === "primary" &&
-                  "bg-primary-1 text-white hover:opacity-90",
-                action.tone === "danger"
-                  ? "bg-negative-1 text-white hover:opacity-90"
-                  : "border border-border-3 text-text-2 hover:border-border-2 hover:text-text-1",
-              )}
-            >
-              {action.value === "restore" ? (
-                <Icon icon={restartLinear} width="16" aria-hidden="true" />
-              ) : null}
-              {action.value === "hard_delete" ? (
-                <Icon
-                  icon={trashBinMinimalisticLinear}
-                  width="16"
-                  aria-hidden="true"
-                />
-              ) : null}
-              {action.label}
-            </button>
-          ))}
-          <button
-            type="button"
-            onClick={onClose}
-            className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
-          >
-            닫기
-          </button>
+          </div>
         </div>
       </div>
     </div>
