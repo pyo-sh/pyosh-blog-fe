@@ -108,7 +108,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
       {posts.length > 0 ? (
         <>
-          <section aria-label="검색 결과">
+          <section className="flex flex-col gap-3" aria-label="검색 결과">
             {posts.map((post) => (
               <SearchResultItem key={post.id} post={post} query={query} />
             ))}

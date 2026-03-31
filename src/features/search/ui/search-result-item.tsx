@@ -72,7 +72,7 @@ export function SearchResultItem({ post, query }: SearchResultItemProps) {
           </h2>
 
           {post.summary ? (
-            <p className="mt-1 hidden line-clamp-2 break-keep text-body-sm leading-relaxed text-text-3 sm:block">
+            <p className="mt-1 line-clamp-2 break-keep text-body-sm leading-relaxed text-text-3">
               {highlightText(post.summary, query)}
             </p>
           ) : null}
