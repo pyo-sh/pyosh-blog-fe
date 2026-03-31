@@ -273,13 +273,19 @@ function DetailView({
   onSelectAction,
 }: DetailViewProps) {
   const isReply = comment.depth > 0;
+  const [selectedStatus, setSelectedStatus] = useState(comment.status);
+
+  useEffect(() => {
+    setSelectedStatus(comment.status);
+  }, [comment.status]);
+
   const stateButtons = [
     { value: "active", label: "정상" },
     { value: "deleted", label: "삭제" },
     { value: "hidden", label: "숨김" },
   ] as const;
   const actionButtons =
-    comment.status === "deleted"
+    selectedStatus === "deleted"
       ? [
           {
             value: "restore" as const,
@@ -292,7 +298,7 @@ function DetailView({
             tone: "danger" as const,
           },
         ]
-      : comment.status === "hidden"
+      : selectedStatus === "hidden"
         ? [
             {
               value: "restore" as const,
@@ -326,7 +332,7 @@ function DetailView({
   return (
     <div className="space-y-5">
       <dl className="flex flex-col gap-2 text-sm">
-        <div className="flex items-center gap-2">
+        <div className="flex items-end gap-2">
           <dt className="min-w-[3.75rem] shrink-0 text-right text-text-3">
             글:
           </dt>
@@ -397,14 +403,14 @@ function DetailView({
             <span
               className={cn(
                 "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium",
-                comment.status === "active" &&
+                selectedStatus === "active" &&
                   "bg-positive-1/10 text-positive-1",
-                comment.status === "deleted" &&
+                selectedStatus === "deleted" &&
                   "bg-negative-1/10 text-negative-1",
-                comment.status === "hidden" && "bg-background-3 text-text-3",
+                selectedStatus === "hidden" && "bg-background-3 text-text-3",
               )}
             >
-              {statusLabelMap[comment.status]}
+              {statusLabelMap[selectedStatus]}
             </span>
           </dd>
         </div>
@@ -496,17 +502,19 @@ function DetailView({
         <div className="flex items-center gap-1">
           <span className="text-xs text-text-4">상태 전환:</span>
           {stateButtons.map((state) => (
-            <span
+            <button
               key={state.value}
+              type="button"
+              onClick={() => setSelectedStatus(state.value)}
               className={cn(
-                "inline-flex rounded-md px-2 py-1 text-xs transition-colors",
-                comment.status === state.value
+                "inline-flex cursor-pointer rounded-md px-2 py-1 text-xs transition-colors",
+                selectedStatus === state.value
                   ? "bg-primary-1/10 text-primary-1"
-                  : "text-text-4",
+                  : "text-text-4 hover:bg-background-3 hover:text-text-2",
               )}
             >
               {state.label}
-            </span>
+            </button>
           ))}
         </div>
         <div className="ml-auto flex flex-wrap justify-end gap-2">
@@ -598,7 +606,7 @@ function ThreadView({
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium text-primary-1 transition-colors hover:bg-background-3 hover:text-primary-2"
+          className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-lg px-2 py-1 text-sm font-medium text-primary-1 transition-colors hover:bg-background-3 hover:text-primary-2"
         >
           ← 상세로 돌아가기
         </button>
