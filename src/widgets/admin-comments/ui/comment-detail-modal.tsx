@@ -502,7 +502,7 @@ function DetailView({
                 type="button"
                 onClick={() => setSelectedStatus(state.value)}
                 className={cn(
-                  "inline-flex cursor-pointer rounded-md px-2 py-1 text-xs transition-colors",
+                  "inline-flex min-w-fit cursor-pointer whitespace-nowrap rounded-md px-2 py-1 text-xs transition-colors",
                   selectedStatus === state.value
                     ? "bg-primary-1/10 text-primary-1"
                     : "text-text-4 hover:bg-background-3 hover:text-text-2",
@@ -521,7 +521,7 @@ function DetailView({
                 onClick={() => onSelectAction(action.value)}
                 disabled={isActionPending}
                 className={cn(
-                  "inline-flex items-center justify-center gap-1 rounded-[0.75rem] px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+                  "inline-flex min-w-fit items-center justify-center gap-1 whitespace-nowrap rounded-[0.75rem] px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
                   action.tone === "primary" &&
                     "bg-primary-1 text-white hover:opacity-90",
                   action.tone === "danger"
@@ -686,7 +686,7 @@ function ThreadView({
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+            className="inline-flex min-w-fit items-center justify-center whitespace-nowrap rounded-[0.75rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
           >
             닫기
           </button>
