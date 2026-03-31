@@ -5,6 +5,7 @@ interface SkeletonProps {
   width?: string;
   height?: string;
   repeat?: number;
+  tone?: "soft" | "strong";
   className?: string;
 }
 
@@ -21,6 +22,7 @@ function SkeletonItem({
   variant = "text",
   width,
   height,
+  tone = "soft",
   className,
 }: Omit<SkeletonProps, "repeat">) {
   const defaults = variantDefaults[variant];
@@ -28,7 +30,8 @@ function SkeletonItem({
   return (
     <div
       className={cn(
-        "animate-pulse bg-background-4",
+        "animate-pulse",
+        tone === "strong" ? "bg-background-4" : "bg-background-3",
         defaults.rounded,
         !height && defaults.height,
         className,
@@ -46,6 +49,7 @@ export function Skeleton({
   width,
   height,
   repeat = 1,
+  tone = "soft",
   className,
 }: SkeletonProps) {
   if (repeat === 1) {
@@ -55,6 +59,7 @@ export function Skeleton({
           variant={variant}
           width={width}
           height={height}
+          tone={tone}
           className={className}
         />
       </div>
@@ -69,6 +74,7 @@ export function Skeleton({
           variant={variant}
           width={width}
           height={height}
+          tone={tone}
           className={className}
         />
       ))}
