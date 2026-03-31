@@ -494,7 +494,7 @@ function DetailView({
 
       <div className="border-t border-border-4 pt-4">
         <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-between">
-          <div className="flex flex-wrap items-center justify-center gap-1">
+          <div className="mx-auto flex flex-wrap items-center justify-center gap-1">
             <span className="min-w-fit whitespace-nowrap text-xs text-text-4">
               상태 전환:
             </span>
