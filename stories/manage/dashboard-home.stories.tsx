@@ -28,19 +28,29 @@ export default meta;
 
 type Story = StoryObj<typeof DashboardHome>;
 
-export const DashboardOnly: Story = {
-  render: () => (
-    <div className="min-h-screen bg-background-1 px-4 py-6 md:px-6">
-      <DashboardHome />
+function DashboardCanvasFrame({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="bg-background-1 px-4 py-6 md:px-6">
+      <div className="mx-auto w-full max-w-[72rem] rounded-[1.5rem] border border-border-4 bg-background-1/80 p-4 shadow-[0px_18px_60px_0px_rgba(0,0,0,0.05)] md:p-6">
+        {children}
+      </div>
     </div>
-  ),
-};
+  );
+}
 
-export const InAdminShell: Story = {
+export const Default: Story = {
   render: () => (
     <ManageLayoutShell>
       <DashboardHome />
     </ManageLayoutShell>
+  ),
+};
+
+export const CanvasOnly: Story = {
+  render: () => (
+    <DashboardCanvasFrame>
+      <DashboardHome />
+    </DashboardCanvasFrame>
   ),
 };
 
