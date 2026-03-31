@@ -275,11 +275,6 @@ function DetailView({
   onSelectAction,
 }: DetailViewProps) {
   const isReply = comment.depth > 0;
-  const stateButtons = [
-    { value: "active", label: "정상" },
-    { value: "deleted", label: "삭제" },
-    { value: "hidden", label: "숨김" },
-  ] as const;
   const actionButtons =
     comment.status === "deleted"
       ? [
@@ -488,25 +483,6 @@ function DetailView({
 
       <div className="border-t border-border-4 pt-4">
         <div className="flex flex-wrap items-center justify-center gap-3">
-          <div className="mx-auto flex flex-wrap items-center justify-center gap-1">
-            <span className="min-w-fit whitespace-nowrap text-xs text-text-4">
-              상태:
-            </span>
-            {stateButtons.map((state) => (
-              <span
-                key={state.value}
-                className={cn(
-                  "inline-flex min-w-fit whitespace-nowrap rounded-md px-2 py-1 text-xs",
-                  comment.status === state.value
-                    ? "bg-primary-1/10 text-primary-1"
-                    : "text-text-4",
-                )}
-              >
-                {state.label}
-              </span>
-            ))}
-          </div>
-
           <div className="flex flex-wrap items-center justify-center gap-2">
             {actionButtons.map((action) => (
               <button
