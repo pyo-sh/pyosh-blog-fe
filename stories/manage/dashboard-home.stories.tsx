@@ -38,6 +38,16 @@ function DashboardCanvasFrame({ children }: { children: React.ReactNode }) {
   );
 }
 
+function DashboardMobileFrame({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="bg-background-1 px-4 py-6">
+      <div className="mx-auto w-full max-w-[24.5rem] overflow-hidden rounded-[1.5rem] border border-border-4 bg-background-1 shadow-[0px_18px_60px_0px_rgba(0,0,0,0.08)]">
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export const Default: Story = {
   render: () => (
     <ManageLayoutShell>
@@ -51,6 +61,16 @@ export const CanvasOnly: Story = {
     <DashboardCanvasFrame>
       <DashboardHome />
     </DashboardCanvasFrame>
+  ),
+};
+
+export const Mobile: Story = {
+  render: () => (
+    <DashboardMobileFrame>
+      <ManageLayoutShell>
+        <DashboardHome />
+      </ManageLayoutShell>
+    </DashboardMobileFrame>
   ),
 };
 

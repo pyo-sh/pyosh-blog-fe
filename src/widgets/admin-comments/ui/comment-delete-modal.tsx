@@ -15,7 +15,7 @@ export type CommentManageAction =
 interface CommentDeleteModalProps {
   isOpen: boolean;
   title: string;
-  description: string;
+  description?: string;
   count: number;
   cascadeCount?: number;
   allowedActions: CommentManageAction[];
@@ -125,15 +125,17 @@ export function CommentDeleteModal({
       onClose={handleClose}
       withBackground
       aria-label={title}
-      className="w-full max-w-[34rem]"
+      className="w-full max-w-[34rem] overflow-hidden"
     >
-      <div className="flex flex-col gap-5 p-6 text-left">
+      <div className="max-h-[85vh] overflow-y-auto p-6 text-left">
         <div className="space-y-2">
           <h2 className="text-lg font-semibold text-text-1">{title}</h2>
-          <p className="text-sm leading-6 text-text-3">{description}</p>
+          {description ? (
+            <p className="text-sm leading-6 text-text-3">{description}</p>
+          ) : null}
         </div>
 
-        <div className="space-y-3">
+        <div className="mt-5 space-y-3">
           {options.map((option) => (
             <label
               key={option.value}
@@ -163,7 +165,7 @@ export function CommentDeleteModal({
           ))}
         </div>
 
-        <div className="flex justify-end gap-3">
+        <div className="mt-5 flex justify-end gap-3">
           <button
             type="button"
             onClick={handleClose}

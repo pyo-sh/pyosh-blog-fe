@@ -1,5 +1,8 @@
 import { http, HttpResponse } from "msw";
-import { mockAdminCommentsResponse } from "./data/admin-comments";
+import {
+  mockAdminCommentsResponse,
+  mockAdminCommentThreadResponses,
+} from "./data/admin-comments";
 import { mockDashboardStats } from "./data/stats";
 
 const dashboardStatsPayload = mockDashboardStats;
@@ -95,6 +98,30 @@ function createDashboardHandlers(options?: {
     http.delete("*/api/admin/comments/:id", () =>
       new HttpResponse(null, { status: 204 }),
     ),
+    http.put("/api/admin/comments/:id/restore", () => new HttpResponse(null, { status: 204 })),
+    http.put("*/api/admin/comments/:id/restore", () =>
+      new HttpResponse(null, { status: 204 }),
+    ),
+    http.get("/api/admin/comments/:id/thread", ({ params }) => {
+      const id = Number(params.id);
+      const payload = mockAdminCommentThreadResponses[id];
+
+      if (!payload) {
+        return new HttpResponse(null, { status: 404 });
+      }
+
+      return HttpResponse.json(payload);
+    }),
+    http.get("*/api/admin/comments/:id/thread", ({ params }) => {
+      const id = Number(params.id);
+      const payload = mockAdminCommentThreadResponses[id];
+
+      if (!payload) {
+        return new HttpResponse(null, { status: 404 });
+      }
+
+      return HttpResponse.json(payload);
+    }),
   ];
 
   return [...statsHandlers, ...commentsHandlers];

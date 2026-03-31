@@ -92,3 +92,52 @@ export const mockAdminCommentsResponse: PaginatedResponse<AdminCommentItem> = {
     totalPages: 26,
   },
 };
+
+export const mockAdminCommentThreadResponses: Record<
+  number,
+  {
+    parent: AdminCommentItem;
+    replies: AdminCommentItem[];
+  }
+> = {
+  1: {
+    parent: mockAdminComments[0],
+    replies: [
+      mockAdminComments[2],
+      {
+        id: 6,
+        postId: 101,
+        parentId: 1,
+        depth: 1,
+        body: "관련 글도 기대하겠습니다. 실제 운영 환경에서의 적용기까지 보면 더 좋을 것 같아요.",
+        isSecret: false,
+        status: "active",
+        author: { type: "oauth", name: "정예린" },
+        replyToName: "김지훈",
+        post: { id: 101, title: "React Server Components 실전 가이드" },
+        createdAt: "2026-03-31T02:30:00.000Z",
+        updatedAt: "2026-03-31T02:30:00.000Z",
+      },
+    ],
+  },
+  3: {
+    parent: mockAdminComments[0],
+    replies: [
+      mockAdminComments[2],
+      {
+        id: 6,
+        postId: 101,
+        parentId: 1,
+        depth: 1,
+        body: "관련 글도 기대하겠습니다. 실제 운영 환경에서의 적용기까지 보면 더 좋을 것 같아요.",
+        isSecret: false,
+        status: "active",
+        author: { type: "oauth", name: "정예린" },
+        replyToName: "김지훈",
+        post: { id: 101, title: "React Server Components 실전 가이드" },
+        createdAt: "2026-03-31T02:30:00.000Z",
+        updatedAt: "2026-03-31T02:30:00.000Z",
+      },
+    ],
+  },
+};
