@@ -38,17 +38,6 @@ interface CommentFormProps<TPayload extends CommentFormPayload> {
   className?: string;
 }
 
-function getEyebrowLabel(
-  variant: "comment" | "guestbook",
-  replyToName?: string | null,
-) {
-  if (replyToName) {
-    return "답글";
-  }
-
-  return variant === "guestbook" ? "방명록" : "댓글";
-}
-
 function getTitleLabel(
   variant: "comment" | "guestbook",
   replyToName?: string | null,
@@ -422,31 +411,27 @@ export function CommentForm<TPayload extends CommentFormPayload>({
     <form
       onSubmit={handleSubmit}
       className={cn(
-        "rounded-[1.5rem] border border-border-3 bg-background-2 p-5",
+        "rounded-[1rem] border border-border-3 bg-background-2 p-5",
         className,
       )}
     >
-      <div className="flex flex-col gap-2">
-        <p className="text-body-xs uppercase tracking-[0.2em] text-text-4">
-          {getEyebrowLabel(variant, replyToName)}
-        </p>
-        <h3 className="text-body-lg font-semibold text-text-1">
-          {getTitleLabel(variant, replyToName)}
-        </h3>
-        <p className="text-body-sm text-text-3">
-          {getDescriptionLabel(variant, viewerType)}
-        </p>
-      </div>
+      {replyToName ? (
+        <div className="mb-3">
+          <p className="text-ui-xs font-semibold text-text-3">
+            {getTitleLabel(variant, replyToName)}
+          </p>
+        </div>
+      ) : null}
 
       {viewerType === "guest" ? (
         <div
           className={cn(
-            "mt-6 grid gap-4",
-            showGuestEmailField ? "md:grid-cols-3" : "md:grid-cols-2",
+            "grid gap-3",
+            showGuestEmailField ? "sm:grid-cols-3" : "sm:grid-cols-2",
           )}
         >
           <label className="block">
-            <span className="text-body-sm font-medium text-text-1">이름</span>
+            <span className="sr-only">이름</span>
             <input
               type="text"
               value={profile.guestName}
@@ -454,17 +439,15 @@ export function CommentForm<TPayload extends CommentFormPayload>({
                 onProfileChange("guestName", event.target.value)
               }
               disabled={isSubmitting}
-              className="mt-2 w-full rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
-              placeholder="홍길동"
+              className="w-full rounded-[0.75rem] border border-border-3 bg-background-1 px-3.5 py-2.5 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+              placeholder="이름"
               required
             />
           </label>
 
           {showGuestEmailField ? (
             <label className="block">
-              <span className="text-body-sm font-medium text-text-1">
-                이메일
-              </span>
+              <span className="sr-only">이메일</span>
               <input
                 type="email"
                 value={profile.guestEmail}
@@ -472,17 +455,14 @@ export function CommentForm<TPayload extends CommentFormPayload>({
                   onProfileChange("guestEmail", event.target.value)
                 }
                 disabled={isSubmitting}
-                className="mt-2 w-full rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
-                placeholder="guest@example.com"
-                required
+                className="w-full rounded-[0.75rem] border border-border-3 bg-background-1 px-3.5 py-2.5 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+                placeholder="이메일"
               />
             </label>
           ) : null}
 
           <label className="block">
-            <span className="text-body-sm font-medium text-text-1">
-              비밀번호
-            </span>
+            <span className="sr-only">비밀번호</span>
             <input
               type="password"
               value={profile.guestPassword}
@@ -490,29 +470,36 @@ export function CommentForm<TPayload extends CommentFormPayload>({
                 onProfileChange("guestPassword", event.target.value)
               }
               disabled={isSubmitting}
-              className="mt-2 w-full rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-[0.75rem] border border-border-3 bg-background-1 px-3.5 py-2.5 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
               placeholder="삭제 시 필요합니다"
               minLength={4}
               required
             />
           </label>
         </div>
-      ) : null}
+      ) : (
+        <p className="mb-3 text-ui-xs text-text-4">
+          {getDescriptionLabel(variant, viewerType)}
+        </p>
+      )}
 
-      <label className="mt-4 block">
-        <span className="text-body-sm font-medium text-text-1">본문</span>
+      <label className="mt-3 block">
+        <span className="sr-only">본문</span>
         <textarea
           value={body}
           onChange={(event) => setBody(event.target.value)}
           disabled={isSubmitting}
-          className="mt-2 min-h-32 w-full rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+          className={cn(
+            "w-full rounded-[0.75rem] border border-border-3 bg-background-1 px-3.5 py-2.5 text-body-sm leading-[1.6] text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60",
+            replyToName ? "min-h-24" : "min-h-[6.25rem]",
+          )}
           placeholder={getBodyPlaceholder(variant, replyToName)}
           maxLength={2000}
           required
         />
         <span
           className={cn(
-            "mt-2 block text-right text-body-xs text-text-4",
+            "mt-1 block text-right text-[0.688rem] text-text-4",
             bodyLength >= 2000
               ? "text-negative-1"
               : bodyLength >= 1500
@@ -524,55 +511,57 @@ export function CommentForm<TPayload extends CommentFormPayload>({
         </span>
       </label>
 
-      <button
-        type="button"
-        onClick={() => setIsSecret((current) => !current)}
-        disabled={isSubmitting}
-        className={cn(
-          "mt-4 inline-flex items-center gap-2 text-body-sm transition-colors",
-          isSecret ? "text-primary-1" : "text-text-4",
-        )}
-        aria-pressed={isSecret}
-        aria-label={isSecret ? "비밀 댓글 해제" : "비밀 댓글로 작성"}
-      >
-        {isSecret ? <LockIcon /> : <UnlockIcon />}
-        {getSecretLabel(variant)}
-      </button>
-
       {errorMessage ? (
         <div
           role="alert"
-          className="mt-4 rounded-[1rem] border border-negative-1/30 bg-negative-1/5 px-4 py-3 text-body-sm text-negative-1"
+          className="mt-3 rounded-[0.75rem] border border-negative-1/30 bg-negative-1/5 px-4 py-3 text-body-sm text-negative-1"
         >
           {errorMessage}
         </div>
       ) : null}
 
-      <div className="mt-6 flex flex-wrap items-center gap-3">
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
         <button
-          type="submit"
+          type="button"
+          onClick={() => setIsSecret((current) => !current)}
           disabled={isSubmitting}
-          className="inline-flex items-center justify-center rounded-[1rem] bg-primary-1 px-5 py-3 text-body-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isSubmitting ? (
-            <>
-              <Spinner size="sm" /> 저장 중
-            </>
-          ) : (
-            submitLabel
+          className={cn(
+            "inline-flex items-center gap-2 text-[0.8125rem] transition-colors",
+            isSecret ? "text-primary-1" : "text-text-4",
           )}
+          aria-pressed={isSecret}
+          aria-label={isSecret ? "비밀 댓글 해제" : "비밀 댓글로 작성"}
+        >
+          {isSecret ? <LockIcon /> : <UnlockIcon />}
+          {getSecretLabel(variant)}
         </button>
 
-        {onCancel ? (
+        <div className="flex flex-wrap items-center gap-3">
           <button
-            type="button"
-            onClick={onCancel}
+            type="submit"
             disabled={isSubmitting}
-            className="inline-flex items-center justify-center rounded-[1rem] border border-border-3 px-5 py-3 text-body-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center justify-center rounded-[0.625rem] bg-primary-1 px-5 py-2.5 text-body-sm font-semibold text-white transition-all hover:-translate-y-px hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            취소
+            {isSubmitting ? (
+              <>
+                <Spinner size="sm" /> 저장 중
+              </>
+            ) : (
+              submitLabel
+            )}
           </button>
-        ) : null}
+
+          {onCancel ? (
+            <button
+              type="button"
+              onClick={onCancel}
+              disabled={isSubmitting}
+              className="inline-flex items-center justify-center rounded-[0.625rem] border border-border-3 px-4 py-2.5 text-body-sm font-medium text-text-2 transition-colors hover:bg-background-3 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              취소
+            </button>
+          ) : null}
+        </div>
       </div>
     </form>
   );
