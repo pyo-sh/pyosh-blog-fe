@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import closeCircleLinear from "@iconify-icons/solar/close-circle-linear";
 import lockKeyholeLinear from "@iconify-icons/solar/lock-keyhole-linear";
+import restartLinear from "@iconify-icons/solar/restart-linear";
+import trashBinMinimalisticLinear from "@iconify-icons/solar/trash-bin-minimalistic-linear";
 import Link from "next/link";
 import type { AdminCommentItem } from "@entities/comment";
 import { fetchAdminCommentThread } from "@entities/comment";
@@ -290,7 +292,7 @@ function DetailView({
           {
             value: "restore" as const,
             label: "복원",
-            tone: "default" as const,
+            tone: "primary" as const,
           },
           {
             value: "hard_delete" as const,
@@ -303,7 +305,7 @@ function DetailView({
             {
               value: "restore" as const,
               label: "복원",
-              tone: "default" as const,
+              tone: "primary" as const,
             },
             {
               value: "soft_delete" as const,
@@ -491,7 +493,7 @@ function DetailView({
       </div>
 
       <div className="flex flex-wrap items-center gap-2 border-t border-border-4 pt-4">
-        <div className="flex items-center gap-1">
+        <div className="flex w-full flex-wrap items-center justify-center gap-1 sm:w-auto sm:justify-start">
           <span className="text-xs text-text-4">상태 전환:</span>
           {stateButtons.map((state) => (
             <button
@@ -509,7 +511,7 @@ function DetailView({
             </button>
           ))}
         </div>
-        <div className="ml-auto flex flex-wrap justify-end gap-2">
+        <div className="flex w-full flex-wrap justify-center gap-2 sm:ml-auto sm:w-auto sm:justify-end">
           {actionButtons.map((action) => (
             <button
               key={action.value}
@@ -517,12 +519,24 @@ function DetailView({
               onClick={() => onSelectAction(action.value)}
               disabled={isActionPending}
               className={cn(
-                "inline-flex items-center justify-center rounded-[0.75rem] px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+                "inline-flex items-center justify-center gap-1 rounded-[0.75rem] px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+                action.tone === "primary" &&
+                  "bg-primary-1 text-white hover:opacity-90",
                 action.tone === "danger"
-                  ? "border border-negative-1/30 text-negative-1 hover:bg-negative-1/10"
+                  ? "bg-negative-1 text-white hover:opacity-90"
                   : "border border-border-3 text-text-2 hover:border-border-2 hover:text-text-1",
               )}
             >
+              {action.value === "restore" ? (
+                <Icon icon={restartLinear} width="16" aria-hidden="true" />
+              ) : null}
+              {action.value === "hard_delete" ? (
+                <Icon
+                  icon={trashBinMinimalisticLinear}
+                  width="16"
+                  aria-hidden="true"
+                />
+              ) : null}
               {action.label}
             </button>
           ))}
