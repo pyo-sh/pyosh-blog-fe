@@ -188,6 +188,7 @@ export function CommentForm<TPayload extends CommentFormPayload>({
 
     try {
       const trimmedBody = body.trim();
+      const trimmedGuestEmail = profile.guestEmail.trim();
 
       if (!trimmedBody) {
         setErrorMessage("본문을 입력해 주세요.");
@@ -211,8 +212,8 @@ export function CommentForm<TPayload extends CommentFormPayload>({
         await onSubmit({
           authorType: "guest",
           guestName: profile.guestName.trim(),
-          ...(showGuestEmailField
-            ? { guestEmail: profile.guestEmail.trim() }
+          ...(showGuestEmailField && trimmedGuestEmail
+            ? { guestEmail: trimmedGuestEmail }
             : {}),
           guestPassword: profile.guestPassword,
           ...payloadBase,

@@ -253,6 +253,12 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
                 {post.title}
               </h1>
 
+              {post.description?.trim() ? (
+                <p className="mt-4 break-keep text-body-base leading-[1.75] text-text-3">
+                  {post.description}
+                </p>
+              ) : null}
+
               {post.tags.length > 0 && (
                 <div className="mt-6 flex flex-wrap gap-1.5">
                   {post.tags.map((tag) => (
