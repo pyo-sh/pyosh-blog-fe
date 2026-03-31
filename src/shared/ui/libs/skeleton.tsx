@@ -22,7 +22,7 @@ function SkeletonItem({
   variant = "text",
   width,
   height,
-  tone = "soft",
+  tone = "strong",
   className,
 }: Omit<SkeletonProps, "repeat">) {
   const defaults = variantDefaults[variant];
@@ -49,7 +49,7 @@ export function Skeleton({
   width,
   height,
   repeat = 1,
-  tone = "soft",
+  tone = "strong",
   className,
 }: SkeletonProps) {
   if (repeat === 1) {

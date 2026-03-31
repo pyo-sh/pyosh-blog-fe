@@ -10,7 +10,7 @@ export default function Loading() {
     >
       <div className="motion-reveal rounded-[2rem] border border-border-3 bg-background-2/90 p-6 shadow-[0_16px_48px_rgba(0,0,0,0.06)] md:p-8">
         <div className="space-y-3">
-          <Skeleton height="1rem" width="7rem" />
+          <Skeleton height="1rem" width="7rem" tone="soft" />
           <Skeleton
             height="2.5rem"
             className="max-w-[20rem] rounded-[1rem]"
@@ -20,6 +20,7 @@ export default function Loading() {
             height="1rem"
             className="max-w-[32rem] rounded-full"
             repeat={2}
+            tone="soft"
           />
         </div>
       </div>
@@ -31,8 +32,13 @@ export default function Loading() {
             className="rounded-[1.5rem] border border-border-3 bg-background-2/90 p-5 shadow-[0_12px_32px_rgba(0,0,0,0.04)] sm:p-6"
           >
             <div className="mb-4 flex items-center gap-3">
-              <Skeleton height="1.5rem" width="5rem" className="rounded-md" />
-              <Skeleton height="0.875rem" width="4.5rem" />
+              <Skeleton
+                height="1.5rem"
+                width="5rem"
+                className="rounded-md"
+                tone="soft"
+              />
+              <Skeleton height="0.875rem" width="4.5rem" tone="soft" />
             </div>
             <div className="mb-3">
               <Skeleton
@@ -42,8 +48,8 @@ export default function Loading() {
               />
             </div>
             <div className="space-y-2">
-              <Skeleton repeat={2} />
-              <Skeleton width="70%" />
+              <Skeleton repeat={2} tone="soft" />
+              <Skeleton width="70%" tone="soft" />
             </div>
           </li>
         ))}

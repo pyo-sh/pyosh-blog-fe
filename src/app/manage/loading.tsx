@@ -5,14 +5,14 @@ export default function DashboardLoading() {
     <div aria-busy="true" className="space-y-8">
       <div className="motion-reveal rounded-[1.75rem] border border-border-3 bg-background-2/90 p-6 shadow-[0_16px_48px_rgba(0,0,0,0.06)]">
         <div className="space-y-3">
-          <Skeleton height="1rem" width="6rem" />
+          <Skeleton height="1rem" width="6rem" tone="soft" />
           <Skeleton
             height="2.25rem"
             width="12rem"
             className="rounded-[1rem]"
             tone="strong"
           />
-          <Skeleton width="18rem" />
+          <Skeleton width="18rem" tone="soft" />
         </div>
       </div>
 
@@ -23,12 +23,12 @@ export default function DashboardLoading() {
             className="rounded-[1.5rem] border border-border-3 bg-background-2/90 p-6 shadow-[0_12px_32px_rgba(0,0,0,0.04)]"
           >
             <div className="mb-4">
-              <Skeleton height="1rem" width="5rem" />
+              <Skeleton height="1rem" width="5rem" tone="soft" />
             </div>
             <div className="mb-3">
               <Skeleton height="2.5rem" width="6rem" tone="strong" />
             </div>
-            <Skeleton />
+            <Skeleton tone="soft" />
           </div>
         ))}
       </div>
@@ -39,7 +39,7 @@ export default function DashboardLoading() {
             key={index}
             className="rounded-[1.5rem] border border-border-3 bg-background-2/90 p-6 shadow-[0_12px_32px_rgba(0,0,0,0.04)]"
           >
-            <Skeleton height="1rem" width="7rem" />
+            <Skeleton height="1rem" width="7rem" tone="soft" />
             <div className="mt-4">
               <Skeleton height="2rem" width="10rem" tone="strong" />
             </div>
@@ -50,6 +50,7 @@ export default function DashboardLoading() {
                   variant="rect"
                   height="4.5rem"
                   className="rounded-[1rem]"
+                  tone="soft"
                 />
               ))}
             </div>

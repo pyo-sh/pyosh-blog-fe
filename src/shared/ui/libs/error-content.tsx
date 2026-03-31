@@ -127,12 +127,6 @@ export function ErrorContent({
                 {action.label}
               </button>
             )}
-
-            <span className="text-ui-xs text-text-4">
-              {context === "admin"
-                ? "관리 화면 문맥에서 동일한 상태 시스템을 사용합니다."
-                : "퍼블릭 화면 문맥에서 동일한 상태 시스템을 사용합니다."}
-            </span>
           </div>
         </div>
       </div>

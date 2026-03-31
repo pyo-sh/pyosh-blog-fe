@@ -76,9 +76,9 @@ export const LoadingPatterns: Story = {
     <div className="grid min-h-screen gap-6 bg-background-1 px-6 py-10 xl:grid-cols-2">
       <section className="rounded-[2rem] border border-border-3 bg-background-2/90 p-8">
         <div className="space-y-3">
-          <Skeleton height="1rem" width="7rem" />
+          <Skeleton height="1rem" width="7rem" tone="soft" />
           <Skeleton height="2.5rem" width="14rem" tone="strong" />
-          <Skeleton repeat={2} />
+          <Skeleton repeat={2} tone="soft" />
         </div>
         <div className="mt-8 space-y-4">
           {Array.from({ length: 3 }).map((_, index) => (
@@ -87,13 +87,18 @@ export const LoadingPatterns: Story = {
               className="rounded-[1.5rem] border border-border-3 bg-background-1 p-5"
             >
               <div className="mb-4 flex items-center gap-3">
-                <Skeleton height="1.5rem" width="5rem" className="rounded-md" />
-                <Skeleton height="0.875rem" width="4rem" />
+                <Skeleton
+                  height="1.5rem"
+                  width="5rem"
+                  className="rounded-md"
+                  tone="soft"
+                />
+                <Skeleton height="0.875rem" width="4rem" tone="soft" />
               </div>
               <Skeleton height="1.75rem" width="16rem" tone="strong" />
               <div className="mt-3 space-y-2">
-                <Skeleton repeat={2} />
-                <Skeleton width="70%" />
+                <Skeleton repeat={2} tone="soft" />
+                <Skeleton width="70%" tone="soft" />
               </div>
             </div>
           ))}
@@ -107,12 +112,12 @@ export const LoadingPatterns: Story = {
               key={index}
               className="rounded-[1.5rem] border border-border-3 bg-background-1 p-5"
             >
-              <Skeleton height="1rem" width="5rem" />
+              <Skeleton height="1rem" width="5rem" tone="soft" />
               <div className="mt-4">
                 <Skeleton height="2.25rem" width="6rem" tone="strong" />
               </div>
               <div className="mt-4">
-                <Skeleton />
+                <Skeleton tone="soft" />
               </div>
             </div>
           ))}
