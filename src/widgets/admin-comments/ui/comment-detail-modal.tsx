@@ -194,7 +194,7 @@ export function CommentDetailModal({
       onClose={onClose}
       withBackground
       aria-label={mode === "thread" ? "댓글 스레드 보기" : "댓글 상세 보기"}
-      className="w-full max-w-xl overflow-hidden rounded-[1.5rem] border border-border-3 bg-background-2"
+      className="w-full max-w-xl overflow-hidden rounded-[1.5rem] border border-border-3 bg-background-2 text-left"
     >
       <div className="relative flex max-h-[85vh] flex-col">
         <div className="flex items-center justify-between px-6 py-5">
@@ -274,7 +274,7 @@ function DetailView({
 }: DetailViewProps) {
   const isReply = comment.depth > 0;
   const actionButtons =
-    comment.status === "deleted" || comment.status === "hidden"
+    comment.status === "deleted"
       ? [
           {
             value: "restore" as const,
@@ -287,33 +287,57 @@ function DetailView({
             tone: "danger" as const,
           },
         ]
-      : [
-          {
-            value: "soft_delete" as const,
-            label: "소프트 삭제",
-            tone: "default" as const,
-          },
-          {
-            value: "hard_delete" as const,
-            label: "영구 삭제",
-            tone: "danger" as const,
-          },
-        ];
+      : comment.status === "hidden"
+        ? [
+            {
+              value: "restore" as const,
+              label: "복원",
+              tone: "default" as const,
+            },
+            {
+              value: "soft_delete" as const,
+              label: "소프트 삭제",
+              tone: "default" as const,
+            },
+            {
+              value: "hard_delete" as const,
+              label: "영구 삭제",
+              tone: "danger" as const,
+            },
+          ]
+        : [
+            {
+              value: "soft_delete" as const,
+              label: "소프트 삭제",
+              tone: "default" as const,
+            },
+            {
+              value: "hard_delete" as const,
+              label: "영구 삭제",
+              tone: "danger" as const,
+            },
+          ];
 
   return (
     <div className="space-y-5">
       <dl className="flex flex-col gap-2 text-sm">
         <div className="flex items-center gap-2">
-          <dt className="min-w-[3.75rem] shrink-0 text-text-3">글:</dt>
-          <dd className="flex items-center gap-2 text-text-1">
+          <dt className="min-w-[3.75rem] shrink-0 text-right text-text-3">
+            글:
+          </dt>
+          <dd className="flex flex-wrap items-end gap-2 text-text-1">
             {comment.post ? (
               <>
-                <span className="line-clamp-1 text-primary-1">
-                  {comment.post.title}
-                </span>
                 <Link
                   href={`/manage/posts/${comment.postId}/preview`}
-                  className="shrink-0 text-xs text-primary-1 transition-colors hover:text-primary-2"
+                  className="line-clamp-1 cursor-pointer text-primary-1 transition-colors hover:text-primary-2 hover:underline"
+                  target="_blank"
+                >
+                  {comment.post.title}
+                </Link>
+                <Link
+                  href={`/manage/posts/${comment.postId}/preview`}
+                  className="shrink-0 cursor-pointer text-xs text-primary-1 transition-colors hover:text-primary-2 hover:underline"
                   target="_blank"
                 >
                   글 보기 →
@@ -326,7 +350,9 @@ function DetailView({
         </div>
 
         <div className="flex items-center gap-2">
-          <dt className="min-w-[3.75rem] shrink-0 text-text-3">작성자:</dt>
+          <dt className="min-w-[3.75rem] shrink-0 text-right text-text-3">
+            작성자:
+          </dt>
           <dd className="flex items-center gap-2 text-text-1">
             {comment.author.name}
             <span className="rounded bg-primary-1/10 px-1.5 py-0.5 text-[0.6875rem] text-primary-1">
@@ -337,23 +363,31 @@ function DetailView({
 
         {comment.author.email ? (
           <div className="flex items-center gap-2">
-            <dt className="min-w-[3.75rem] shrink-0 text-text-3">이메일:</dt>
+            <dt className="min-w-[3.75rem] shrink-0 text-right text-text-3">
+              이메일:
+            </dt>
             <dd className="text-text-2">{comment.author.email}</dd>
           </div>
         ) : null}
 
         <div className="flex items-center gap-2">
-          <dt className="min-w-[3.75rem] shrink-0 text-text-3">작성일:</dt>
+          <dt className="min-w-[3.75rem] shrink-0 text-right text-text-3">
+            작성일:
+          </dt>
           <dd className="text-text-2">{formatDetailDate(comment.createdAt)}</dd>
         </div>
 
         <div className="flex items-center gap-2">
-          <dt className="min-w-[3.75rem] shrink-0 text-text-3">비밀:</dt>
+          <dt className="min-w-[3.75rem] shrink-0 text-right text-text-3">
+            비밀:
+          </dt>
           <dd className="text-text-2">{comment.isSecret ? "예" : "아니오"}</dd>
         </div>
 
         <div className="flex items-center gap-2">
-          <dt className="min-w-[3.75rem] shrink-0 text-text-3">상태:</dt>
+          <dt className="min-w-[3.75rem] shrink-0 text-right text-text-3">
+            상태:
+          </dt>
           <dd>
             <span
               className={cn(
@@ -372,7 +406,9 @@ function DetailView({
 
         {isReply && comment.replyToName ? (
           <div className="flex items-center gap-2">
-            <dt className="min-w-[3.75rem] shrink-0 text-text-3">답글 대상:</dt>
+            <dt className="min-w-[3.75rem] shrink-0 text-right text-text-3">
+              답글 대상:
+            </dt>
             <dd className="text-text-2">@{comment.replyToName}</dd>
           </div>
         ) : null}
@@ -441,7 +477,7 @@ function DetailView({
           type="button"
           onClick={onOpenThread}
           disabled={threadLoading}
-          className="w-full rounded-[0.75rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full cursor-pointer rounded-[0.75rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {threadLoading
             ? "스레드 불러오는 중..."
@@ -451,14 +487,7 @@ function DetailView({
         </button>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 border-t border-border-4 pt-4">
-        <button
-          type="button"
-          onClick={onClose}
-          className="ml-auto inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
-        >
-          닫기
-        </button>
+      <div className="flex flex-wrap justify-end gap-2 border-t border-border-4 pt-4">
         {actionButtons.map((action) => (
           <button
             key={action.value}
@@ -475,6 +504,13 @@ function DetailView({
             {action.label}
           </button>
         ))}
+        <button
+          type="button"
+          onClick={onClose}
+          className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+        >
+          닫기
+        </button>
       </div>
     </div>
   );
@@ -513,15 +549,21 @@ function ThreadView({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-end gap-2">
           {postTitle ? (
             <>
               <span className="text-sm text-text-3">글:</span>
-              <span className="text-sm text-primary-1">{postTitle}</span>
+              <Link
+                href={`/manage/posts/${postId}/preview`}
+                className="cursor-pointer text-sm text-primary-1 transition-colors hover:text-primary-2 hover:underline"
+                target="_blank"
+              >
+                {postTitle}
+              </Link>
               {postId ? (
                 <Link
                   href={`/manage/posts/${postId}/preview`}
-                  className="text-xs text-primary-1 transition-colors hover:text-primary-2"
+                  className="cursor-pointer text-xs text-primary-1 transition-colors hover:text-primary-2 hover:underline"
                   target="_blank"
                 >
                   글 보기 →
@@ -554,7 +596,7 @@ function ThreadView({
                 isFocused
                   ? "border-l-[3px] border-primary-1 bg-primary-2/10"
                   : "border-border-3 hover:bg-background-1",
-                isReply && "ml-5",
+                isReply && "ml-5 w-[calc(100%-1.25rem)]",
               )}
             >
               <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">

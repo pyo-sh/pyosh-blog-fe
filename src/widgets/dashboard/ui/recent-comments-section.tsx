@@ -99,7 +99,7 @@ function CommentRow({
 }) {
   return (
     <div
-      className="flex items-start gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-background-1"
+      className="flex cursor-pointer items-start gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-background-1"
       role="button"
       tabIndex={0}
       onClick={onOpen}
@@ -172,8 +172,12 @@ const QUERY_KEY = ["dashboard", "recentComments"] as const;
 const ADMIN_COMMENTS_QUERY_KEY = ["admin-comments"] as const;
 
 function getAllowedActionsForStatus(status: AdminCommentItem["status"]) {
-  if (status === "deleted" || status === "hidden") {
+  if (status === "deleted") {
     return ["restore", "hard_delete"] as const;
+  }
+
+  if (status === "hidden") {
+    return ["restore", "soft_delete", "hard_delete"] as const;
   }
 
   return ["soft_delete", "hard_delete"] as const;

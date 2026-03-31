@@ -51,8 +51,12 @@ type ActionContext =
   | null;
 
 function getAllowedActionsForStatus(status: AdminCommentItem["status"]) {
-  if (status === "deleted" || status === "hidden") {
+  if (status === "deleted") {
     return ["restore", "hard_delete"] as const;
+  }
+
+  if (status === "hidden") {
+    return ["restore", "soft_delete", "hard_delete"] as const;
   }
 
   return ["soft_delete", "hard_delete"] as const;
