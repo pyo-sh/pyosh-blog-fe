@@ -1,16 +1,64 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useSelectedLayoutSegment } from "next/navigation";
-import { AdminSidebar } from "@widgets/admin-sidebar";
+import { Icon } from "@iconify/react";
+import hamburgerMenuLinear from "@iconify-icons/solar/hamburger-menu-linear";
+import { usePathname } from "next/navigation";
+import {
+  ADMIN_CHROME_HEIGHT,
+  ADMIN_CHROME_HEIGHT_CLASS,
+  ADMIN_CHROME_STYLE,
+} from "./ui/admin-shell-constants";
+import { cn } from "@shared/lib/style-utils";
+import { AdminHeaderActions, AdminSidebar } from "@widgets/admin-sidebar";
+
+const PAGE_TITLES = [
+  { match: (pathname: string) => pathname === "/manage", title: "대시보드" },
+  {
+    match: (pathname: string) => pathname === "/manage/posts/new",
+    title: "글 작성",
+  },
+  {
+    match: (pathname: string) => pathname.endsWith("/edit"),
+    title: "글 수정",
+  },
+  {
+    match: (pathname: string) => pathname.endsWith("/preview"),
+    title: "글 미리보기",
+  },
+  {
+    match: (pathname: string) => pathname.startsWith("/manage/posts"),
+    title: "글",
+  },
+  {
+    match: (pathname: string) => pathname.startsWith("/manage/categories"),
+    title: "카테고리",
+  },
+  {
+    match: (pathname: string) => pathname.startsWith("/manage/comments"),
+    title: "댓글",
+  },
+  {
+    match: (pathname: string) => pathname.startsWith("/manage/guestbook"),
+    title: "방명록",
+  },
+  {
+    match: (pathname: string) => pathname.startsWith("/manage/assets"),
+    title: "에셋",
+  },
+] as const;
+
+function getPageTitle(pathname: string) {
+  return PAGE_TITLES.find((entry) => entry.match(pathname))?.title ?? "관리자";
+}
 
 export function ManageLayoutShell({ children }: { children: React.ReactNode }) {
-  const segment = useSelectedLayoutSegment();
+  const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
   const didOpenRef = useRef(false);
 
-  // Return focus to hamburger button when sidebar closes (not on initial mount)
   useEffect(() => {
     if (sidebarOpen) {
       didOpenRef.current = true;
@@ -19,19 +67,34 @@ export function ManageLayoutShell({ children }: { children: React.ReactNode }) {
     }
   }, [sidebarOpen]);
 
-  if (segment === "login") {
+  if (pathname === "/manage/login") {
     return <>{children}</>;
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="relative min-h-screen bg-background-1 text-text-1">
+      <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(circle_at_top_right,rgba(138,111,224,0.08),transparent_26%),linear-gradient(to_bottom,rgba(249,249,250,0.15),rgba(249,249,250,0))] dark:bg-[radial-gradient(circle_at_top_right,rgba(165,145,232,0.08),transparent_26%),linear-gradient(to_bottom,rgba(19,20,21,0.18),rgba(19,20,21,0))]" />
+
       <AdminSidebar
+        isCollapsed={sidebarCollapsed}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
+        onToggleCollapsed={() => setSidebarCollapsed((value) => !value)}
       />
-      <div className="flex flex-1 flex-col min-w-0">
-        {/* Mobile top bar with hamburger */}
-        <div className="flex h-14 items-center border-b border-border-3 bg-background-1 px-4 md:hidden">
+
+      <div
+        className={cn(
+          "relative z-10 min-h-screen transition-[padding] duration-300",
+          sidebarCollapsed ? "md:pl-16" : "md:pl-60",
+        )}
+      >
+        <header
+          className={cn(
+            "sticky top-0 z-10 box-border flex items-center gap-4 border-b border-border-4 bg-[rgba(249,249,250,0.8)] px-4 backdrop-blur-[16px] backdrop-saturate-[1.4] dark:bg-[rgba(19,20,21,0.85)] md:px-6",
+            ADMIN_CHROME_HEIGHT_CLASS,
+          )}
+          style={ADMIN_CHROME_STYLE}
+        >
           <button
             ref={hamburgerRef}
             type="button"
@@ -39,32 +102,25 @@ export function ManageLayoutShell({ children }: { children: React.ReactNode }) {
             aria-label="메뉴 열기"
             aria-expanded={sidebarOpen}
             aria-controls={sidebarOpen ? "admin-nav-overlay" : undefined}
-            className="p-2 rounded-md text-text-3 hover:bg-background-2 hover:text-text-1 transition-colors"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-text-2 transition-colors hover:bg-background-3 hover:text-text-1 md:hidden"
           >
-            <HamburgerIcon />
+            <Icon icon={hamburgerMenuLinear} width="22" aria-hidden="true" />
           </button>
-        </div>
-        <main className="flex-1 p-6">{children}</main>
+
+          <p className="text-lg font-bold text-text-1">
+            {getPageTitle(pathname)}
+          </p>
+
+          <AdminHeaderActions />
+        </header>
+
+        <main
+          className="px-4 py-6 md:px-6"
+          style={{ minHeight: `calc(100dvh - ${ADMIN_CHROME_HEIGHT})` }}
+        >
+          {children}
+        </main>
       </div>
     </div>
-  );
-}
-
-function HamburgerIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M4 6h16M4 12h16M4 18h16" />
-    </svg>
   );
 }

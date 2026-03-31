@@ -1,1 +1,1 @@
-export { AdminSidebar } from "./ui/admin-sidebar";
+export { AdminHeaderActions, AdminSidebar } from "./ui/admin-sidebar";
