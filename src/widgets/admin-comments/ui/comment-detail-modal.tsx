@@ -338,22 +338,14 @@ function DetailView({
           </dt>
           <dd className="flex min-h-6 flex-wrap items-end gap-2 text-text-1">
             {comment.post ? (
-              <>
-                <Link
-                  href={`/manage/posts/${comment.postId}/preview`}
-                  className="line-clamp-1 cursor-pointer self-end text-primary-1 transition-colors hover:text-primary-2 hover:underline"
-                  target="_blank"
-                >
-                  {comment.post.title}
-                </Link>
-                <Link
-                  href={`/manage/posts/${comment.postId}/preview`}
-                  className="shrink-0 self-end cursor-pointer text-xs leading-5 text-primary-1 transition-colors hover:text-primary-2 hover:underline"
-                  target="_blank"
-                >
-                  글 보기 →
-                </Link>
-              </>
+              <Link
+                href={`/manage/posts/${comment.postId}/preview`}
+                className="inline-flex min-h-6 items-end gap-1 cursor-pointer text-primary-1 transition-colors hover:text-primary-2 hover:underline"
+                target="_blank"
+              >
+                <span className="line-clamp-1">{comment.post.title}</span>
+                <span className="shrink-0 text-xs leading-5">글 보기 →</span>
+              </Link>
             ) : (
               <span className="text-text-4">삭제된 글</span>
             )}
@@ -586,20 +578,12 @@ function ThreadView({
               <span className="text-sm text-text-3">글:</span>
               <Link
                 href={`/manage/posts/${postId}/preview`}
-                className="cursor-pointer text-sm text-primary-1 transition-colors hover:text-primary-2 hover:underline"
+                className="inline-flex min-h-6 items-end gap-1 cursor-pointer text-sm text-primary-1 transition-colors hover:text-primary-2 hover:underline"
                 target="_blank"
               >
-                {postTitle}
+                <span>{postTitle}</span>
+                <span className="text-xs leading-5">글 보기 →</span>
               </Link>
-              {postId ? (
-                <Link
-                  href={`/manage/posts/${postId}/preview`}
-                  className="cursor-pointer text-xs text-primary-1 transition-colors hover:text-primary-2 hover:underline"
-                  target="_blank"
-                >
-                  글 보기 →
-                </Link>
-              ) : null}
             </>
           ) : null}
         </div>

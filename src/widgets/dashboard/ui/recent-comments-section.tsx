@@ -393,7 +393,6 @@ export function RecentCommentsSection() {
       <CommentDeleteModal
         isOpen={actionContext !== null}
         title="댓글 작업"
-        description="댓글에 적용할 작업을 선택하세요."
         count={1}
         cascadeCount={cascadeCount}
         allowedActions={[...actionModalActions]}

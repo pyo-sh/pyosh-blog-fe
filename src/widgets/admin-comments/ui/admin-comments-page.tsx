@@ -389,10 +389,6 @@ export function AdminCommentsPage() {
 
   const actionModalTitle =
     actionContext?.type === "bulk" ? "댓글 일괄 작업" : "댓글 작업";
-  const actionModalDescription =
-    actionContext?.type === "bulk"
-      ? `${actionContext.items.length}개 댓글에 적용할 작업을 선택하세요.`
-      : "댓글에 적용할 작업을 선택하세요.";
   const actionModalCount =
     actionContext?.type === "bulk" ? actionContext.items.length : 1;
   const actionModalActions =
@@ -643,7 +639,6 @@ export function AdminCommentsPage() {
       <CommentDeleteModal
         isOpen={actionContext !== null}
         title={actionModalTitle}
-        description={actionModalDescription}
         count={actionModalCount}
         cascadeCount={cascadeCount}
         allowedActions={[...actionModalActions]}
