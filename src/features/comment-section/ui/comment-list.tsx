@@ -696,6 +696,12 @@ export function CommentList({
 
     const target = buildReplyTarget(comment);
 
+    if (replyTarget?.commentId === target.commentId) {
+      setReplyTarget(null);
+
+      return;
+    }
+
     setExpandedRoots((current) => ({
       ...current,
       [target.parentId]: true,

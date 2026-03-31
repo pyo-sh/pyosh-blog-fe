@@ -88,7 +88,7 @@ export function RecentPopularPosts({
                     setSelectedPopularDays(option.days);
                   }}
                   className={cn(
-                    "inline-flex min-h-6 rounded-full border px-2.5 py-[3px] text-[0.75rem] leading-4 font-normal transition-colors",
+                    "inline-flex min-h-5 rounded-full border px-2 py-[2px] text-[0.688rem] leading-3.5 font-normal transition-colors",
                     isActive
                       ? "border-primary-1 bg-primary-1/6 text-primary-1"
                       : "border-border-3 text-text-3 hover:border-primary-1 hover:bg-primary-1/6 hover:text-primary-1",
