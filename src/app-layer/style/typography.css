@@ -377,14 +377,14 @@
   .post-markdown li,
   .post-markdown blockquote {
     font-size: 0.938rem;
-    line-height: 1.8;
+    line-height: 1.7;
   }
 
   .post-markdown blockquote {
     border-left: 3px solid var(--primary1);
     background: color-mix(in srgb, var(--primary1) 4%, transparent);
     border-radius: 0 0.5rem 0.5rem 0;
-    padding: 0.75rem 1rem;
+    padding: 0.625rem 0.875rem;
     color: var(--text3);
   }
 

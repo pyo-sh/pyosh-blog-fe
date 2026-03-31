@@ -78,7 +78,7 @@ export function TocSection({ headings, onItemClick }: TocSectionProps) {
                 href={`#${item.id}`}
                 onClick={(event) => handleHeadingClick(event, item.id)}
                 className={cn(
-                  "block truncate text-[0.688rem] font-medium leading-4 transition-colors hover:text-primary-1",
+                  "block truncate py-[3px] text-[0.688rem] font-medium leading-4 transition-colors hover:text-primary-1",
                   item.level === 1 && "pl-0 text-text-3",
                   item.level === 2 && "pl-2.5 text-text-3",
                   item.level === 3 && "pl-5 text-text-4",
