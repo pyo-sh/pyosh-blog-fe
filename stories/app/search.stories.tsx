@@ -14,6 +14,7 @@ type SearchStoryArgs = {
   emptyDescription: string;
   emptyIcon: "search" | "search-zoom-in";
   posts: Post[];
+  mobile?: boolean;
 };
 
 const storyMeta: Meta<SearchStoryArgs> = {
@@ -120,8 +121,9 @@ function SearchStoryFrame({
   emptyDescription,
   emptyIcon,
   posts,
+  mobile = false,
 }: SearchStoryArgs) {
-  return (
+  const content = (
     <main className="mx-auto flex min-h-[100dvh] w-full max-w-[67.5rem] flex-col gap-6 px-4 pb-16 pt-8 md:px-6">
       <SearchForm currentFilter={currentFilter} initialQuery={initialQuery} />
 
@@ -145,6 +147,20 @@ function SearchStoryFrame({
         />
       )}
     </main>
+  );
+
+  if (mobile) {
+    return (
+      <div className="mx-auto w-full max-w-[25.4375rem] px-4 py-4">
+        <div className="overflow-hidden rounded-[1.5rem] border border-border-3 bg-background-1 shadow-[0px_18px_60px_0px_rgba(0,0,0,0.08)]">
+          {content}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    content
   );
 }
 
@@ -198,7 +214,7 @@ export const EmptyQuery: Story = {
 };
 
 export const Mobile: Story = {
-  render: (args) => <SearchStoryFrame {...args} />,
+  render: (args) => <SearchStoryFrame {...args} mobile />,
   args: {
     posts: resultPosts,
     resultsTitle: '"JavaScript" 검색 결과 (3건)',

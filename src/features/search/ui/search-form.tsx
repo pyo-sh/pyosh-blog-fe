@@ -88,7 +88,7 @@ export function SearchForm({ currentFilter, initialQuery }: SearchFormProps) {
           onChange={(event) => setQuery(event.target.value)}
           placeholder="검색어를 입력해 주세요"
           aria-label="검색어 입력"
-          className="w-full min-w-0 bg-transparent text-[0.875rem] leading-[1.188rem] text-text-1 outline-none placeholder:text-text-4"
+          className="h-full w-full min-w-0 bg-transparent text-[0.875rem] leading-normal text-text-1 outline-none placeholder:text-text-4"
         />
       </label>
 

@@ -25,17 +25,9 @@ export function SearchResultItem({ post, query }: SearchResultItemProps) {
   const publishedDate = formatDate(post.publishedAt ?? post.createdAt);
   const formattedPageviews = post.totalPageviews.toLocaleString("ko-KR");
   const formattedComments = post.commentCount.toLocaleString("ko-KR");
-  const hasMatchedComment = Boolean(post.matchedComment);
 
   return (
-    <article
-      className={[
-        "surface-hover-shift group relative rounded-xl px-4 py-5 hover:bg-background-2 sm:px-5",
-        hasMatchedComment
-          ? "border-l-[3px] border-primary-1 pl-[0.8125rem] sm:pl-[1.0625rem]"
-          : "",
-      ].join(" ")}
-    >
+    <article className="surface-hover-shift group relative rounded-xl px-4 py-5 hover:bg-background-2 sm:px-5">
       <Link
         href={`/posts/${post.slug}`}
         className="absolute inset-0 z-10 rounded-xl"
