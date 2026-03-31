@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Preview } from "@storybook/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { withThemeByDataAttribute } from "@storybook/addon-themes";
 import { initialize, mswLoader } from "msw-storybook-addon";
 import { ToastProvider } from "@app-layer/provider/toast-provider";
+import { clearCsrfToken } from "@shared/api";
 import { ThemeProvider } from "@app-layer/theme";
 import "../src/app-layer/style/index.css";
 
@@ -11,12 +12,12 @@ initialize({ onUnhandledRequest: "bypass" });
 
 const preview: Preview = {
   decorators: [
-    (Story) => {
+    (Story, context) => {
       const [queryClient] = useState(
         () =>
           new QueryClient({
             defaultOptions: {
-              queries: { retry: false, staleTime: Infinity },
+              queries: { retry: false, staleTime: 0 },
             },
           }),
       );
@@ -24,6 +25,11 @@ const preview: Preview = {
         typeof document === "undefined"
           ? ""
           : (document.documentElement.dataset.theme ?? "");
+
+      useEffect(() => {
+        clearCsrfToken();
+        queryClient.clear();
+      }, [context.id, queryClient]);
 
       return (
         <QueryClientProvider client={queryClient}>

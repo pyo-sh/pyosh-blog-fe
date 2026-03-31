@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Icon } from "@iconify/react";
 import lockLinear from "@iconify-icons/solar/lock-linear";
 import trashBinMinimalisticLinear from "@iconify-icons/solar/trash-bin-minimalistic-linear";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import type { PaginatedResponse } from "@shared/api";
 import {
   adminDeleteComment,
   fetchAdminComments,
@@ -148,35 +147,14 @@ function CommentRow({
 
 const QUERY_KEY = ["dashboard", "recentComments"] as const;
 
-export function RecentCommentsSection({
-  commentsOverride,
-}: {
-  commentsOverride?: PaginatedResponse<AdminCommentItem>;
-}) {
+export function RecentCommentsSection() {
   const queryClient = useQueryClient();
   const [deleteError, setDeleteError] = useState<string | null>(null);
-  const [mockComments, setMockComments] = useState(
-    commentsOverride?.data ?? [],
-  );
-  const [mockTotalComments, setMockTotalComments] = useState(
-    commentsOverride?.meta.total ?? 0,
-  );
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: QUERY_KEY,
     queryFn: () => fetchAdminComments({ limit: 5 }),
-    enabled: commentsOverride === undefined,
-    initialData: commentsOverride,
   });
-
-  useEffect(() => {
-    if (!commentsOverride) {
-      return;
-    }
-
-    setMockComments(commentsOverride.data);
-    setMockTotalComments(commentsOverride.meta.total);
-  }, [commentsOverride]);
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => adminDeleteComment(id),
@@ -191,25 +169,9 @@ export function RecentCommentsSection({
     },
   });
 
-  const comments = commentsOverride ? mockComments : (data?.data ?? []);
-  const totalComments = commentsOverride
-    ? mockTotalComments
-    : (data?.meta.total ?? 0);
+  const comments = data?.data ?? [];
+  const totalComments = data?.meta.total ?? 0;
   const activeDeleteId = deleteMutation.variables ?? null;
-
-  const handleDelete = (commentId: number) => {
-    if (commentsOverride) {
-      setDeleteError(null);
-      setMockComments((current) =>
-        current.filter((comment) => comment.id !== commentId),
-      );
-      setMockTotalComments((current) => Math.max(0, current - 1));
-
-      return;
-    }
-
-    deleteMutation.mutate(commentId);
-  };
 
   return (
     <section className="rounded-xl border border-border-4 bg-background-2 p-5">
@@ -257,11 +219,9 @@ export function RecentCommentsSection({
                 key={comment.id}
                 item={comment}
                 isDeleting={
-                  !commentsOverride &&
-                  deleteMutation.isPending &&
-                  activeDeleteId === comment.id
+                  deleteMutation.isPending && activeDeleteId === comment.id
                 }
-                onDelete={() => handleDelete(comment.id)}
+                onDelete={() => deleteMutation.mutate(comment.id)}
               />
             ))}
           </div>

@@ -5,7 +5,6 @@ import chart2Linear from "@iconify-icons/solar/chart-2-linear";
 import eyeLinear from "@iconify-icons/solar/eye-linear";
 import graphUpLinear from "@iconify-icons/solar/graph-up-linear";
 import { useQuery } from "@tanstack/react-query";
-import type { DashboardStats } from "@entities/stat";
 import { fetchDashboardStats } from "@entities/stat";
 import { formatNumber } from "@shared/lib/format-number";
 import { Skeleton } from "@shared/ui/libs";
@@ -76,16 +75,10 @@ const STAT_CARDS = [
   },
 ] as const;
 
-export function StatsSection({
-  dataOverride,
-}: {
-  dataOverride?: DashboardStats;
-}) {
+export function StatsSection() {
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["dashboard", "stats"],
     queryFn: fetchDashboardStats,
-    enabled: dataOverride === undefined,
-    initialData: dataOverride,
   });
 
   if (isLoading) {
