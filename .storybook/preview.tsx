@@ -10,41 +10,54 @@ import "../src/app-layer/style/index.css";
 
 initialize({ onUnhandledRequest: "bypass" });
 
+function StoryProviders({
+  storyId,
+  children,
+}: {
+  storyId: string;
+  children: React.ReactNode;
+}) {
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: { retry: false, staleTime: 0 },
+        },
+      }),
+  );
+  const initialTheme =
+    typeof document === "undefined"
+      ? ""
+      : (document.documentElement.dataset.theme ?? "");
+
+  useEffect(() => {
+    clearCsrfToken();
+  }, [storyId]);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider initialTheme={initialTheme}>
+        <div
+          className="min-h-screen bg-background-1 text-text-1 transition-theme"
+          style={{
+            fontFamily: '"Gothic A1", ui-sans-serif, system-ui, sans-serif',
+          }}
+        >
+          {children}
+          <ToastProvider />
+        </div>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+}
+
 const preview: Preview = {
   decorators: [
     (Story, context) => {
-      const [queryClient] = useState(
-        () =>
-          new QueryClient({
-            defaultOptions: {
-              queries: { retry: false, staleTime: 0 },
-            },
-          }),
-      );
-      const initialTheme =
-        typeof document === "undefined"
-          ? ""
-          : (document.documentElement.dataset.theme ?? "");
-
-      useEffect(() => {
-        clearCsrfToken();
-        queryClient.clear();
-      }, [context.id, queryClient]);
-
       return (
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider initialTheme={initialTheme}>
-            <div
-              className="min-h-screen bg-background-1 text-text-1 transition-theme"
-              style={{
-                fontFamily: '"Gothic A1", ui-sans-serif, system-ui, sans-serif',
-              }}
-            >
-              <Story />
-              <ToastProvider />
-            </div>
-          </ThemeProvider>
-        </QueryClientProvider>
+        <StoryProviders key={context.id} storyId={context.id}>
+          <Story />
+        </StoryProviders>
       );
     },
     withThemeByDataAttribute({
