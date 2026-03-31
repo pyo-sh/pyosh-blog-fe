@@ -16,6 +16,7 @@ import sidebarMinimalisticLinear from "@iconify-icons/solar/sidebar-minimalistic
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { ADMIN_CHROME_HEIGHT_CLASS } from "@app/manage/ui/admin-shell-constants";
 import { logout } from "@entities/auth";
 import { cn } from "@shared/lib/style-utils";
 import { ThemeButton } from "@widgets/header/theme-button";
@@ -279,7 +280,12 @@ export function AdminSidebar({
           isCollapsed ? "w-16" : "w-60",
         )}
       >
-        <div className="flex h-14 items-center gap-2 border-b border-border-4 px-4">
+        <div
+          className={cn(
+            "flex items-center gap-2 border-b border-border-4 px-4",
+            ADMIN_CHROME_HEIGHT_CLASS,
+          )}
+        >
           <Link
             href="/manage"
             className={cn(
@@ -288,11 +294,13 @@ export function AdminSidebar({
             )}
             title="대시보드"
           >
-            <LogoIcon
-              width={28}
-              height={28}
-              className="shrink-0 text-primary-1"
-            />
+            {isCollapsed ? null : (
+              <LogoIcon
+                width={28}
+                height={28}
+                className="shrink-0 text-primary-1"
+              />
+            )}
             <span
               className={cn(
                 "rounded px-1.5 py-0.5 text-xs font-medium transition-[opacity,width] duration-200",
@@ -359,7 +367,12 @@ export function AdminSidebar({
             aria-label="내비게이션 메뉴"
             className="fixed inset-y-0 left-0 z-30 flex w-60 flex-col border-r border-border-3 bg-background-2"
           >
-            <div className="flex h-14 items-center gap-2 border-b border-border-4 px-4">
+            <div
+              className={cn(
+                "flex items-center gap-2 border-b border-border-4 px-4",
+                ADMIN_CHROME_HEIGHT_CLASS,
+              )}
+            >
               <Link
                 href="/manage"
                 onClick={onClose}

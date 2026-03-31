@@ -4,6 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import hamburgerMenuLinear from "@iconify-icons/solar/hamburger-menu-linear";
 import { usePathname } from "next/navigation";
+import {
+  ADMIN_CHROME_HEIGHT,
+  ADMIN_CHROME_HEIGHT_CLASS,
+} from "./ui/admin-shell-constants";
 import { cn } from "@shared/lib/style-utils";
 import { AdminHeaderActions, AdminSidebar } from "@widgets/admin-sidebar";
 
@@ -83,7 +87,12 @@ export function ManageLayoutShell({ children }: { children: React.ReactNode }) {
           sidebarCollapsed ? "md:pl-16" : "md:pl-60",
         )}
       >
-        <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b border-border-4 bg-[rgba(249,249,250,0.8)] px-4 backdrop-blur-[16px] backdrop-saturate-[1.4] dark:bg-[rgba(19,20,21,0.85)] md:px-6">
+        <header
+          className={cn(
+            "sticky top-0 z-10 flex items-center gap-4 border-b border-border-4 bg-[rgba(249,249,250,0.8)] px-4 backdrop-blur-[16px] backdrop-saturate-[1.4] dark:bg-[rgba(19,20,21,0.85)] md:px-6",
+            ADMIN_CHROME_HEIGHT_CLASS,
+          )}
+        >
           <button
             ref={hamburgerRef}
             type="button"
@@ -103,7 +112,10 @@ export function ManageLayoutShell({ children }: { children: React.ReactNode }) {
           <AdminHeaderActions />
         </header>
 
-        <main className="min-h-[calc(100dvh-56px)] px-4 py-6 md:px-6">
+        <main
+          className="px-4 py-6 md:px-6"
+          style={{ minHeight: `calc(100dvh - ${ADMIN_CHROME_HEIGHT})` }}
+        >
           {children}
         </main>
       </div>
