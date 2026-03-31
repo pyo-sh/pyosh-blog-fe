@@ -77,47 +77,54 @@ export function CommentItem({
 
   if (isDeleted) {
     return (
-      <article className="rounded-[1.5rem] border border-border-3 bg-background-1 p-5">
-        <p className="text-body-md italic text-text-4">삭제된 댓글입니다.</p>
+      <article className="border-b border-border-4 py-4">
+        <p className="text-body-sm italic text-text-4">삭제된 댓글입니다.</p>
         {showReplyToggle ? (
-          <button
-            type="button"
-            onClick={onToggleReplies}
-            className="mt-5 inline-flex items-center gap-2 text-body-sm text-text-3 transition-colors hover:text-text-1"
-          >
-            답글 {replyCount}개
-            <ChevronIcon expanded={repliesExpanded} />
-          </button>
+          <div className="mt-2">
+            <button
+              type="button"
+              onClick={onToggleReplies}
+              className="inline-flex items-center gap-1 text-ui-sm text-text-3 transition-colors hover:text-text-1"
+            >
+              답글 {replyCount}개
+              <ChevronIcon expanded={repliesExpanded} />
+            </button>
+          </div>
         ) : null}
       </article>
     );
   }
 
   return (
-    <article className="rounded-[1.5rem] border border-border-3 bg-background-1 p-5">
-      <div className="flex flex-wrap items-center gap-3 text-body-sm text-text-3">
-        <span className="font-semibold text-text-1">{comment.author.name}</span>
-        <time dateTime={comment.createdAt}>
+    <article className="border-b border-border-4 py-4 last:border-b-0">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-ui-sm font-semibold text-text-1">
+          {comment.author.name}
+        </span>
+        <time
+          dateTime={comment.createdAt}
+          className="text-[0.688rem] text-text-4"
+        >
           {formatDate(comment.createdAt)}
         </time>
         {comment.isSecret ? <LockIcon /> : null}
       </div>
 
-      <p className="mt-4 whitespace-pre-wrap text-body-md text-text-2">
+      <p className="mt-2 whitespace-pre-wrap break-keep text-body-sm leading-[1.7] text-text-2">
         {comment.replyToName ? (
-          <span className="font-bold text-primary-1">
+          <span className="text-body-sm font-bold text-primary-1">
             @{comment.replyToName}{" "}
           </span>
         ) : null}
         {body}
       </p>
 
-      <div className="mt-5 flex flex-wrap items-center gap-4">
+      <div className="mt-2 flex flex-wrap items-center gap-3">
         {canReply ? (
           <button
             type="button"
             onClick={() => onReply(comment)}
-            className="text-body-sm font-medium text-primary-1 transition-opacity hover:opacity-80"
+            className="text-ui-xs font-medium text-text-4 transition-colors hover:text-text-2"
           >
             답글
           </button>
@@ -127,23 +134,25 @@ export function CommentItem({
           <button
             type="button"
             onClick={() => onDelete(comment)}
-            className="text-body-sm font-medium text-text-3 transition-opacity hover:opacity-80"
+            className="text-ui-xs font-medium text-text-4 transition-colors hover:text-text-2"
           >
             삭제
           </button>
         ) : null}
+      </div>
 
-        {showReplyToggle ? (
+      {showReplyToggle ? (
+        <div className="mt-1">
           <button
             type="button"
             onClick={onToggleReplies}
-            className="inline-flex items-center gap-2 text-body-sm text-text-3 transition-colors hover:text-text-1"
+            className="inline-flex items-center gap-1 text-ui-sm text-text-3 transition-colors hover:text-text-1"
           >
             답글 {replyCount}개
             <ChevronIcon expanded={repliesExpanded} />
           </button>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
     </article>
   );
 }

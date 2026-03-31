@@ -696,6 +696,12 @@ export function CommentList({
 
     const target = buildReplyTarget(comment);
 
+    if (replyTarget?.commentId === target.commentId) {
+      setReplyTarget(null);
+
+      return;
+    }
+
     setExpandedRoots((current) => ({
       ...current,
       [target.parentId]: true,
@@ -706,16 +712,21 @@ export function CommentList({
   return (
     <section
       ref={sectionRef}
-      className="rounded-[2rem] border border-border-3 bg-background-2 p-6 md:p-8"
+      className="mt-12 border-t border-border-3 pt-8"
       aria-labelledby="post-comments-heading"
     >
       <header>
-        <h2 id="post-comments-heading" className="text-h2 text-text-1">
+        <h2
+          id="post-comments-heading"
+          className="flex items-baseline gap-1.5 text-h4 text-text-1 md:text-h3"
+        >
           댓글{" "}
-          <span className="text-h2 text-text-3">({safeMeta.totalCount})</span>
+          <span className="text-h4 text-text-3 md:text-h3">
+            ({safeMeta.totalCount})
+          </span>
         </h2>
         {isLocked ? (
-          <p className="mt-3 text-body-sm text-text-3">
+          <p className="mt-3 rounded-[0.75rem] border border-border-3 bg-background-2 px-4 py-3 text-body-sm text-text-3">
             댓글이 잠겼습니다. 기존 댓글만 확인할 수 있습니다.
           </p>
         ) : null}
@@ -737,19 +748,19 @@ export function CommentList({
         {loadError ? (
           <div
             role="status"
-            className="mb-5 rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3 text-body-sm text-text-3"
+            className="mb-5 rounded-[0.75rem] border border-border-3 bg-background-2 px-4 py-3 text-body-sm text-text-3"
           >
             {loadError}
           </div>
         ) : null}
 
         {isLoadingPage ? (
-          <div className="flex min-h-48 items-center justify-center rounded-[1.5rem] border border-dashed border-border-3 bg-background-1 px-5 py-8 text-body-md text-text-3">
+          <div className="flex min-h-48 items-center justify-center rounded-[1rem] border border-dashed border-border-3 bg-background-2 px-5 py-8 text-body-md text-text-3">
             <Spinner size="sm" />
             <span className="ml-3">댓글을 불러오는 중입니다.</span>
           </div>
         ) : resolvedComments.length > 0 ? (
-          <ul className="grid gap-5">
+          <ul>
             {resolvedComments.map((comment) => {
               const repliesExpanded =
                 expandedRoots[comment.id] ?? comment.replies.length <= 2;
@@ -763,7 +774,7 @@ export function CommentList({
                 <li
                   key={comment.id}
                   ref={(node) => registerCommentRef(comment.id, node)}
-                  className="space-y-4"
+                  className="space-y-3"
                 >
                   <CommentItem
                     comment={comment}
@@ -799,17 +810,17 @@ export function CommentList({
                       replyToName={replyTarget.replyToName}
                       submitLabel="답글 작성"
                       onCancel={() => setReplyTarget(null)}
-                      className="ml-0 md:ml-8"
+                      className="ml-6 mt-1"
                     />
                   ) : null}
 
                   {visibleReplies.length > 0 ? (
-                    <ul className="grid gap-4 md:ml-8">
+                    <ul className="ml-6 border-l-2 border-border-4 pl-4">
                       {visibleReplies.map((reply) => (
                         <li
                           key={reply.id}
                           ref={(node) => registerCommentRef(reply.id, node)}
-                          className="border-l border-border-3 pl-5"
+                          className="last:[&>article]:border-b-0"
                         >
                           <CommentItem
                             comment={reply}
@@ -836,7 +847,7 @@ export function CommentList({
                               replyToName={replyTarget.replyToName}
                               submitLabel="답글 작성"
                               onCancel={() => setReplyTarget(null)}
-                              className="mt-4"
+                              className="mt-2"
                             />
                           ) : null}
                         </li>
@@ -848,7 +859,7 @@ export function CommentList({
             })}
           </ul>
         ) : (
-          <div className="rounded-[1.5rem] border border-dashed border-border-3 bg-background-1 px-5 py-8 text-body-md text-text-3">
+          <div className="rounded-[1rem] border border-dashed border-border-3 bg-background-2 px-5 py-8 text-body-md text-text-3">
             첫 댓글을 남겨 보세요.
           </div>
         )}
@@ -857,13 +868,13 @@ export function CommentList({
       {!safeMeta.isLegacy && safeMeta.totalPages > 1 ? (
         <nav
           aria-label="댓글 페이지네이션"
-          className="mt-8 flex flex-wrap items-center justify-center gap-2"
+          className="mt-6 flex flex-wrap items-center justify-center gap-1"
         >
           <button
             type="button"
             onClick={() => loadPage(Math.max(1, currentPage - 1))}
             disabled={isLoadingPage || currentPage <= 1}
-            className="inline-flex items-center justify-center rounded-[0.85rem] border border-border-3 px-3 py-2 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-[0.5rem] text-sm text-text-3 transition-colors hover:bg-background-3 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
           >
             &lsaquo;
           </button>
@@ -873,7 +884,7 @@ export function CommentList({
                 <span
                   key={`ellipsis-${currentPage}-${index}`}
                   aria-hidden="true"
-                  className="inline-flex min-w-[2.25rem] items-center justify-center px-1 py-2 text-sm text-text-4"
+                  className="inline-flex h-8 min-w-8 items-center justify-center px-1 text-sm text-text-4"
                 >
                   ...
                 </span>
@@ -886,8 +897,8 @@ export function CommentList({
                   aria-current={page === currentPage ? "page" : undefined}
                   className={
                     page === currentPage
-                      ? "inline-flex min-w-[2.25rem] items-center justify-center rounded-[0.85rem] bg-primary-1 px-3 py-2 text-sm font-semibold text-white"
-                      : "inline-flex min-w-[2.25rem] items-center justify-center rounded-[0.85rem] border border-border-3 px-3 py-2 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+                      ? "inline-flex h-8 min-w-8 items-center justify-center rounded-[0.5rem] bg-primary-1 px-2 text-sm font-semibold text-white"
+                      : "inline-flex h-8 min-w-8 items-center justify-center rounded-[0.5rem] px-2 text-sm text-text-3 transition-colors hover:bg-background-3 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
                   }
                 >
                   {page}
@@ -900,7 +911,7 @@ export function CommentList({
               loadPage(Math.min(safeMeta.totalPages, currentPage + 1))
             }
             disabled={isLoadingPage || currentPage >= safeMeta.totalPages}
-            className="inline-flex items-center justify-center rounded-[0.85rem] border border-border-3 px-3 py-2 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-[0.5rem] text-sm text-text-3 transition-colors hover:bg-background-3 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
           >
             &rsaquo;
           </button>

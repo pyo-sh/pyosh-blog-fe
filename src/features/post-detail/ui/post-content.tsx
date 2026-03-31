@@ -11,7 +11,7 @@ export async function PostContent({ contentMd }: PostContentProps) {
   return (
     <CodeBlockEnhancer>
       <div
-        className="markdown-content prose max-w-none"
+        className="markdown-content post-markdown prose max-w-none break-keep"
         dangerouslySetInnerHTML={{ __html: html }}
       />
     </CodeBlockEnhancer>

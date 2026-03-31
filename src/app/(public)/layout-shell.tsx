@@ -70,9 +70,12 @@ export function PublicLayoutShell({
       {/* 2-column layout: sidebar + main */}
       <div className="mx-auto flex w-full max-w-[67.5rem] gap-6 px-4 md:px-6">
         {/* Desktop sidebar */}
-        <aside aria-label="사이드바" className="hidden w-56 shrink-0 lg:block">
+        <aside
+          aria-label="사이드바"
+          className="hidden w-[234px] shrink-0 pr-6 lg:block"
+        >
           <StickySidebarWrapper>
-            <div className="pr-6 pt-8 pb-16">
+            <div className="pt-8 pb-16">
               <PublicSidebarContent
                 recentPosts={recentPosts}
                 popularPosts={popularPosts}

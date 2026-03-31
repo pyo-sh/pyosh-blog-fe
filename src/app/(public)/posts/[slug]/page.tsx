@@ -1,5 +1,7 @@
 import { cache } from "react";
 import type { Metadata } from "next";
+import { Icon } from "@iconify/react";
+import eyeLinear from "@iconify-icons/solar/eye-linear";
 import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,12 +15,7 @@ import {
 } from "@entities/comment";
 import { fetchPosts, fetchPostBySlug } from "@entities/post";
 import { CommentList } from "@features/comment-section";
-import {
-  PostContent,
-  PostNavigation,
-  RelatedPosts,
-  ViewCounter,
-} from "@features/post-detail";
+import { PostContent, RelatedPosts, ViewCounter } from "@features/post-detail";
 import { ApiResponseError } from "@shared/api";
 import { extractHeadings, type TocItem } from "@shared/lib/markdown";
 import {
@@ -135,7 +132,7 @@ export async function generateMetadata({
 
 export default async function PostDetailPage({ params }: PostDetailPageProps) {
   try {
-    const { post, prevPost, nextPost } = await getPostDetail(params.slug);
+    const { post } = await getPostDetail(params.slug);
     const headings = extractHeadings(post.contentMd);
     let comments: Comment[] = [];
     let commentMeta: CommentListMeta = {
@@ -200,9 +197,11 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
     ];
 
     const viewer = await getCurrentViewer();
+    const publishedAt = post.publishedAt ?? post.createdAt;
+    const formattedViews = (post.totalPageviews ?? 0).toLocaleString("ko-KR");
 
     return (
-      <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col gap-8 px-4 py-12 md:px-6">
+      <main className="w-full pt-8 pb-16">
         {siteUrl ? (
           <JsonLd data={buildBlogPostingJsonLd(post, siteUrl)} />
         ) : null}
@@ -210,72 +209,66 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
           <JsonLd data={buildBreadcrumbJsonLd(breadcrumbItems, siteUrl)} />
         ) : null}
         <ViewCounter postId={post.id} />
-        <article className="overflow-hidden rounded-[2rem] border border-border-3 bg-background-2">
+        <article className="motion-reveal">
           {post.thumbnailUrl && (
-            <div className="relative aspect-[16/9] w-full overflow-hidden bg-background-3">
-              <Image
-                src={post.thumbnailUrl}
-                alt={post.title}
-                fill
-                priority
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 960px"
-              />
+            <div className="mb-6 overflow-hidden rounded-[1.5rem] bg-background-3">
+              <div className="relative aspect-[16/9] w-full">
+                <Image
+                  src={post.thumbnailUrl}
+                  alt={post.title}
+                  fill
+                  priority
+                  className="object-cover"
+                  sizes="(max-width: 1080px) 100vw, 896px"
+                />
+              </div>
             </div>
           )}
 
-          <div className="flex flex-col gap-8 px-8 py-10">
-            <header className="flex flex-col gap-5">
-              <div className="flex flex-wrap items-center gap-3 text-body-xs uppercase tracking-[0.2em] text-text-4">
+          <div className="flex flex-col">
+            <header className="mb-8">
+              <div className="mb-3 flex flex-wrap items-center gap-3">
                 <Link
                   href={`/categories/${post.category.slug}`}
-                  className="transition-colors hover:text-text-2"
+                  className="inline-flex items-center rounded-md bg-primary-1/12 px-2.5 py-1 text-ui-xs font-semibold text-primary-1 transition-colors hover:bg-primary-1/16"
                 >
                   {post.category.name}
                 </Link>
-                <span aria-hidden="true">•</span>
-                <time dateTime={post.publishedAt ?? post.createdAt}>
+                <time dateTime={publishedAt} className="text-ui-xs text-text-4">
                   {formatDate(post.publishedAt, post.createdAt)}
                 </time>
-                {post.contentModifiedAt && (
-                  <>
-                    <span aria-hidden="true">•</span>
-                    <span>
-                      수정:{" "}
-                      <time dateTime={post.contentModifiedAt}>
-                        {formatDate(
-                          post.contentModifiedAt,
-                          post.contentModifiedAt,
-                        )}
-                      </time>
-                    </span>
-                  </>
-                )}
-                <span aria-hidden="true">•</span>
                 <span
-                  aria-label={`조회수 ${(post.totalPageviews ?? 0).toLocaleString("ko-KR")}회`}
+                  className="inline-flex items-center gap-1 text-ui-xs text-text-4"
+                  aria-label={`조회수 ${formattedViews}회`}
                 >
-                  조회 {(post.totalPageviews ?? 0).toLocaleString("ko-KR")}
+                  <Icon icon={eyeLinear} width="14" aria-hidden="true" />
+                  {formattedViews}
                 </span>
               </div>
 
-              <h1 className="text-heading-lg text-text-1">{post.title}</h1>
+              <h1
+                className="break-keep text-[1.5rem] leading-[1.95rem] tracking-tight text-text-1 md:text-h1"
+                style={{ fontWeight: 700 }}
+              >
+                {post.title}
+              </h1>
 
               {post.description?.trim() ? (
-                <p className="max-w-3xl text-body-base leading-7 text-text-3">
+                <p className="mt-4 break-keep text-body-base leading-[1.75] text-text-3">
                   {post.description}
                 </p>
               ) : null}
 
               {post.tags.length > 0 && (
-                <div className="flex flex-wrap gap-3">
+                <div className="mt-6 flex flex-wrap gap-1.5">
                   {post.tags.map((tag) => (
-                    <span
+                    <Link
                       key={tag.id}
-                      className="rounded-full border border-border-3 px-3 py-1.5 text-body-sm text-text-3 transition-colors hover:border-border-2 hover:text-text-2"
+                      href={`/tags/${tag.slug}`}
+                      className="inline-flex rounded-full border border-border-3 px-2.5 py-1 text-ui-xs font-medium text-text-3 transition-all duration-[200ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-primary-1 hover:bg-primary-1/6 hover:text-primary-1"
                     >
                       #{tag.name}
-                    </span>
+                    </Link>
                   ))}
                 </div>
               )}
@@ -293,11 +286,14 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
 
             <PostContent contentMd={post.contentMd} />
 
-            {relatedPosts.length > 0 && <RelatedPosts posts={relatedPosts} />}
+            {relatedPosts.length > 0 ? (
+              <div className="mt-10">
+                <RelatedPosts posts={relatedPosts} />
+              </div>
+            ) : null}
           </div>
         </article>
 
-        <PostNavigation prevPost={prevPost} nextPost={nextPost} />
         {post.commentStatus !== "disabled" ? (
           <CommentList
             postId={post.id}

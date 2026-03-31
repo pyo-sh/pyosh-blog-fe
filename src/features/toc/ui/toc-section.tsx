@@ -1,6 +1,8 @@
 "use client";
 
 import { type MouseEvent, useEffect, useState } from "react";
+import { Icon } from "@iconify/react";
+import listLinear from "@iconify-icons/solar/list-linear";
 import type { TocItem } from "@shared/lib/markdown";
 import { cn } from "@shared/lib/style-utils";
 
@@ -53,8 +55,9 @@ export function TocSection({ headings, onItemClick }: TocSectionProps) {
   return (
     <nav aria-label="목차">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-body-xs font-semibold uppercase tracking-[0.16em] text-text-4">
-          목차
+        <h2 className="flex items-center gap-1.5 text-[0.688rem] font-bold uppercase tracking-[0.04em] text-text-4">
+          <Icon icon={listLinear} width="13" aria-hidden="true" />
+          <span>목차</span>
         </h2>
         <button
           type="button"
@@ -75,12 +78,10 @@ export function TocSection({ headings, onItemClick }: TocSectionProps) {
                 href={`#${item.id}`}
                 onClick={(event) => handleHeadingClick(event, item.id)}
                 className={cn(
-                  "block truncate transition-colors hover:text-primary-1",
-                  item.level === 1 &&
-                    "pl-0 text-body-xs font-medium text-text-3",
-                  item.level === 2 &&
-                    "pl-2.5 text-body-xs font-medium text-text-3",
-                  item.level === 3 && "pl-5 text-[11px] text-text-4",
+                  "block truncate py-[2px] text-[0.688rem] font-medium leading-4 transition-colors hover:text-primary-1",
+                  item.level === 1 && "pl-0 text-text-3",
+                  item.level === 2 && "pl-2.5 text-text-3",
+                  item.level === 3 && "pl-5 text-text-4",
                 )}
                 title={item.text}
               >
