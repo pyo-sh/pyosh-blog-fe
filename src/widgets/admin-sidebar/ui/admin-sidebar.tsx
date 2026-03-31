@@ -16,7 +16,10 @@ import sidebarMinimalisticLinear from "@iconify-icons/solar/sidebar-minimalistic
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ADMIN_CHROME_HEIGHT_CLASS } from "@app/manage/ui/admin-shell-constants";
+import {
+  ADMIN_CHROME_HEIGHT_CLASS,
+  ADMIN_CHROME_STYLE,
+} from "@app/manage/ui/admin-shell-constants";
 import { logout } from "@entities/auth";
 import { cn } from "@shared/lib/style-utils";
 import { ThemeButton } from "@widgets/header/theme-button";
@@ -140,8 +143,8 @@ function SidebarNav({ collapsed = false, onItemClick }: SidebarNavProps) {
                 href={item.path}
                 onClick={onItemClick}
                 className={cn(
-                  "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all",
-                  collapsed ? "justify-center px-0" : "",
+                  "flex items-center rounded-lg px-3 py-2 text-sm transition-all",
+                  collapsed ? "justify-center gap-0 px-0" : "gap-2.5",
                   isActive
                     ? "bg-primary-1/10 font-medium text-primary-1"
                     : "text-text-2 hover:bg-background-3 hover:text-text-1",
@@ -282,49 +285,58 @@ export function AdminSidebar({
       >
         <div
           className={cn(
-            "flex items-center gap-2 border-b border-border-4 px-4",
+            "box-border border-b border-border-4",
+            isCollapsed
+              ? "flex justify-center px-0"
+              : "flex items-center gap-2 px-4",
             ADMIN_CHROME_HEIGHT_CLASS,
           )}
+          style={ADMIN_CHROME_STYLE}
         >
-          <Link
-            href="/manage"
-            className={cn(
-              "flex min-w-0 items-center gap-2 text-primary-1",
-              isCollapsed ? "justify-center" : "",
-            )}
-            title="대시보드"
-          >
-            {isCollapsed ? null : (
-              <LogoIcon
-                width={28}
-                height={28}
-                className="shrink-0 text-primary-1"
-              />
-            )}
-            <span
-              className={cn(
-                "rounded px-1.5 py-0.5 text-xs font-medium transition-[opacity,width] duration-200",
-                isCollapsed
-                  ? "w-0 overflow-hidden bg-transparent p-0 opacity-0"
-                  : "bg-primary-1/10 opacity-100",
-              )}
+          {isCollapsed ? (
+            <button
+              type="button"
+              onClick={onToggleCollapsed}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-text-3 transition-colors hover:bg-background-3 hover:text-text-1"
+              aria-label="사이드바 펼치기"
             >
-              Admin
-            </span>
-          </Link>
+              <Icon
+                icon={sidebarMinimalisticLinear}
+                width="18"
+                aria-hidden="true"
+              />
+            </button>
+          ) : (
+            <>
+              <Link
+                href="/manage"
+                className="flex min-w-0 items-center gap-2 text-primary-1"
+                title="대시보드"
+              >
+                <LogoIcon
+                  width={28}
+                  height={28}
+                  className="shrink-0 text-primary-1"
+                />
+                <span className="rounded bg-primary-1/10 px-1.5 py-0.5 text-xs font-medium">
+                  Admin
+                </span>
+              </Link>
 
-          <button
-            type="button"
-            onClick={onToggleCollapsed}
-            className="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-lg text-text-3 transition-colors hover:bg-background-3 hover:text-text-1"
-            aria-label={isCollapsed ? "사이드바 펼치기" : "사이드바 접기"}
-          >
-            <Icon
-              icon={sidebarMinimalisticLinear}
-              width="18"
-              aria-hidden="true"
-            />
-          </button>
+              <button
+                type="button"
+                onClick={onToggleCollapsed}
+                className="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-lg text-text-3 transition-colors hover:bg-background-3 hover:text-text-1"
+                aria-label="사이드바 접기"
+              >
+                <Icon
+                  icon={sidebarMinimalisticLinear}
+                  width="18"
+                  aria-hidden="true"
+                />
+              </button>
+            </>
+          )}
         </div>
 
         <SidebarNav collapsed={isCollapsed} />
@@ -333,8 +345,8 @@ export function AdminSidebar({
           <Link
             href="/"
             className={cn(
-              "flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-text-3 transition-colors hover:bg-background-3 hover:text-text-1",
-              isCollapsed ? "justify-center px-0" : "",
+              "flex items-center rounded-lg px-3 py-2 text-sm text-text-3 transition-colors hover:bg-background-3 hover:text-text-1",
+              isCollapsed ? "justify-center gap-0 px-0" : "gap-2",
             )}
             title="블로그로 돌아가기"
           >
@@ -369,9 +381,10 @@ export function AdminSidebar({
           >
             <div
               className={cn(
-                "flex items-center gap-2 border-b border-border-4 px-4",
+                "box-border flex items-center gap-2 border-b border-border-4 px-4",
                 ADMIN_CHROME_HEIGHT_CLASS,
               )}
+              style={ADMIN_CHROME_STYLE}
             >
               <Link
                 href="/manage"
