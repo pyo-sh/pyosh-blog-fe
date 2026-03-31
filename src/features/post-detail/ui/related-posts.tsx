@@ -13,7 +13,7 @@ export function RelatedPosts({ posts }: RelatedPostsProps) {
 
   return (
     <section aria-label="관련 글">
-      <h2 className="mb-3 flex items-center gap-1.5 text-body-sm leading-none text-text-1 [font-weight:700]">
+      <h2 className="mb-3 flex items-center gap-1.5 text-body-sm font-bold leading-none text-text-1">
         <Icon
           icon={documentTextLinear}
           width="16"
