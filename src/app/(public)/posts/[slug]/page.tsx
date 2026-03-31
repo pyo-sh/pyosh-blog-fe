@@ -246,15 +246,12 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
                 </span>
               </div>
 
-              <h1 className="break-keep text-body-lg font-bold leading-snug tracking-tight text-text-1 md:text-h1">
+              <h1
+                className="break-keep text-[1.5rem] leading-[1.95rem] tracking-tight text-text-1 md:text-h1"
+                style={{ fontWeight: 700 }}
+              >
                 {post.title}
               </h1>
-
-              {post.description?.trim() ? (
-                <p className="mt-4 max-w-3xl break-keep text-body-base leading-relaxed text-text-3">
-                  {post.description}
-                </p>
-              ) : null}
 
               {post.tags.length > 0 && (
                 <div className="mt-6 flex flex-wrap gap-1.5">

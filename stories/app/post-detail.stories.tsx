@@ -524,15 +524,12 @@ function PostDetailMain({
               </span>
             </div>
 
-            <h1 className="break-keep text-body-lg font-bold leading-snug tracking-tight text-text-1 md:text-h1">
+            <h1
+              className="break-keep text-[1.5rem] leading-[1.95rem] tracking-tight text-text-1 md:text-h1"
+              style={{ fontWeight: 700 }}
+            >
               {postDetailPost.title}
             </h1>
-
-            {postDetailPost.description ? (
-              <p className="mt-4 max-w-3xl break-keep text-body-base leading-relaxed text-text-3">
-                {postDetailPost.description}
-              </p>
-            ) : null}
 
             <div className="mt-6 flex flex-wrap gap-1.5">
               {postDetailPost.tags.map((tag) => (
@@ -865,5 +862,12 @@ export const LockedComments: Story = {
   args: {
     layoutMode: "desktop-sidebar",
     commentStatus: "locked",
+  },
+};
+
+export const DisabledComments: Story = {
+  args: {
+    layoutMode: "desktop-sidebar",
+    commentStatus: "disabled",
   },
 };

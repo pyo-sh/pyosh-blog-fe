@@ -22,12 +22,12 @@ export function RelatedPosts({ posts }: RelatedPostsProps) {
         />
         관련 글
       </h2>
-      <div className="flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [scroll-snap-type:x_mandatory] [&::-webkit-scrollbar]:hidden">
+      <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-2 pr-8 [scrollbar-width:none] [scroll-snap-type:x_mandatory] sm:mx-0 sm:px-0 sm:pr-0 [&::-webkit-scrollbar]:hidden">
         {posts.map((post) => (
           <Link
             key={post.id}
             href={`/posts/${post.slug}`}
-            className="group block w-[180px] shrink-0 overflow-hidden rounded-[0.75rem] border border-border-3 bg-background-2 text-decoration-none transition-all duration-[300ms] ease-[cubic-bezier(0.16,1,0.3,1)] [scroll-snap-align:start] hover:-translate-y-[3px] hover:border-primary-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)]"
+            className="group block w-[11.75rem] shrink-0 overflow-hidden rounded-[0.75rem] border border-border-3 bg-background-2 text-decoration-none transition-all duration-[300ms] ease-[cubic-bezier(0.16,1,0.3,1)] [scroll-snap-align:start] hover:-translate-y-[3px] hover:border-primary-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)]"
           >
             <div className="aspect-[16/10] overflow-hidden bg-background-3">
               {post.thumbnailUrl ? (

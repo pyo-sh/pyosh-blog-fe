@@ -80,14 +80,16 @@ export function CommentItem({
       <article className="border-b border-border-4 py-4">
         <p className="text-body-sm italic text-text-4">삭제된 댓글입니다.</p>
         {showReplyToggle ? (
-          <button
-            type="button"
-            onClick={onToggleReplies}
-            className="mt-2 inline-flex items-center gap-1 text-ui-sm text-text-3 transition-colors hover:text-text-1"
-          >
-            답글 {replyCount}개
-            <ChevronIcon expanded={repliesExpanded} />
-          </button>
+          <div className="mt-2">
+            <button
+              type="button"
+              onClick={onToggleReplies}
+              className="inline-flex items-center gap-1 text-ui-sm text-text-3 transition-colors hover:text-text-1"
+            >
+              답글 {replyCount}개
+              <ChevronIcon expanded={repliesExpanded} />
+            </button>
+          </div>
         ) : null}
       </article>
     );
@@ -137,8 +139,10 @@ export function CommentItem({
             삭제
           </button>
         ) : null}
+      </div>
 
-        {showReplyToggle ? (
+      {showReplyToggle ? (
+        <div className="mt-1">
           <button
             type="button"
             onClick={onToggleReplies}
@@ -147,8 +151,8 @@ export function CommentItem({
             답글 {replyCount}개
             <ChevronIcon expanded={repliesExpanded} />
           </button>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
     </article>
   );
 }
