@@ -273,6 +273,11 @@ function DetailView({
   onSelectAction,
 }: DetailViewProps) {
   const isReply = comment.depth > 0;
+  const stateButtons = [
+    { value: "active", label: "정상" },
+    { value: "deleted", label: "삭제" },
+    { value: "hidden", label: "숨김" },
+  ] as const;
   const actionButtons =
     comment.status === "deleted"
       ? [
@@ -325,19 +330,19 @@ function DetailView({
           <dt className="min-w-[3.75rem] shrink-0 text-right text-text-3">
             글:
           </dt>
-          <dd className="flex flex-wrap items-end gap-2 text-text-1">
+          <dd className="flex min-h-6 flex-wrap items-end gap-2 text-text-1">
             {comment.post ? (
               <>
                 <Link
                   href={`/manage/posts/${comment.postId}/preview`}
-                  className="line-clamp-1 cursor-pointer text-primary-1 transition-colors hover:text-primary-2 hover:underline"
+                  className="line-clamp-1 cursor-pointer self-end text-primary-1 transition-colors hover:text-primary-2 hover:underline"
                   target="_blank"
                 >
                   {comment.post.title}
                 </Link>
                 <Link
                   href={`/manage/posts/${comment.postId}/preview`}
-                  className="shrink-0 cursor-pointer text-xs text-primary-1 transition-colors hover:text-primary-2 hover:underline"
+                  className="shrink-0 self-end cursor-pointer text-xs leading-5 text-primary-1 transition-colors hover:text-primary-2 hover:underline"
                   target="_blank"
                 >
                   글 보기 →
@@ -420,7 +425,7 @@ function DetailView({
             type="button"
             onClick={onToggleParent}
             disabled={threadLoading && !parentExpanded}
-            className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium text-primary-1 transition-colors hover:bg-background-3 disabled:opacity-60"
+            className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[0.8125rem] font-medium text-primary-1 transition-colors hover:bg-background-3 disabled:opacity-60"
           >
             <span>{parentExpanded ? "▼" : "▶"}</span>
             {parentExpanded ? "부모 댓글 숨기기" : "부모 댓글 보기"}
@@ -487,30 +492,48 @@ function DetailView({
         </button>
       </div>
 
-      <div className="flex flex-wrap justify-end gap-2 border-t border-border-4 pt-4">
-        {actionButtons.map((action) => (
+      <div className="flex flex-wrap items-center gap-2 border-t border-border-4 pt-4">
+        <div className="flex items-center gap-1">
+          <span className="text-xs text-text-4">상태 전환:</span>
+          {stateButtons.map((state) => (
+            <span
+              key={state.value}
+              className={cn(
+                "inline-flex rounded-md px-2 py-1 text-xs transition-colors",
+                comment.status === state.value
+                  ? "bg-primary-1/10 text-primary-1"
+                  : "text-text-4",
+              )}
+            >
+              {state.label}
+            </span>
+          ))}
+        </div>
+        <div className="ml-auto flex flex-wrap justify-end gap-2">
+          {actionButtons.map((action) => (
+            <button
+              key={action.value}
+              type="button"
+              onClick={() => onSelectAction(action.value)}
+              disabled={isActionPending}
+              className={cn(
+                "inline-flex items-center justify-center rounded-[0.75rem] px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+                action.tone === "danger"
+                  ? "border border-negative-1/30 text-negative-1 hover:bg-negative-1/10"
+                  : "border border-border-3 text-text-2 hover:border-border-2 hover:text-text-1",
+              )}
+            >
+              {action.label}
+            </button>
+          ))}
           <button
-            key={action.value}
             type="button"
-            onClick={() => onSelectAction(action.value)}
-            disabled={isActionPending}
-            className={cn(
-              "inline-flex items-center justify-center rounded-[0.75rem] px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
-              action.tone === "danger"
-                ? "border border-negative-1/30 text-negative-1 hover:bg-negative-1/10"
-                : "border border-border-3 text-text-2 hover:border-border-2 hover:text-text-1",
-            )}
+            onClick={onClose}
+            className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
           >
-            {action.label}
+            닫기
           </button>
-        ))}
-        <button
-          type="button"
-          onClick={onClose}
-          className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
-        >
-          닫기
-        </button>
+        </div>
       </div>
     </div>
   );
@@ -592,7 +615,7 @@ function ThreadView({
               type="button"
               onClick={() => onClickComment(item)}
               className={cn(
-                "w-full rounded-lg border p-4 text-left transition-colors hover:border-primary-1/50",
+                "w-full cursor-pointer rounded-lg border p-4 text-left transition-colors hover:border-primary-1/50",
                 isFocused
                   ? "border-l-[3px] border-primary-1 bg-primary-2/10"
                   : "border-border-3 hover:bg-background-1",
