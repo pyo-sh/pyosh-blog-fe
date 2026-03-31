@@ -55,7 +55,7 @@ export function TocSection({ headings, onItemClick }: TocSectionProps) {
   return (
     <nav aria-label="목차">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="flex items-center gap-1.5 text-ui-xs font-bold uppercase tracking-[0.04em] text-text-4">
+        <h2 className="flex items-center gap-1.5 text-[0.688rem] font-bold uppercase tracking-[0.04em] text-text-4">
           <Icon icon={listLinear} width="13" aria-hidden="true" />
           <span>목차</span>
         </h2>
@@ -78,7 +78,7 @@ export function TocSection({ headings, onItemClick }: TocSectionProps) {
                 href={`#${item.id}`}
                 onClick={(event) => handleHeadingClick(event, item.id)}
                 className={cn(
-                  "block truncate text-ui-xs font-medium transition-colors hover:text-primary-1",
+                  "block truncate text-[0.688rem] font-medium leading-4 transition-colors hover:text-primary-1",
                   item.level === 1 && "pl-0 text-text-3",
                   item.level === 2 && "pl-2.5 text-text-3",
                   item.level === 3 && "pl-5 text-text-4",

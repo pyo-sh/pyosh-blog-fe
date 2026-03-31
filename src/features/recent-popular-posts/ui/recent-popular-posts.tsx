@@ -52,7 +52,7 @@ export function RecentPopularPosts({
               aria-selected={activeTab === tab}
               onClick={() => setActiveTab(tab)}
               className={cn(
-                "rounded-md px-3 py-1 text-[0.8rem] font-medium transition-colors",
+                "rounded-md px-2.5 py-1 text-[0.8rem] font-medium transition-colors",
                 activeTab === tab
                   ? "bg-primary-1/12 font-semibold text-primary-1"
                   : "text-text-3 hover:text-text-2",
