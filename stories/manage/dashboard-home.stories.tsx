@@ -1,14 +1,15 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { http, HttpResponse } from "msw";
 import { ManageLayoutShell } from "@app/manage/layout-shell";
-import { clearCsrfToken } from "@shared/api";
 import type { AdminCommentItem } from "@entities/comment";
 import type { DashboardStats } from "@entities/stat";
 import { DashboardHome } from "@widgets/dashboard";
 
-const dashboardStatsPattern = /\/api\/admin\/stats\/dashboard$/;
-const adminCommentsPattern = /\/api\/admin\/comments(?:\?.*)?$/;
-const csrfTokenPattern = /\/api\/auth\/csrf-token$/;
-const adminCommentDeletePattern = /\/api\/admin\/comments\/[^/?]+(?:\?.*)?$/;
+const dashboardStatsPattern = /https?:\/\/[^/]+\/api\/admin\/stats\/dashboard$/;
+const adminCommentsPattern = /https?:\/\/[^/]+\/api\/admin\/comments(?:\?.*)?$/;
+const csrfTokenPattern = /https?:\/\/[^/]+\/api\/auth\/csrf-token$/;
+const adminCommentDeletePattern =
+  /https?:\/\/[^/]+\/api\/admin\/comments\/[^/?]+(?:\?.*)?$/;
 
 const dashboardStats: DashboardStats = {
   todayPageviews: 1247,
@@ -62,10 +63,7 @@ const recentComments: AdminCommentItem[] = [
     status: "active",
     author: { type: "guest", name: "이준혁" },
     replyToName: "김지훈",
-    post: {
-      id: 103,
-      title: "Container Queries로 진짜 컴포넌트 기반 반응형 만들기",
-    },
+    post: { id: 103, title: "Container Queries로 진짜 컴포넌트 기반 반응형 만들기" },
     createdAt: "2026-03-31T01:00:00.000Z",
     updatedAt: "2026-03-31T01:00:00.000Z",
   },
@@ -79,10 +77,7 @@ const recentComments: AdminCommentItem[] = [
     status: "active",
     author: { type: "oauth", name: "최민서" },
     replyToName: null,
-    post: {
-      id: 104,
-      title: "Docker 멀티스테이지 빌드로 이미지 크기를 87% 줄인 이야기",
-    },
+    post: { id: 104, title: "Docker 멀티스테이지 빌드로 이미지 크기를 87% 줄인 이야기" },
     createdAt: "2026-03-30T03:00:00.000Z",
     updatedAt: "2026-03-30T03:00:00.000Z",
   },
@@ -102,95 +97,36 @@ const recentComments: AdminCommentItem[] = [
   },
 ];
 
-let originalFetch: typeof globalThis.fetch | null = null;
-
-function toUrlString(input: RequestInfo | URL): string {
-  if (typeof input === "string") {
-    return input;
-  }
-
-  if (input instanceof URL) {
-    return input.toString();
-  }
-
-  return input.url;
-}
-
-function jsonResponse(body: unknown) {
-  return Promise.resolve(
-    new Response(JSON.stringify(body), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
+const handlers = [
+  http.get(dashboardStatsPattern, () =>
+    HttpResponse.json(dashboardStats),
+  ),
+  http.get(adminCommentsPattern, () =>
+    HttpResponse.json({
+      data: recentComments,
+      meta: {
+        page: 1,
+        limit: 5,
+        total: 127,
+        totalPages: 26,
+      },
     }),
-  );
-}
-
-function ensureDashboardFetchMock() {
-  if (typeof window === "undefined" || originalFetch) {
-    return;
-  }
-
-  originalFetch = globalThis.fetch.bind(globalThis);
-
-  globalThis.fetch = async (input, init) => {
-    const url = toUrlString(input);
-    const method =
-      init?.method ??
-      (typeof Request !== "undefined" && input instanceof Request
-        ? input.method
-        : "GET");
-
-    if (method === "GET" && dashboardStatsPattern.test(url)) {
-      return jsonResponse(dashboardStats);
-    }
-
-    if (method === "GET" && adminCommentsPattern.test(url)) {
-      return jsonResponse({
-        data: recentComments,
-        meta: {
-          page: 1,
-          limit: 5,
-          total: 127,
-          totalPages: 26,
-        },
-      });
-    }
-
-    if (method === "GET" && csrfTokenPattern.test(url)) {
-      return jsonResponse({ token: "storybook-csrf-token" });
-    }
-
-    if (method === "DELETE" && adminCommentDeletePattern.test(url)) {
-      return new Response(null, { status: 204 });
-    }
-
-    return originalFetch!(input, init);
-  };
-}
-
-function DashboardCanvas({ withShell }: { withShell: boolean }) {
-  ensureDashboardFetchMock();
-  clearCsrfToken();
-
-  if (withShell) {
-    return (
-      <ManageLayoutShell>
-        <DashboardHome />
-      </ManageLayoutShell>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-background-1 px-4 py-6 md:px-6">
-      <DashboardHome />
-    </div>
-  );
-}
+  ),
+  http.get(csrfTokenPattern, () =>
+    HttpResponse.json({ token: "storybook-csrf-token" }),
+  ),
+  http.delete(adminCommentDeletePattern, () =>
+    new HttpResponse(null, { status: 204 }),
+  ),
+];
 
 const meta = {
   title: "Manage/DashboardHome",
   component: DashboardHome,
   parameters: {
+    msw: {
+      handlers,
+    },
     nextjs: {
       navigation: {
         pathname: "/manage",
@@ -205,9 +141,17 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const DashboardOnly: Story = {
-  render: () => <DashboardCanvas withShell={false} />,
+  render: () => (
+    <div className="min-h-screen bg-background-1 px-4 py-6 md:px-6">
+      <DashboardHome />
+    </div>
+  ),
 };
 
 export const InAdminShell: Story = {
-  render: () => <DashboardCanvas withShell />,
+  render: () => (
+    <ManageLayoutShell>
+      <DashboardHome />
+    </ManageLayoutShell>
+  ),
 };
