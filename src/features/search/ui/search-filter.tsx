@@ -40,7 +40,7 @@ export function SearchFilterDropdown({
         value={currentFilter}
         onChange={handleChange}
         aria-label="검색 필터"
-        className="h-10 appearance-none rounded-[1rem] border border-border-3 bg-background-1 pl-4 pr-9 text-body-sm text-text-1 outline-none transition-colors focus:border-primary-1"
+        className="h-[2.625rem] appearance-none rounded-[0.625rem] border border-border-3 bg-background-2 py-0 pl-[0.875rem] pr-9 text-ui-sm text-text-1 outline-none transition-[border-color,box-shadow] focus:border-primary-1"
       >
         {FILTER_OPTIONS.map((opt) => (
           <option key={opt.value} value={opt.value}>
