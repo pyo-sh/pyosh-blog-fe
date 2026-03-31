@@ -107,9 +107,9 @@ export function ManageLayoutShell({ children }: { children: React.ReactNode }) {
             <Icon icon={hamburgerMenuLinear} width="22" aria-hidden="true" />
           </button>
 
-          <h1 className="text-lg font-bold text-text-1">
+          <p className="text-lg font-bold text-text-1">
             {getPageTitle(pathname)}
-          </h1>
+          </p>
 
           <AdminHeaderActions />
         </header>

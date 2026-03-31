@@ -275,19 +275,13 @@ function DetailView({
   onSelectAction,
 }: DetailViewProps) {
   const isReply = comment.depth > 0;
-  const [selectedStatus, setSelectedStatus] = useState(comment.status);
-
-  useEffect(() => {
-    setSelectedStatus(comment.status);
-  }, [comment.status]);
-
   const stateButtons = [
     { value: "active", label: "정상" },
     { value: "deleted", label: "삭제" },
     { value: "hidden", label: "숨김" },
   ] as const;
   const actionButtons =
-    selectedStatus === "deleted"
+    comment.status === "deleted"
       ? [
           {
             value: "restore" as const,
@@ -300,7 +294,7 @@ function DetailView({
             tone: "danger" as const,
           },
         ]
-      : selectedStatus === "hidden"
+      : comment.status === "hidden"
         ? [
             {
               value: "restore" as const,
@@ -397,14 +391,14 @@ function DetailView({
             <span
               className={cn(
                 "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium",
-                selectedStatus === "active" &&
+                comment.status === "active" &&
                   "bg-positive-1/10 text-positive-1",
-                selectedStatus === "deleted" &&
+                comment.status === "deleted" &&
                   "bg-negative-1/10 text-negative-1",
-                selectedStatus === "hidden" && "bg-background-3 text-text-3",
+                comment.status === "hidden" && "bg-background-3 text-text-3",
               )}
             >
-              {statusLabelMap[selectedStatus]}
+              {statusLabelMap[comment.status]}
             </span>
           </dd>
         </div>
@@ -496,22 +490,20 @@ function DetailView({
         <div className="flex flex-wrap items-center justify-center gap-3">
           <div className="mx-auto flex flex-wrap items-center justify-center gap-1">
             <span className="min-w-fit whitespace-nowrap text-xs text-text-4">
-              상태 전환:
+              상태:
             </span>
             {stateButtons.map((state) => (
-              <button
+              <span
                 key={state.value}
-                type="button"
-                onClick={() => setSelectedStatus(state.value)}
                 className={cn(
-                  "inline-flex min-w-fit cursor-pointer whitespace-nowrap rounded-md px-2 py-1 text-xs transition-colors",
-                  selectedStatus === state.value
+                  "inline-flex min-w-fit whitespace-nowrap rounded-md px-2 py-1 text-xs",
+                  comment.status === state.value
                     ? "bg-primary-1/10 text-primary-1"
-                    : "text-text-4 hover:bg-background-3 hover:text-text-2",
+                    : "text-text-4",
                 )}
               >
                 {state.label}
-              </button>
+              </span>
             ))}
           </div>
 
