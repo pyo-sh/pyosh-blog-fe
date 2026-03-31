@@ -5,6 +5,8 @@ import type { AdminCommentItem } from "@entities/comment";
 import type { DashboardStats } from "@entities/stat";
 import { DashboardHome } from "@widgets/dashboard";
 
+const API_ORIGIN = "http://localhost:5500";
+
 const dashboardStats: DashboardStats = {
   todayPageviews: 1247,
   weekPageviews: 8934,
@@ -92,10 +94,10 @@ const recentComments: AdminCommentItem[] = [
 ];
 
 const handlers = [
-  http.get("/api/admin/stats/dashboard", () =>
+  http.get(`${API_ORIGIN}/api/admin/stats/dashboard`, () =>
     HttpResponse.json(dashboardStats),
   ),
-  http.get("/api/admin/comments", () =>
+  http.get(`${API_ORIGIN}/api/admin/comments`, () =>
     HttpResponse.json({
       data: recentComments,
       meta: {
@@ -106,10 +108,12 @@ const handlers = [
       },
     }),
   ),
-  http.get("/api/auth/csrf-token", () =>
+  http.get(`${API_ORIGIN}/api/auth/csrf-token`, () =>
     HttpResponse.json({ token: "storybook-csrf-token" }),
   ),
-  http.delete("/api/admin/comments/:id", () => new HttpResponse(null, { status: 204 })),
+  http.delete(`${API_ORIGIN}/api/admin/comments/:id`, () =>
+    new HttpResponse(null, { status: 204 }),
+  ),
 ];
 
 const meta = {
