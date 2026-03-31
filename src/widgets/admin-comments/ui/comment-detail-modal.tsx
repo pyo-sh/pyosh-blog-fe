@@ -495,7 +495,9 @@ function DetailView({
       <div className="border-t border-border-4 pt-4">
         <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center justify-center gap-1">
-            <span className="text-xs text-text-4">상태 전환:</span>
+            <span className="min-w-fit whitespace-nowrap text-xs text-text-4">
+              상태 전환:
+            </span>
             {stateButtons.map((state) => (
               <button
                 key={state.value}
@@ -545,7 +547,7 @@ function DetailView({
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+              className="inline-flex min-w-fit items-center justify-center whitespace-nowrap rounded-[0.75rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
             >
               닫기
             </button>
