@@ -129,7 +129,14 @@ export function CommentDeleteModal({
     >
       <div className="max-h-[85vh] overflow-y-auto p-6 text-left">
         <div className="space-y-2">
-          <h2 className="text-lg font-semibold text-text-1">{title}</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-text-1">{title}</h2>
+            {count > 1 ? (
+              <span className="inline-flex rounded-md bg-primary-1/10 px-2 py-0.5 text-xs font-medium text-primary-1">
+                {count}
+              </span>
+            ) : null}
+          </div>
           {description ? (
             <p className="text-sm leading-6 text-text-3">{description}</p>
           ) : null}
