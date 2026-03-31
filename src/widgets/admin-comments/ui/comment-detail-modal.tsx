@@ -493,8 +493,8 @@ function DetailView({
       </div>
 
       <div className="border-t border-border-4 pt-4">
-        <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center justify-center gap-1">
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-3 sm:justify-between">
+          <div className="flex max-w-full flex-wrap items-center justify-center gap-1">
             <span className="min-w-fit whitespace-nowrap text-xs text-text-4">
               상태 전환:
             </span>
@@ -515,7 +515,7 @@ function DetailView({
             ))}
           </div>
 
-          <div className="flex items-center justify-center gap-2">
+          <div className="flex max-w-full flex-wrap items-center justify-center gap-2 sm:justify-end">
             {actionButtons.map((action) => (
               <button
                 key={action.value}
