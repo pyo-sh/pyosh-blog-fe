@@ -13,6 +13,8 @@ export default function ManageNotFound() {
           href: "/manage",
           label: "관리 홈으로 돌아가기",
         }}
+        context="admin"
+        eyebrow="Admin Status"
       />
     </div>
   );
