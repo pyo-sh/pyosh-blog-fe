@@ -5,7 +5,11 @@ import type { AdminCommentItem } from "@entities/comment";
 import type { DashboardStats } from "@entities/stat";
 import { DashboardHome } from "@widgets/dashboard";
 
-const API_ORIGIN = "http://localhost:5500";
+const dashboardStatsPattern = /https?:\/\/[^/]+\/api\/admin\/stats\/dashboard$/;
+const adminCommentsPattern = /https?:\/\/[^/]+\/api\/admin\/comments(?:\?.*)?$/;
+const csrfTokenPattern = /https?:\/\/[^/]+\/api\/auth\/csrf-token$/;
+const adminCommentDeletePattern =
+  /https?:\/\/[^/]+\/api\/admin\/comments\/[^/?]+(?:\?.*)?$/;
 
 const dashboardStats: DashboardStats = {
   todayPageviews: 1247,
@@ -94,10 +98,10 @@ const recentComments: AdminCommentItem[] = [
 ];
 
 const handlers = [
-  http.get(`${API_ORIGIN}/api/admin/stats/dashboard`, () =>
+  http.get(dashboardStatsPattern, () =>
     HttpResponse.json(dashboardStats),
   ),
-  http.get(`${API_ORIGIN}/api/admin/comments`, () =>
+  http.get(adminCommentsPattern, () =>
     HttpResponse.json({
       data: recentComments,
       meta: {
@@ -108,10 +112,10 @@ const handlers = [
       },
     }),
   ),
-  http.get(`${API_ORIGIN}/api/auth/csrf-token`, () =>
+  http.get(csrfTokenPattern, () =>
     HttpResponse.json({ token: "storybook-csrf-token" }),
   ),
-  http.delete(`${API_ORIGIN}/api/admin/comments/:id`, () =>
+  http.delete(adminCommentDeletePattern, () =>
     new HttpResponse(null, { status: 204 }),
   ),
 ];
