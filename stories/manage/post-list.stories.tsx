@@ -1,34 +1,34 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { ManageLayoutShell } from "@app/manage/layout-shell";
-import { DashboardHome } from "@widgets/dashboard";
+import ManagePostsPage from "@app/manage/posts/page";
 import {
-  dashboardEmptyHandlers,
-  dashboardErrorHandlers,
-  dashboardSuccessHandlers,
-} from "../mocks/dashboard-handlers";
+  postListEmptyHandlers,
+  postListErrorHandlers,
+  postListHandlers,
+} from "../mocks/post-list-handlers";
 
-const meta: Meta<typeof DashboardHome> = {
-  title: "Manage/DashboardHome",
-  component: DashboardHome,
+const meta: Meta<typeof ManagePostsPage> = {
+  title: "Manage/PostList",
+  component: ManagePostsPage,
   parameters: {
     layout: "fullscreen",
     nextjs: {
       navigation: {
-        pathname: "/manage",
+        pathname: "/manage/posts",
         query: {},
       },
     },
     msw: {
-      handlers: dashboardSuccessHandlers,
+      handlers: postListHandlers,
     },
   },
 };
 
 export default meta;
 
-type Story = StoryObj<typeof DashboardHome>;
+type Story = StoryObj<typeof ManagePostsPage>;
 
-function DashboardCanvasFrame({ children }: { children: React.ReactNode }) {
+function PostListCanvasFrame({ children }: { children: React.ReactNode }) {
   return (
     <div className="bg-background-1 px-4 py-6 md:px-6">
       <div className="mx-auto w-full max-w-[72rem] rounded-[1.5rem] border border-border-4 bg-background-1/80 p-4 shadow-[0px_18px_60px_0px_rgba(0,0,0,0.05)] md:p-6">
@@ -38,7 +38,7 @@ function DashboardCanvasFrame({ children }: { children: React.ReactNode }) {
   );
 }
 
-function DashboardMobileFrame({ children }: { children: React.ReactNode }) {
+function PostListMobileFrame({ children }: { children: React.ReactNode }) {
   return (
     <div className="bg-background-1 px-4 py-6">
       <div className="mx-auto w-full max-w-[24.5rem] overflow-hidden rounded-[1.5rem] border border-border-4 bg-background-1 shadow-[0px_18px_60px_0px_rgba(0,0,0,0.08)]">
@@ -53,38 +53,43 @@ function DashboardMobileFrame({ children }: { children: React.ReactNode }) {
 export const Default: Story = {
   render: () => (
     <ManageLayoutShell>
-      <DashboardHome />
+      <ManagePostsPage />
     </ManageLayoutShell>
   ),
 };
 
 export const CanvasOnly: Story = {
   render: () => (
-    <DashboardCanvasFrame>
-      <DashboardHome />
-    </DashboardCanvasFrame>
+    <PostListCanvasFrame>
+      <ManagePostsPage />
+    </PostListCanvasFrame>
   ),
 };
 
 export const Mobile: Story = {
+  parameters: {
+    viewport: {
+      defaultViewport: "mobile",
+    },
+  },
   render: () => (
-    <DashboardMobileFrame>
+    <PostListMobileFrame>
       <ManageLayoutShell>
-        <DashboardHome />
+        <ManagePostsPage />
       </ManageLayoutShell>
-    </DashboardMobileFrame>
+    </PostListMobileFrame>
   ),
 };
 
 export const Empty: Story = {
   render: () => (
     <ManageLayoutShell>
-      <DashboardHome />
+      <ManagePostsPage />
     </ManageLayoutShell>
   ),
   parameters: {
     msw: {
-      handlers: dashboardEmptyHandlers,
+      handlers: postListEmptyHandlers,
     },
   },
 };
@@ -92,12 +97,12 @@ export const Empty: Story = {
 export const Error: Story = {
   render: () => (
     <ManageLayoutShell>
-      <DashboardHome />
+      <ManagePostsPage />
     </ManageLayoutShell>
   ),
   parameters: {
     msw: {
-      handlers: dashboardErrorHandlers,
+      handlers: postListErrorHandlers,
     },
   },
 };

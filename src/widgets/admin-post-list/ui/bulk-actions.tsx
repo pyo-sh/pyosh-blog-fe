@@ -1,6 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { Icon } from "@iconify/react";
+import altArrowDownLinear from "@iconify-icons/solar/alt-arrow-down-linear";
+import restartLinear from "@iconify-icons/solar/restart-linear";
 import type { AdminPostTab } from "./post-filters";
 import type { Category } from "@entities/category";
 import { cn } from "@shared/lib/style-utils";
@@ -19,7 +22,6 @@ interface BulkActionsProps {
     ids: number[],
     categoryId?: number,
     commentStatus?: "open" | "locked" | "disabled",
-    visibility?: "public" | "private",
   ) => Promise<void>;
   onClearSelection: () => void;
 }
@@ -30,7 +32,7 @@ const COMMENT_STATUS_OPTIONS: Array<{
 }> = [
   { label: "열림", value: "open" },
   { label: "잠김", value: "locked" },
-  { label: "비활성", value: "disabled" },
+  { label: "닫힘", value: "disabled" },
 ];
 
 const COMMENT_STATUS_DESC: Record<"open" | "locked" | "disabled", string> = {
@@ -39,13 +41,187 @@ const COMMENT_STATUS_DESC: Record<"open" | "locked" | "disabled", string> = {
   disabled: "댓글 영역이 완전히 숨겨집니다.",
 };
 
-const VISIBILITY_OPTIONS: Array<{
-  label: string;
-  value: "public" | "private";
-}> = [
-  { label: "공개", value: "public" },
-  { label: "비공개", value: "private" },
-];
+function BulkSelect({
+  value,
+  onChange,
+  options,
+  ariaLabel,
+  className,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  options: Array<{ label: string; value: string; depth?: number }>;
+  ariaLabel: string;
+  className?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const listboxId = useId();
+  const selectedOption =
+    options.find((option) => option.value === value) ?? options[0];
+  const selectedIndex = Math.max(
+    options.findIndex((option) => option.value === value),
+    0,
+  );
+
+  useEffect(() => {
+    function handlePointerDown(event: MouseEvent) {
+      if (
+        rootRef.current &&
+        !rootRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handlePointerDown);
+
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const next = optionRefs.current[activeIndex];
+    if (!next) return;
+
+    const frame = requestAnimationFrame(() => next.focus());
+
+    return () => cancelAnimationFrame(frame);
+  }, [activeIndex, open]);
+
+  function openList(index = selectedIndex) {
+    setActiveIndex(index);
+    setOpen(true);
+  }
+
+  function closeList() {
+    setOpen(false);
+    triggerRef.current?.focus();
+  }
+
+  function selectValue(nextValue: string) {
+    onChange(nextValue);
+    closeList();
+  }
+
+  function moveActive(nextIndex: number) {
+    const maxIndex = options.length - 1;
+    setActiveIndex(Math.min(Math.max(nextIndex, 0), maxIndex));
+  }
+
+  return (
+    <div ref={rootRef} className={cn("relative inline-flex", className)}>
+      <button
+        ref={triggerRef}
+        type="button"
+        aria-label={ariaLabel}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-controls={listboxId}
+        onClick={() =>
+          open ? setOpen(false) : openList(selectedIndex)
+        }
+        onKeyDown={(event) => {
+          if (event.key === "ArrowDown") {
+            event.preventDefault();
+            openList(selectedIndex);
+          } else if (event.key === "ArrowUp") {
+            event.preventDefault();
+            openList(selectedIndex);
+          } else if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openList(selectedIndex);
+          }
+        }}
+        className={cn(
+          "flex h-8 w-full items-center rounded-md border border-border-3 bg-background-1 px-2.5 py-[5px] pr-7 text-left text-[12px] font-normal leading-none text-text-1 outline-none transition-colors",
+          open && "border-primary-1 ring-3 ring-primary-1/10",
+        )}
+      >
+        <span className="truncate whitespace-nowrap">
+          {selectedOption?.label ?? ""}
+        </span>
+        <Icon
+          icon={altArrowDownLinear}
+          width="12"
+          aria-hidden="true"
+          className={cn(
+            "pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-text-4 transition-transform",
+            open && "rotate-180",
+          )}
+        />
+      </button>
+
+      {open ? (
+        <div className="absolute left-0 top-[calc(100%+4px)] z-[200] min-w-full overflow-hidden rounded-lg border border-border-3 bg-background-1 shadow-[0_4px_16px_rgba(0,0,0,0.1)]">
+          <div
+            id={listboxId}
+            role="listbox"
+            aria-label={ariaLabel}
+            className="py-0.5"
+          >
+            {options.map((option, index) => {
+              const isSelected = option.value === value;
+
+              return (
+                <button
+                  key={option.value}
+                  ref={(node) => {
+                    optionRefs.current[index] = node;
+                  }}
+                  type="button"
+                  role="option"
+                  aria-selected={isSelected}
+                  tabIndex={index === activeIndex ? 0 : -1}
+                  onClick={() => selectValue(option.value)}
+                  onFocus={() => setActiveIndex(index)}
+                  onKeyDown={(event) => {
+                    if (event.key === "ArrowDown") {
+                      event.preventDefault();
+                      moveActive(index + 1);
+                    } else if (event.key === "ArrowUp") {
+                      event.preventDefault();
+                      moveActive(index - 1);
+                    } else if (event.key === "Home") {
+                      event.preventDefault();
+                      moveActive(0);
+                    } else if (event.key === "End") {
+                      event.preventDefault();
+                      moveActive(options.length - 1);
+                    } else if (event.key === "Escape") {
+                      event.preventDefault();
+                      closeList();
+                    } else if (event.key === "Tab") {
+                      setOpen(false);
+                    } else if (event.key === " " || event.key === "Enter") {
+                      event.preventDefault();
+                      selectValue(option.value);
+                    }
+                  }}
+                  className={cn(
+                    "flex w-full items-center whitespace-nowrap px-3 py-2 text-left text-[12px] leading-none text-text-1 transition-colors hover:bg-background-2",
+                    isSelected && "font-medium text-primary-1",
+                  )}
+                  style={{
+                    paddingLeft: option.depth
+                      ? `${12 + option.depth * 16}px`
+                      : undefined,
+                  }}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 function buildCategoryTree(
   categories: Category[],
@@ -53,10 +229,13 @@ function buildCategoryTree(
   depth = 0,
 ): Array<{ category: Category; depth: number }> {
   const result: Array<{ category: Category; depth: number }> = [];
-  const children = categories.filter((c) => c.parentId === parentId);
-  for (const child of children) {
-    result.push({ category: child, depth });
-    result.push(...buildCategoryTree(categories, child.id, depth + 1));
+  const children = categories.filter(
+    (category) => category.parentId === parentId,
+  );
+
+  for (const category of children) {
+    result.push({ category, depth });
+    result.push(...buildCategoryTree(categories, category.id, depth + 1));
   }
 
   return result;
@@ -78,35 +257,49 @@ export function BulkActions({
   const [commentStatus, setCommentStatus] = useState<
     "open" | "locked" | "disabled" | undefined
   >(undefined);
-  const [visibility, setVisibility] = useState<
-    "public" | "private" | undefined
-  >(undefined);
   const [showApplyDialog, setShowApplyDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showRestoreDialog, setShowRestoreDialog] = useState(false);
   const [showHardDeleteDialog, setShowHardDeleteDialog] = useState(false);
   const [isPending, setIsPending] = useState(false);
 
+  const flatCategories = useMemo(
+    () => buildCategoryTree(categories),
+    [categories],
+  );
+  const categoryOptions = useMemo(
+    () => [
+      { label: "카테고리", value: "" },
+      ...flatCategories.map(({ category, depth }) => ({
+        label: category.name,
+        value: String(category.id),
+        depth,
+      })),
+    ],
+    [flatCategories],
+  );
+  const commentStatusOptions = useMemo(
+    () => [
+      { label: "댓글 상태", value: "" },
+      ...COMMENT_STATUS_OPTIONS,
+    ],
+    [],
+  );
   const count = selectedIds.length;
-  const hasUpdate =
-    categoryId !== undefined ||
-    commentStatus !== undefined ||
-    visibility !== undefined;
-  const flatCategories = buildCategoryTree(categories);
+  const hasUpdate = categoryId !== undefined || commentStatus !== undefined;
 
   if (count === 0) return null;
 
   async function handleApply() {
     setIsPending(true);
     try {
-      await onBulkUpdate(selectedIds, categoryId, commentStatus, visibility);
+      await onBulkUpdate(selectedIds, categoryId, commentStatus);
       setCategoryId(undefined);
       setCommentStatus(undefined);
-      setVisibility(undefined);
       setShowApplyDialog(false);
       onClearSelection();
     } catch {
-      // Parent already toasted; keep dialog open so user can retry.
+      // Parent mutation already handles the error.
     } finally {
       setIsPending(false);
     }
@@ -119,7 +312,7 @@ export function BulkActions({
       setShowDeleteDialog(false);
       onClearSelection();
     } catch {
-      // Parent already toasted; keep dialog open so user can retry.
+      // Parent mutation already handles the error.
     } finally {
       setIsPending(false);
     }
@@ -132,7 +325,7 @@ export function BulkActions({
       setShowRestoreDialog(false);
       onClearSelection();
     } catch {
-      // Parent already toasted; keep dialog open so user can retry.
+      // Parent mutation already handles the error.
     } finally {
       setIsPending(false);
     }
@@ -145,7 +338,7 @@ export function BulkActions({
       setShowHardDeleteDialog(false);
       onClearSelection();
     } catch {
-      // Parent already toasted; keep dialog open so user can retry.
+      // Parent mutation already handles the error.
     } finally {
       setIsPending(false);
     }
@@ -153,95 +346,57 @@ export function BulkActions({
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-3 rounded-[1rem] border border-primary-1/20 bg-primary-1/5 px-4 py-3">
-        <label className="flex items-center gap-2 text-sm font-medium text-text-1">
+      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border-3 bg-background-2 px-4 py-3">
+        <label className="flex items-center gap-2 text-body-sm font-medium leading-none text-text-2">
           <input
             type="checkbox"
             checked={allSelected}
             onChange={onSelectAll}
             className="h-4 w-4 rounded border-border-3 accent-primary-1"
           />
-          전체
+          <span className="leading-none">전체</span>
+          <span className="ml-1 text-body-sm font-semibold leading-none text-primary-1">
+            선택됨 {count}개
+          </span>
         </label>
 
-        <span className="text-sm text-text-2">선택됨 {count}개</span>
+        <div className="hidden h-6 w-px bg-border-3 md:block" />
 
         {tab === "active" ? (
-          <>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-text-4">카테고리:</span>
-              <select
-                value={categoryId ?? ""}
-                onChange={(e) =>
-                  setCategoryId(
-                    e.target.value ? Number(e.target.value) : undefined,
-                  )
-                }
-                className="rounded-[0.6rem] border border-border-3 bg-background-1 px-2 py-1.5 text-sm text-text-1 outline-none focus:border-primary-1"
-              >
-                <option value="">-</option>
-                {flatCategories.map(({ category, depth }) => (
-                  <option key={category.id} value={category.id}>
-                    {"\u00A0".repeat(depth * 2)}
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className="flex flex-1 flex-wrap items-center gap-2">
+            <BulkSelect
+              value={categoryId ? String(categoryId) : ""}
+              onChange={(value) =>
+                setCategoryId(value ? Number(value) : undefined)
+              }
+              options={categoryOptions}
+              ariaLabel="일괄 카테고리 변경"
+              className="min-w-[8rem]"
+            />
 
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-text-4">댓글:</span>
-              <select
-                value={commentStatus ?? ""}
-                onChange={(e) =>
-                  setCommentStatus(
-                    (e.target.value as "open" | "locked" | "disabled") ||
-                      undefined,
-                  )
-                }
-                className="rounded-[0.6rem] border border-border-3 bg-background-1 px-2 py-1.5 text-sm text-text-1 outline-none focus:border-primary-1"
-              >
-                <option value="">-</option>
-                {COMMENT_STATUS_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-text-4">공개:</span>
-              <select
-                value={visibility ?? ""}
-                onChange={(e) =>
-                  setVisibility(
-                    (e.target.value as "public" | "private") || undefined,
-                  )
-                }
-                className="rounded-[0.6rem] border border-border-3 bg-background-1 px-2 py-1.5 text-sm text-text-1 outline-none focus:border-primary-1"
-              >
-                <option value="">-</option>
-                {VISIBILITY_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <BulkSelect
+              value={commentStatus ?? ""}
+              onChange={(value) =>
+                setCommentStatus(
+                  (value as "open" | "locked" | "disabled") || undefined,
+                )
+              }
+              options={commentStatusOptions}
+              ariaLabel="일괄 댓글 상태 변경"
+              className="min-w-[8rem]"
+            />
 
             <button
               type="button"
               onClick={() => {
                 setCategoryId(undefined);
                 setCommentStatus(undefined);
-                setVisibility(undefined);
               }}
+              aria-label="일괄 변경 초기화"
               disabled={!hasUpdate}
-              className="rounded-[0.6rem] border border-border-3 px-2.5 py-1.5 text-sm text-text-3 transition-colors hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
-              aria-label="초기화"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border-3 text-text-2 transition-colors hover:bg-background-3 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              ↺
+              <Icon icon={restartLinear} width="16" aria-hidden="true" />
             </button>
 
             <button
@@ -249,59 +404,47 @@ export function BulkActions({
               onClick={() => setShowApplyDialog(true)}
               disabled={!hasUpdate || isPending}
               className={cn(
-                "rounded-[0.6rem] px-3 py-1.5 text-sm font-medium transition-colors",
-                "disabled:cursor-not-allowed disabled:opacity-50",
+                "inline-flex h-8 items-center justify-center rounded-md border px-3 text-[12px] font-medium leading-none transition-colors",
                 hasUpdate
-                  ? "bg-primary-1 text-white hover:opacity-90"
+                  ? "border-primary-1 bg-primary-1 text-white hover:opacity-90"
                   : "border border-border-3 text-text-3",
+                "disabled:cursor-not-allowed disabled:opacity-50",
               )}
             >
               적용
             </button>
-          </>
+
+            <button
+              type="button"
+              onClick={() => setShowDeleteDialog(true)}
+              disabled={isPending}
+              className="inline-flex h-8 items-center justify-center rounded-md border border-negative-1 bg-negative-1 px-3 text-[12px] font-medium leading-none text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              삭제
+            </button>
+          </div>
         ) : (
-          <>
+          <div className="flex flex-1 flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => setShowRestoreDialog(true)}
               disabled={isPending}
-              className="rounded-[0.6rem] border border-border-3 px-3 py-1.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-8 items-center justify-center rounded-md border border-border-3 px-3 text-[12px] font-medium leading-none text-text-2 transition-colors hover:bg-background-3 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {isPending ? "처리 중..." : "일괄 복원"}
+              복원
             </button>
             <button
               type="button"
               onClick={() => setShowHardDeleteDialog(true)}
               disabled={isPending}
-              className="rounded-[0.6rem] border border-negative-1/30 px-3 py-1.5 text-sm font-medium text-negative-1 transition-colors hover:bg-negative-1/10 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-8 items-center justify-center rounded-md border border-negative-1 bg-negative-1 px-3 text-[12px] font-medium leading-none text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              일괄 영구 삭제
+              삭제
             </button>
-          </>
+          </div>
         )}
-
-        <div className="ml-auto flex items-center gap-3">
-          {tab === "active" ? (
-            <button
-              type="button"
-              onClick={() => setShowDeleteDialog(true)}
-              disabled={isPending}
-              className="rounded-[0.6rem] border border-negative-1/30 px-3 py-1.5 text-sm font-medium text-negative-1 transition-colors hover:bg-negative-1/10 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              일괄 삭제
-            </button>
-          ) : null}
-          <button
-            type="button"
-            onClick={onClearSelection}
-            className="text-xs text-text-4 hover:text-text-2"
-          >
-            선택 해제
-          </button>
-        </div>
       </div>
 
-      {/* Apply confirm dialog */}
       <ConfirmDialog
         isOpen={showApplyDialog}
         onClose={() => setShowApplyDialog(false)}
@@ -313,44 +456,33 @@ export function BulkActions({
         <ul className="space-y-2">
           {categoryId !== undefined ? (
             <li>
-              카테고리: →{" "}
+              카테고리:{" "}
               <span className="font-medium text-text-1">
-                {flatCategories.find((f) => f.category.id === categoryId)
-                  ?.category.name ?? String(categoryId)}
+                {flatCategories.find((item) => item.category.id === categoryId)
+                  ?.category.name ?? categoryId}
               </span>
             </li>
           ) : null}
           {commentStatus !== undefined ? (
             <li>
               <div>
-                댓글 상태: →{" "}
+                댓글 상태:{" "}
                 <span className="font-medium text-text-1">
                   {
                     COMMENT_STATUS_OPTIONS.find(
-                      (o) => o.value === commentStatus,
+                      (option) => option.value === commentStatus,
                     )?.label
                   }
                 </span>
               </div>
-              <p className="mt-1 text-xs text-text-4">
-                &quot;{COMMENT_STATUS_DESC[commentStatus]}&quot;
+              <p className="mt-1 text-ui-xs text-text-4">
+                {COMMENT_STATUS_DESC[commentStatus]}
               </p>
-            </li>
-          ) : null}
-          {visibility !== undefined ? (
-            <li>
-              공개 여부: →{" "}
-              <span className="font-medium text-text-1">
-                {VISIBILITY_OPTIONS.find(
-                  (option) => option.value === visibility,
-                )?.label ?? visibility}
-              </span>
             </li>
           ) : null}
         </ul>
       </ConfirmDialog>
 
-      {/* Soft delete confirm dialog */}
       <ConfirmDialog
         isOpen={showDeleteDialog}
         onClose={() => setShowDeleteDialog(false)}
@@ -363,7 +495,6 @@ export function BulkActions({
         <p>삭제된 글은 휴지통에서 복원할 수 있습니다.</p>
       </ConfirmDialog>
 
-      {/* Restore confirm dialog */}
       <ConfirmDialog
         isOpen={showRestoreDialog}
         onClose={() => setShowRestoreDialog(false)}
@@ -375,7 +506,6 @@ export function BulkActions({
         <p>복원된 글은 활성 글 탭에 다시 표시됩니다.</p>
       </ConfirmDialog>
 
-      {/* Hard delete confirm dialog */}
       <ConfirmDialog
         isOpen={showHardDeleteDialog}
         onClose={() => setShowHardDeleteDialog(false)}
