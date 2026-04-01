@@ -153,16 +153,19 @@ function InlineVisibilitySwitch({
   checked,
   disabled,
   onClick,
+  ariaLabel,
 }: {
   checked: boolean;
   disabled: boolean;
   onClick: () => void;
+  ariaLabel: string;
 }) {
   return (
     <button
       type="button"
       role="switch"
       aria-checked={checked}
+      aria-label={ariaLabel}
       disabled={disabled}
       onClick={(event) => {
         event.stopPropagation();
@@ -691,6 +694,7 @@ export function PostTable({
                           checked={post.visibility === "public"}
                           disabled={isTogglePending}
                           onClick={() => onToggleVisibility(post)}
+                          ariaLabel={`${post.title} 공개 여부`}
                         />
                         <span
                           className={cn(
