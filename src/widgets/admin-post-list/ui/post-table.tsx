@@ -326,6 +326,8 @@ export function PostTable({
     try {
       await onDelete(singleDeleteTarget.id);
       setSingleDeleteTarget(null);
+    } catch {
+      // Parent mutation already handles the error.
     } finally {
       setIsDeletePending(false);
     }
@@ -337,6 +339,8 @@ export function PostTable({
     try {
       await onHardDelete(hardDeleteTarget.id);
       setHardDeleteTarget(null);
+    } catch {
+      // Parent mutation already handles the error.
     } finally {
       setIsHardDeletePending(false);
     }

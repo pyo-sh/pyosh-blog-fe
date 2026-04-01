@@ -311,6 +311,8 @@ export function BulkActions({
       await onBulkDelete(selectedIds);
       setShowDeleteDialog(false);
       onClearSelection();
+    } catch {
+      // Parent mutation already handles the error.
     } finally {
       setIsPending(false);
     }
@@ -322,6 +324,8 @@ export function BulkActions({
       await onBulkRestore(selectedIds);
       setShowRestoreDialog(false);
       onClearSelection();
+    } catch {
+      // Parent mutation already handles the error.
     } finally {
       setIsPending(false);
     }
@@ -333,6 +337,8 @@ export function BulkActions({
       await onBulkHardDelete(selectedIds);
       setShowHardDeleteDialog(false);
       onClearSelection();
+    } catch {
+      // Parent mutation already handles the error.
     } finally {
       setIsPending(false);
     }
