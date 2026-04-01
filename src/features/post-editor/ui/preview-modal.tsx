@@ -44,7 +44,7 @@ export function PreviewModal({
           <MarkdownPreview
             value={value}
             className="h-full min-h-0"
-            headerTitle="미리보기"
+            showHeader={false}
           />
         </div>
       </div>

@@ -6,6 +6,7 @@ import { Icon } from "@iconify/react";
 import archiveLinear from "@iconify-icons/solar/archive-linear";
 import checkCircleLinear from "@iconify-icons/solar/check-circle-linear";
 import disketteLinear from "@iconify-icons/solar/diskette-linear";
+import eyeLinear from "@iconify-icons/solar/eye-linear";
 import uploadLinear from "@iconify-icons/solar/upload-linear";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -1012,19 +1013,6 @@ export function PostForm({
             <section
               className={cn("min-h-0", activeTab === "all" ? "" : "flex-1")}
             >
-              {!isDesktopPreview &&
-              (activeTab === "all" || activeTab === "editor-split") ? (
-                <div className="flex justify-end px-6 py-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowPreviewModal(true)}
-                    className="rounded-[0.85rem] border border-border-3 bg-background-2 px-4 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
-                  >
-                    미리보기
-                  </button>
-                </div>
-              ) : null}
-
               <div
                 className={cn(
                   "grid min-h-0 gap-0 overflow-hidden bg-background-1",
@@ -1092,6 +1080,17 @@ export function PostForm({
                   ? "저장 중"
                   : "저장"}
               </button>
+              {!isDesktopPreview &&
+              (activeTab === "all" || activeTab === "editor-split") ? (
+                <button
+                  type="button"
+                  onClick={() => setShowPreviewModal(true)}
+                  className={SECONDARY_BUTTON_CLASS}
+                >
+                  <Icon icon={eyeLinear} width="16" aria-hidden="true" />
+                  미리보기
+                </button>
+              ) : null}
             </div>
 
             <div className="ml-auto flex flex-wrap items-center gap-3">

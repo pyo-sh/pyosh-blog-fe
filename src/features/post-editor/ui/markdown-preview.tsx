@@ -10,6 +10,7 @@ interface MarkdownPreviewProps {
   containerRef?: RefObject<HTMLDivElement>;
   className?: string;
   headerTitle?: string;
+  showHeader?: boolean;
 }
 
 export function MarkdownPreview({
@@ -17,6 +18,7 @@ export function MarkdownPreview({
   containerRef,
   className,
   headerTitle = "Preview",
+  showHeader = true,
 }: MarkdownPreviewProps) {
   const [html, setHtml] = useState("");
   const [isRendering, setIsRendering] = useState(false);
@@ -58,10 +60,12 @@ export function MarkdownPreview({
         className,
       )}
     >
-      <div className="flex items-center justify-between border-b border-border-3 bg-background-2 px-4 py-3 text-xs font-medium text-text-4">
-        <span>{headerTitle}</span>
-        <span>{isRendering ? "렌더링 중" : "실시간 반영"}</span>
-      </div>
+      {showHeader ? (
+        <div className="flex items-center justify-between border-b border-border-3 bg-background-2 px-4 py-3 text-xs font-medium text-text-4">
+          <span>{headerTitle}</span>
+          <span>{isRendering ? "렌더링 중" : "실시간 반영"}</span>
+        </div>
+      ) : null}
 
       {error ? (
         <div className="p-6 text-sm text-negative-1">{error}</div>
