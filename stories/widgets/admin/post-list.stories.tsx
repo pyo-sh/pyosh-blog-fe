@@ -26,6 +26,7 @@ function AdminPostListStory({
   const [tab, setTab] = useState<AdminPostTab>(initialTab);
   const [status, setStatus] = useState<AdminPostStatusFilter>("all");
   const [visibility, setVisibility] = useState<AdminPostVisibilityFilter>("all");
+  const [categoryId, setCategoryId] = useState<number | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<number[]>(initiallySelectedIds);
   const [sort, setSort] = useState<SortField | undefined>(undefined);
@@ -69,6 +70,7 @@ function AdminPostListStory({
     setSearchQuery("");
     setStatus("all");
     setVisibility("all");
+    setCategoryId(undefined);
   }
 
   function handleSortChange(field: SortField) {
@@ -92,10 +94,13 @@ function AdminPostListStory({
         trashCount={trashPosts.length}
         status={status}
         visibility={visibility}
+        categoryId={categoryId}
+        categories={mockCategories}
         searchQuery={searchQuery}
         onTabChange={resetListForTab}
         onStatusChange={setStatus}
         onVisibilityChange={setVisibility}
+        onCategoryChange={setCategoryId}
         onSearch={setSearchQuery}
       />
 
@@ -137,12 +142,7 @@ function AdminPostListStory({
               current.filter((post) => !ids.includes(post.id)),
             );
           }}
-          onBulkUpdate={async (
-            ids,
-            categoryId,
-            commentStatus,
-            nextVisibility,
-          ) => {
+          onBulkUpdate={async (ids, categoryId, commentStatus) => {
             setActivePosts((current) =>
               current.map((post) => {
                 if (!ids.includes(post.id)) {
@@ -163,7 +163,6 @@ function AdminPostListStory({
                     slug: category.slug,
                   },
                   commentStatus: commentStatus ?? post.commentStatus,
-                  visibility: nextVisibility ?? post.visibility,
                 };
               }),
             );
