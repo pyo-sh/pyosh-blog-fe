@@ -151,33 +151,6 @@ function sortCategories(categories: Category[]): Category[] {
     }));
 }
 
-function FormField({
-  label,
-  htmlFor,
-  children,
-  hint,
-  description,
-}: {
-  label: string;
-  htmlFor?: string;
-  children: ReactNode;
-  hint?: string;
-  description?: string;
-}) {
-  return (
-    <label className="flex flex-col gap-2.5" htmlFor={htmlFor}>
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="text-xs font-medium text-text-2">{label}</span>
-        {hint ? <span className="text-xs text-text-4">{hint}</span> : null}
-      </div>
-      {children}
-      {description ? (
-        <p className="text-xs text-text-4">{description}</p>
-      ) : null}
-    </label>
-  );
-}
-
 function getStatusMeta(status: Post["status"]) {
   if (status === "published") {
     return {
@@ -230,6 +203,26 @@ function CompactMetaLabel({
         {label}
       </span>
       {children}
+    </div>
+  );
+}
+
+function MetaFormRow({
+  label,
+  children,
+  hint,
+}: {
+  label: string;
+  children: ReactNode;
+  hint?: string;
+}) {
+  return (
+    <div className="grid gap-3 border-b border-border-4 pb-5 last:border-b-0 last:pb-0 md:grid-cols-[7rem_minmax(0,1fr)] md:items-start">
+      <div className="pt-2 text-sm font-medium text-text-2">{label}</div>
+      <div className="min-w-0">
+        {children}
+        {hint ? <p className="mt-2 text-xs text-text-4">{hint}</p> : null}
+      </div>
     </div>
   );
 }
@@ -657,9 +650,9 @@ export function PostForm({
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "rounded-[0.75rem] px-3 py-2 text-sm font-medium transition-colors",
+                  "rounded-[0.7rem] px-3 py-1.5 text-sm font-medium transition-colors",
                   activeTab === tab.id
-                    ? "bg-background-1 text-primary-1 shadow-[0px_8px_24px_0px_rgba(15,23,42,0.06)]"
+                    ? "bg-background-1 text-primary-1 shadow-[0px_8px_20px_0px_rgba(15,23,42,0.06)]"
                     : "text-text-3 hover:bg-background-3 hover:text-text-1",
                 )}
               >
@@ -674,7 +667,7 @@ export function PostForm({
           </div>
         </div>
 
-        <div className="border-b border-border-4 px-5 py-4 md:px-6">
+        <div className="border-b border-border-4 px-6 py-4">
           <input
             id="title"
             name="title"
@@ -684,7 +677,7 @@ export function PostForm({
             onChange={(event) => handleFieldChange("title", event.target.value)}
             placeholder="제목을 입력하세요"
             aria-label="제목"
-            className="w-full border-none bg-transparent text-[1.7rem] font-semibold tracking-[-0.03em] text-text-1 outline-none placeholder:text-text-4 md:text-[2rem]"
+            className="w-full border-none bg-transparent text-[1.8rem] font-semibold tracking-[-0.03em] text-text-1 outline-none placeholder:text-text-4 md:text-[2rem]"
           />
         </div>
 
@@ -710,10 +703,10 @@ export function PostForm({
         ) : null}
 
         {activeTab === "all" ? (
-          <section className="border-b border-border-4 px-5 py-4 md:px-6">
-            <div className="flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-6 lg:gap-y-3">
+          <section className="border-b border-border-4 px-6 py-3">
+            <div className="flex flex-col gap-3 xl:flex-row xl:flex-wrap xl:items-center xl:gap-x-5 xl:gap-y-3">
               <CompactMetaLabel label="카테고리">
-                <div className="min-w-[12rem]">
+                <div className="min-w-[10rem]">
                   <CategoryTreeSelect
                     categories={categories}
                     value={values.categoryId}
@@ -724,7 +717,7 @@ export function PostForm({
               </CompactMetaLabel>
 
               <CompactMetaLabel label="태그">
-                <div className="min-w-[18rem] flex-1">
+                <div className="min-w-[16rem] flex-1">
                   <TagChipInput
                     value={values.tags}
                     onChange={(nextTags) => handleFieldChange("tags", nextTags)}
@@ -737,7 +730,7 @@ export function PostForm({
                   <button
                     type="button"
                     onClick={() => setActiveTab("info")}
-                    className="rounded-[0.7rem] border border-border-3 bg-background-1 px-3 py-2 text-xs font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+                    className="inline-flex items-center rounded-[0.7rem] border border-border-3 bg-background-1 px-2.5 py-1.5 text-xs font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
                   >
                     에셋 갤러리에서 선택
                   </button>
@@ -759,19 +752,19 @@ export function PostForm({
               </CompactMetaLabel>
 
               <CompactMetaLabel label="상태">
-                <div className="flex items-center gap-1 rounded-[0.8rem] bg-background-2 p-1">
+                <div className="flex items-center gap-1">
                   {(["draft", "published"] as const).map((status) => (
                     <button
                       key={status}
                       type="button"
                       onClick={() => handleFieldChange("status", status)}
                       className={cn(
-                        "rounded-[0.7rem] px-3 py-1.5 text-xs font-medium transition-colors",
+                        "rounded-[0.55rem] px-3 py-1.5 text-xs font-medium transition-colors",
                         values.status === status
                           ? status === "published"
-                            ? "bg-positive-1/10 text-positive-1"
-                            : "bg-primary-1/10 text-primary-1"
-                          : "text-text-3 hover:bg-background-3 hover:text-text-1",
+                            ? "bg-positive-1/12 text-positive-1"
+                            : "bg-background-3 text-text-1"
+                          : "border border-border-3 text-text-3 hover:bg-background-3 hover:text-text-1",
                       )}
                     >
                       {status === "draft" ? "작성중" : "발행"}
@@ -809,7 +802,7 @@ export function PostForm({
               </CompactMetaLabel>
 
               <CompactMetaLabel label="댓글 상태">
-                <div className="min-w-[8rem]">
+                <div className="min-w-[7rem]">
                   <select
                     id="commentStatusCompact"
                     value={values.commentStatus}
@@ -820,7 +813,7 @@ export function PostForm({
                       )
                     }
                     aria-label="댓글 상태"
-                    className="w-full rounded-[0.9rem] border border-border-3 bg-background-1 px-3 py-2 text-sm text-text-1 outline-none transition-colors focus:border-primary-1"
+                    className="w-full rounded-[0.75rem] border border-border-3 bg-background-1 px-3 py-1.5 text-sm text-text-1 outline-none transition-colors focus:border-primary-1"
                   >
                     {COMMENT_STATUS_OPTIONS.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -835,28 +828,25 @@ export function PostForm({
         ) : null}
 
         {activeTab === "info" ? (
-          <section className="grid gap-6 px-5 py-5 lg:grid-cols-[minmax(0,1.2fr)_22rem] lg:px-6">
-            <div className="space-y-6">
-              <FormField label="카테고리" htmlFor="categoryId">
+          <section className="grid gap-6 px-6 py-5 lg:grid-cols-[minmax(0,1.15fr)_20rem]">
+            <div className="space-y-5">
+              <MetaFormRow label="카테고리">
                 <CategoryTreeSelect
                   categories={categories}
                   value={values.categoryId}
                   disabled={categoriesQuery.isPending}
                   onChange={(value) => handleFieldChange("categoryId", value)}
                 />
-              </FormField>
+              </MetaFormRow>
 
-              <FormField label="태그" htmlFor="tags">
+              <MetaFormRow label="태그">
                 <TagChipInput
                   value={values.tags}
                   onChange={(nextTags) => handleFieldChange("tags", nextTags)}
                 />
-              </FormField>
+              </MetaFormRow>
 
-              <FormField
-                label="공개 설정"
-                description="발행된 글을 공개할지 결정합니다."
-              >
+              <MetaFormRow label="공개 설정" hint="발행된 글을 공개합니다">
                 <button
                   type="button"
                   onClick={() =>
@@ -865,18 +855,11 @@ export function PostForm({
                       values.visibility === "public" ? "private" : "public",
                     )
                   }
-                  className="flex w-full items-center justify-between rounded-[1rem] border border-border-3 bg-background-2 px-4 py-3 text-left"
+                  className="flex w-full items-center justify-between rounded-[0.9rem] border border-border-3 bg-background-2 px-4 py-3 text-left"
                 >
-                  <div>
-                    <p className="text-sm font-medium text-text-1">
-                      {getVisibilityLabel(values.visibility)}
-                    </p>
-                    <p className="mt-1 text-xs text-text-4">
-                      {values.visibility === "public"
-                        ? "발행 시 외부에 노출됩니다."
-                        : "관리자 화면에서만 확인할 수 있습니다."}
-                    </p>
-                  </div>
+                  <span className="text-sm font-medium text-text-1">
+                    {getVisibilityLabel(values.visibility)}
+                  </span>
                   <span
                     className={cn(
                       "relative h-6 w-11 rounded-full transition-colors",
@@ -895,42 +878,42 @@ export function PostForm({
                     />
                   </span>
                 </button>
-              </FormField>
+              </MetaFormRow>
 
-              <FormField
+              <MetaFormRow
                 label="댓글 상태"
-                htmlFor="commentStatus"
-                description={`${
+                hint={`${
                   COMMENT_STATUS_OPTIONS.find(
                     (option) => option.value === values.commentStatus,
                   )?.label ?? "열림"
                 }: ${getCommentStatusDescription(values.commentStatus)}`}
               >
-                <select
-                  id="commentStatus"
-                  name="commentStatus"
-                  value={values.commentStatus}
-                  onChange={(event) =>
-                    handleFieldChange(
-                      "commentStatus",
-                      event.target.value as PostFormValues["commentStatus"],
-                    )
-                  }
-                  aria-label="댓글 상태"
-                  className="rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors focus:border-primary-1"
-                >
-                  {COMMENT_STATUS_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </FormField>
+                <div className="max-w-[14rem]">
+                  <select
+                    id="commentStatus"
+                    name="commentStatus"
+                    value={values.commentStatus}
+                    onChange={(event) =>
+                      handleFieldChange(
+                        "commentStatus",
+                        event.target.value as PostFormValues["commentStatus"],
+                      )
+                    }
+                    aria-label="댓글 상태"
+                    className="w-full rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors focus:border-primary-1"
+                  >
+                    {COMMENT_STATUS_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </MetaFormRow>
 
-              <FormField
+              <MetaFormRow
                 label="썸네일"
-                htmlFor="thumbnailUrl"
-                description="드래그 앤 드롭으로도 업로드할 수 있습니다."
+                hint="드래그 앤 드롭으로도 업로드 가능"
               >
                 <ThumbnailUploader
                   value={values.thumbnailUrl}
@@ -938,13 +921,9 @@ export function PostForm({
                     handleFieldChange("thumbnailUrl", nextValue)
                   }
                 />
-              </FormField>
+              </MetaFormRow>
 
-              <FormField
-                label="요약 (summary)"
-                htmlFor="summary"
-                hint={`${values.summary.length}/200`}
-              >
+              <MetaFormRow label="요약 (summary)">
                 <textarea
                   id="summary"
                   name="summary"
@@ -959,14 +938,12 @@ export function PostForm({
                   aria-label="Summary"
                   className="rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
                 />
-              </FormField>
+                <div className="mt-2 text-right text-xs text-text-4">
+                  {values.summary.length} / 200자
+                </div>
+              </MetaFormRow>
 
-              <FormField
-                label="설명 (description)"
-                htmlFor="description"
-                hint={`${values.description.length}/300`}
-                description="SEO 메타 설명에 사용됩니다."
-              >
+              <MetaFormRow label="설명 (description)" hint="SEO 메타 설명">
                 <textarea
                   id="description"
                   name="description"
@@ -980,10 +957,13 @@ export function PostForm({
                   aria-label="Description"
                   className="rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
                 />
-              </FormField>
+                <div className="mt-2 text-right text-xs text-text-4">
+                  {values.description.length} / 300자
+                </div>
+              </MetaFormRow>
 
-              <div className="border-t border-border-4 pt-6">
-                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-text-4">
+              <div className="border-t border-border-4 pt-5">
+                <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-text-4">
                   글 목록 아이템 미리보기
                 </p>
                 <PostCardPreview
@@ -999,8 +979,8 @@ export function PostForm({
               </div>
             </div>
 
-            <div className="lg:pl-2">
-              <div className="rounded-[1.5rem] border border-border-3 bg-background-2 p-4">
+            <div>
+              <div className="rounded-[1.1rem] border border-border-3 bg-background-2 p-4">
                 <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-text-4">
                   글 목록 미리보기
                 </p>
@@ -1021,7 +1001,7 @@ export function PostForm({
         ) : null}
 
         {shouldRenderEditor ? (
-          <section className="min-h-[46rem] px-5 py-5 md:px-6">
+          <section className="min-h-[46rem] px-6 py-5">
             {!isDesktopPreview &&
             (activeTab === "all" || activeTab === "editor-split") ? (
               <div className="mb-4 flex justify-end">
@@ -1078,13 +1058,13 @@ export function PostForm({
           </section>
         ) : null}
 
-        <div className="flex flex-col gap-4 border-t border-border-4 bg-background-1 px-5 py-4 md:px-6 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-4 border-t border-border-4 bg-background-1 px-6 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
               disabled={mutation.isPending || isCategoryUnavailable}
               onClick={() => submitWithIntent(secondaryAction.intent)}
-              className="inline-flex items-center justify-center rounded-[0.9rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:opacity-60"
+              className="inline-flex items-center justify-center rounded-[0.8rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:opacity-60"
             >
               {secondaryAction.label}
             </button>
@@ -1100,7 +1080,7 @@ export function PostForm({
               <button
                 type="button"
                 onClick={onCancel}
-                className="rounded-[0.9rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+                className="rounded-[0.8rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
               >
                 {cancelLabel}
               </button>
@@ -1108,7 +1088,7 @@ export function PostForm({
             <button
               type="submit"
               disabled={mutation.isPending || isCategoryUnavailable}
-              className="rounded-[0.9rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:opacity-60"
+              className="rounded-[0.8rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:opacity-60"
             >
               {mutation.isPending && pendingIntent === "save"
                 ? "저장 중"
@@ -1118,7 +1098,7 @@ export function PostForm({
               type="button"
               disabled={mutation.isPending || isCategoryUnavailable}
               onClick={() => setShowPublishConfirm(true)}
-              className="inline-flex items-center justify-center gap-2 rounded-[0.9rem] bg-primary-1 px-5 py-2.5 text-sm font-semibold text-white transition-opacity disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 rounded-[0.8rem] bg-primary-1 px-5 py-2.5 text-sm font-semibold text-white transition-opacity disabled:opacity-60"
             >
               {mutation.isPending && pendingIntent !== null ? (
                 <Spinner size="sm" />
@@ -1128,21 +1108,16 @@ export function PostForm({
           </div>
         </div>
 
-        <div className="px-5 pb-5 md:px-6">
-          <div className="mt-4 flex flex-wrap items-center gap-2">
+        <div className="px-6 pb-5">
+          <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-text-4">
             <span
-              className={cn(
-                "rounded-full border px-3 py-1 text-xs font-semibold",
-                statusMeta.tone,
-              )}
+              className={cn("rounded-md border px-2.5 py-1", statusMeta.tone)}
             >
               {statusMeta.label}
             </span>
-            <span className="rounded-full border border-primary-1/10 bg-primary-1/10 px-3 py-1 text-xs font-medium text-primary-1">
-              {selectedCategoryName || "카테고리 미선택"}
-            </span>
-            <span className="text-xs text-text-4">
-              {getVisibilityLabel(values.visibility)} · 댓글{" "}
+            <span>{selectedCategoryName || "카테고리 미선택"}</span>
+            <span>{getVisibilityLabel(values.visibility)}</span>
+            <span>
               {
                 COMMENT_STATUS_OPTIONS.find(
                   (option) => option.value === values.commentStatus,
@@ -1150,9 +1125,7 @@ export function PostForm({
               }
             </span>
             {metaSummary ? (
-              <span className="max-w-full truncate text-xs text-text-4">
-                {metaSummary}
-              </span>
+              <span className="truncate">{metaSummary}</span>
             ) : null}
           </div>
         </div>
