@@ -635,12 +635,13 @@ export function PostForm({
     activeTab === "editor-only";
   const shouldRenderInlinePreview =
     shouldRenderEditor && activeTab !== "editor-only" && isDesktopPreview;
+  const shouldRenderTitleField = activeTab === "all" || activeTab === "info";
 
   return (
     <>
       <form
         onSubmit={handleSubmit}
-        className="overflow-hidden rounded-[1.75rem] border border-border-3 bg-background-1 shadow-[0px_24px_80px_0px_rgba(15,23,42,0.08)]"
+        className="flex h-[calc(100dvh-8.5rem)] min-h-[42rem] flex-col overflow-hidden rounded-[1.75rem] border border-border-3 bg-background-1"
       >
         <div className="border-b border-border-4 bg-background-2 px-4 py-2 md:px-6">
           <div className="flex flex-wrap items-center gap-1">
@@ -667,19 +668,23 @@ export function PostForm({
           </div>
         </div>
 
-        <div className="border-b border-border-4 px-6 py-4">
-          <input
-            id="title"
-            name="title"
-            type="text"
-            maxLength={200}
-            value={values.title}
-            onChange={(event) => handleFieldChange("title", event.target.value)}
-            placeholder="제목을 입력하세요"
-            aria-label="제목"
-            className="w-full border-none bg-transparent text-[1.8rem] font-semibold tracking-[-0.03em] text-text-1 outline-none placeholder:text-text-4 md:text-[2rem]"
-          />
-        </div>
+        {shouldRenderTitleField ? (
+          <div className="border-b border-border-4 px-6 py-4">
+            <input
+              id="title"
+              name="title"
+              type="text"
+              maxLength={200}
+              value={values.title}
+              onChange={(event) =>
+                handleFieldChange("title", event.target.value)
+              }
+              placeholder="제목을 입력하세요"
+              aria-label="제목"
+              className="w-full border-none bg-transparent text-[1.8rem] font-semibold tracking-[-0.03em] text-text-1 outline-none placeholder:text-text-4 md:text-[2rem]"
+            />
+          </div>
+        ) : null}
 
         {submitError ? (
           <div className="mx-5 mt-5 rounded-[1rem] border border-negative-1/20 bg-negative-1/5 px-4 py-3 text-sm text-negative-1 md:mx-6">
@@ -702,431 +707,446 @@ export function PostForm({
           </div>
         ) : null}
 
-        {activeTab === "all" ? (
-          <section className="border-b border-border-4 px-6 py-3">
-            <div className="flex flex-col gap-3 xl:flex-row xl:flex-wrap xl:items-center xl:gap-x-5 xl:gap-y-3">
-              <CompactMetaLabel label="카테고리">
-                <div className="min-w-[10rem]">
-                  <CategoryTreeSelect
-                    categories={categories}
-                    value={values.categoryId}
-                    disabled={categoriesQuery.isPending}
-                    onChange={(value) => handleFieldChange("categoryId", value)}
-                  />
-                </div>
-              </CompactMetaLabel>
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          {activeTab === "all" ? (
+            <section className="border-b border-border-4 px-6 py-3">
+              <div className="flex flex-col gap-3 xl:flex-row xl:flex-wrap xl:items-center xl:gap-x-5 xl:gap-y-3">
+                <CompactMetaLabel label="카테고리">
+                  <div className="min-w-[10rem]">
+                    <CategoryTreeSelect
+                      categories={categories}
+                      value={values.categoryId}
+                      disabled={categoriesQuery.isPending}
+                      onChange={(value) =>
+                        handleFieldChange("categoryId", value)
+                      }
+                    />
+                  </div>
+                </CompactMetaLabel>
 
-              <CompactMetaLabel label="태그">
-                <div className="min-w-[16rem] flex-1">
-                  <TagChipInput
-                    value={values.tags}
-                    onChange={(nextTags) => handleFieldChange("tags", nextTags)}
-                  />
-                </div>
-              </CompactMetaLabel>
+                <CompactMetaLabel label="태그">
+                  <div className="min-w-[16rem] flex-1">
+                    <TagChipInput
+                      value={values.tags}
+                      onChange={(nextTags) =>
+                        handleFieldChange("tags", nextTags)
+                      }
+                    />
+                  </div>
+                </CompactMetaLabel>
 
-              <CompactMetaLabel label="썸네일">
-                <div className="flex items-center gap-2">
+                <CompactMetaLabel label="썸네일">
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("info")}
+                      className="inline-flex items-center rounded-[0.7rem] border border-border-3 bg-background-1 px-2.5 py-1.5 text-xs font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+                    >
+                      에셋 갤러리에서 선택
+                    </button>
+                    <div className="overflow-hidden rounded-[0.6rem] border border-border-3 bg-background-2">
+                      {values.thumbnailUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element -- arbitrary admin preview URLs are allowed
+                        <img
+                          src={values.thumbnailUrl}
+                          alt="썸네일 미리보기"
+                          className="h-9 w-12 object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-9 w-12 items-center justify-center text-[10px] text-text-4">
+                          없음
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </CompactMetaLabel>
+
+                <CompactMetaLabel label="상태">
+                  <div className="flex items-center gap-1">
+                    {(["draft", "published"] as const).map((status) => (
+                      <button
+                        key={status}
+                        type="button"
+                        onClick={() => handleFieldChange("status", status)}
+                        className={cn(
+                          "rounded-[0.55rem] px-3 py-1.5 text-xs font-medium transition-colors",
+                          values.status === status
+                            ? status === "published"
+                              ? "bg-positive-1/12 text-positive-1"
+                              : "bg-background-3 text-text-1"
+                            : "border border-border-3 text-text-3 hover:bg-background-3 hover:text-text-1",
+                        )}
+                      >
+                        {status === "draft" ? "작성중" : "발행"}
+                      </button>
+                    ))}
+                  </div>
+                </CompactMetaLabel>
+
+                <CompactMetaLabel label="공개">
                   <button
                     type="button"
-                    onClick={() => setActiveTab("info")}
-                    className="inline-flex items-center rounded-[0.7rem] border border-border-3 bg-background-1 px-2.5 py-1.5 text-xs font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
-                  >
-                    에셋 갤러리에서 선택
-                  </button>
-                  <div className="overflow-hidden rounded-[0.6rem] border border-border-3 bg-background-2">
-                    {values.thumbnailUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element -- arbitrary admin preview URLs are allowed
-                      <img
-                        src={values.thumbnailUrl}
-                        alt="썸네일 미리보기"
-                        className="h-9 w-12 object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-9 w-12 items-center justify-center text-[10px] text-text-4">
-                        없음
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </CompactMetaLabel>
-
-              <CompactMetaLabel label="상태">
-                <div className="flex items-center gap-1">
-                  {(["draft", "published"] as const).map((status) => (
-                    <button
-                      key={status}
-                      type="button"
-                      onClick={() => handleFieldChange("status", status)}
-                      className={cn(
-                        "rounded-[0.55rem] px-3 py-1.5 text-xs font-medium transition-colors",
-                        values.status === status
-                          ? status === "published"
-                            ? "bg-positive-1/12 text-positive-1"
-                            : "bg-background-3 text-text-1"
-                          : "border border-border-3 text-text-3 hover:bg-background-3 hover:text-text-1",
-                      )}
-                    >
-                      {status === "draft" ? "작성중" : "발행"}
-                    </button>
-                  ))}
-                </div>
-              </CompactMetaLabel>
-
-              <CompactMetaLabel label="공개">
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleFieldChange(
-                      "visibility",
-                      values.visibility === "public" ? "private" : "public",
-                    )
-                  }
-                  className={cn(
-                    "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
-                    values.visibility === "public"
-                      ? "border-primary-1/20 bg-primary-1/10 text-primary-1"
-                      : "border-border-3 bg-background-1 text-text-3",
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "h-2.5 w-2.5 rounded-full",
-                      values.visibility === "public"
-                        ? "bg-primary-1"
-                        : "bg-text-4",
-                    )}
-                  />
-                  {getVisibilityLabel(values.visibility)}
-                </button>
-              </CompactMetaLabel>
-
-              <CompactMetaLabel label="댓글 상태">
-                <div className="min-w-[7rem]">
-                  <select
-                    id="commentStatusCompact"
-                    value={values.commentStatus}
-                    onChange={(event) =>
+                    onClick={() =>
                       handleFieldChange(
-                        "commentStatus",
-                        event.target.value as PostFormValues["commentStatus"],
+                        "visibility",
+                        values.visibility === "public" ? "private" : "public",
                       )
                     }
-                    aria-label="댓글 상태"
-                    className="w-full rounded-[0.75rem] border border-border-3 bg-background-1 px-3 py-1.5 text-sm text-text-1 outline-none transition-colors focus:border-primary-1"
-                  >
-                    {COMMENT_STATUS_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </CompactMetaLabel>
-            </div>
-          </section>
-        ) : null}
-
-        {activeTab === "info" ? (
-          <section className="grid gap-6 px-6 py-5 lg:grid-cols-[minmax(0,1.15fr)_20rem]">
-            <div className="space-y-5">
-              <MetaFormRow label="카테고리">
-                <CategoryTreeSelect
-                  categories={categories}
-                  value={values.categoryId}
-                  disabled={categoriesQuery.isPending}
-                  onChange={(value) => handleFieldChange("categoryId", value)}
-                />
-              </MetaFormRow>
-
-              <MetaFormRow label="태그">
-                <TagChipInput
-                  value={values.tags}
-                  onChange={(nextTags) => handleFieldChange("tags", nextTags)}
-                />
-              </MetaFormRow>
-
-              <MetaFormRow label="공개 설정" hint="발행된 글을 공개합니다">
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleFieldChange(
-                      "visibility",
-                      values.visibility === "public" ? "private" : "public",
-                    )
-                  }
-                  className="flex w-full items-center justify-between rounded-[0.9rem] border border-border-3 bg-background-2 px-4 py-3 text-left"
-                >
-                  <span className="text-sm font-medium text-text-1">
-                    {getVisibilityLabel(values.visibility)}
-                  </span>
-                  <span
                     className={cn(
-                      "relative h-6 w-11 rounded-full transition-colors",
+                      "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
                       values.visibility === "public"
-                        ? "bg-primary-1"
-                        : "bg-border-3",
+                        ? "border-primary-1/20 bg-primary-1/10 text-primary-1"
+                        : "border-border-3 bg-background-1 text-text-3",
                     )}
                   >
                     <span
                       className={cn(
-                        "absolute top-1 h-4 w-4 rounded-full bg-white transition-transform",
+                        "h-2.5 w-2.5 rounded-full",
                         values.visibility === "public"
-                          ? "translate-x-6"
-                          : "translate-x-1",
+                          ? "bg-primary-1"
+                          : "bg-text-4",
                       )}
                     />
-                  </span>
-                </button>
-              </MetaFormRow>
+                    {getVisibilityLabel(values.visibility)}
+                  </button>
+                </CompactMetaLabel>
 
-              <MetaFormRow
-                label="댓글 상태"
-                hint={`${
-                  COMMENT_STATUS_OPTIONS.find(
-                    (option) => option.value === values.commentStatus,
-                  )?.label ?? "열림"
-                }: ${getCommentStatusDescription(values.commentStatus)}`}
-              >
-                <div className="max-w-[14rem]">
-                  <select
-                    id="commentStatus"
-                    name="commentStatus"
-                    value={values.commentStatus}
-                    onChange={(event) =>
-                      handleFieldChange(
-                        "commentStatus",
-                        event.target.value as PostFormValues["commentStatus"],
-                      )
-                    }
-                    aria-label="댓글 상태"
-                    className="w-full rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors focus:border-primary-1"
+                <CompactMetaLabel label="댓글 상태">
+                  <div className="min-w-[7rem]">
+                    <select
+                      id="commentStatusCompact"
+                      value={values.commentStatus}
+                      onChange={(event) =>
+                        handleFieldChange(
+                          "commentStatus",
+                          event.target.value as PostFormValues["commentStatus"],
+                        )
+                      }
+                      aria-label="댓글 상태"
+                      className="w-full rounded-[0.75rem] border border-border-3 bg-background-1 px-3 py-1.5 text-sm text-text-1 outline-none transition-colors focus:border-primary-1"
+                    >
+                      {COMMENT_STATUS_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </CompactMetaLabel>
+              </div>
+            </section>
+          ) : null}
+
+          {activeTab === "info" ? (
+            <section className="overflow-y-auto px-6 py-5 lg:max-h-[calc(100dvh-19.5rem)]">
+              <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_20rem]">
+                <div className="space-y-5">
+                  <MetaFormRow label="카테고리">
+                    <CategoryTreeSelect
+                      categories={categories}
+                      value={values.categoryId}
+                      disabled={categoriesQuery.isPending}
+                      onChange={(value) =>
+                        handleFieldChange("categoryId", value)
+                      }
+                    />
+                  </MetaFormRow>
+
+                  <MetaFormRow label="태그">
+                    <TagChipInput
+                      value={values.tags}
+                      onChange={(nextTags) =>
+                        handleFieldChange("tags", nextTags)
+                      }
+                    />
+                  </MetaFormRow>
+
+                  <MetaFormRow label="공개 설정" hint="발행된 글을 공개합니다">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleFieldChange(
+                          "visibility",
+                          values.visibility === "public" ? "private" : "public",
+                        )
+                      }
+                      className="flex w-full items-center justify-between rounded-[0.9rem] border border-border-3 bg-background-2 px-4 py-3 text-left"
+                    >
+                      <span className="text-sm font-medium text-text-1">
+                        {getVisibilityLabel(values.visibility)}
+                      </span>
+                      <span
+                        className={cn(
+                          "relative h-6 w-11 rounded-full transition-colors",
+                          values.visibility === "public"
+                            ? "bg-primary-1"
+                            : "bg-border-3",
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "absolute top-1 h-4 w-4 rounded-full bg-white transition-transform",
+                            values.visibility === "public"
+                              ? "translate-x-6"
+                              : "translate-x-1",
+                          )}
+                        />
+                      </span>
+                    </button>
+                  </MetaFormRow>
+
+                  <MetaFormRow
+                    label="댓글 상태"
+                    hint={`${
+                      COMMENT_STATUS_OPTIONS.find(
+                        (option) => option.value === values.commentStatus,
+                      )?.label ?? "열림"
+                    }: ${getCommentStatusDescription(values.commentStatus)}`}
                   >
-                    {COMMENT_STATUS_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </MetaFormRow>
+                    <div className="max-w-[14rem]">
+                      <select
+                        id="commentStatus"
+                        name="commentStatus"
+                        value={values.commentStatus}
+                        onChange={(event) =>
+                          handleFieldChange(
+                            "commentStatus",
+                            event.target
+                              .value as PostFormValues["commentStatus"],
+                          )
+                        }
+                        aria-label="댓글 상태"
+                        className="w-full rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors focus:border-primary-1"
+                      >
+                        {COMMENT_STATUS_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </MetaFormRow>
 
-              <MetaFormRow
-                label="썸네일"
-                hint="드래그 앤 드롭으로도 업로드 가능"
+                  <MetaFormRow
+                    label="썸네일"
+                    hint="드래그 앤 드롭으로도 업로드 가능"
+                  >
+                    <ThumbnailUploader
+                      value={values.thumbnailUrl}
+                      onChange={(nextValue) =>
+                        handleFieldChange("thumbnailUrl", nextValue)
+                      }
+                    />
+                  </MetaFormRow>
+
+                  <MetaFormRow label="요약 (summary)">
+                    <textarea
+                      id="summary"
+                      name="summary"
+                      maxLength={200}
+                      rows={3}
+                      value={values.summary}
+                      onChange={(event) => {
+                        setIsSummaryManuallyEdited(true);
+                        handleFieldChange("summary", event.target.value);
+                      }}
+                      placeholder="글 목록에 표시될 요약문을 입력하세요"
+                      aria-label="Summary"
+                      className="rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
+                    />
+                    <div className="mt-2 text-right text-xs text-text-4">
+                      {values.summary.length} / 200자
+                    </div>
+                  </MetaFormRow>
+
+                  <MetaFormRow label="설명 (description)" hint="SEO 메타 설명">
+                    <textarea
+                      id="description"
+                      name="description"
+                      maxLength={300}
+                      rows={4}
+                      value={values.description}
+                      onChange={(event) =>
+                        handleFieldChange("description", event.target.value)
+                      }
+                      placeholder="검색엔진에 표시될 설명을 입력하세요"
+                      aria-label="Description"
+                      className="rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
+                    />
+                    <div className="mt-2 text-right text-xs text-text-4">
+                      {values.description.length} / 300자
+                    </div>
+                  </MetaFormRow>
+
+                  <div className="border-t border-border-4 pt-5">
+                    <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-text-4">
+                      글 목록 아이템 미리보기
+                    </p>
+                    <PostCardPreview
+                      title={values.title}
+                      categoryName={selectedCategoryName}
+                      tags={values.tags}
+                      thumbnailUrl={values.thumbnailUrl}
+                      summary={values.summary}
+                      contentMd={values.contentMd}
+                      visibility={values.visibility}
+                      status={values.status}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="rounded-[1.1rem] border border-border-3 bg-background-2 p-4">
+                    <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-text-4">
+                      글 목록 미리보기
+                    </p>
+                    <PostCardPreview
+                      title={values.title}
+                      categoryName={selectedCategoryName}
+                      tags={values.tags}
+                      thumbnailUrl={values.thumbnailUrl}
+                      summary={values.summary}
+                      contentMd={values.contentMd}
+                      visibility={values.visibility}
+                      status={values.status}
+                      compact
+                    />
+                  </div>
+                </div>
+              </div>
+            </section>
+          ) : null}
+
+          {shouldRenderEditor ? (
+            <section className="h-full min-h-0 px-6 py-5">
+              {!isDesktopPreview &&
+              (activeTab === "all" || activeTab === "editor-split") ? (
+                <div className="mb-4 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setShowPreviewModal(true)}
+                    className="rounded-[0.85rem] border border-border-3 bg-background-2 px-4 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+                  >
+                    미리보기
+                  </button>
+                </div>
+              ) : null}
+
+              <div
+                className={cn(
+                  "grid h-full min-h-0 gap-0 overflow-hidden rounded-[1.5rem] border border-border-3 bg-background-1",
+                  shouldRenderInlinePreview
+                    ? "lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]"
+                    : "grid-cols-1",
+                )}
               >
-                <ThumbnailUploader
-                  value={values.thumbnailUrl}
-                  onChange={(nextValue) =>
-                    handleFieldChange("thumbnailUrl", nextValue)
-                  }
-                />
-              </MetaFormRow>
-
-              <MetaFormRow label="요약 (summary)">
-                <textarea
-                  id="summary"
-                  name="summary"
-                  maxLength={200}
-                  rows={3}
-                  value={values.summary}
-                  onChange={(event) => {
-                    setIsSummaryManuallyEdited(true);
-                    handleFieldChange("summary", event.target.value);
-                  }}
-                  placeholder="글 목록에 표시될 요약문을 입력하세요"
-                  aria-label="Summary"
-                  className="rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
-                />
-                <div className="mt-2 text-right text-xs text-text-4">
-                  {values.summary.length} / 200자
-                </div>
-              </MetaFormRow>
-
-              <MetaFormRow label="설명 (description)" hint="SEO 메타 설명">
-                <textarea
-                  id="description"
-                  name="description"
-                  maxLength={300}
-                  rows={4}
-                  value={values.description}
-                  onChange={(event) =>
-                    handleFieldChange("description", event.target.value)
-                  }
-                  placeholder="검색엔진에 표시될 설명을 입력하세요"
-                  aria-label="Description"
-                  className="rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
-                />
-                <div className="mt-2 text-right text-xs text-text-4">
-                  {values.description.length} / 300자
-                </div>
-              </MetaFormRow>
-
-              <div className="border-t border-border-4 pt-5">
-                <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-text-4">
-                  글 목록 아이템 미리보기
-                </p>
-                <PostCardPreview
-                  title={values.title}
-                  categoryName={selectedCategoryName}
-                  tags={values.tags}
-                  thumbnailUrl={values.thumbnailUrl}
-                  summary={values.summary}
-                  contentMd={values.contentMd}
-                  visibility={values.visibility}
-                  status={values.status}
-                />
-              </div>
-            </div>
-
-            <div>
-              <div className="rounded-[1.1rem] border border-border-3 bg-background-2 p-4">
-                <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-text-4">
-                  글 목록 미리보기
-                </p>
-                <PostCardPreview
-                  title={values.title}
-                  categoryName={selectedCategoryName}
-                  tags={values.tags}
-                  thumbnailUrl={values.thumbnailUrl}
-                  summary={values.summary}
-                  contentMd={values.contentMd}
-                  visibility={values.visibility}
-                  status={values.status}
-                  compact
-                />
-              </div>
-            </div>
-          </section>
-        ) : null}
-
-        {shouldRenderEditor ? (
-          <section className="min-h-[46rem] px-6 py-5">
-            {!isDesktopPreview &&
-            (activeTab === "all" || activeTab === "editor-split") ? (
-              <div className="mb-4 flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => setShowPreviewModal(true)}
-                  className="rounded-[0.85rem] border border-border-3 bg-background-2 px-4 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
-                >
-                  미리보기
-                </button>
-              </div>
-            ) : null}
-
-            <div
-              className={cn(
-                "grid gap-0 overflow-hidden rounded-[1.5rem] border border-border-3 bg-background-1",
-                shouldRenderInlinePreview
-                  ? "lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]"
-                  : "grid-cols-1",
-              )}
-            >
-              <div className="min-w-0">
-                <MarkdownEditor
-                  pendingImageCount={pendingImageCount}
-                  labelId="contentMdLabel"
-                  value={values.contentMd}
-                  onEditorReady={setEditorView}
-                  onChange={(value) => handleFieldChange("contentMd", value)}
-                  onImageButtonClick={() => setShowImageGallery(true)}
-                  onImageFiles={insertPendingFiles}
-                  onBlur={(contentMd) => {
-                    if (!isSummaryManuallyEdited) {
-                      handleFieldChange(
-                        "summary",
-                        extractPlainText(contentMd, 200),
-                      );
-                    }
-                  }}
-                  className="[&_.cm-editor]:min-h-[42rem] [&_.cm-scroller]:min-h-[42rem]"
-                />
-              </div>
-
-              {shouldRenderInlinePreview ? (
-                <div className="min-w-0 border-t border-border-3 bg-background-1 lg:border-l lg:border-t-0">
-                  <MarkdownPreview
-                    value={previewContent}
-                    containerRef={previewRef}
-                    className="h-full min-h-[42rem] rounded-none border-0"
-                    headerTitle="미리보기"
+                <div className="min-w-0 min-h-0">
+                  <MarkdownEditor
+                    pendingImageCount={pendingImageCount}
+                    labelId="contentMdLabel"
+                    value={values.contentMd}
+                    onEditorReady={setEditorView}
+                    onChange={(value) => handleFieldChange("contentMd", value)}
+                    onImageButtonClick={() => setShowImageGallery(true)}
+                    onImageFiles={insertPendingFiles}
+                    onBlur={(contentMd) => {
+                      if (!isSummaryManuallyEdited) {
+                        handleFieldChange(
+                          "summary",
+                          extractPlainText(contentMd, 200),
+                        );
+                      }
+                    }}
+                    className="h-full min-h-0 [&_.cm-editor]:h-full [&_.cm-editor]:min-h-0 [&_.cm-scroller]:h-full [&_.cm-scroller]:min-h-0"
                   />
                 </div>
+
+                {shouldRenderInlinePreview ? (
+                  <div className="min-w-0 min-h-0 border-t border-border-3 bg-background-1 lg:border-l lg:border-t-0">
+                    <MarkdownPreview
+                      value={previewContent}
+                      containerRef={previewRef}
+                      className="h-full min-h-0 rounded-none border-0"
+                      headerTitle="미리보기"
+                    />
+                  </div>
+                ) : null}
+              </div>
+            </section>
+          ) : null}
+
+          <div className="px-6 pb-4">
+            <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-text-4">
+              <span
+                className={cn("rounded-md border px-2.5 py-1", statusMeta.tone)}
+              >
+                {statusMeta.label}
+              </span>
+              <span>{selectedCategoryName || "카테고리 미선택"}</span>
+              <span>{getVisibilityLabel(values.visibility)}</span>
+              <span>
+                {
+                  COMMENT_STATUS_OPTIONS.find(
+                    (option) => option.value === values.commentStatus,
+                  )?.label
+                }
+              </span>
+              {metaSummary ? (
+                <span className="truncate">{metaSummary}</span>
               ) : null}
             </div>
-          </section>
-        ) : null}
-
-        <div className="flex flex-col gap-4 border-t border-border-4 bg-background-1 px-6 py-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              disabled={mutation.isPending || isCategoryUnavailable}
-              onClick={() => submitWithIntent(secondaryAction.intent)}
-              className="inline-flex items-center justify-center rounded-[0.8rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:opacity-60"
-            >
-              {secondaryAction.label}
-            </button>
-            {isDirty ? (
-              <span className="text-xs text-text-4">자동 저장 전</span>
-            ) : (
-              <span className="text-xs text-positive-1">자동 저장됨</span>
-            )}
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            {onCancel ? (
-              <button
-                type="button"
-                onClick={onCancel}
-                className="rounded-[0.8rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
-              >
-                {cancelLabel}
-              </button>
-            ) : null}
-            <button
-              type="submit"
-              disabled={mutation.isPending || isCategoryUnavailable}
-              className="rounded-[0.8rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:opacity-60"
-            >
-              {mutation.isPending && pendingIntent === "save"
-                ? "저장 중"
-                : "저장 (초안)"}
-            </button>
-            <button
-              type="button"
-              disabled={mutation.isPending || isCategoryUnavailable}
-              onClick={() => setShowPublishConfirm(true)}
-              className="inline-flex items-center justify-center gap-2 rounded-[0.8rem] bg-primary-1 px-5 py-2.5 text-sm font-semibold text-white transition-opacity disabled:opacity-60"
-            >
-              {mutation.isPending && pendingIntent !== null ? (
-                <Spinner size="sm" />
-              ) : null}
-              {values.status === "published" ? "다시 발행" : "발행"}
-            </button>
           </div>
         </div>
 
-        <div className="px-6 pb-5">
-          <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-text-4">
-            <span
-              className={cn("rounded-md border px-2.5 py-1", statusMeta.tone)}
-            >
-              {statusMeta.label}
-            </span>
-            <span>{selectedCategoryName || "카테고리 미선택"}</span>
-            <span>{getVisibilityLabel(values.visibility)}</span>
-            <span>
-              {
-                COMMENT_STATUS_OPTIONS.find(
-                  (option) => option.value === values.commentStatus,
-                )?.label
-              }
-            </span>
-            {metaSummary ? (
-              <span className="truncate">{metaSummary}</span>
-            ) : null}
+        <div className="border-t border-border-4 bg-background-2 px-6 py-4 shadow-[0_-12px_32px_rgba(15,23,42,0.06)]">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                disabled={mutation.isPending || isCategoryUnavailable}
+                onClick={() => submitWithIntent(secondaryAction.intent)}
+                className="inline-flex items-center justify-center rounded-[0.8rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:opacity-60"
+              >
+                {secondaryAction.label}
+              </button>
+              {isDirty ? (
+                <span className="text-xs text-text-4">자동 저장 전</span>
+              ) : (
+                <span className="text-xs text-positive-1">자동 저장됨</span>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              {onCancel ? (
+                <button
+                  type="button"
+                  onClick={onCancel}
+                  className="rounded-[0.8rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+                >
+                  {cancelLabel}
+                </button>
+              ) : null}
+              <button
+                type="submit"
+                disabled={mutation.isPending || isCategoryUnavailable}
+                className="rounded-[0.8rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:opacity-60"
+              >
+                {mutation.isPending && pendingIntent === "save"
+                  ? "저장 중"
+                  : "저장 (초안)"}
+              </button>
+              <button
+                type="button"
+                disabled={mutation.isPending || isCategoryUnavailable}
+                onClick={() => setShowPublishConfirm(true)}
+                className="inline-flex items-center justify-center gap-2 rounded-[0.8rem] bg-primary-1 px-5 py-2.5 text-sm font-semibold text-white transition-opacity disabled:opacity-60"
+              >
+                {mutation.isPending && pendingIntent !== null ? (
+                  <Spinner size="sm" />
+                ) : null}
+                {values.status === "published" ? "다시 발행" : "발행"}
+              </button>
+            </div>
           </div>
         </div>
       </form>
