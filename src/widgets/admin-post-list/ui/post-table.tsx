@@ -567,7 +567,7 @@ export function PostTable({
                           icon={post.isPinned ? pinBold : pinLinear}
                           width="16"
                           aria-hidden="true"
-                          className="cursor-pointer"
+                          className="translate-y-[2px] cursor-pointer"
                         />
                       </button>
                     </td>
@@ -618,13 +618,13 @@ export function PostTable({
                       </Badge>
                     </td>
                     <td className="border-b border-border-4 px-3 py-3 align-middle">
-                      <span className="flex items-center gap-1 whitespace-nowrap text-[13px] leading-4 text-text-4">
+                      <span className="flex items-center gap-1 whitespace-nowrap text-[13px] leading-none text-text-4">
                         <Icon icon={eyeLinear} width="14" aria-hidden="true" />
                         {post.totalPageviews.toLocaleString("ko-KR")}
                       </span>
                     </td>
                     <td className="border-b border-border-4 px-3 py-3 align-middle">
-                      <span className="flex items-center gap-1 whitespace-nowrap text-[13px] leading-4 text-text-4">
+                      <span className="flex items-center gap-1 whitespace-nowrap text-[13px] leading-none text-text-4">
                         <Icon
                           icon={chatRoundDotsLinear}
                           width="14"
