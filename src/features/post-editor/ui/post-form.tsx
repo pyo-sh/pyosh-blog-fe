@@ -2,6 +2,10 @@
 
 import type { FormEvent, ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Icon } from "@iconify/react";
+import archiveLinear from "@iconify-icons/solar/archive-linear";
+import checkCircleLinear from "@iconify-icons/solar/check-circle-linear";
+import uploadLinear from "@iconify-icons/solar/upload-linear";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { CategoryTreeSelect } from "./category-tree-select";
@@ -101,6 +105,12 @@ const TABS: Array<{ id: EditorTab; label: string }> = [
 ];
 
 const REMOVED_PENDING_IMAGE_TTL_MS = 30_000;
+const PAGE_TAB_CLASS =
+  "inline-flex h-8 items-center justify-center rounded-[0.375rem] px-[0.875rem] border-none bg-transparent text-[13px] font-medium leading-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-1/20";
+const SECONDARY_BUTTON_CLASS =
+  "inline-flex h-9 items-center justify-center gap-1.5 rounded-[0.5rem] border border-border-3 bg-transparent px-4 text-sm font-medium text-text-2 transition-[background-color,transform] hover:bg-background-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-1/20 disabled:opacity-60";
+const PRIMARY_BUTTON_CLASS =
+  "inline-flex h-9 items-center justify-center gap-1.5 rounded-[0.5rem] bg-primary-1 px-4 text-sm font-medium text-white transition-[opacity,transform] hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-1/20 disabled:opacity-60";
 
 function createInitialValues(
   initialValues?: Partial<PostFormValues>,
@@ -149,27 +159,6 @@ function sortCategories(categories: Category[]): Category[] {
       ...category,
       children: sortCategories(category.children ?? []),
     }));
-}
-
-function getStatusMeta(status: Post["status"]) {
-  if (status === "published") {
-    return {
-      label: "발행",
-      tone: "bg-positive-1/10 text-positive-1 border-positive-1/10",
-    };
-  }
-
-  if (status === "archived") {
-    return {
-      label: "보관",
-      tone: "bg-yellow-1/10 text-yellow-1 border-yellow-1/10",
-    };
-  }
-
-  return {
-    label: "작성중",
-    tone: "bg-background-3 text-text-3 border-border-3",
-  };
 }
 
 function getVisibilityLabel(visibility: Post["visibility"]) {
@@ -493,10 +482,6 @@ export function PostForm({
       ).length,
     [pendingImages, values.contentMd],
   );
-  const statusMeta = getStatusMeta(values.status);
-  const metaSummary =
-    values.summary.trim() || extractPlainText(values.contentMd, 200);
-
   const handleFieldChange = <Key extends keyof PostFormValues>(
     key: Key,
     value: PostFormValues[Key],
@@ -641,7 +626,7 @@ export function PostForm({
     <>
       <form
         onSubmit={handleSubmit}
-        className="flex h-[calc(100dvh-8.5rem)] min-h-[42rem] flex-col overflow-hidden rounded-[1.75rem] border border-border-3 bg-background-1"
+        className="flex h-full min-h-0 flex-col overflow-hidden bg-background-1"
       >
         <div className="border-b border-border-4 bg-background-2 px-4 py-2 md:px-6">
           <div className="flex flex-wrap items-center gap-1">
@@ -651,9 +636,9 @@ export function PostForm({
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "rounded-[0.7rem] px-3 py-1.5 text-sm font-medium transition-colors",
+                  PAGE_TAB_CLASS,
                   activeTab === tab.id
-                    ? "bg-background-1 text-primary-1 shadow-[0px_8px_20px_0px_rgba(15,23,42,0.06)]"
+                    ? "bg-primary-1 text-white hover:bg-primary-1"
                     : "text-text-3 hover:bg-background-3 hover:text-text-1",
                 )}
               >
@@ -707,9 +692,9 @@ export function PostForm({
           </div>
         ) : null}
 
-        <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
           {activeTab === "all" ? (
-            <section className="border-b border-border-4 px-6 py-3">
+            <section className="shrink-0 border-b border-border-4 px-6 py-3">
               <div className="flex flex-col gap-3 xl:flex-row xl:flex-wrap xl:items-center xl:gap-x-5 xl:gap-y-3">
                 <CompactMetaLabel label="카테고리">
                   <div className="min-w-[10rem]">
@@ -838,7 +823,7 @@ export function PostForm({
           ) : null}
 
           {activeTab === "info" ? (
-            <section className="overflow-y-auto px-6 py-5 lg:max-h-[calc(100dvh-19.5rem)]">
+            <section className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
               <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_20rem]">
                 <div className="space-y-5">
                   <MetaFormRow label="카테고리">
@@ -1018,7 +1003,7 @@ export function PostForm({
           ) : null}
 
           {shouldRenderEditor ? (
-            <section className="h-full min-h-0 px-6 py-5">
+            <section className="min-h-0 flex-1 px-6 py-5">
               {!isDesktopPreview &&
               (activeTab === "all" || activeTab === "editor-split") ? (
                 <div className="mb-4 flex justify-end">
@@ -1074,45 +1059,32 @@ export function PostForm({
               </div>
             </section>
           ) : null}
-
-          <div className="px-6 pb-4">
-            <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-text-4">
-              <span
-                className={cn("rounded-md border px-2.5 py-1", statusMeta.tone)}
-              >
-                {statusMeta.label}
-              </span>
-              <span>{selectedCategoryName || "카테고리 미선택"}</span>
-              <span>{getVisibilityLabel(values.visibility)}</span>
-              <span>
-                {
-                  COMMENT_STATUS_OPTIONS.find(
-                    (option) => option.value === values.commentStatus,
-                  )?.label
-                }
-              </span>
-              {metaSummary ? (
-                <span className="truncate">{metaSummary}</span>
-              ) : null}
-            </div>
-          </div>
         </div>
 
-        <div className="border-t border-border-4 bg-background-2 px-6 py-4 shadow-[0_-12px_32px_rgba(15,23,42,0.06)]">
+        <div className="border-t border-border-3 bg-background-2 px-6 py-3">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-wrap items-center gap-3">
               <button
                 type="button"
                 disabled={mutation.isPending || isCategoryUnavailable}
                 onClick={() => submitWithIntent(secondaryAction.intent)}
-                className="inline-flex items-center justify-center rounded-[0.8rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:opacity-60"
+                className={SECONDARY_BUTTON_CLASS}
               >
+                <Icon icon={archiveLinear} width="16" aria-hidden="true" />
                 {secondaryAction.label}
               </button>
               {isDirty ? (
                 <span className="text-xs text-text-4">자동 저장 전</span>
               ) : (
-                <span className="text-xs text-positive-1">자동 저장됨</span>
+                <span className="inline-flex items-center gap-1.5 text-xs text-text-4">
+                  <Icon
+                    icon={checkCircleLinear}
+                    width="14"
+                    className="text-positive-1"
+                    aria-hidden="true"
+                  />
+                  자동 저장됨
+                </span>
               )}
             </div>
 
@@ -1121,7 +1093,7 @@ export function PostForm({
                 <button
                   type="button"
                   onClick={onCancel}
-                  className="rounded-[0.8rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+                  className={SECONDARY_BUTTON_CLASS}
                 >
                   {cancelLabel}
                 </button>
@@ -1129,7 +1101,7 @@ export function PostForm({
               <button
                 type="submit"
                 disabled={mutation.isPending || isCategoryUnavailable}
-                className="rounded-[0.8rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:opacity-60"
+                className={SECONDARY_BUTTON_CLASS}
               >
                 {mutation.isPending && pendingIntent === "save"
                   ? "저장 중"
@@ -1139,11 +1111,13 @@ export function PostForm({
                 type="button"
                 disabled={mutation.isPending || isCategoryUnavailable}
                 onClick={() => setShowPublishConfirm(true)}
-                className="inline-flex items-center justify-center gap-2 rounded-[0.8rem] bg-primary-1 px-5 py-2.5 text-sm font-semibold text-white transition-opacity disabled:opacity-60"
+                className={PRIMARY_BUTTON_CLASS}
               >
                 {mutation.isPending && pendingIntent !== null ? (
                   <Spinner size="sm" />
-                ) : null}
+                ) : (
+                  <Icon icon={uploadLinear} width="16" aria-hidden="true" />
+                )}
                 {values.status === "published" ? "다시 발행" : "발행"}
               </button>
             </div>
