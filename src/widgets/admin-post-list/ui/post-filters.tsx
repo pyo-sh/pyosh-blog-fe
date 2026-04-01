@@ -110,7 +110,7 @@ function FilterSelect({
         aria-expanded={open}
         onClick={() => setOpen((current) => !current)}
         className={cn(
-          "flex w-full items-center rounded-lg border border-border-3 bg-background-1 px-3 py-2 pr-8 text-left text-[14px] leading-5 text-text-1 outline-none transition-colors",
+          "flex h-10 w-full items-center rounded-lg border border-border-3 bg-background-1 px-3 py-2 pr-8 text-left text-[14px] leading-5 text-text-1 outline-none transition-colors",
           open && "border-primary-1 ring-3 ring-primary-1/10",
         )}
       >
@@ -248,10 +248,7 @@ export function PostFilters({
       </div>
 
       {tab === "active" ? (
-        <form
-          onSubmit={handleSearch}
-          className="flex flex-wrap items-center gap-3"
-        >
+        <form onSubmit={handleSearch} className="flex flex-wrap items-center gap-3">
           <FilterSelect
             value={status}
             onChange={(value) => onStatusChange(value as AdminPostStatusFilter)}
@@ -280,7 +277,7 @@ export function PostFilters({
             options={categoryOptions}
           />
 
-          <div className="relative w-full max-w-xs min-w-[15rem]">
+          <div className="relative flex h-10 w-full max-w-xs min-w-[15rem] items-center">
             <Icon
               icon={magniferLinear}
               width="16"
@@ -293,7 +290,7 @@ export function PostFilters({
               value={inputValue}
               onChange={(event) => setInputValue(event.target.value)}
               placeholder="제목으로 검색..."
-              className="w-full rounded-lg border border-border-3 bg-background-1 px-9 py-2 text-[14px] leading-5 text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 focus:ring-3 focus:ring-primary-1/10"
+              className="h-10 w-full rounded-lg border border-border-3 bg-background-1 px-9 py-2 text-[14px] leading-5 text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 focus:ring-3 focus:ring-primary-1/10"
             />
             {inputValue ? (
               <button

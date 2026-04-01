@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
+import altArrowDownLinear from "@iconify-icons/solar/alt-arrow-down-linear";
 import restartLinear from "@iconify-icons/solar/restart-linear";
 import type { AdminPostTab } from "./post-filters";
 import type { Category } from "@entities/category";
@@ -39,6 +40,103 @@ const COMMENT_STATUS_DESC: Record<"open" | "locked" | "disabled", string> = {
   locked: "기존 댓글은 유지되며 새 댓글 작성이 차단됩니다.",
   disabled: "댓글 영역이 완전히 숨겨집니다.",
 };
+
+function BulkSelect({
+  value,
+  onChange,
+  options,
+  ariaLabel,
+  className,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  options: Array<{ label: string; value: string; depth?: number }>;
+  ariaLabel: string;
+  className?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const selectedOption =
+    options.find((option) => option.value === value) ?? options[0];
+
+  useEffect(() => {
+    function handlePointerDown(event: MouseEvent) {
+      if (
+        rootRef.current &&
+        !rootRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handlePointerDown);
+
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, []);
+
+  return (
+    <div ref={rootRef} className={cn("relative inline-flex", className)}>
+      <button
+        type="button"
+        aria-label={ariaLabel}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((current) => !current)}
+        className={cn(
+          "flex h-8 w-full items-center rounded-md border border-border-3 bg-background-1 px-2.5 py-[5px] pr-7 text-left text-[12px] font-normal leading-none text-text-1 outline-none transition-colors",
+          open && "border-primary-1 ring-3 ring-primary-1/10",
+        )}
+      >
+        <span className="truncate whitespace-nowrap">
+          {selectedOption?.label ?? ""}
+        </span>
+        <Icon
+          icon={altArrowDownLinear}
+          width="12"
+          aria-hidden="true"
+          className={cn(
+            "pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-text-4 transition-transform",
+            open && "rotate-180",
+          )}
+        />
+      </button>
+
+      {open ? (
+        <div className="absolute left-0 top-[calc(100%+4px)] z-[200] min-w-full overflow-hidden rounded-lg border border-border-3 bg-background-1 shadow-[0_4px_16px_rgba(0,0,0,0.1)]">
+          <div role="listbox" aria-label={ariaLabel} className="py-0.5">
+            {options.map((option) => {
+              const isSelected = option.value === value;
+
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  role="option"
+                  aria-selected={isSelected}
+                  onClick={() => {
+                    onChange(option.value);
+                    setOpen(false);
+                  }}
+                  className={cn(
+                    "flex w-full items-center whitespace-nowrap px-3 py-2 text-left text-[12px] leading-none text-text-1 transition-colors hover:bg-background-2",
+                    isSelected && "font-medium text-primary-1",
+                  )}
+                  style={{
+                    paddingLeft: option.depth
+                      ? `${12 + option.depth * 16}px`
+                      : undefined,
+                  }}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 function buildCategoryTree(
   categories: Category[],
@@ -83,6 +181,24 @@ export function BulkActions({
   const flatCategories = useMemo(
     () => buildCategoryTree(categories),
     [categories],
+  );
+  const categoryOptions = useMemo(
+    () => [
+      { label: "카테고리", value: "" },
+      ...flatCategories.map(({ category, depth }) => ({
+        label: category.name,
+        value: String(category.id),
+        depth,
+      })),
+    ],
+    [flatCategories],
+  );
+  const commentStatusOptions = useMemo(
+    () => [
+      { label: "댓글 상태", value: "" },
+      ...COMMENT_STATUS_OPTIONS,
+    ],
+    [],
   );
   const count = selectedIds.length;
   const hasUpdate = categoryId !== undefined || commentStatus !== undefined;
@@ -140,15 +256,15 @@ export function BulkActions({
   return (
     <>
       <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border-3 bg-background-2 px-4 py-3">
-        <label className="flex items-center gap-2 text-body-sm font-medium text-text-2">
+        <label className="flex items-center gap-2 text-body-sm font-medium leading-none text-text-2">
           <input
             type="checkbox"
             checked={allSelected}
             onChange={onSelectAll}
             className="h-4 w-4 rounded border-border-3 accent-primary-1"
           />
-          <span>전체</span>
-          <span className="ml-1 text-body-sm font-semibold text-primary-1">
+          <span className="leading-none">전체</span>
+          <span className="ml-1 text-body-sm font-semibold leading-none text-primary-1">
             선택됨 {count}개
           </span>
         </label>
@@ -157,42 +273,27 @@ export function BulkActions({
 
         {tab === "active" ? (
           <div className="flex flex-1 flex-wrap items-center gap-2">
-            <select
-              value={categoryId ?? ""}
-              onChange={(event) =>
-                setCategoryId(
-                  event.target.value ? Number(event.target.value) : undefined,
-                )
+            <BulkSelect
+              value={categoryId ? String(categoryId) : ""}
+              onChange={(value) =>
+                setCategoryId(value ? Number(value) : undefined)
               }
-              aria-label="일괄 카테고리 변경"
-              className="min-w-[8rem] rounded-lg border border-border-3 bg-background-1 px-3 py-2 text-body-sm text-text-1 outline-none transition-colors focus:border-primary-1 focus:ring-3 focus:ring-primary-1/10"
-            >
-              <option value="">카테고리</option>
-              {flatCategories.map(({ category, depth }) => (
-                <option key={category.id} value={category.id}>
-                  {`${" ".repeat(depth * 2)}${category.name}`}
-                </option>
-              ))}
-            </select>
+              options={categoryOptions}
+              ariaLabel="일괄 카테고리 변경"
+              className="min-w-[8rem]"
+            />
 
-            <select
+            <BulkSelect
               value={commentStatus ?? ""}
-              onChange={(event) =>
+              onChange={(value) =>
                 setCommentStatus(
-                  (event.target.value as "open" | "locked" | "disabled") ||
-                    undefined,
+                  (value as "open" | "locked" | "disabled") || undefined,
                 )
               }
-              aria-label="일괄 댓글 상태 변경"
-              className="min-w-[8rem] rounded-lg border border-border-3 bg-background-1 px-3 py-2 text-body-sm text-text-1 outline-none transition-colors focus:border-primary-1 focus:ring-3 focus:ring-primary-1/10"
-            >
-              <option value="">댓글 상태</option>
-              {COMMENT_STATUS_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              options={commentStatusOptions}
+              ariaLabel="일괄 댓글 상태 변경"
+              className="min-w-[8rem]"
+            />
 
             <button
               type="button"
@@ -202,7 +303,7 @@ export function BulkActions({
               }}
               aria-label="일괄 변경 초기화"
               disabled={!hasUpdate}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border-3 text-text-2 transition-colors hover:bg-background-3 disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border-3 text-text-2 transition-colors hover:bg-background-3 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Icon icon={restartLinear} width="16" aria-hidden="true" />
             </button>
@@ -212,9 +313,9 @@ export function BulkActions({
               onClick={() => setShowApplyDialog(true)}
               disabled={!hasUpdate || isPending}
               className={cn(
-                "rounded-lg px-3 py-2 text-body-sm font-medium transition-colors",
+                "inline-flex h-8 items-center justify-center rounded-md border px-3 text-[12px] font-medium leading-none transition-colors",
                 hasUpdate
-                  ? "bg-primary-1 text-white hover:opacity-90"
+                  ? "border-primary-1 bg-primary-1 text-white hover:opacity-90"
                   : "border border-border-3 text-text-3",
                 "disabled:cursor-not-allowed disabled:opacity-50",
               )}
@@ -226,7 +327,7 @@ export function BulkActions({
               type="button"
               onClick={() => setShowDeleteDialog(true)}
               disabled={isPending}
-              className="rounded-lg bg-negative-1 px-3 py-2 text-body-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-8 items-center justify-center rounded-md border border-negative-1 bg-negative-1 px-3 text-[12px] font-medium leading-none text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               삭제
             </button>
