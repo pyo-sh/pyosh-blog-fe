@@ -218,13 +218,13 @@ export function PostFilters({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex min-w-0 items-center gap-1">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex min-w-0 flex-wrap items-center gap-1">
           <button
             type="button"
             onClick={() => onTabChange("active")}
             className={cn(
-              "rounded-lg px-4 py-2 text-[14px] font-medium leading-5 transition-colors",
+              "whitespace-nowrap rounded-lg px-4 py-2 text-[14px] font-medium leading-5 transition-colors",
               tab === "active"
                 ? "bg-primary-1/10 text-primary-1"
                 : "text-text-3 hover:text-text-2",
@@ -236,7 +236,7 @@ export function PostFilters({
             type="button"
             onClick={() => onTabChange("trash")}
             className={cn(
-              "rounded-lg px-4 py-2 text-[14px] font-medium leading-5 transition-colors",
+              "whitespace-nowrap rounded-lg px-4 py-2 text-[14px] font-medium leading-5 transition-colors",
               tab === "trash"
                 ? "bg-primary-1/10 text-primary-1"
                 : "text-text-3 hover:text-text-2",
@@ -250,7 +250,7 @@ export function PostFilters({
             ) : null}
           </button>
         </div>
-        {action ? <div className="shrink-0">{action}</div> : null}
+        {action ? <div className="shrink-0 whitespace-nowrap">{action}</div> : null}
       </div>
 
       {tab === "active" ? (
