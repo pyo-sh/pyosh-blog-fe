@@ -61,14 +61,7 @@ export function MarkdownPreview({
     setIsRendering(true);
     const requestId = requestIdRef.current + 1;
     requestIdRef.current = requestId;
-
-    const timeoutId = window.setTimeout(() => {
-      workerRef.current?.postMessage({ id: requestId, value });
-    }, 300);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
+    workerRef.current.postMessage({ id: requestId, value });
   }, [value]);
 
   return (

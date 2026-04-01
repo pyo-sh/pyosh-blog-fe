@@ -11,8 +11,6 @@ export default function ManagePostCreatePage() {
       <div className="h-full w-full">
         <PostForm
           mode="create"
-          cancelLabel="목록으로"
-          onCancel={() => router.push("/manage/posts")}
           onSuccess={() => router.push("/manage/posts")}
         />
       </div>

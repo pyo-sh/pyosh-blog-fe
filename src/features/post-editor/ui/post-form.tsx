@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import archiveLinear from "@iconify-icons/solar/archive-linear";
 import checkCircleLinear from "@iconify-icons/solar/check-circle-linear";
+import disketteLinear from "@iconify-icons/solar/diskette-linear";
 import uploadLinear from "@iconify-icons/solar/upload-linear";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -220,8 +221,6 @@ export function PostForm({
   mode = "create",
   postId,
   initialValues,
-  cancelLabel = "취소",
-  onCancel,
   onSuccess,
 }: PostFormProps) {
   const queryClient = useQueryClient();
@@ -692,7 +691,12 @@ export function PostForm({
           </div>
         ) : null}
 
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div
+          className={cn(
+            "flex min-h-0 flex-1 flex-col",
+            activeTab === "all" ? "overflow-y-auto" : "overflow-hidden",
+          )}
+        >
           {activeTab === "all" ? (
             <section className="shrink-0 border-b border-border-4 px-6 py-3">
               <div className="flex flex-col gap-3 xl:flex-row xl:flex-wrap xl:items-center xl:gap-x-5 xl:gap-y-3">
@@ -1003,10 +1007,15 @@ export function PostForm({
           ) : null}
 
           {shouldRenderEditor ? (
-            <section className="min-h-0 flex-1 px-6 py-5">
+            <section
+              className={cn(
+                "min-h-0",
+                activeTab === "all" ? "shrink-0" : "flex-1",
+              )}
+            >
               {!isDesktopPreview &&
               (activeTab === "all" || activeTab === "editor-split") ? (
-                <div className="mb-4 flex justify-end">
+                <div className="flex justify-end px-6 py-4">
                   <button
                     type="button"
                     onClick={() => setShowPreviewModal(true)}
@@ -1019,7 +1028,8 @@ export function PostForm({
 
               <div
                 className={cn(
-                  "grid h-full min-h-0 gap-0 overflow-hidden rounded-[1.5rem] border border-border-3 bg-background-1",
+                  "grid min-h-0 gap-0 overflow-hidden bg-background-1",
+                  activeTab === "all" ? "h-[42rem]" : "h-full",
                   shouldRenderInlinePreview
                     ? "lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]"
                     : "grid-cols-1",
@@ -1047,7 +1057,7 @@ export function PostForm({
                 </div>
 
                 {shouldRenderInlinePreview ? (
-                  <div className="min-w-0 min-h-0 border-t border-border-3 bg-background-1 lg:border-l lg:border-t-0">
+                  <div className="min-w-0 min-h-0 bg-background-1">
                     <MarkdownPreview
                       value={previewContent}
                       containerRef={previewRef}
@@ -1073,6 +1083,19 @@ export function PostForm({
                 <Icon icon={archiveLinear} width="16" aria-hidden="true" />
                 {secondaryAction.label}
               </button>
+              <button
+                type="submit"
+                disabled={mutation.isPending || isCategoryUnavailable}
+                className={SECONDARY_BUTTON_CLASS}
+              >
+                <Icon icon={disketteLinear} width="16" aria-hidden="true" />
+                {mutation.isPending && pendingIntent === "save"
+                  ? "저장 중"
+                  : "저장"}
+              </button>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
               {isDirty ? (
                 <span className="text-xs text-text-4">자동 저장 전</span>
               ) : (
@@ -1086,27 +1109,6 @@ export function PostForm({
                   자동 저장됨
                 </span>
               )}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-              {onCancel ? (
-                <button
-                  type="button"
-                  onClick={onCancel}
-                  className={SECONDARY_BUTTON_CLASS}
-                >
-                  {cancelLabel}
-                </button>
-              ) : null}
-              <button
-                type="submit"
-                disabled={mutation.isPending || isCategoryUnavailable}
-                className={SECONDARY_BUTTON_CLASS}
-              >
-                {mutation.isPending && pendingIntent === "save"
-                  ? "저장 중"
-                  : "저장 (초안)"}
-              </button>
               <button
                 type="button"
                 disabled={mutation.isPending || isCategoryUnavailable}
