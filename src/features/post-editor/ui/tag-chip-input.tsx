@@ -126,9 +126,9 @@ export function TagChipInput({ value, onChange }: TagChipInputProps) {
   }
 
   return (
-    <div className="space-y-2" ref={containerRef}>
+    <div className="space-y-1.5" ref={containerRef}>
       <div
-        className="relative rounded-[1rem] border border-border-3 bg-background-1 px-3 py-3 transition-colors focus-within:border-primary-1"
+        className="relative rounded-[0.75rem] border border-border-3 bg-background-1 px-3 py-2.5 transition-colors focus-within:border-primary-1"
         onClick={() => inputRef.current?.focus()}
       >
         <div className="flex flex-wrap items-center gap-2">
@@ -140,8 +140,8 @@ export function TagChipInput({ value, onChange }: TagChipInputProps) {
                 key={tag}
                 className={
                   isExisting
-                    ? "inline-flex items-center gap-2 rounded-full bg-background-3 px-3 py-1 text-xs text-text-2"
-                    : "inline-flex items-center gap-2 rounded-full bg-primary-1/10 px-3 py-1 text-xs text-primary-1"
+                    ? "inline-flex items-center gap-2 rounded-full bg-background-3 px-2.5 py-1 text-[11px] text-text-2"
+                    : "inline-flex items-center gap-2 rounded-full bg-primary-1/10 px-2.5 py-1 text-[11px] text-primary-1"
                 }
               >
                 {tag}
@@ -180,7 +180,7 @@ export function TagChipInput({ value, onChange }: TagChipInputProps) {
             aria-label="태그"
             aria-expanded={suggestions.length > 0}
             aria-controls={suggestions.length > 0 ? listboxId : undefined}
-            className="min-w-[10rem] flex-1 bg-transparent px-1 py-1 text-sm text-text-1 outline-none placeholder:text-text-4"
+            className="min-w-[9rem] flex-1 bg-transparent px-1 py-0.5 text-[13px] text-text-2 outline-none placeholder:text-text-4"
           />
         </div>
 
@@ -188,7 +188,7 @@ export function TagChipInput({ value, onChange }: TagChipInputProps) {
           <div
             id={listboxId}
             role="listbox"
-            className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-20 overflow-hidden rounded-[1rem] border border-border-3 bg-background-2 shadow-[0px_18px_40px_0px_rgba(0,0,0,0.08)]"
+            className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-20 overflow-hidden rounded-[0.85rem] border border-border-3 bg-background-2 shadow-[0px_18px_40px_0px_rgba(0,0,0,0.08)]"
           >
             {suggestions.map((suggestion, index) => (
               <button
@@ -202,16 +202,16 @@ export function TagChipInput({ value, onChange }: TagChipInputProps) {
                 }}
                 className={
                   index === activeIndex
-                    ? "flex w-full items-center justify-between bg-background-3 px-4 py-3 text-left text-sm text-text-1"
-                    : "flex w-full items-center justify-between px-4 py-3 text-left text-sm text-text-2 transition-colors hover:bg-background-3"
+                    ? "flex w-full items-center justify-between bg-background-3 px-3 py-2.5 text-left text-[13px] text-text-1"
+                    : "flex w-full items-center justify-between px-3 py-2.5 text-left text-[13px] text-text-2 transition-colors hover:bg-background-3"
                 }
               >
                 <span>{suggestion.label}</span>
                 <span
                   className={
                     suggestion.isNew
-                      ? "text-xs font-medium text-primary-1"
-                      : "text-xs text-text-4"
+                      ? "text-[11px] font-medium text-primary-1"
+                      : "text-[11px] text-text-4"
                   }
                 >
                   {suggestion.isNew ? "새 태그" : "기존 태그"}
@@ -223,11 +223,11 @@ export function TagChipInput({ value, onChange }: TagChipInputProps) {
       </div>
 
       {tagsQuery.isError ? (
-        <p className="text-xs text-negative-1">
+        <p className="text-[11px] text-negative-1">
           {getErrorMessage(tagsQuery.error, "태그 목록을 불러오지 못했습니다.")}
         </p>
       ) : (
-        <p className="text-xs text-text-4">
+        <p className="text-[11px] text-text-4">
           기존 태그는 중성색, 새 태그는 강조색으로 표시됩니다.
         </p>
       )}

@@ -208,11 +208,11 @@ function MetaFormRow({
   hint?: string;
 }) {
   return (
-    <div className="grid gap-3 border-b border-border-4 pb-5 last:border-b-0 last:pb-0 md:grid-cols-[7rem_minmax(0,1fr)] md:items-start">
-      <div className="pt-2 text-sm font-medium text-text-2">{label}</div>
+    <div className="grid gap-2.5 border-b border-border-4 pb-4 last:border-b-0 last:pb-0 md:grid-cols-[6rem_minmax(0,1fr)] md:items-start">
+      <div className="pt-2 text-[13px] font-medium text-text-3">{label}</div>
       <div className="min-w-0">
         {children}
-        {hint ? <p className="mt-2 text-xs text-text-4">{hint}</p> : null}
+        {hint ? <p className="mt-1.5 text-[11px] text-text-4">{hint}</p> : null}
       </div>
     </div>
   );
@@ -862,14 +862,14 @@ export function PostForm({
                           values.visibility === "public" ? "private" : "public",
                         )
                       }
-                      className="flex w-full items-center justify-between rounded-[0.9rem] border border-border-3 bg-background-2 px-4 py-3 text-left"
+                      className="flex h-10 w-full items-center justify-between rounded-[0.75rem] border border-border-3 bg-background-2 px-3 text-left"
                     >
-                      <span className="text-sm font-medium text-text-1">
+                      <span className="text-[13px] font-medium text-text-2">
                         {getVisibilityLabel(values.visibility)}
                       </span>
                       <span
                         className={cn(
-                          "relative h-6 w-11 rounded-full transition-colors",
+                          "relative h-5 w-10 rounded-full transition-colors",
                           values.visibility === "public"
                             ? "bg-primary-1"
                             : "bg-border-3",
@@ -877,10 +877,10 @@ export function PostForm({
                       >
                         <span
                           className={cn(
-                            "absolute top-1 h-4 w-4 rounded-full bg-white transition-transform",
+                            "absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform",
                             values.visibility === "public"
-                              ? "translate-x-6"
-                              : "translate-x-1",
+                              ? "translate-x-5"
+                              : "translate-x-0.5",
                           )}
                         />
                       </span>
@@ -908,7 +908,7 @@ export function PostForm({
                           )
                         }
                         aria-label="댓글 상태"
-                        className="w-full rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors focus:border-primary-1"
+                        className="h-10 w-full rounded-[0.75rem] border border-border-3 bg-background-1 px-3 text-[13px] text-text-2 outline-none transition-colors focus:border-primary-1"
                       >
                         {COMMENT_STATUS_OPTIONS.map((option) => (
                           <option key={option.value} value={option.value}>
@@ -944,9 +944,9 @@ export function PostForm({
                       }}
                       placeholder="글 목록에 표시될 요약문을 입력하세요"
                       aria-label="Summary"
-                      className="rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
+                      className="w-full rounded-[0.75rem] border border-border-3 bg-background-1 px-3 py-2.5 text-[13px] text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
                     />
-                    <div className="mt-2 text-right text-xs text-text-4">
+                    <div className="mt-1.5 text-right text-[11px] text-text-4">
                       {values.summary.length} / 200자
                     </div>
                   </MetaFormRow>
@@ -963,9 +963,9 @@ export function PostForm({
                       }
                       placeholder="검색엔진에 표시될 설명을 입력하세요"
                       aria-label="Description"
-                      className="rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
+                      className="w-full rounded-[0.75rem] border border-border-3 bg-background-1 px-3 py-2.5 text-[13px] text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
                     />
-                    <div className="mt-2 text-right text-xs text-text-4">
+                    <div className="mt-1.5 text-right text-[11px] text-text-4">
                       {values.description.length} / 300자
                     </div>
                   </MetaFormRow>

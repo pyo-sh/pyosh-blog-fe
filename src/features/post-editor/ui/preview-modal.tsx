@@ -40,7 +40,7 @@ export function PreviewModal({
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 px-6 py-6">
+        <div className="min-h-0 flex-1">
           <MarkdownPreview
             value={value}
             className="h-full min-h-0"
