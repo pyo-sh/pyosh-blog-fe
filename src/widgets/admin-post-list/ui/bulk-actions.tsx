@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import altArrowDownLinear from "@iconify-icons/solar/alt-arrow-down-linear";
 import restartLinear from "@iconify-icons/solar/restart-linear";
@@ -55,9 +55,17 @@ function BulkSelect({
   className?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const listboxId = useId();
   const selectedOption =
     options.find((option) => option.value === value) ?? options[0];
+  const selectedIndex = Math.max(
+    options.findIndex((option) => option.value === value),
+    0,
+  );
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
@@ -74,14 +82,58 @@ function BulkSelect({
     return () => document.removeEventListener("mousedown", handlePointerDown);
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+
+    const next = optionRefs.current[activeIndex];
+    if (!next) return;
+
+    const frame = requestAnimationFrame(() => next.focus());
+
+    return () => cancelAnimationFrame(frame);
+  }, [activeIndex, open]);
+
+  function openList(index = selectedIndex) {
+    setActiveIndex(index);
+    setOpen(true);
+  }
+
+  function closeList() {
+    setOpen(false);
+    triggerRef.current?.focus();
+  }
+
+  function selectValue(nextValue: string) {
+    onChange(nextValue);
+    closeList();
+  }
+
+  function moveActive(nextIndex: number) {
+    const maxIndex = options.length - 1;
+    setActiveIndex(Math.min(Math.max(nextIndex, 0), maxIndex));
+  }
+
   return (
     <div ref={rootRef} className={cn("relative inline-flex", className)}>
       <button
+        ref={triggerRef}
         type="button"
         aria-label={ariaLabel}
         aria-haspopup="listbox"
         aria-expanded={open}
-        onClick={() => setOpen((current) => !current)}
+        aria-controls={listboxId}
+        onClick={() =>
+          open ? setOpen(false) : openList(selectedIndex)
+        }
+        onKeyDown={(event) => {
+          if (event.key === "ArrowDown") {
+            event.preventDefault();
+            openList(selectedIndex);
+          } else if (event.key === "ArrowUp") {
+            event.preventDefault();
+            openList(selectedIndex);
+          }
+        }}
         className={cn(
           "flex h-8 w-full items-center rounded-md border border-border-3 bg-background-1 px-2.5 py-[5px] pr-7 text-left text-[12px] font-normal leading-none text-text-1 outline-none transition-colors",
           open && "border-primary-1 ring-3 ring-primary-1/10",
@@ -103,19 +155,49 @@ function BulkSelect({
 
       {open ? (
         <div className="absolute left-0 top-[calc(100%+4px)] z-[200] min-w-full overflow-hidden rounded-lg border border-border-3 bg-background-1 shadow-[0_4px_16px_rgba(0,0,0,0.1)]">
-          <div role="listbox" aria-label={ariaLabel} className="py-0.5">
-            {options.map((option) => {
+          <div
+            id={listboxId}
+            role="listbox"
+            aria-label={ariaLabel}
+            className="py-0.5"
+          >
+            {options.map((option, index) => {
               const isSelected = option.value === value;
 
               return (
                 <button
                   key={option.value}
+                  ref={(node) => {
+                    optionRefs.current[index] = node;
+                  }}
                   type="button"
                   role="option"
                   aria-selected={isSelected}
-                  onClick={() => {
-                    onChange(option.value);
-                    setOpen(false);
+                  tabIndex={index === activeIndex ? 0 : -1}
+                  onClick={() => selectValue(option.value)}
+                  onFocus={() => setActiveIndex(index)}
+                  onKeyDown={(event) => {
+                    if (event.key === "ArrowDown") {
+                      event.preventDefault();
+                      moveActive(index + 1);
+                    } else if (event.key === "ArrowUp") {
+                      event.preventDefault();
+                      moveActive(index - 1);
+                    } else if (event.key === "Home") {
+                      event.preventDefault();
+                      moveActive(0);
+                    } else if (event.key === "End") {
+                      event.preventDefault();
+                      moveActive(options.length - 1);
+                    } else if (event.key === "Escape") {
+                      event.preventDefault();
+                      closeList();
+                    } else if (event.key === "Tab") {
+                      setOpen(false);
+                    } else if (event.key === " " || event.key === "Enter") {
+                      event.preventDefault();
+                      selectValue(option.value);
+                    }
                   }}
                   className={cn(
                     "flex w-full items-center whitespace-nowrap px-3 py-2 text-left text-[12px] leading-none text-text-1 transition-colors hover:bg-background-2",

@@ -548,8 +548,19 @@ export function PostTable({
                   <tr
                     key={post.id}
                     onClick={() => router.push(`/manage/posts/${post.id}/edit`)}
+                    onKeyDown={(event) => {
+                      if (event.currentTarget !== event.target) return;
+
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        router.push(`/manage/posts/${post.id}/edit`);
+                      }
+                    }}
+                    tabIndex={0}
+                    role="link"
+                    aria-label={`${post.title} 수정`}
                     className={cn(
-                      "cursor-pointer align-middle transition-colors hover:bg-background-2",
+                      "cursor-pointer align-middle transition-colors hover:bg-background-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-1/30",
                       isSelected && "bg-primary-1/5",
                     )}
                   >
