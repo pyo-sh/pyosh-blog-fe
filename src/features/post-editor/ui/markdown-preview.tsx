@@ -78,7 +78,7 @@ export function MarkdownPreview({
         className,
       )}
     >
-      <div className="flex items-center justify-between border-b border-border-3 px-4 py-3 text-xs uppercase tracking-[0.2em] text-text-4">
+      <div className="flex items-center justify-between border-b border-border-3 bg-background-2 px-4 py-3 text-xs font-medium text-text-4">
         <span>{headerTitle}</span>
         <span>{isRendering ? "렌더링 중" : "실시간 반영"}</span>
       </div>
@@ -88,7 +88,7 @@ export function MarkdownPreview({
       ) : (
         <div ref={containerRef} className="min-h-0 flex-1 overflow-y-auto">
           <div
-            className="markdown-content prose max-w-none px-4 py-6"
+            className="markdown-content prose max-w-none px-6 py-5"
             dangerouslySetInnerHTML={{ __html: html }}
           />
         </div>

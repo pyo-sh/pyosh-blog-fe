@@ -41,8 +41,7 @@ import { getErrorMessage } from "@shared/lib/get-error-message";
 import { cn } from "@shared/lib/style-utils";
 import { Spinner } from "@shared/ui/libs";
 
-type EditorTab = "all" | "meta" | "content";
-type PreviewMode = "split" | "editor";
+type EditorTab = "all" | "info" | "editor-split" | "editor-only";
 type SubmitIntent =
   | "save"
   | "publish"
@@ -67,7 +66,6 @@ interface PostFormProps {
   mode?: "create" | "edit";
   postId?: number;
   initialValues?: Partial<PostFormValues>;
-  submitLabel?: string;
   cancelLabel?: string;
   onCancel?: () => void;
   onSuccess?: (post: Post) => void;
@@ -86,14 +84,6 @@ const DEFAULT_VALUES: PostFormValues = {
   contentMd: "",
 };
 
-const VISIBILITY_OPTIONS: Array<{
-  label: string;
-  value: Post["visibility"];
-}> = [
-  { label: "공개", value: "public" },
-  { label: "비공개", value: "private" },
-];
-
 const COMMENT_STATUS_OPTIONS: Array<{
   label: string;
   value: "open" | "locked" | "disabled";
@@ -103,22 +93,11 @@ const COMMENT_STATUS_OPTIONS: Array<{
   { label: "비활성", value: "disabled" },
 ];
 
-const TABS: Array<{ id: EditorTab; label: string; description: string }> = [
-  {
-    id: "all",
-    label: "전체",
-    description: "메타데이터와 본문을 함께 편집합니다.",
-  },
-  {
-    id: "meta",
-    label: "정보",
-    description: "메타데이터와 글 목록 카드를 미리 봅니다.",
-  },
-  {
-    id: "content",
-    label: "글",
-    description: "본문 작성과 미리보기에 집중합니다.",
-  },
+const TABS: Array<{ id: EditorTab; label: string }> = [
+  { id: "all", label: "전체" },
+  { id: "info", label: "정보" },
+  { id: "editor-split", label: "에디터 + 프리뷰" },
+  { id: "editor-only", label: "에디터" },
 ];
 
 const REMOVED_PENDING_IMAGE_TTL_MS = 30_000;
@@ -163,31 +142,6 @@ function mapPostToFormValues(post: Post): PostFormValues {
   };
 }
 
-function FormField({
-  label,
-  htmlFor,
-  children,
-  hint,
-}: {
-  label: string;
-  htmlFor?: string;
-  children: ReactNode;
-  hint?: string;
-}) {
-  return (
-    <label
-      className="flex flex-col gap-2 text-sm text-text-2"
-      htmlFor={htmlFor}
-    >
-      <div className="flex items-center justify-between gap-3">
-        <span className="font-medium text-text-1">{label}</span>
-        {hint ? <span className="text-xs text-text-4">{hint}</span> : null}
-      </div>
-      {children}
-    </label>
-  );
-}
-
 function sortCategories(categories: Category[]): Category[] {
   return [...categories]
     .sort((left, right) => left.sortOrder - right.sortOrder)
@@ -195,6 +149,89 @@ function sortCategories(categories: Category[]): Category[] {
       ...category,
       children: sortCategories(category.children ?? []),
     }));
+}
+
+function FormField({
+  label,
+  htmlFor,
+  children,
+  hint,
+  description,
+}: {
+  label: string;
+  htmlFor?: string;
+  children: ReactNode;
+  hint?: string;
+  description?: string;
+}) {
+  return (
+    <label className="flex flex-col gap-2.5" htmlFor={htmlFor}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="text-xs font-medium text-text-2">{label}</span>
+        {hint ? <span className="text-xs text-text-4">{hint}</span> : null}
+      </div>
+      {children}
+      {description ? (
+        <p className="text-xs text-text-4">{description}</p>
+      ) : null}
+    </label>
+  );
+}
+
+function getStatusMeta(status: Post["status"]) {
+  if (status === "published") {
+    return {
+      label: "발행",
+      tone: "bg-positive-1/10 text-positive-1 border-positive-1/10",
+    };
+  }
+
+  if (status === "archived") {
+    return {
+      label: "보관",
+      tone: "bg-yellow-1/10 text-yellow-1 border-yellow-1/10",
+    };
+  }
+
+  return {
+    label: "작성중",
+    tone: "bg-background-3 text-text-3 border-border-3",
+  };
+}
+
+function getVisibilityLabel(visibility: Post["visibility"]) {
+  return visibility === "public" ? "공개" : "비공개";
+}
+
+function getCommentStatusDescription(
+  commentStatus: PostFormValues["commentStatus"],
+) {
+  if (commentStatus === "locked") {
+    return "기존 댓글만 표시";
+  }
+
+  if (commentStatus === "disabled") {
+    return "댓글 영역 숨김";
+  }
+
+  return "댓글 작성 가능";
+}
+
+function CompactMetaLabel({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-2.5">
+      <span className="shrink-0 text-[11px] font-medium text-text-4">
+        {label}
+      </span>
+      {children}
+    </div>
+  );
 }
 
 export function PostForm({
@@ -226,7 +263,6 @@ export function PostForm({
   const [showPublishConfirm, setShowPublishConfirm] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [showImageGallery, setShowImageGallery] = useState(false);
-  const [previewMode, setPreviewMode] = useState<PreviewMode>("split");
   const [isDesktopPreview, setIsDesktopPreview] = useState(false);
   const [editorView, setEditorView] = useState<EditorView | null>(null);
   const [pendingImages, setPendingImages] = useState<Map<string, PendingImage>>(
@@ -283,10 +319,9 @@ export function PostForm({
       return;
     }
 
-    const mediaQuery = window.matchMedia("(min-width: 1280px)");
+    const mediaQuery = window.matchMedia("(min-width: 1024px)");
     const updateViewport = () => {
       setIsDesktopPreview(mediaQuery.matches);
-      setPreviewMode((current) => (mediaQuery.matches ? current : "editor"));
     };
 
     updateViewport();
@@ -364,12 +399,12 @@ export function PostForm({
       return;
     }
 
-    if (previewMode !== "split" || activeTab === "meta") {
+    if (activeTab !== "all" && activeTab !== "editor-split") {
       return;
     }
 
     return attachScrollSync(editorView, previewRef.current);
-  }, [activeTab, editorView, isDesktopPreview, previewMode]);
+  }, [activeTab, editorView, isDesktopPreview]);
 
   const categoriesQuery = useQuery({
     queryKey: ["categories", "admin"],
@@ -465,6 +500,9 @@ export function PostForm({
       ).length,
     [pendingImages, values.contentMd],
   );
+  const statusMeta = getStatusMeta(values.status);
+  const metaSummary =
+    values.summary.trim() || extractPlainText(values.contentMd, 200);
 
   const handleFieldChange = <Key extends keyof PostFormValues>(
     key: Key,
@@ -476,14 +514,6 @@ export function PostForm({
       [key]: value,
     }));
   };
-
-  function handlePreviewModeChange(mode: PreviewMode) {
-    if (mode === "split" && !isDesktopPreview) {
-      return;
-    }
-
-    setPreviewMode(mode);
-  }
 
   function insertPendingFiles(files: FileList | File[]) {
     if (!editorView) {
@@ -606,64 +636,66 @@ export function PostForm({
         ? { label: "발행 취소", intent: "unpublish" as const }
         : { label: "보관", intent: "archive" as const };
 
+  const shouldRenderEditor =
+    activeTab === "all" ||
+    activeTab === "editor-split" ||
+    activeTab === "editor-only";
+  const shouldRenderInlinePreview =
+    shouldRenderEditor && activeTab !== "editor-only" && isDesktopPreview;
+
   return (
     <>
       <form
         onSubmit={handleSubmit}
-        className="space-y-6 rounded-[1.75rem] border border-border-3 bg-background-2 p-6 shadow-[0px_18px_60px_0px_rgba(0,0,0,0.06)]"
+        className="overflow-hidden rounded-[1.75rem] border border-border-3 bg-background-1 shadow-[0px_24px_80px_0px_rgba(15,23,42,0.08)]"
       >
-        <div className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-xs uppercase tracking-[0.24em] text-text-4">
-                Editor Views
-              </p>
-              <p className="mt-2 text-sm text-text-3">
-                탭 전환은 동일 폼 안에서만 일어나며 입력값은 유지됩니다.
-              </p>
-            </div>
-            {isDirty ? (
-              <span className="rounded-full bg-warning-2 px-3 py-1 text-xs font-medium text-warning-1">
-                저장되지 않은 변경
-              </span>
-            ) : null}
-          </div>
-
-          <div className="grid gap-2 rounded-[1.25rem] bg-background-1 p-2 md:grid-cols-3">
+        <div className="border-b border-border-4 bg-background-2 px-4 py-2 md:px-6">
+          <div className="flex flex-wrap items-center gap-1">
             {TABS.map((tab) => (
               <button
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "rounded-[1rem] px-4 py-3 text-left transition-colors",
+                  "rounded-[0.75rem] px-3 py-2 text-sm font-medium transition-colors",
                   activeTab === tab.id
-                    ? "bg-primary-1 text-white shadow-[0px_14px_30px_0px_rgba(138,111,224,0.2)]"
-                    : "text-text-2 hover:bg-background-2 hover:text-text-1",
+                    ? "bg-background-1 text-primary-1 shadow-[0px_8px_24px_0px_rgba(15,23,42,0.06)]"
+                    : "text-text-3 hover:bg-background-3 hover:text-text-1",
                 )}
               >
-                <div className="text-sm font-semibold">{tab.label}</div>
-                <div
-                  className={cn(
-                    "mt-1 text-xs",
-                    activeTab === tab.id ? "text-white/80" : "text-text-4",
-                  )}
-                >
-                  {tab.description}
-                </div>
+                {tab.label}
               </button>
             ))}
+            {isDirty ? (
+              <span className="ml-auto rounded-full border border-warning-1/20 bg-warning-2 px-3 py-1 text-xs font-medium text-warning-1">
+                저장되지 않은 변경
+              </span>
+            ) : null}
           </div>
         </div>
 
+        <div className="border-b border-border-4 px-5 py-4 md:px-6">
+          <input
+            id="title"
+            name="title"
+            type="text"
+            maxLength={200}
+            value={values.title}
+            onChange={(event) => handleFieldChange("title", event.target.value)}
+            placeholder="제목을 입력하세요"
+            aria-label="제목"
+            className="w-full border-none bg-transparent text-[1.7rem] font-semibold tracking-[-0.03em] text-text-1 outline-none placeholder:text-text-4 md:text-[2rem]"
+          />
+        </div>
+
         {submitError ? (
-          <div className="rounded-[1rem] border border-negative-1/20 bg-negative-1/5 px-4 py-3 text-sm text-negative-1">
+          <div className="mx-5 mt-5 rounded-[1rem] border border-negative-1/20 bg-negative-1/5 px-4 py-3 text-sm text-negative-1 md:mx-6">
             {submitError}
           </div>
         ) : null}
 
         {categoriesQuery.isError ? (
-          <div className="rounded-[1rem] border border-negative-1/20 bg-negative-1/5 px-4 py-3 text-sm text-negative-1">
+          <div className="mx-5 mt-5 rounded-[1rem] border border-negative-1/20 bg-negative-1/5 px-4 py-3 text-sm text-negative-1 md:mx-6">
             {getErrorMessage(
               categoriesQuery.error,
               "카테고리 목록을 불러오지 못했습니다.",
@@ -672,70 +704,114 @@ export function PostForm({
         ) : null}
 
         {!categoriesQuery.isPending && categories.length === 0 ? (
-          <div className="rounded-[1rem] border border-warning-1/20 bg-warning-2 px-4 py-3 text-sm text-warning-1">
+          <div className="mx-5 mt-5 rounded-[1rem] border border-warning-1/20 bg-warning-2 px-4 py-3 text-sm text-warning-1 md:mx-6">
             카테고리를 먼저 생성하세요.
           </div>
         ) : null}
 
-        {activeTab !== "content" ? (
-          <section className="grid gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(22rem,0.85fr)]">
-            <div className="space-y-5">
-              <div className="grid gap-4 md:grid-cols-2">
-                <FormField
-                  label="제목"
-                  htmlFor="title"
-                  hint={`${values.title.length}/200`}
-                >
-                  <input
-                    id="title"
-                    name="title"
-                    type="text"
-                    maxLength={200}
-                    value={values.title}
-                    onChange={(event) =>
-                      handleFieldChange("title", event.target.value)
-                    }
-                    placeholder="글 제목"
-                    aria-label="제목"
-                    className="rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
-                  />
-                </FormField>
-
-                <FormField label="카테고리" htmlFor="categoryId">
+        {activeTab === "all" ? (
+          <section className="border-b border-border-4 px-5 py-4 md:px-6">
+            <div className="flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-6 lg:gap-y-3">
+              <CompactMetaLabel label="카테고리">
+                <div className="min-w-[12rem]">
                   <CategoryTreeSelect
                     categories={categories}
                     value={values.categoryId}
                     disabled={categoriesQuery.isPending}
                     onChange={(value) => handleFieldChange("categoryId", value)}
                   />
-                </FormField>
+                </div>
+              </CompactMetaLabel>
 
-                <FormField label="공개 여부" htmlFor="visibility">
-                  <select
-                    id="visibility"
-                    name="visibility"
-                    value={values.visibility}
-                    onChange={(event) =>
-                      handleFieldChange(
-                        "visibility",
-                        event.target.value as Post["visibility"],
-                      )
-                    }
-                    aria-label="공개 여부"
-                    className="rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors focus:border-primary-1"
+              <CompactMetaLabel label="태그">
+                <div className="min-w-[18rem] flex-1">
+                  <TagChipInput
+                    value={values.tags}
+                    onChange={(nextTags) => handleFieldChange("tags", nextTags)}
+                  />
+                </div>
+              </CompactMetaLabel>
+
+              <CompactMetaLabel label="썸네일">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("info")}
+                    className="rounded-[0.7rem] border border-border-3 bg-background-1 px-3 py-2 text-xs font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
                   >
-                    {VISIBILITY_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </FormField>
+                    에셋 갤러리에서 선택
+                  </button>
+                  <div className="overflow-hidden rounded-[0.6rem] border border-border-3 bg-background-2">
+                    {values.thumbnailUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- arbitrary admin preview URLs are allowed
+                      <img
+                        src={values.thumbnailUrl}
+                        alt="썸네일 미리보기"
+                        className="h-9 w-12 object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-9 w-12 items-center justify-center text-[10px] text-text-4">
+                        없음
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CompactMetaLabel>
 
-                <FormField label="댓글 상태" htmlFor="commentStatus">
+              <CompactMetaLabel label="상태">
+                <div className="flex items-center gap-1 rounded-[0.8rem] bg-background-2 p-1">
+                  {(["draft", "published"] as const).map((status) => (
+                    <button
+                      key={status}
+                      type="button"
+                      onClick={() => handleFieldChange("status", status)}
+                      className={cn(
+                        "rounded-[0.7rem] px-3 py-1.5 text-xs font-medium transition-colors",
+                        values.status === status
+                          ? status === "published"
+                            ? "bg-positive-1/10 text-positive-1"
+                            : "bg-primary-1/10 text-primary-1"
+                          : "text-text-3 hover:bg-background-3 hover:text-text-1",
+                      )}
+                    >
+                      {status === "draft" ? "작성중" : "발행"}
+                    </button>
+                  ))}
+                </div>
+              </CompactMetaLabel>
+
+              <CompactMetaLabel label="공개">
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleFieldChange(
+                      "visibility",
+                      values.visibility === "public" ? "private" : "public",
+                    )
+                  }
+                  className={cn(
+                    "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                    values.visibility === "public"
+                      ? "border-primary-1/20 bg-primary-1/10 text-primary-1"
+                      : "border-border-3 bg-background-1 text-text-3",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "h-2.5 w-2.5 rounded-full",
+                      values.visibility === "public"
+                        ? "bg-primary-1"
+                        : "bg-text-4",
+                    )}
+                  />
+                  {getVisibilityLabel(values.visibility)}
+                </button>
+              </CompactMetaLabel>
+
+              <CompactMetaLabel label="댓글 상태">
+                <div className="min-w-[8rem]">
                   <select
-                    id="commentStatus"
-                    name="commentStatus"
+                    id="commentStatusCompact"
                     value={values.commentStatus}
                     onChange={(event) =>
                       handleFieldChange(
@@ -744,7 +820,7 @@ export function PostForm({
                       )
                     }
                     aria-label="댓글 상태"
-                    className="rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors focus:border-primary-1"
+                    className="w-full rounded-[0.9rem] border border-border-3 bg-background-1 px-3 py-2 text-sm text-text-1 outline-none transition-colors focus:border-primary-1"
                   >
                     {COMMENT_STATUS_OPTIONS.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -752,8 +828,23 @@ export function PostForm({
                       </option>
                     ))}
                   </select>
-                </FormField>
-              </div>
+                </div>
+              </CompactMetaLabel>
+            </div>
+          </section>
+        ) : null}
+
+        {activeTab === "info" ? (
+          <section className="grid gap-6 px-5 py-5 lg:grid-cols-[minmax(0,1.2fr)_22rem] lg:px-6">
+            <div className="space-y-6">
+              <FormField label="카테고리" htmlFor="categoryId">
+                <CategoryTreeSelect
+                  categories={categories}
+                  value={values.categoryId}
+                  disabled={categoriesQuery.isPending}
+                  onChange={(value) => handleFieldChange("categoryId", value)}
+                />
+              </FormField>
 
               <FormField label="태그" htmlFor="tags">
                 <TagChipInput
@@ -762,7 +853,85 @@ export function PostForm({
                 />
               </FormField>
 
-              <FormField label="썸네일" htmlFor="thumbnailUrl">
+              <FormField
+                label="공개 설정"
+                description="발행된 글을 공개할지 결정합니다."
+              >
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleFieldChange(
+                      "visibility",
+                      values.visibility === "public" ? "private" : "public",
+                    )
+                  }
+                  className="flex w-full items-center justify-between rounded-[1rem] border border-border-3 bg-background-2 px-4 py-3 text-left"
+                >
+                  <div>
+                    <p className="text-sm font-medium text-text-1">
+                      {getVisibilityLabel(values.visibility)}
+                    </p>
+                    <p className="mt-1 text-xs text-text-4">
+                      {values.visibility === "public"
+                        ? "발행 시 외부에 노출됩니다."
+                        : "관리자 화면에서만 확인할 수 있습니다."}
+                    </p>
+                  </div>
+                  <span
+                    className={cn(
+                      "relative h-6 w-11 rounded-full transition-colors",
+                      values.visibility === "public"
+                        ? "bg-primary-1"
+                        : "bg-border-3",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "absolute top-1 h-4 w-4 rounded-full bg-white transition-transform",
+                        values.visibility === "public"
+                          ? "translate-x-6"
+                          : "translate-x-1",
+                      )}
+                    />
+                  </span>
+                </button>
+              </FormField>
+
+              <FormField
+                label="댓글 상태"
+                htmlFor="commentStatus"
+                description={`${
+                  COMMENT_STATUS_OPTIONS.find(
+                    (option) => option.value === values.commentStatus,
+                  )?.label ?? "열림"
+                }: ${getCommentStatusDescription(values.commentStatus)}`}
+              >
+                <select
+                  id="commentStatus"
+                  name="commentStatus"
+                  value={values.commentStatus}
+                  onChange={(event) =>
+                    handleFieldChange(
+                      "commentStatus",
+                      event.target.value as PostFormValues["commentStatus"],
+                    )
+                  }
+                  aria-label="댓글 상태"
+                  className="rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors focus:border-primary-1"
+                >
+                  {COMMENT_STATUS_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </FormField>
+
+              <FormField
+                label="썸네일"
+                htmlFor="thumbnailUrl"
+                description="드래그 앤 드롭으로도 업로드할 수 있습니다."
+              >
                 <ThumbnailUploader
                   value={values.thumbnailUrl}
                   onChange={(nextValue) =>
@@ -771,167 +940,110 @@ export function PostForm({
                 />
               </FormField>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <FormField
-                  label="Summary"
-                  htmlFor="summary"
-                  hint={`${values.summary.length}/200`}
-                >
-                  <textarea
-                    id="summary"
-                    name="summary"
-                    maxLength={200}
-                    rows={4}
-                    value={values.summary}
-                    onChange={(event) => {
-                      setIsSummaryManuallyEdited(true);
-                      handleFieldChange("summary", event.target.value);
-                    }}
-                    placeholder="글 목록과 카드에 표시될 짧은 요약"
-                    aria-label="Summary"
-                    className="rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
-                  />
-                </FormField>
+              <FormField
+                label="요약 (summary)"
+                htmlFor="summary"
+                hint={`${values.summary.length}/200`}
+              >
+                <textarea
+                  id="summary"
+                  name="summary"
+                  maxLength={200}
+                  rows={3}
+                  value={values.summary}
+                  onChange={(event) => {
+                    setIsSummaryManuallyEdited(true);
+                    handleFieldChange("summary", event.target.value);
+                  }}
+                  placeholder="글 목록에 표시될 요약문을 입력하세요"
+                  aria-label="Summary"
+                  className="rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
+                />
+              </FormField>
 
-                <FormField
-                  label="Description"
-                  htmlFor="description"
-                  hint={`${values.description.length}/300`}
-                >
-                  <textarea
-                    id="description"
-                    name="description"
-                    maxLength={300}
-                    rows={4}
-                    value={values.description}
-                    onChange={(event) =>
-                      handleFieldChange("description", event.target.value)
-                    }
-                    placeholder="검색/메타 태그용 설명"
-                    aria-label="Description"
-                    className="rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
-                  />
-                </FormField>
+              <FormField
+                label="설명 (description)"
+                htmlFor="description"
+                hint={`${values.description.length}/300`}
+                description="SEO 메타 설명에 사용됩니다."
+              >
+                <textarea
+                  id="description"
+                  name="description"
+                  maxLength={300}
+                  rows={4}
+                  value={values.description}
+                  onChange={(event) =>
+                    handleFieldChange("description", event.target.value)
+                  }
+                  placeholder="검색엔진에 표시될 설명을 입력하세요"
+                  aria-label="Description"
+                  className="rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
+                />
+              </FormField>
+
+              <div className="border-t border-border-4 pt-6">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-text-4">
+                  글 목록 아이템 미리보기
+                </p>
+                <PostCardPreview
+                  title={values.title}
+                  categoryName={selectedCategoryName}
+                  tags={values.tags}
+                  thumbnailUrl={values.thumbnailUrl}
+                  summary={values.summary}
+                  contentMd={values.contentMd}
+                  visibility={values.visibility}
+                  status={values.status}
+                />
               </div>
             </div>
 
-            <div className="space-y-4">
-              <div className="rounded-[1.25rem] border border-border-3 bg-background-1 p-5">
-                <p className="text-xs uppercase tracking-[0.24em] text-text-4">
-                  실시간 요약
+            <div className="lg:pl-2">
+              <div className="rounded-[1.5rem] border border-border-3 bg-background-2 p-4">
+                <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-text-4">
+                  글 목록 미리보기
                 </p>
-                <div className="mt-3 grid gap-3 text-sm text-text-3">
-                  <div className="rounded-[1rem] bg-background-2 p-4">
-                    <span className="text-xs text-text-4">상태</span>
-                    <p className="mt-1 font-medium text-text-1">
-                      {values.status === "published"
-                        ? "발행"
-                        : values.status === "archived"
-                          ? "보관"
-                          : "초안"}
-                    </p>
-                  </div>
-                  <div className="rounded-[1rem] bg-background-2 p-4">
-                    <span className="text-xs text-text-4">카테고리</span>
-                    <p className="mt-1 font-medium text-text-1">
-                      {selectedCategoryName || "선택되지 않음"}
-                    </p>
-                  </div>
-                  <div className="rounded-[1rem] bg-background-2 p-4">
-                    <span className="text-xs text-text-4">자동 summary</span>
-                    <p className="mt-1 leading-6 text-text-2">
-                      {values.summary.trim() ||
-                        extractPlainText(values.contentMd)}
-                    </p>
-                  </div>
-                </div>
+                <PostCardPreview
+                  title={values.title}
+                  categoryName={selectedCategoryName}
+                  tags={values.tags}
+                  thumbnailUrl={values.thumbnailUrl}
+                  summary={values.summary}
+                  contentMd={values.contentMd}
+                  visibility={values.visibility}
+                  status={values.status}
+                  compact
+                />
               </div>
-
-              <PostCardPreview
-                title={values.title}
-                categoryName={selectedCategoryName}
-                tags={values.tags}
-                thumbnailUrl={values.thumbnailUrl}
-                summary={values.summary}
-                contentMd={values.contentMd}
-                visibility={values.visibility}
-                status={values.status}
-              />
             </div>
           </section>
         ) : null}
 
-        {activeTab !== "meta" ? (
-          <section className="space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-[1.25rem] border border-border-3 bg-background-1 px-4 py-3">
-              <div>
-                <p className="text-xs uppercase tracking-[0.24em] text-text-4">
-                  Preview Mode
-                </p>
-                <p className="mt-1 text-sm text-text-3">
-                  XL 이상에서는 분할 미리보기를, 작은 화면에서는 모달 미리보기를
-                  사용합니다.
-                </p>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  disabled={!isDesktopPreview}
-                  onClick={() => handlePreviewModeChange("split")}
-                  className={cn(
-                    "rounded-[0.9rem] border px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
-                    previewMode === "split"
-                      ? "border-primary-1 bg-primary-1 text-white"
-                      : "border-border-3 bg-background-2 text-text-2 hover:border-border-2 hover:text-text-1",
-                  )}
-                >
-                  에디터 + 프리뷰
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handlePreviewModeChange("editor")}
-                  className={cn(
-                    "rounded-[0.9rem] border px-4 py-2 text-sm font-medium transition-colors",
-                    previewMode === "editor"
-                      ? "border-primary-1 bg-primary-1 text-white"
-                      : "border-border-3 bg-background-2 text-text-2 hover:border-border-2 hover:text-text-1",
-                  )}
-                >
-                  에디터만
-                </button>
+        {shouldRenderEditor ? (
+          <section className="min-h-[46rem] px-5 py-5 md:px-6">
+            {!isDesktopPreview &&
+            (activeTab === "all" || activeTab === "editor-split") ? (
+              <div className="mb-4 flex justify-end">
                 <button
                   type="button"
                   onClick={() => setShowPreviewModal(true)}
-                  className="rounded-[0.9rem] border border-border-3 bg-background-2 px-4 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+                  className="rounded-[0.85rem] border border-border-3 bg-background-2 px-4 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
                 >
                   미리보기
                 </button>
               </div>
-            </div>
+            ) : null}
 
             <div
               className={cn(
-                "grid gap-4",
-                previewMode === "split" && isDesktopPreview
-                  ? "xl:grid-cols-2"
+                "grid gap-0 overflow-hidden rounded-[1.5rem] border border-border-3 bg-background-1",
+                shouldRenderInlinePreview
+                  ? "lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]"
                   : "grid-cols-1",
               )}
             >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <label
-                    id="contentMdLabel"
-                    onClick={() =>
-                      document.getElementById("contentMd")?.focus()
-                    }
-                    className="text-sm font-medium text-text-1"
-                  >
-                    본문
-                  </label>
-                  <span className="text-xs uppercase tracking-[0.2em] text-text-4">
-                    Markdown
-                  </span>
-                </div>
+              <div className="min-w-0">
                 <MarkdownEditor
                   pendingImageCount={pendingImageCount}
                   labelId="contentMdLabel"
@@ -948,22 +1060,17 @@ export function PostForm({
                       );
                     }
                   }}
+                  className="[&_.cm-editor]:min-h-[42rem] [&_.cm-scroller]:min-h-[42rem]"
                 />
               </div>
 
-              {previewMode === "split" && isDesktopPreview ? (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-text-1">
-                      미리보기
-                    </span>
-                    <span className="text-xs uppercase tracking-[0.2em] text-text-4">
-                      실시간 반영
-                    </span>
-                  </div>
+              {shouldRenderInlinePreview ? (
+                <div className="min-w-0 border-t border-border-3 bg-background-1 lg:border-l lg:border-t-0">
                   <MarkdownPreview
                     value={previewContent}
                     containerRef={previewRef}
+                    className="h-full min-h-[42rem] rounded-none border-0"
+                    headerTitle="미리보기"
                   />
                 </div>
               ) : null}
@@ -971,48 +1078,82 @@ export function PostForm({
           </section>
         ) : null}
 
-        <div className="flex flex-col gap-3 border-t border-border-3 pt-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-wrap gap-3">
+        <div className="flex flex-col gap-4 border-t border-border-4 bg-background-1 px-5 py-4 md:px-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
               disabled={mutation.isPending || isCategoryUnavailable}
               onClick={() => submitWithIntent(secondaryAction.intent)}
-              className="rounded-[0.9rem] border border-border-3 px-5 py-3 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:opacity-60"
+              className="inline-flex items-center justify-center rounded-[0.9rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:opacity-60"
             >
               {secondaryAction.label}
             </button>
+            {isDirty ? (
+              <span className="text-xs text-text-4">자동 저장 전</span>
+            ) : (
+              <span className="text-xs text-positive-1">자동 저장됨</span>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
             {onCancel ? (
               <button
                 type="button"
                 onClick={onCancel}
-                className="rounded-[0.9rem] border border-border-3 px-5 py-3 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+                className="rounded-[0.9rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
               >
                 {cancelLabel}
               </button>
             ) : null}
-          </div>
-
-          <div className="flex flex-col gap-3 sm:flex-row">
             <button
               type="submit"
               disabled={mutation.isPending || isCategoryUnavailable}
-              className="rounded-[0.9rem] border border-border-3 bg-background-1 px-5 py-3 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:opacity-60"
+              className="rounded-[0.9rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:opacity-60"
             >
               {mutation.isPending && pendingIntent === "save"
                 ? "저장 중"
-                : "저장"}
+                : "저장 (초안)"}
             </button>
             <button
               type="button"
               disabled={mutation.isPending || isCategoryUnavailable}
               onClick={() => setShowPublishConfirm(true)}
-              className="inline-flex items-center justify-center gap-2 rounded-[0.9rem] bg-primary-1 px-5 py-3 text-sm font-semibold text-white transition-opacity disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 rounded-[0.9rem] bg-primary-1 px-5 py-2.5 text-sm font-semibold text-white transition-opacity disabled:opacity-60"
             >
               {mutation.isPending && pendingIntent !== null ? (
                 <Spinner size="sm" />
               ) : null}
               {values.status === "published" ? "다시 발행" : "발행"}
             </button>
+          </div>
+        </div>
+
+        <div className="px-5 pb-5 md:px-6">
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <span
+              className={cn(
+                "rounded-full border px-3 py-1 text-xs font-semibold",
+                statusMeta.tone,
+              )}
+            >
+              {statusMeta.label}
+            </span>
+            <span className="rounded-full border border-primary-1/10 bg-primary-1/10 px-3 py-1 text-xs font-medium text-primary-1">
+              {selectedCategoryName || "카테고리 미선택"}
+            </span>
+            <span className="text-xs text-text-4">
+              {getVisibilityLabel(values.visibility)} · 댓글{" "}
+              {
+                COMMENT_STATUS_OPTIONS.find(
+                  (option) => option.value === values.commentStatus,
+                )?.label
+              }
+            </span>
+            {metaSummary ? (
+              <span className="max-w-full truncate text-xs text-text-4">
+                {metaSummary}
+              </span>
+            ) : null}
           </div>
         </div>
       </form>
@@ -1030,6 +1171,7 @@ export function PostForm({
 
       <PreviewModal
         isOpen={showPreviewModal}
+        title={values.title}
         value={previewContent}
         onClose={() => setShowPreviewModal(false)}
       />
