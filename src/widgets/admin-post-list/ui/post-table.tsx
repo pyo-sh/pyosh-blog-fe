@@ -363,6 +363,9 @@ export function PostTable({
                     제목
                   </th>
                   <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left text-ui-xs font-semibold uppercase leading-4 tracking-[0.14em] text-text-4">
+                    카테고리
+                  </th>
+                  <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left text-ui-xs font-semibold uppercase leading-4 tracking-[0.14em] text-text-4">
                     삭제일
                   </th>
                   <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left text-ui-xs font-semibold uppercase leading-4 tracking-[0.14em] text-text-4">
@@ -386,16 +389,18 @@ export function PostTable({
                       />
                     </td>
                     <td className="border-b border-border-4 px-3 py-3 align-middle">
-                      <div className="flex flex-col gap-1">
-                        <span className="truncate whitespace-nowrap text-[14px] font-medium leading-4 text-text-1">
-                          {post.title}
+                      <span className="truncate whitespace-nowrap text-[14px] font-medium leading-4 text-text-1">
+                        {post.title}
+                      </span>
+                    </td>
+                    <td className="border-b border-border-4 px-3 py-3 align-middle">
+                      {post.category ? (
+                        <span className="whitespace-nowrap text-[14px] leading-4 text-text-4">
+                          {post.category.name}
                         </span>
-                        {post.category ? (
-                          <span className="whitespace-nowrap text-[14px] leading-4 text-text-4">
-                            {post.category.name}
-                          </span>
-                        ) : null}
-                      </div>
+                      ) : (
+                        <span className="whitespace-nowrap text-[14px] leading-4 text-text-4">-</span>
+                      )}
                     </td>
                     <td className="border-b border-border-4 px-3 py-3 align-middle text-[14px] leading-4 text-text-3">
                       {formatDate(post.deletedAt)}
@@ -406,7 +411,7 @@ export function PostTable({
                           type="button"
                           onClick={() => onRestore(post.id)}
                           disabled={deleteId === post.id}
-                          className="rounded-lg border border-border-3 px-3 py-2 text-body-sm font-medium text-text-2 transition-colors hover:bg-background-3 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="inline-flex h-8 items-center justify-center rounded-md border border-border-3 px-3 text-[12px] font-medium leading-none text-text-2 transition-colors hover:bg-background-3 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           복원
                         </button>
@@ -414,7 +419,7 @@ export function PostTable({
                           type="button"
                           onClick={() => setHardDeleteTarget(post)}
                           disabled={deleteId === post.id}
-                          className="rounded-lg bg-negative-1 px-3 py-2 text-body-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="inline-flex h-8 items-center justify-center rounded-md border border-negative-1 bg-negative-1 px-3 text-[12px] font-medium leading-none text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           영구 삭제
                         </button>

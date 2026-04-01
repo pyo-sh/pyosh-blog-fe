@@ -338,17 +338,17 @@ export function BulkActions({
               type="button"
               onClick={() => setShowRestoreDialog(true)}
               disabled={isPending}
-              className="rounded-lg border border-border-3 px-3 py-2 text-body-sm font-medium text-text-2 transition-colors hover:bg-background-3 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-8 items-center justify-center rounded-md border border-border-3 px-3 text-[12px] font-medium leading-none text-text-2 transition-colors hover:bg-background-3 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              일괄 복원
+              복원
             </button>
             <button
               type="button"
               onClick={() => setShowHardDeleteDialog(true)}
               disabled={isPending}
-              className="rounded-lg bg-negative-1 px-3 py-2 text-body-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-8 items-center justify-center rounded-md border border-negative-1 bg-negative-1 px-3 text-[12px] font-medium leading-none text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              일괄 영구 삭제
+              삭제
             </button>
           </div>
         )}
