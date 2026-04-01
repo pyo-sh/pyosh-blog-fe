@@ -355,7 +355,7 @@ export function PostTable({
                       type="checkbox"
                       checked={allSelected}
                       onChange={onToggleSelectAll}
-                      className="h-4 w-4 rounded border-border-3 accent-primary-1"
+                      className="mx-auto block h-4 w-4 rounded border-border-3 accent-primary-1"
                       aria-label="전체 선택"
                     />
                   </th>
@@ -384,7 +384,7 @@ export function PostTable({
                         type="checkbox"
                         checked={selectedIds.includes(post.id)}
                         onChange={() => onToggleSelect(post.id)}
-                        className="h-4 w-4 rounded border-border-3 accent-primary-1"
+                        className="mx-auto block h-4 w-4 rounded border-border-3 accent-primary-1"
                         aria-label={`${post.title} 선택`}
                       />
                     </td>
