@@ -90,7 +90,7 @@ function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-1 text-ui-xs font-semibold",
+        "inline-flex items-center rounded-md px-2 py-0.5 text-[12px] font-medium leading-4 whitespace-nowrap",
         tone === "category" && "bg-primary-1/12 text-primary-1",
         tone === "published" && "bg-primary-1/12 text-primary-1",
         tone === "draft" && "bg-warning-1/12 text-warning-1",
@@ -155,7 +155,7 @@ function InlineVisibilitySwitch({
         onClick();
       }}
       className={cn(
-        "relative inline-flex h-5 w-10 shrink-0 rounded-full transition-colors",
+        "relative inline-flex h-5 w-9 shrink-0 rounded-full transition-colors",
         checked ? "bg-primary-1" : "bg-border-3",
         "disabled:cursor-not-allowed disabled:opacity-50",
       )}
@@ -163,7 +163,7 @@ function InlineVisibilitySwitch({
       <span
         className={cn(
           "absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform",
-          checked ? "translate-x-[1.125rem]" : "translate-x-0.5",
+          checked ? "translate-x-4" : "translate-x-0.5",
         )}
       />
     </button>
@@ -373,11 +373,11 @@ export function PostTable({
                     </td>
                     <td className="border-b border-border-4 px-4 py-4">
                       <div className="flex flex-col gap-1">
-                        <span className="text-body-sm font-medium text-text-1">
+                        <span className="truncate whitespace-nowrap text-[14px] font-medium leading-5 text-text-1">
                           {post.title}
                         </span>
                         {post.category ? (
-                          <span className="text-ui-xs text-text-4">
+                          <span className="whitespace-nowrap text-[14px] leading-5 text-text-4">
                             {post.category.name}
                           </span>
                         ) : null}
@@ -586,7 +586,7 @@ export function PostTable({
                         )}
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="block truncate text-body-sm font-medium text-text-1">
+                            <span className="block truncate whitespace-nowrap text-[14px] font-medium leading-5 text-text-1">
                               {post.title}
                             </span>
                             {post.category ? (
@@ -596,7 +596,7 @@ export function PostTable({
                             ) : null}
                           </div>
                           {post.summary ? (
-                            <p className="mt-0.5 line-clamp-1 text-ui-xs text-text-4">
+                            <p className="mt-0.5 line-clamp-1 whitespace-nowrap text-[12px] leading-4 text-text-4">
                               {post.summary}
                             </p>
                           ) : null}
@@ -617,13 +617,13 @@ export function PostTable({
                       </Badge>
                     </td>
                     <td className="border-b border-border-4 px-4 py-4">
-                      <span className="flex items-center gap-1 text-body-sm text-text-3">
+                      <span className="flex items-center gap-1 whitespace-nowrap text-[14px] leading-5 text-text-3">
                         <Icon icon={eyeLinear} width="14" aria-hidden="true" />
                         {post.totalPageviews.toLocaleString("ko-KR")}
                       </span>
                     </td>
                     <td className="border-b border-border-4 px-4 py-4">
-                      <span className="flex items-center gap-1 text-body-sm text-text-3">
+                      <span className="flex items-center gap-1 whitespace-nowrap text-[14px] leading-5 text-text-3">
                         <Icon
                           icon={chatRoundDotsLinear}
                           width="14"
@@ -638,13 +638,13 @@ export function PostTable({
                           {commentStatusLabelMap[post.commentStatus]}
                         </Badge>
                       ) : (
-                        <span className="text-ui-xs text-text-4">-</span>
+                        <span className="whitespace-nowrap text-[14px] leading-5 text-text-4">-</span>
                       )}
                     </td>
-                    <td className="border-b border-border-4 px-4 py-4 text-body-sm text-text-4">
+                    <td className="border-b border-border-4 px-4 py-4 whitespace-nowrap text-[14px] leading-5 text-text-4">
                       {formatDate(post.publishedAt)}
                     </td>
-                    <td className="border-b border-border-4 px-4 py-4 text-body-sm text-text-4">
+                    <td className="border-b border-border-4 px-4 py-4 whitespace-nowrap text-[14px] leading-5 text-text-4">
                       {formatDate(post.contentModifiedAt)}
                     </td>
                     <td
@@ -659,7 +659,7 @@ export function PostTable({
                         />
                         <span
                           className={cn(
-                            "text-ui-xs",
+                            "whitespace-nowrap text-[12px] font-medium leading-4",
                             post.visibility === "public"
                               ? "text-primary-1"
                               : "text-text-4",
