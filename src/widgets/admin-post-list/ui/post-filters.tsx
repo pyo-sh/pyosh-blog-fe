@@ -162,6 +162,9 @@ function FilterSelect({
           } else if (event.key === "ArrowUp") {
             event.preventDefault();
             openList(selectedIndex);
+          } else if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openList(selectedIndex);
           }
         }}
         className={cn(
