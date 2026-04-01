@@ -109,9 +109,9 @@ const REMOVED_PENDING_IMAGE_TTL_MS = 30_000;
 const PAGE_TAB_CLASS =
   "inline-flex h-8 items-center justify-center rounded-[0.375rem] px-[0.875rem] border-none bg-transparent text-[13px] font-medium leading-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-1/20";
 const SECONDARY_BUTTON_CLASS =
-  "inline-flex h-9 items-center justify-center gap-1.5 rounded-[0.5rem] border border-border-3 bg-transparent px-4 text-sm font-medium text-text-2 transition-[background-color,transform] hover:bg-background-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-1/20 disabled:opacity-60";
+  "inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-[0.5rem] border border-border-3 bg-transparent px-4 text-sm font-medium text-text-2 transition-[background-color,transform] hover:bg-background-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-1/20 disabled:opacity-60";
 const PRIMARY_BUTTON_CLASS =
-  "inline-flex h-9 items-center justify-center gap-1.5 rounded-[0.5rem] bg-primary-1 px-4 text-sm font-medium text-white transition-[opacity,transform] hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-1/20 disabled:opacity-60";
+  "inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-[0.5rem] bg-primary-1 px-4 text-sm font-medium text-white transition-[opacity,transform] hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-1/20 disabled:opacity-60";
 
 function createInitialValues(
   initialValues?: Partial<PostFormValues>,
@@ -693,12 +693,14 @@ export function PostForm({
 
         <div
           className={cn(
-            "flex min-h-0 flex-1 flex-col",
-            activeTab === "all" ? "overflow-y-auto" : "overflow-hidden",
+            "min-h-0 flex-1",
+            activeTab === "all"
+              ? "overflow-y-auto"
+              : "flex flex-col overflow-hidden",
           )}
         >
           {activeTab === "all" ? (
-            <section className="shrink-0 border-b border-border-4 px-6 py-3">
+            <section className="border-b border-border-4 px-6 py-3">
               <div className="flex flex-col gap-3 xl:flex-row xl:flex-wrap xl:items-center xl:gap-x-5 xl:gap-y-3">
                 <CompactMetaLabel label="카테고리">
                   <div className="min-w-[10rem]">
@@ -1008,10 +1010,7 @@ export function PostForm({
 
           {shouldRenderEditor ? (
             <section
-              className={cn(
-                "min-h-0",
-                activeTab === "all" ? "shrink-0" : "flex-1",
-              )}
+              className={cn("min-h-0", activeTab === "all" ? "" : "flex-1")}
             >
               {!isDesktopPreview &&
               (activeTab === "all" || activeTab === "editor-split") ? (
@@ -1035,7 +1034,7 @@ export function PostForm({
                     : "grid-cols-1",
                 )}
               >
-                <div className="min-w-0 min-h-0">
+                <div className="min-h-0 min-w-0 h-full">
                   <MarkdownEditor
                     pendingImageCount={pendingImageCount}
                     labelId="contentMdLabel"
@@ -1057,7 +1056,7 @@ export function PostForm({
                 </div>
 
                 {shouldRenderInlinePreview ? (
-                  <div className="min-w-0 min-h-0 bg-background-1">
+                  <div className="h-full min-h-0 min-w-0 bg-background-1">
                     <MarkdownPreview
                       value={previewContent}
                       containerRef={previewRef}
@@ -1072,7 +1071,7 @@ export function PostForm({
         </div>
 
         <div className="border-t border-border-3 bg-background-2 px-6 py-3">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
             <div className="flex flex-wrap items-center gap-3">
               <button
                 type="button"
@@ -1095,11 +1094,13 @@ export function PostForm({
               </button>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="ml-auto flex flex-wrap items-center gap-3">
               {isDirty ? (
-                <span className="text-xs text-text-4">자동 저장 전</span>
+                <span className="whitespace-nowrap text-xs text-text-4">
+                  자동 저장 전
+                </span>
               ) : (
-                <span className="inline-flex items-center gap-1.5 text-xs text-text-4">
+                <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-xs text-text-4">
                   <Icon
                     icon={checkCircleLinear}
                     width="14"

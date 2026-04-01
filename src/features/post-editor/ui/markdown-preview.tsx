@@ -2,6 +2,7 @@
 
 import type { RefObject } from "react";
 import { useEffect, useRef, useState } from "react";
+import { renderMarkdown } from "@shared/lib/markdown";
 import { cn } from "@shared/lib/style-utils";
 
 interface MarkdownPreviewProps {
@@ -20,54 +21,40 @@ export function MarkdownPreview({
   const [html, setHtml] = useState("");
   const [isRendering, setIsRendering] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const workerRef = useRef<Worker | null>(null);
   const requestIdRef = useRef(0);
 
   useEffect(() => {
-    const worker = new Worker(
-      new URL("./markdown-preview.worker.ts", import.meta.url),
-    );
-
-    worker.onmessage = (
-      event: MessageEvent<{ id: number; html?: string; error?: string }>,
-    ) => {
-      if (event.data.id !== requestIdRef.current) {
-        return;
-      }
-
-      if (event.data.error) {
-        setError(event.data.error);
-      } else {
-        setHtml(event.data.html ?? "");
-        setError(null);
-      }
-
-      setIsRendering(false);
-    };
-
-    workerRef.current = worker;
-
-    return () => {
-      worker.terminate();
-      workerRef.current = null;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (workerRef.current === null) {
-      return;
-    }
-
     setIsRendering(true);
     const requestId = requestIdRef.current + 1;
     requestIdRef.current = requestId;
-    workerRef.current.postMessage({ id: requestId, value });
+
+    void renderMarkdown(value)
+      .then((nextHtml) => {
+        if (requestId !== requestIdRef.current) {
+          return;
+        }
+
+        setHtml(nextHtml);
+        setError(null);
+      })
+      .catch(() => {
+        if (requestId !== requestIdRef.current) {
+          return;
+        }
+
+        setError("미리보기를 렌더링할 수 없습니다.");
+      })
+      .finally(() => {
+        if (requestId === requestIdRef.current) {
+          setIsRendering(false);
+        }
+      });
   }, [value]);
 
   return (
     <div
       className={cn(
-        "relative flex min-h-[60vh] flex-col overflow-hidden rounded-[1.25rem] border border-border-3 bg-background-1",
+        "relative flex h-full min-h-0 flex-col overflow-hidden bg-background-1",
         className,
       )}
     >

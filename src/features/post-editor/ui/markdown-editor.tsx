@@ -299,7 +299,7 @@ export function MarkdownEditor({
   }, [editorView, value]);
 
   return (
-    <div className={cn("flex flex-col", className)}>
+    <div className={cn("flex h-full min-h-0 flex-col", className)}>
       <textarea
         aria-hidden="true"
         className="sr-only"
@@ -316,11 +316,13 @@ export function MarkdownEditor({
       <div
         ref={containerRef}
         className={cn(
-          "min-h-[60vh] overflow-hidden rounded-b-[1.25rem] border border-t-0 border-border-3",
-          "[&_.cm-editor]:min-h-[60vh]",
+          "min-h-0 flex-1 overflow-hidden",
+          "[&_.cm-editor]:h-full",
+          "[&_.cm-editor]:min-h-0",
           "[&_.cm-editor]:outline-none",
           "[&_.cm-editor.cm-focused]:ring-1 [&_.cm-editor.cm-focused]:ring-inset [&_.cm-editor.cm-focused]:ring-primary-1",
-          "[&_.cm-scroller]:min-h-[60vh]",
+          "[&_.cm-scroller]:h-full",
+          "[&_.cm-scroller]:min-h-0",
         )}
       />
     </div>
