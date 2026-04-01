@@ -133,7 +133,7 @@ function SortableHeader({
     <button
       type="button"
       onClick={() => onSort(field)}
-      className="inline-flex items-center gap-1 whitespace-nowrap text-left text-ui-xs font-semibold uppercase leading-4 tracking-[0.14em] text-text-4 transition-colors hover:text-text-2"
+      className="inline-flex items-center gap-1 whitespace-nowrap text-left text-ui-xs font-semibold uppercase leading-none tracking-[0.14em] text-text-4 transition-colors hover:text-text-2"
     >
       <span>{label}</span>
       <Icon
@@ -469,30 +469,30 @@ export function PostTable({
           >
             <thead>
               <tr>
-                <th className="w-4 whitespace-nowrap border-b border-border-4 px-3 py-4 text-center leading-4">
+                <th className="w-4 whitespace-nowrap border-b border-border-4 px-3 py-4 text-center align-middle leading-none">
                   <input
                     type="checkbox"
                     checked={allSelected}
                     onChange={onToggleSelectAll}
-                    className="h-4 w-4 rounded border-border-3 accent-primary-1"
+                    className="mx-auto block h-4 w-4 rounded border-border-3 accent-primary-1"
                     aria-label="전체 선택"
                   />
                 </th>
-                <th className="w-4 whitespace-nowrap border-b border-border-4 px-3 py-4 text-center leading-4">
+                <th className="w-4 whitespace-nowrap border-b border-border-4 px-3 py-4 text-center align-middle leading-none">
                   <Icon
                     icon={pinBold}
                     width="16"
                     aria-hidden="true"
-                    className="text-text-4"
+                    className="mx-auto text-text-4"
                   />
                 </th>
-                <th className="min-w-[19rem] whitespace-nowrap border-b border-border-4 px-4 py-4 text-left text-ui-xs font-semibold uppercase leading-4 tracking-[0.14em] text-text-4">
+                <th className="min-w-[19rem] whitespace-nowrap border-b border-border-4 px-4 py-4 text-left align-middle text-ui-xs font-semibold uppercase leading-none tracking-[0.14em] text-text-4">
                   제목
                 </th>
-                <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left text-ui-xs font-semibold uppercase leading-4 tracking-[0.14em] text-text-4">
+                <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left align-middle text-ui-xs font-semibold uppercase leading-none tracking-[0.14em] text-text-4">
                   상태
                 </th>
-                <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left">
+                <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left align-middle leading-none">
                   <SortableHeader
                     label="조회수"
                     field="totalPageviews"
@@ -501,7 +501,7 @@ export function PostTable({
                     onSort={onSortChange}
                   />
                 </th>
-                <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left">
+                <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left align-middle leading-none">
                   <SortableHeader
                     label="댓글"
                     field="commentCount"
@@ -510,10 +510,10 @@ export function PostTable({
                     onSort={onSortChange}
                   />
                 </th>
-                <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left text-ui-xs font-semibold uppercase leading-4 tracking-[0.14em] text-text-4">
+                <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left align-middle text-ui-xs font-semibold uppercase leading-none tracking-[0.14em] text-text-4">
                   댓글 상태
                 </th>
-                <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left">
+                <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left align-middle leading-none">
                   <SortableHeader
                     label="발행일"
                     field="published_at"
@@ -522,14 +522,14 @@ export function PostTable({
                     onSort={onSortChange}
                   />
                 </th>
-                <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left text-ui-xs font-semibold uppercase leading-4 tracking-[0.14em] text-text-4">
+                <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left align-middle text-ui-xs font-semibold uppercase leading-none tracking-[0.14em] text-text-4">
                   수정일
                 </th>
-                <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left text-ui-xs font-semibold uppercase leading-4 tracking-[0.14em] text-text-4">
+                <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left align-middle text-ui-xs font-semibold uppercase leading-none tracking-[0.14em] text-text-4">
                   공개
                 </th>
-                <th className="w-12 whitespace-nowrap border-b border-border-4 px-2 py-4" />
-                <th className="w-12 whitespace-nowrap border-b border-border-4 px-2 py-4" />
+                <th className="w-12 whitespace-nowrap border-b border-border-4 px-2 py-4 align-middle leading-none" />
+                <th className="w-12 whitespace-nowrap border-b border-border-4 px-2 py-4 align-middle leading-none" />
               </tr>
             </thead>
             <tbody>
