@@ -125,7 +125,7 @@ function SortableHeader({
     <button
       type="button"
       onClick={() => onSort(field)}
-      className="inline-flex items-center gap-1 whitespace-nowrap text-left text-ui-xs font-semibold uppercase tracking-[0.14em] text-text-4 transition-colors hover:text-text-2"
+      className="inline-flex items-center gap-1 whitespace-nowrap text-left text-ui-xs font-semibold uppercase leading-4 tracking-[0.14em] text-text-4 transition-colors hover:text-text-2"
     >
       <span>{label}</span>
       <span className={cn(isActive ? "text-primary-1" : "text-text-4")}>
@@ -336,7 +336,7 @@ export function PostTable({
             >
               <thead>
                 <tr>
-                  <th className="w-10 whitespace-nowrap border-b border-border-4 px-4 py-4 text-left">
+                  <th className="w-4 whitespace-nowrap border-b border-border-4 px-3 py-4 text-center leading-4">
                     <input
                       type="checkbox"
                       checked={allSelected}
@@ -345,13 +345,13 @@ export function PostTable({
                       aria-label="전체 선택"
                     />
                   </th>
-                  <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left text-ui-xs font-semibold uppercase tracking-[0.14em] text-text-4">
+                  <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left text-ui-xs font-semibold uppercase leading-4 tracking-[0.14em] text-text-4">
                     제목
                   </th>
-                  <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left text-ui-xs font-semibold uppercase tracking-[0.14em] text-text-4">
+                  <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left text-ui-xs font-semibold uppercase leading-4 tracking-[0.14em] text-text-4">
                     삭제일
                   </th>
-                  <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left text-ui-xs font-semibold uppercase tracking-[0.14em] text-text-4">
+                  <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left text-ui-xs font-semibold uppercase leading-4 tracking-[0.14em] text-text-4">
                     작업
                   </th>
                 </tr>
@@ -362,7 +362,7 @@ export function PostTable({
                     key={post.id}
                     className="align-middle transition-colors hover:bg-background-2"
                   >
-                    <td className="border-b border-border-4 px-3 py-3 align-middle">
+                    <td className="w-4 border-b border-border-4 px-3 py-3 text-center align-middle">
                       <input
                         type="checkbox"
                         checked={selectedIds.includes(post.id)}
@@ -373,17 +373,17 @@ export function PostTable({
                     </td>
                     <td className="border-b border-border-4 px-3 py-3 align-middle">
                       <div className="flex flex-col gap-1">
-                        <span className="truncate whitespace-nowrap text-[14px] font-medium leading-5 text-text-1">
+                        <span className="truncate whitespace-nowrap text-[14px] font-medium leading-4 text-text-1">
                           {post.title}
                         </span>
                         {post.category ? (
-                          <span className="whitespace-nowrap text-[14px] leading-5 text-text-4">
+                          <span className="whitespace-nowrap text-[14px] leading-4 text-text-4">
                             {post.category.name}
                           </span>
                         ) : null}
                       </div>
                     </td>
-                    <td className="border-b border-border-4 px-3 py-3 align-middle text-body-sm text-text-3">
+                    <td className="border-b border-border-4 px-3 py-3 align-middle text-[14px] leading-4 text-text-3">
                       {formatDate(post.deletedAt)}
                     </td>
                     <td className="border-b border-border-4 px-3 py-3 align-middle">
@@ -450,7 +450,7 @@ export function PostTable({
           >
             <thead>
               <tr>
-                <th className="w-10 whitespace-nowrap border-b border-border-4 px-4 py-4 text-left">
+                <th className="w-4 whitespace-nowrap border-b border-border-4 px-3 py-4 text-center leading-4">
                   <input
                     type="checkbox"
                     checked={allSelected}
@@ -459,18 +459,18 @@ export function PostTable({
                     aria-label="전체 선택"
                   />
                 </th>
-                <th className="w-10 whitespace-nowrap border-b border-border-4 px-3 py-4 text-left">
+                <th className="w-4 whitespace-nowrap border-b border-border-4 px-3 py-4 text-center leading-4">
                   <Icon
                     icon={pinBold}
-                    width="14"
+                    width="16"
                     aria-hidden="true"
                     className="text-text-4"
                   />
                 </th>
-                <th className="min-w-[19rem] whitespace-nowrap border-b border-border-4 px-4 py-4 text-left text-ui-xs font-semibold uppercase tracking-[0.14em] text-text-4">
+                <th className="min-w-[19rem] whitespace-nowrap border-b border-border-4 px-4 py-4 text-left text-ui-xs font-semibold uppercase leading-4 tracking-[0.14em] text-text-4">
                   제목
                 </th>
-                <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left text-ui-xs font-semibold uppercase tracking-[0.14em] text-text-4">
+                <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left text-ui-xs font-semibold uppercase leading-4 tracking-[0.14em] text-text-4">
                   상태
                 </th>
                 <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left">
@@ -491,7 +491,7 @@ export function PostTable({
                     onSort={onSortChange}
                   />
                 </th>
-                <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left text-ui-xs font-semibold uppercase tracking-[0.14em] text-text-4">
+                <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left text-ui-xs font-semibold uppercase leading-4 tracking-[0.14em] text-text-4">
                   댓글 상태
                 </th>
                 <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left">
@@ -503,10 +503,10 @@ export function PostTable({
                     onSort={onSortChange}
                   />
                 </th>
-                <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left text-ui-xs font-semibold uppercase tracking-[0.14em] text-text-4">
+                <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left text-ui-xs font-semibold uppercase leading-4 tracking-[0.14em] text-text-4">
                   수정일
                 </th>
-                <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left text-ui-xs font-semibold uppercase tracking-[0.14em] text-text-4">
+                <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left text-ui-xs font-semibold uppercase leading-4 tracking-[0.14em] text-text-4">
                   공개
                 </th>
                 <th className="w-12 whitespace-nowrap border-b border-border-4 px-2 py-4" />
@@ -535,7 +535,7 @@ export function PostTable({
                     )}
                   >
                     <td
-                      className="border-b border-border-4 px-3 py-3 align-middle"
+                      className="w-4 border-b border-border-4 px-3 py-3 text-center align-middle"
                       onClick={(event) => event.stopPropagation()}
                     >
                       <input
@@ -547,7 +547,7 @@ export function PostTable({
                       />
                     </td>
                     <td
-                      className="border-b border-border-4 px-3 py-3 align-middle"
+                      className="w-4 border-b border-border-4 px-3 py-3 text-center align-middle"
                       onClick={(event) => event.stopPropagation()}
                     >
                       <button
@@ -555,7 +555,7 @@ export function PostTable({
                         onClick={() => onTogglePin(post)}
                         disabled={isTogglePending}
                         className={cn(
-                          "inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors",
+                          "inline-flex h-4 w-4 items-center justify-center transition-colors",
                           post.isPinned
                             ? "text-primary-1 hover:bg-primary-1/10"
                             : "text-text-4 hover:bg-background-3 hover:text-text-2",
@@ -586,7 +586,7 @@ export function PostTable({
                         )}
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="block truncate whitespace-nowrap text-[14px] font-medium leading-5 text-text-1">
+                            <span className="block truncate whitespace-nowrap text-[14px] font-medium leading-4 text-text-1">
                               {post.title}
                             </span>
                             {post.category ? (
