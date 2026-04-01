@@ -542,7 +542,7 @@ export function PostTable({
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => onToggleSelect(post.id)}
-                        className="h-4 w-4 rounded border-border-3 accent-primary-1"
+                        className="mx-auto block h-4 w-4 rounded border-border-3 accent-primary-1"
                         aria-label={`${post.title} 선택`}
                       />
                     </td>
@@ -555,7 +555,7 @@ export function PostTable({
                         onClick={() => onTogglePin(post)}
                         disabled={isTogglePending}
                         className={cn(
-                          "inline-flex h-4 w-4 items-center justify-center transition-colors",
+                          "mx-auto inline-flex h-4 w-4 cursor-pointer items-center justify-center leading-none transition-colors",
                           post.isPinned
                             ? "text-primary-1 hover:bg-primary-1/10"
                             : "text-text-4 hover:bg-background-3 hover:text-text-2",
@@ -567,6 +567,7 @@ export function PostTable({
                           icon={post.isPinned ? pinBold : pinLinear}
                           width="16"
                           aria-hidden="true"
+                          className="cursor-pointer"
                         />
                       </button>
                     </td>
@@ -641,11 +642,15 @@ export function PostTable({
                         <span className="whitespace-nowrap text-[14px] leading-5 text-text-4">-</span>
                       )}
                     </td>
-                    <td className="border-b border-border-4 px-3 py-3 align-middle whitespace-nowrap text-[13px] leading-4 text-text-4">
-                      {formatDate(post.publishedAt)}
+                    <td className="border-b border-border-4 px-3 py-3 align-middle">
+                      <span className="inline-flex min-h-4 items-center whitespace-nowrap text-[13px] leading-none text-text-4">
+                        {formatDate(post.publishedAt)}
+                      </span>
                     </td>
-                    <td className="border-b border-border-4 px-3 py-3 align-middle whitespace-nowrap text-[13px] leading-4 text-text-4">
-                      {formatDate(post.contentModifiedAt)}
+                    <td className="border-b border-border-4 px-3 py-3 align-middle">
+                      <span className="inline-flex min-h-4 items-center whitespace-nowrap text-[13px] leading-none text-text-4">
+                        {formatDate(post.contentModifiedAt)}
+                      </span>
                     </td>
                     <td
                       className="border-b border-border-4 px-3 py-3 align-middle"
