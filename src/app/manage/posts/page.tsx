@@ -418,41 +418,40 @@ export default function ManagePostsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <PostFilters
-          tab={tab}
-          trashCount={trashCount}
-          status={status}
-          visibility={visibility}
-          categoryId={categoryId}
-          categories={categories}
-          searchQuery={searchQuery}
-          onTabChange={handleTabChange}
-          onStatusChange={(value) => {
-            setStatus(value);
-            resetPage();
-          }}
-          onVisibilityChange={(value) => {
-            setVisibility(value);
-            resetPage();
-          }}
-          onCategoryChange={(value) => {
-            setCategoryId(value);
-            resetPage();
-          }}
-          onSearch={(value) => {
-            setSearchQuery(value);
-            resetPage();
-          }}
-        />
-
-        <Link
-          href="/manage/posts/new"
-          className="inline-flex items-center justify-center rounded-lg bg-primary-1 px-4 py-2.5 text-body-sm font-semibold text-white transition-opacity hover:opacity-90"
-        >
-          새 글 작성
-        </Link>
-      </div>
+      <PostFilters
+        tab={tab}
+        trashCount={trashCount}
+        status={status}
+        visibility={visibility}
+        categoryId={categoryId}
+        categories={categories}
+        searchQuery={searchQuery}
+        onTabChange={handleTabChange}
+        onStatusChange={(value) => {
+          setStatus(value);
+          resetPage();
+        }}
+        onVisibilityChange={(value) => {
+          setVisibility(value);
+          resetPage();
+        }}
+        onCategoryChange={(value) => {
+          setCategoryId(value);
+          resetPage();
+        }}
+        onSearch={(value) => {
+          setSearchQuery(value);
+          resetPage();
+        }}
+        action={
+          <Link
+            href="/manage/posts/new"
+            className="inline-flex items-center justify-center rounded-lg bg-primary-1 px-4 py-2.5 text-body-sm font-semibold text-white transition-opacity hover:opacity-90"
+          >
+            새 글 작성
+          </Link>
+        }
+      />
 
       {selectedIds.length > 0 ? (
         <BulkActions

@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import {
   type FormEvent,
   useEffect,
@@ -31,6 +32,7 @@ interface PostFiltersProps {
   onVisibilityChange: (visibility: AdminPostVisibilityFilter) => void;
   onCategoryChange: (categoryId?: number) => void;
   onSearch: (q: string) => void;
+  action?: ReactNode;
 }
 
 const STATUS_OPTIONS: Array<{ label: string; value: AdminPostStatusFilter }> = [
@@ -178,6 +180,7 @@ export function PostFilters({
   onVisibilityChange,
   onCategoryChange,
   onSearch,
+  action,
 }: PostFiltersProps) {
   const [inputValue, setInputValue] = useState(searchQuery);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -215,36 +218,39 @@ export function PostFilters({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-1">
-        <button
-          type="button"
-          onClick={() => onTabChange("active")}
-          className={cn(
-            "rounded-lg px-4 py-2 text-[14px] font-medium leading-5 transition-colors",
-            tab === "active"
-              ? "bg-primary-1/10 text-primary-1"
-              : "text-text-3 hover:text-text-2",
-          )}
-        >
-          게시글
-        </button>
-        <button
-          type="button"
-          onClick={() => onTabChange("trash")}
-          className={cn(
-            "rounded-lg px-4 py-2 text-[14px] font-medium leading-5 transition-colors",
-            tab === "trash"
-              ? "bg-primary-1/10 text-primary-1"
-              : "text-text-3 hover:text-text-2",
-          )}
-        >
-          휴지통
-          {trashCount !== undefined && trashCount > 0 ? (
-            <span className="ml-1.5 text-ui-xs font-semibold text-primary-1">
-              ({trashCount})
-            </span>
-          ) : null}
-        </button>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-1">
+          <button
+            type="button"
+            onClick={() => onTabChange("active")}
+            className={cn(
+              "rounded-lg px-4 py-2 text-[14px] font-medium leading-5 transition-colors",
+              tab === "active"
+                ? "bg-primary-1/10 text-primary-1"
+                : "text-text-3 hover:text-text-2",
+            )}
+          >
+            게시글
+          </button>
+          <button
+            type="button"
+            onClick={() => onTabChange("trash")}
+            className={cn(
+              "rounded-lg px-4 py-2 text-[14px] font-medium leading-5 transition-colors",
+              tab === "trash"
+                ? "bg-primary-1/10 text-primary-1"
+                : "text-text-3 hover:text-text-2",
+            )}
+          >
+            휴지통
+            {trashCount !== undefined && trashCount > 0 ? (
+              <span className="ml-1.5 text-ui-xs font-semibold text-primary-1">
+                ({trashCount})
+              </span>
+            ) : null}
+          </button>
+        </div>
+        {action ? <div className="shrink-0">{action}</div> : null}
       </div>
 
       {tab === "active" ? (
