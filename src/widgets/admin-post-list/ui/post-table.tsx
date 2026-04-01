@@ -3,6 +3,9 @@
 import type { ComponentProps, ReactNode } from "react";
 import { useState } from "react";
 import { Icon } from "@iconify/react";
+import altArrowDownLinear from "@iconify-icons/solar/alt-arrow-down-linear";
+import altArrowUpLinear from "@iconify-icons/solar/alt-arrow-up-linear";
+import sortLinear from "@iconify-icons/solar/sort-linear";
 import chatRoundDotsLinear from "@iconify-icons/solar/chat-round-dots-linear";
 import eyeLinear from "@iconify-icons/solar/eye-linear";
 import pinBold from "@iconify-icons/solar/pin-bold";
@@ -120,6 +123,11 @@ function SortableHeader({
   onSort: (field: SortField) => void;
 }) {
   const isActive = currentSort === field;
+  const sortIcon = !isActive
+    ? sortLinear
+    : currentOrder === "desc"
+      ? altArrowDownLinear
+      : altArrowUpLinear;
 
   return (
     <button
@@ -128,9 +136,15 @@ function SortableHeader({
       className="inline-flex items-center gap-1 whitespace-nowrap text-left text-ui-xs font-semibold uppercase leading-4 tracking-[0.14em] text-text-4 transition-colors hover:text-text-2"
     >
       <span>{label}</span>
-      <span className={cn(isActive ? "text-primary-1" : "text-text-4")}>
-        {isActive ? (currentOrder === "desc" ? "▼" : "▲") : "↕"}
-      </span>
+      <Icon
+        icon={sortIcon}
+        width="12"
+        aria-hidden="true"
+        className={cn(
+          "shrink-0",
+          isActive ? "text-primary-1" : "text-text-4",
+        )}
+      />
     </button>
   );
 }
@@ -653,7 +667,7 @@ export function PostTable({
                       </span>
                     </td>
                     <td
-                      className="border-b border-border-4 px-3 py-3 align-middle"
+                      className="min-w-[104px] border-b border-border-4 px-3 py-3 align-middle"
                       onClick={(event) => event.stopPropagation()}
                     >
                       <div className="flex items-center gap-2">
