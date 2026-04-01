@@ -402,7 +402,7 @@ export function PostTable({
                         <span className="whitespace-nowrap text-[14px] leading-4 text-text-4">-</span>
                       )}
                     </td>
-                    <td className="border-b border-border-4 px-3 py-3 align-middle text-[14px] leading-4 text-text-3">
+                    <td className="border-b border-border-4 px-3 py-3 align-middle text-[13px] leading-4 text-text-3">
                       {formatDate(post.deletedAt)}
                     </td>
                     <td className="border-b border-border-4 px-3 py-3 align-middle">
