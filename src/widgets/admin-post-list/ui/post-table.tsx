@@ -360,9 +360,9 @@ export function PostTable({
                 {posts.map((post) => (
                   <tr
                     key={post.id}
-                    className="align-top transition-colors hover:bg-background-2"
+                    className="align-middle transition-colors hover:bg-background-2"
                   >
-                    <td className="border-b border-border-4 px-4 py-4">
+                    <td className="border-b border-border-4 px-3 py-3 align-middle">
                       <input
                         type="checkbox"
                         checked={selectedIds.includes(post.id)}
@@ -371,7 +371,7 @@ export function PostTable({
                         aria-label={`${post.title} 선택`}
                       />
                     </td>
-                    <td className="border-b border-border-4 px-4 py-4">
+                    <td className="border-b border-border-4 px-3 py-3 align-middle">
                       <div className="flex flex-col gap-1">
                         <span className="truncate whitespace-nowrap text-[14px] font-medium leading-5 text-text-1">
                           {post.title}
@@ -383,10 +383,10 @@ export function PostTable({
                         ) : null}
                       </div>
                     </td>
-                    <td className="border-b border-border-4 px-4 py-4 text-body-sm text-text-3">
+                    <td className="border-b border-border-4 px-3 py-3 align-middle text-body-sm text-text-3">
                       {formatDate(post.deletedAt)}
                     </td>
-                    <td className="border-b border-border-4 px-4 py-4">
+                    <td className="border-b border-border-4 px-3 py-3 align-middle">
                       <div className="flex flex-wrap gap-2">
                         <button
                           type="button"
@@ -530,12 +530,12 @@ export function PostTable({
                     key={post.id}
                     onClick={() => router.push(`/manage/posts/${post.id}/edit`)}
                     className={cn(
-                      "cursor-pointer align-top transition-colors hover:bg-background-2",
+                      "cursor-pointer align-middle transition-colors hover:bg-background-2",
                       isSelected && "bg-primary-1/5",
                     )}
                   >
                     <td
-                      className="border-b border-border-4 px-4 py-4"
+                      className="border-b border-border-4 px-3 py-3 align-middle"
                       onClick={(event) => event.stopPropagation()}
                     >
                       <input
@@ -547,7 +547,7 @@ export function PostTable({
                       />
                     </td>
                     <td
-                      className="border-b border-border-4 px-3 py-4"
+                      className="border-b border-border-4 px-3 py-3 align-middle"
                       onClick={(event) => event.stopPropagation()}
                     >
                       <button
@@ -570,7 +570,7 @@ export function PostTable({
                         />
                       </button>
                     </td>
-                    <td className="border-b border-border-4 px-4 py-4">
+                    <td className="border-b border-border-4 px-3 py-3 align-middle">
                       <div className="flex max-w-[20rem] items-center gap-3">
                         {post.thumbnailUrl ? (
                           <Image
@@ -603,7 +603,7 @@ export function PostTable({
                         </div>
                       </div>
                     </td>
-                    <td className="border-b border-border-4 px-4 py-4">
+                    <td className="border-b border-border-4 px-3 py-3 align-middle">
                       <Badge
                         tone={
                           post.status === "published"
@@ -616,13 +616,13 @@ export function PostTable({
                         {statusLabelMap[post.status]}
                       </Badge>
                     </td>
-                    <td className="border-b border-border-4 px-4 py-4">
+                    <td className="border-b border-border-4 px-3 py-3 align-middle">
                       <span className="flex items-center gap-1 whitespace-nowrap text-[14px] leading-5 text-text-3">
                         <Icon icon={eyeLinear} width="14" aria-hidden="true" />
                         {post.totalPageviews.toLocaleString("ko-KR")}
                       </span>
                     </td>
-                    <td className="border-b border-border-4 px-4 py-4">
+                    <td className="border-b border-border-4 px-3 py-3 align-middle">
                       <span className="flex items-center gap-1 whitespace-nowrap text-[14px] leading-5 text-text-3">
                         <Icon
                           icon={chatRoundDotsLinear}
@@ -632,7 +632,7 @@ export function PostTable({
                         {post.commentCount.toLocaleString("ko-KR")}
                       </span>
                     </td>
-                    <td className="border-b border-border-4 px-4 py-4">
+                    <td className="border-b border-border-4 px-3 py-3 align-middle">
                       {post.commentStatus ? (
                         <Badge tone={commentTone}>
                           {commentStatusLabelMap[post.commentStatus]}
@@ -641,14 +641,14 @@ export function PostTable({
                         <span className="whitespace-nowrap text-[14px] leading-5 text-text-4">-</span>
                       )}
                     </td>
-                    <td className="border-b border-border-4 px-4 py-4 whitespace-nowrap text-[14px] leading-5 text-text-4">
+                    <td className="border-b border-border-4 px-3 py-3 align-middle whitespace-nowrap text-[14px] leading-5 text-text-4">
                       {formatDate(post.publishedAt)}
                     </td>
-                    <td className="border-b border-border-4 px-4 py-4 whitespace-nowrap text-[14px] leading-5 text-text-4">
+                    <td className="border-b border-border-4 px-3 py-3 align-middle whitespace-nowrap text-[14px] leading-5 text-text-4">
                       {formatDate(post.contentModifiedAt)}
                     </td>
                     <td
-                      className="border-b border-border-4 px-4 py-4"
+                      className="border-b border-border-4 px-3 py-3 align-middle"
                       onClick={(event) => event.stopPropagation()}
                     >
                       <div className="flex items-center gap-2">
@@ -669,14 +669,14 @@ export function PostTable({
                         </span>
                       </div>
                     </td>
-                    <td className="border-b border-border-4 px-2 py-4">
+                    <td className="border-b border-border-4 px-3 py-3 align-middle">
                       <TableActionButton
                         href={`/manage/posts/${post.id}/preview`}
                         ariaLabel="미리보기"
                         icon={eyeLinear}
                       />
                     </td>
-                    <td className="border-b border-border-4 px-2 py-4">
+                    <td className="border-b border-border-4 px-3 py-3 align-middle">
                       <TableActionButton
                         ariaLabel="삭제"
                         icon={trashBinMinimalisticLinear}
