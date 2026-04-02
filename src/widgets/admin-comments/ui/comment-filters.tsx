@@ -119,6 +119,14 @@ function formatRangeLabel(range: DateRange | undefined) {
   return "날짜 범위";
 }
 
+function isSameDayRange(range: DateRange | undefined) {
+  return Boolean(
+    range?.from &&
+    range?.to &&
+    format(range.from, "yyyy-MM-dd") === format(range.to, "yyyy-MM-dd"),
+  );
+}
+
 function getSelectTriggerWidthCh<T extends string>(
   label: string,
   options: Array<SelectOption<T>>,
@@ -350,6 +358,7 @@ function DateRangePicker({
           to: parseDateValue(endDate),
         }
       : undefined;
+  const isSingleDaySelection = isSameDayRange(range);
 
   useEffect(() => {
     if (!isOpen) {
@@ -492,10 +501,18 @@ function DateRangePicker({
                 "h-10 w-10 cursor-pointer rounded-[0.75rem] text-sm leading-none text-text-2 transition-colors hover:bg-background-2 hover:text-text-1",
               selected:
                 "[&>button]:bg-primary-1 [&>button]:text-white [&>button]:hover:bg-primary-1",
-              range_start:
-                "[&>button]:rounded-r-none [&>button]:bg-primary-1 [&>button]:text-white [&>button]:hover:bg-primary-1",
-              range_end:
-                "[&>button]:rounded-l-none [&>button]:bg-primary-1 [&>button]:text-white [&>button]:hover:bg-primary-1",
+              range_start: cn(
+                "[&>button]:bg-primary-1 [&>button]:text-white [&>button]:hover:bg-primary-1",
+                isSingleDaySelection
+                  ? "[&>button]:rounded-[0.75rem]"
+                  : "[&>button]:rounded-r-none",
+              ),
+              range_end: cn(
+                "[&>button]:bg-primary-1 [&>button]:text-white [&>button]:hover:bg-primary-1",
+                isSingleDaySelection
+                  ? "[&>button]:rounded-[0.75rem]"
+                  : "[&>button]:rounded-l-none",
+              ),
               range_middle:
                 "[&>button]:cursor-pointer [&>button]:rounded-none [&>button]:bg-primary-1 [&>button]:text-white [&>button]:hover:bg-primary-1",
               today: "[&>button]:border [&>button]:border-primary-1/30",

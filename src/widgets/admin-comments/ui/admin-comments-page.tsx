@@ -648,14 +648,14 @@ export function AdminCommentsPage() {
                     return next;
                   });
                 }}
-                className="px-2 py-1.5 text-sm text-primary-1 transition-colors hover:text-primary-1/80"
+                className="cursor-pointer px-2 py-1.5 text-sm text-primary-1 transition-colors hover:text-primary-1/80"
               >
                 전체 선택
               </button>
               <button
                 type="button"
                 onClick={handleClearSelection}
-                className="px-2 py-1.5 text-sm text-text-3 transition-colors hover:text-text-1"
+                className="cursor-pointer px-2 py-1.5 text-sm text-text-3 transition-colors hover:text-text-1"
               >
                 전체 해제
               </button>
@@ -663,7 +663,7 @@ export function AdminCommentsPage() {
                 type="button"
                 onClick={() => handleOpenBulkAction("restore")}
                 disabled={!bulkAllowedActions.includes("restore")}
-                className="inline-flex h-9 items-center rounded-[0.7rem] border border-border-3 px-3 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] border border-border-3 px-3 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 복원
               </button>
@@ -671,7 +671,7 @@ export function AdminCommentsPage() {
                 type="button"
                 onClick={() => handleOpenBulkAction("soft_delete")}
                 disabled={!bulkAllowedActions.includes("soft_delete")}
-                className="inline-flex h-9 items-center rounded-[0.7rem] border border-border-3 px-3 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] border border-border-3 px-3 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 소프트 삭제
               </button>
@@ -679,7 +679,7 @@ export function AdminCommentsPage() {
                 type="button"
                 onClick={() => handleOpenBulkAction("hard_delete")}
                 disabled={!bulkAllowedActions.includes("hard_delete")}
-                className="inline-flex h-9 items-center rounded-[0.7rem] border border-negative-1/30 px-3 text-sm text-negative-1 transition-colors hover:bg-negative-1/10 disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] border border-negative-1/30 px-3 text-sm text-negative-1 transition-colors hover:bg-negative-1/10 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 영구 삭제
               </button>
