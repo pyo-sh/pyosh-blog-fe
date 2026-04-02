@@ -761,7 +761,7 @@ export function PostForm({
         </div>
 
         {shouldRenderTitleField ? (
-          <div className="border-b border-border-4 px-6 py-4">
+          <div className="flex items-center border-b border-border-4 px-6 py-4">
             <input
               id="title"
               name="title"
@@ -773,7 +773,7 @@ export function PostForm({
               }
               placeholder="제목을 입력하세요"
               aria-label="제목"
-              className="w-full border-b-2 border-transparent bg-transparent pb-3 text-[1.8rem] font-semibold tracking-[-0.03em] text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 md:text-[2rem]"
+              className="w-full border-b-2 border-transparent bg-transparent py-3 text-[1.8rem] font-semibold tracking-[-0.03em] text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 md:text-[2rem]"
             />
           </div>
         ) : null}
@@ -962,48 +962,51 @@ export function PostForm({
                     />
                   </MetaFormRow>
 
-                  <MetaFormRow label="공개 설정" hint="발행된 글을 공개합니다">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleFieldChange(
-                          "visibility",
-                          values.visibility === "public" ? "private" : "public",
-                        )
-                      }
-                      className="flex h-10 w-full items-center justify-between rounded-[0.75rem] border border-border-3 bg-background-2 px-3 text-left"
-                    >
-                      <span className="text-[13px] font-medium text-text-2">
-                        {getVisibilityLabel(values.visibility)}
-                      </span>
-                      <span
+                  <MetaFormRow label="공개 설정">
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleFieldChange(
+                            "visibility",
+                            values.visibility === "public"
+                              ? "private"
+                              : "public",
+                          )
+                        }
                         className={cn(
-                          "relative h-5 w-10 rounded-full transition-colors",
+                          "relative h-6 w-11 rounded-full transition-colors",
                           values.visibility === "public"
                             ? "bg-primary-1"
                             : "bg-border-3",
                         )}
+                        aria-label="공개 전환"
                       >
                         <span
                           className={cn(
-                            "absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform",
+                            "absolute left-[2px] top-[2px] h-5 w-5 rounded-full bg-white transition-transform",
                             values.visibility === "public"
                               ? "translate-x-5"
-                              : "translate-x-0.5",
+                              : "translate-x-0",
                           )}
                         />
+                      </button>
+                      <span className="text-[13px] font-medium text-text-2">
+                        공개
                       </span>
-                    </button>
+                    </div>
                   </MetaFormRow>
 
-                  <MetaFormRow
-                    label="댓글 상태"
-                    hint={`${
-                      COMMENT_STATUS_OPTIONS.find(
-                        (option) => option.value === values.commentStatus,
-                      )?.label ?? "열림"
-                    }: ${getCommentStatusDescription(values.commentStatus)}`}
-                  >
+                  <MetaFormRow label="댓글 상태">
+                    <div className="mb-1 flex items-end">
+                      <span className="ml-auto text-right text-[11px] text-text-4">
+                        {`${
+                          COMMENT_STATUS_OPTIONS.find(
+                            (option) => option.value === values.commentStatus,
+                          )?.label ?? "열림"
+                        }: ${getCommentStatusDescription(values.commentStatus)}`}
+                      </span>
+                    </div>
                     <div className="max-w-[14rem]">
                       <InlineCustomSelect
                         value={values.commentStatus}
@@ -1018,10 +1021,7 @@ export function PostForm({
                     </div>
                   </MetaFormRow>
 
-                  <MetaFormRow
-                    label="썸네일"
-                    hint="드래그 앤 드롭으로도 업로드 가능"
-                  >
+                  <MetaFormRow label="썸네일">
                     <ThumbnailUploader
                       value={values.thumbnailUrl}
                       onChange={(nextValue) =>
@@ -1050,7 +1050,7 @@ export function PostForm({
                     </div>
                   </MetaFormRow>
 
-                  <MetaFormRow label="설명 (description)" hint="SEO 메타 설명">
+                  <MetaFormRow label="설명 (description)">
                     <textarea
                       id="description"
                       name="description"

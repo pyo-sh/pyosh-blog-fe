@@ -24,6 +24,7 @@ export function TagChipInput({ value, onChange }: TagChipInputProps) {
   const [inputValue, setInputValue] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
+  const [isComposing, setIsComposing] = useState(false);
 
   const tagsQuery = useQuery({
     queryKey: ["tags"],
@@ -110,6 +111,10 @@ export function TagChipInput({ value, onChange }: TagChipInputProps) {
     }
 
     if (event.key === "Enter") {
+      if (isComposing) {
+        return;
+      }
+
       event.preventDefault();
       const nextValue =
         suggestions.length > 0 ? suggestions[activeIndex]?.label : inputValue;
@@ -168,10 +173,17 @@ export function TagChipInput({ value, onChange }: TagChipInputProps) {
             onChange={(event) =>
               setInputValue(event.target.value.slice(0, MAX_TAG_LENGTH))
             }
+            onCompositionStart={() => setIsComposing(true)}
+            onCompositionEnd={(event) => {
+              setIsComposing(false);
+              setInputValue(event.currentTarget.value.slice(0, MAX_TAG_LENGTH));
+            }}
             onFocus={() => setIsFocused(true)}
             onBlur={() => {
               setIsFocused(false);
-              commitTag(inputValue);
+              if (!isComposing) {
+                commitTag(inputValue);
+              }
             }}
             onKeyDown={handleKeyDown}
             placeholder={
