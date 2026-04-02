@@ -443,9 +443,9 @@ export function AdminCommentsPage() {
   const pageNumbers = meta ? generatePageNumbers(page, meta.totalPages, 2) : [];
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-[1.5rem] border border-border-4 bg-background-1 p-5">
-        <div className="flex flex-col gap-3 border-b border-border-4 pb-4 xl:flex-row xl:items-center xl:justify-between">
+    <div>
+      <section className="bg-background-1 p-0">
+        <div className="flex flex-wrap items-end justify-start gap-3 pb-4">
           <CommentFilters
             status={filters.status}
             authorType={filters.authorType}

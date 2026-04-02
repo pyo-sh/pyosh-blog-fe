@@ -6,6 +6,7 @@ import { Icon } from "@iconify/react";
 import calendarLinear from "@iconify-icons/solar/calendar-linear";
 import closeCircleLinear from "@iconify-icons/solar/close-circle-linear";
 import magniferLinear from "@iconify-icons/solar/magnifer-linear";
+import refreshLinear from "@iconify-icons/solar/restart-linear";
 import { addDays, format, parseISO } from "date-fns";
 import { ko } from "date-fns/locale";
 import type { Post } from "@entities/post";
@@ -261,7 +262,9 @@ function FilterCustomSelect<T extends string>({
         className="relative flex h-10 min-w-[9rem] items-center rounded-[0.8rem] border border-border-3 bg-background-1 px-3 pr-8 text-left text-sm leading-none text-text-2 outline-none transition-colors hover:border-border-2 focus-visible:border-primary-1"
       >
         <span className="truncate">
-          {`${selected?.triggerLabel ?? label}: ${selected?.label ?? ""}`}
+          {selected?.value === "all"
+            ? (selected?.triggerLabel ?? label)
+            : (selected?.label ?? "")}
         </span>
         <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-text-4">
           ▾
@@ -370,24 +373,17 @@ function DateRangePicker({
 
       {isOpen ? (
         <div className="absolute left-0 top-full z-30 mt-2 rounded-[1.2rem] border border-border-3 bg-background-1 p-4 shadow-[0px_18px_48px_0px_rgba(0,0,0,0.16)]">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <div>
-              <p className="text-sm font-medium leading-none text-text-1">
-                사용자 지정 기간
-              </p>
-              <p className="mt-1 text-xs leading-none text-text-4">
-                시작일과 종료일을 직접 선택합니다.
-              </p>
-            </div>
+          <div className="mb-2 flex items-center justify-end">
             <button
               type="button"
               onClick={() => {
                 onDateChange(undefined, undefined);
                 setIsOpen(false);
               }}
-              className="rounded-[0.65rem] border border-border-3 px-2.5 py-2 text-xs leading-none text-text-3 transition-colors hover:border-border-2 hover:text-text-1"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-[0.65rem] border border-border-3 text-text-3 transition-colors hover:border-border-2 hover:text-text-1"
+              aria-label="기간 초기화"
             >
-              초기화
+              <Icon icon={refreshLinear} width="14" />
             </button>
           </div>
 
@@ -419,13 +415,14 @@ function DateRangePicker({
               root: "rdp-root",
               months: "flex",
               month: "space-y-3",
-              caption: "flex h-8 items-center justify-between px-1",
+              caption:
+                "relative flex h-8 items-center justify-center px-10 text-center",
               caption_label: "text-sm font-semibold leading-none text-text-1",
-              nav: "flex items-center gap-1",
+              nav: "contents",
               button_previous:
-                "inline-flex h-8 w-8 items-center justify-center rounded-[0.7rem] border border-border-3 bg-background-1 text-text-3 transition-colors hover:border-border-2 hover:text-text-1",
+                "absolute left-0 top-1/2 inline-flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-[0.55rem] border border-border-3 bg-background-1 text-text-3 transition-colors hover:border-border-2 hover:text-text-1",
               button_next:
-                "inline-flex h-8 w-8 items-center justify-center rounded-[0.7rem] border border-border-3 bg-background-1 text-text-3 transition-colors hover:border-border-2 hover:text-text-1",
+                "absolute right-0 top-1/2 inline-flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-[0.55rem] border border-border-3 bg-background-1 text-text-3 transition-colors hover:border-border-2 hover:text-text-1",
               month_grid: "border-separate border-spacing-y-1.5",
               weekdays: "grid grid-cols-7",
               weekday:
