@@ -7,6 +7,7 @@ import archiveLinear from "@iconify-icons/solar/archive-linear";
 import checkCircleLinear from "@iconify-icons/solar/check-circle-linear";
 import disketteLinear from "@iconify-icons/solar/diskette-linear";
 import eyeLinear from "@iconify-icons/solar/eye-linear";
+import galleryWideLinear from "@iconify-icons/solar/gallery-wide-linear";
 import uploadLinear from "@iconify-icons/solar/upload-linear";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -778,7 +779,7 @@ export function PostForm({
         onSubmit={handleSubmit}
         className="flex h-full min-h-0 flex-col overflow-hidden bg-background-1"
       >
-        <div className="border-b border-border-4 bg-background-2 px-4 py-2 md:px-6">
+        <div className="border-b border-border-4 bg-background-2 px-3 py-2">
           <div className="flex flex-wrap items-center gap-1">
             {TABS.map((tab) => (
               <button
@@ -888,9 +889,14 @@ export function PostForm({
                     <button
                       type="button"
                       onClick={() => setShowThumbnailPicker(true)}
-                      className="inline-flex h-10 items-center whitespace-nowrap rounded-[0.7rem] border border-border-3 bg-background-1 px-3 text-xs font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+                      className="inline-flex h-10 w-10 items-center justify-center whitespace-nowrap rounded-[0.7rem] border border-border-3 bg-background-1 text-xs font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+                      aria-label="에셋 갤러리"
                     >
-                      에셋 갤러리
+                      <Icon
+                        icon={galleryWideLinear}
+                        width="14"
+                        aria-hidden="true"
+                      />
                     </button>
                     <div className="overflow-hidden rounded-[0.6rem] border border-border-3 bg-background-2">
                       {values.thumbnailUrl ? (
