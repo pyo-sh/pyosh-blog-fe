@@ -79,6 +79,7 @@ interface PostFormProps {
 
 interface InlineSelectOption<T extends string | number> {
   label: string;
+  triggerLabel?: string;
   value: T;
 }
 
@@ -171,12 +172,16 @@ function sortCategories(categories: Category[]): Category[] {
 function flattenCategoryOptions(
   categories: Category[],
   depth = 0,
-): Array<{ label: string; value: number }> {
+): Array<{ label: string; triggerLabel?: string; value: number }> {
   return categories.flatMap((category) => {
     const prefix = depth === 0 ? "" : `\u3000`.repeat(depth);
 
     return [
-      { label: `${prefix}${category.name}`, value: category.id },
+      {
+        label: `${prefix}${category.name}`,
+        triggerLabel: category.name,
+        value: category.id,
+      },
       ...flattenCategoryOptions(category.children ?? [], depth + 1),
     ];
   });
@@ -285,7 +290,9 @@ function InlineCustomSelect<T extends string | number>({
         onClick={() => setIsOpen((current) => !current)}
         className="flex h-10 w-full items-center rounded-[0.5rem] border border-border-3 bg-background-1 px-3 pr-8 text-left text-[13px] text-text-2 outline-none transition-colors focus-visible:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        <span className="truncate">{selected?.label ?? placeholder ?? ""}</span>
+        <span className="truncate">
+          {selected?.triggerLabel ?? selected?.label ?? placeholder ?? ""}
+        </span>
         <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-text-4">
           ▾
         </span>

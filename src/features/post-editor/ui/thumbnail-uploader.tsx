@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Icon } from "@iconify/react";
+import clipboardLinear from "@iconify-icons/solar/clipboard-linear";
+import galleryWideLinear from "@iconify-icons/solar/gallery-wide-linear";
+import linkMinimalistic2Linear from "@iconify-icons/solar/link-minimalistic-2-linear";
 import { toast } from "sonner";
 import { AssetPickerModal, uploadAssets } from "@entities/asset";
 import { cn } from "@shared/lib/style-utils";
@@ -142,6 +146,7 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
           disabled={isUploading}
           className="h-9 rounded-[0.75rem] border border-border-3 px-3 text-[11px] font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-60"
         >
+          <Icon icon={galleryWideLinear} width="14" aria-hidden="true" />
           에셋 갤러리
         </button>
         <button
@@ -149,18 +154,20 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
           onClick={() => setShowUrlInput((current) => !current)}
           className="h-9 rounded-[0.75rem] border border-border-3 px-3 text-[11px] font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
         >
-          URL 입력
+          <Icon icon={linkMinimalistic2Linear} width="14" aria-hidden="true" />
+          URL
         </button>
         <button
           type="button"
           onClick={() => setIsAwaitingPaste((current) => !current)}
           className={cn(
-            "h-9 rounded-[0.75rem] border px-3 text-[11px] font-medium transition-colors",
+            "inline-flex h-9 items-center gap-1.5 rounded-[0.75rem] border px-3 text-[11px] font-medium transition-colors",
             isAwaitingPaste
               ? "border-primary-1 bg-primary-1/10 text-primary-1"
               : "border-border-3 text-text-2 hover:border-border-2 hover:text-text-1",
           )}
         >
+          <Icon icon={clipboardLinear} width="14" aria-hidden="true" />
           {isAwaitingPaste ? "붙여넣기 대기 중..." : "클립보드"}
         </button>
         <button
