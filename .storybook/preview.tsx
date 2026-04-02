@@ -21,7 +21,13 @@ function StoryProviders({
     () =>
       new QueryClient({
         defaultOptions: {
-          queries: { retry: false, staleTime: 0 },
+          queries: {
+            retry: false,
+            staleTime: 0,
+            refetchOnMount: false,
+            refetchOnWindowFocus: false,
+            refetchOnReconnect: false,
+          },
         },
       }),
   );

@@ -1,5 +1,8 @@
 import { http, HttpResponse } from "msw";
-import { mockAdminCommentsResponse } from "./data/admin-comments";
+import {
+  mockAdminCommentsResponse,
+  mockAdminCommentThreadResponses,
+} from "./data/admin-comments";
 import { mockAssets } from "./data/assets";
 import { mockCategories } from "./data/categories";
 import { mockAdminGuestbookEntries } from "./data/guestbook";
@@ -152,7 +155,21 @@ export function createManageCommentsHandlers(options?: {
           : mockAdminCommentsResponse,
       );
     }),
-    ...jsonGet("/api/admin/comments/:id/thread", () => HttpResponse.json([])),
+    ...withBaseUrl("/api/admin/comments/:id/thread").map((url) =>
+      http.get(url, ({ params }) => {
+        const id = Number(params.id);
+        const payload = mockAdminCommentThreadResponses[id];
+
+        if (!payload) {
+          return HttpResponse.json({
+            parent: mockAdminCommentsResponse.data[0],
+            replies: [],
+          });
+        }
+
+        return HttpResponse.json(payload);
+      }),
+    ),
     ...emptyMutation("delete", "/api/admin/comments/bulk"),
     ...emptyMutation("delete", "/api/admin/comments/:id"),
     ...emptyMutation("put", "/api/admin/comments/:id/restore"),
