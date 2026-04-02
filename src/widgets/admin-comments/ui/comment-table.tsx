@@ -109,8 +109,9 @@ export function CommentTable({
               return (
                 <tr
                   key={item.id}
+                  onClick={() => onClickComment(item)}
                   className={cn(
-                    "transition-colors hover:bg-background-2",
+                    "cursor-pointer transition-colors hover:bg-background-2",
                     isSelected && "bg-primary-1/6",
                   )}
                 >
@@ -118,6 +119,7 @@ export function CommentTable({
                     <input
                       type="checkbox"
                       checked={isSelected}
+                      onClick={(event) => event.stopPropagation()}
                       onChange={() => onToggleSelect(item)}
                       className="h-4 w-4 rounded border-border-3 accent-primary-1"
                       aria-label={`댓글 ${item.id} 선택`}
@@ -145,7 +147,10 @@ export function CommentTable({
                     <div className="max-w-[22rem]">
                       <button
                         type="button"
-                        onClick={() => onClickComment(item)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          onClickComment(item);
+                        }}
                         className="block w-full truncate text-left text-sm leading-none text-text-2 transition-colors hover:text-primary-1"
                         title="클릭하여 상세 보기"
                       >
@@ -165,6 +170,7 @@ export function CommentTable({
                     {item.post ? (
                       <Link
                         href={`/manage/posts/${item.postId}/preview`}
+                        onClick={(event) => event.stopPropagation()}
                         className="block max-w-[12rem] truncate text-sm leading-none text-primary-1 transition-colors hover:underline"
                       >
                         {item.post.title}
@@ -211,7 +217,10 @@ export function CommentTable({
                     <button
                       type="button"
                       disabled={deletingId === item.id}
-                      onClick={() => onManage(item)}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onManage(item);
+                      }}
                       className={cn(
                         "inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-50",
                         item.status === "deleted" || item.status === "hidden"
