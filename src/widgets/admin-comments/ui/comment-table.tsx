@@ -9,12 +9,17 @@ import type { AdminCommentItem } from "@entities/comment";
 import { cn } from "@shared/lib/style-utils";
 
 const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
+  year: "numeric",
   month: "2-digit",
   day: "2-digit",
 });
 
 function formatDate(value: string) {
   return dateFormatter.format(new Date(value));
+}
+
+function getAvatarLabel(name: string) {
+  return name.trim().charAt(0) || "?";
 }
 
 const statusLabelMap: Record<AdminCommentItem["status"], string> = {
@@ -49,12 +54,12 @@ export function CommentTable({
     !allPageSelected && pageIds.some((id) => selectedIds.has(id));
 
   return (
-    <div className="overflow-hidden rounded-[1.5rem] border border-border-3">
+    <div className="overflow-hidden rounded-[1rem] border border-border-4 bg-background-1">
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-background-2">
-          <thead className="bg-background-1 text-left text-[11px] uppercase tracking-[0.18em] text-text-4">
+        <table className="min-w-full">
+          <thead className="bg-background-2 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-text-4">
             <tr>
-              <th className="px-4 py-4 font-medium">
+              <th className="w-10 px-3 py-3.5 font-medium">
                 <input
                   type="checkbox"
                   checked={allPageSelected}
@@ -66,21 +71,21 @@ export function CommentTable({
                   aria-label="현재 페이지 전체 선택"
                 />
               </th>
-              <th className="px-4 py-4 font-medium">작성자</th>
-              <th className="px-4 py-4 font-medium">내용</th>
-              <th className="px-4 py-4 font-medium">글 제목</th>
-              <th className="px-4 py-4 font-medium">
-                <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-border-3 bg-background-2">
+              <th className="px-3 py-3.5 font-medium">작성자</th>
+              <th className="px-3 py-3.5 font-medium">내용</th>
+              <th className="px-3 py-3.5 font-medium">게시글</th>
+              <th className="px-3 py-3.5 font-medium text-center">
+                <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-border-3 bg-background-1">
                   <Icon icon={lockKeyholeLinear} width="12" />
                 </span>
                 <span className="sr-only">비밀 여부</span>
               </th>
-              <th className="px-4 py-4 font-medium">상태</th>
-              <th className="px-4 py-4 font-medium">날짜</th>
-              <th className="px-4 py-4 font-medium">작업</th>
+              <th className="px-3 py-3.5 font-medium">상태</th>
+              <th className="px-3 py-3.5 font-medium">작성일</th>
+              <th className="px-3 py-3.5 font-medium text-center">액션</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border-3">
+          <tbody className="divide-y divide-border-4">
             {rows.map((item) => {
               const isSelected = selectedIds.has(item.id);
               const authorLabel =
@@ -91,11 +96,11 @@ export function CommentTable({
                 <tr
                   key={item.id}
                   className={cn(
-                    "align-top transition-colors hover:bg-background-1/70",
+                    "align-top transition-colors hover:bg-background-2",
                     isSelected && "bg-primary-1/6",
                   )}
                 >
-                  <td className="px-4 py-4">
+                  <td className="px-3 py-3.5">
                     <input
                       type="checkbox"
                       checked={isSelected}
@@ -105,45 +110,54 @@ export function CommentTable({
                     />
                   </td>
 
-                  <td className="px-4 py-4">
-                    <div className="flex flex-col gap-1">
-                      <span className="whitespace-nowrap text-sm font-semibold text-text-1">
-                        {isReply ? (
-                          <span className="mr-1 rounded-full bg-background-3 px-1.5 py-0.5 text-[10px] text-text-4">
-                            답글
+                  <td className="px-3 py-3.5">
+                    <div className="flex items-center gap-2.5">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-background-3 text-xs font-semibold text-text-2">
+                        {getAvatarLabel(item.author.name)}
+                      </span>
+                      <div className="min-w-0 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="truncate text-sm font-medium text-text-1">
+                            {item.author.name}
                           </span>
-                        ) : null}
-                        {item.author.name}
-                      </span>
-                      <span className="inline-flex w-fit items-center rounded-full border border-border-3 bg-background-1 px-2 py-0.5 text-[11px] font-medium text-text-3">
-                        {authorLabel}
-                      </span>
+                          {isReply ? (
+                            <span className="inline-flex items-center rounded-md bg-info-1/10 px-1.5 py-0.5 text-[10px] font-medium text-info-1">
+                              답글
+                            </span>
+                          ) : null}
+                        </div>
+                        <span className="inline-flex w-fit items-center rounded-md bg-primary-1/10 px-1.5 py-0.5 text-[11px] font-medium text-primary-1">
+                          {authorLabel}
+                        </span>
+                      </div>
                     </div>
                   </td>
 
-                  <td className="px-4 py-4">
-                    <div className="max-w-[18rem] space-y-1">
+                  <td className="px-3 py-3.5">
+                    <div className="max-w-[22rem]">
                       <button
                         type="button"
                         onClick={() => onClickComment(item)}
                         className="block w-full text-left text-sm leading-6 text-text-2 transition-colors hover:text-primary-1"
                         title="클릭하여 상세 보기"
                       >
-                        {item.replyToName ? (
-                          <span className="font-medium text-text-4">
-                            @{item.replyToName}{" "}
-                          </span>
-                        ) : null}
-                        <span className="line-clamp-2">{item.body}</span>
+                        <span className="line-clamp-1 break-keep">
+                          {item.replyToName ? (
+                            <span className="font-medium text-text-4">
+                              @{item.replyToName}{" "}
+                            </span>
+                          ) : null}
+                          {item.body}
+                        </span>
                       </button>
                     </div>
                   </td>
 
-                  <td className="px-4 py-4">
+                  <td className="px-3 py-3.5">
                     {item.post ? (
                       <Link
                         href={`/manage/posts/${item.postId}/preview`}
-                        className="line-clamp-2 max-w-[11rem] text-sm font-medium text-primary-1 transition-colors hover:text-primary-2"
+                        className="line-clamp-1 max-w-[12rem] text-sm text-primary-1 transition-colors hover:underline"
                       >
                         {item.post.title}
                       </Link>
@@ -152,10 +166,10 @@ export function CommentTable({
                     )}
                   </td>
 
-                  <td className="px-4 py-4 text-center">
+                  <td className="px-3 py-3.5 text-center">
                     {item.isSecret ? (
                       <span
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary-1/10 text-primary-1"
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary-1/10 text-primary-1"
                         title="비밀 댓글"
                       >
                         <Icon icon={lockKeyholeLinear} width="15" />
@@ -165,10 +179,10 @@ export function CommentTable({
                     )}
                   </td>
 
-                  <td className="px-4 py-4">
+                  <td className="px-3 py-3.5">
                     <span
                       className={cn(
-                        "inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold",
+                        "inline-flex items-center rounded-md px-2 py-1 text-[11px] font-medium",
                         item.status === "active" &&
                           "bg-positive-1/10 text-positive-1",
                         item.status === "deleted" &&
@@ -181,21 +195,26 @@ export function CommentTable({
                     </span>
                   </td>
 
-                  <td className="px-4 py-4 text-sm whitespace-nowrap text-text-3">
+                  <td className="px-3 py-3.5 text-xs whitespace-nowrap text-text-4">
                     {formatDate(item.createdAt)}
                   </td>
 
-                  <td className="px-4 py-4">
+                  <td className="px-3 py-3.5 text-center">
                     <button
                       type="button"
                       disabled={deletingId === item.id}
                       onClick={() => onManage(item)}
                       className={cn(
-                        "inline-flex items-center justify-center gap-1.5 rounded-[0.8rem] border px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+                        "inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-50",
                         item.status === "deleted" || item.status === "hidden"
-                          ? "border-border-3 text-text-2 hover:border-border-2 hover:text-text-1"
-                          : "border-negative-1/30 text-negative-1 hover:bg-negative-1/10",
+                          ? "text-text-3 hover:bg-background-3 hover:text-text-1"
+                          : "text-negative-1 hover:bg-negative-1/10",
                       )}
+                      aria-label={
+                        item.status === "deleted" || item.status === "hidden"
+                          ? "댓글 관리"
+                          : "댓글 삭제"
+                      }
                     >
                       <Icon
                         icon={
@@ -205,11 +224,6 @@ export function CommentTable({
                         }
                         width="15"
                       />
-                      {deletingId === item.id
-                        ? "처리 중"
-                        : item.status === "deleted" || item.status === "hidden"
-                          ? "관리"
-                          : "삭제"}
                     </button>
                   </td>
                 </tr>
