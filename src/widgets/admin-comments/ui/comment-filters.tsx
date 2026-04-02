@@ -386,7 +386,7 @@ function DateRangePicker({
               previousMonth ? goToMonth(previousMonth) : undefined
             }
             disabled={!previousMonth}
-            className="inline-flex h-5 w-5 items-center justify-center rounded-[0.45rem] text-text-3 transition-colors hover:bg-background-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-30"
+            className="inline-flex h-5 w-5 cursor-pointer items-center justify-center rounded-[0.45rem] text-text-3 transition-colors hover:bg-background-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-30"
             aria-label="이전 달"
           >
             <components.Chevron orientation="left" size={13} />
@@ -400,7 +400,7 @@ function DateRangePicker({
             type="button"
             onClick={() => (nextMonth ? goToMonth(nextMonth) : undefined)}
             disabled={!nextMonth}
-            className="inline-flex h-5 w-5 items-center justify-center rounded-[0.45rem] text-text-3 transition-colors hover:bg-background-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-30"
+            className="inline-flex h-5 w-5 cursor-pointer items-center justify-center rounded-[0.45rem] text-text-3 transition-colors hover:bg-background-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-30"
             aria-label="다음 달"
           >
             <components.Chevron orientation="right" size={13} />
@@ -413,7 +413,7 @@ function DateRangePicker({
             onDateChange(undefined, undefined);
             setIsOpen(false);
           }}
-          className="absolute right-0 top-1/2 inline-flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-[0.45rem] border border-border-3 bg-background-1 text-text-3 transition-colors hover:border-border-2 hover:bg-background-2 hover:text-text-1"
+          className="absolute right-0 top-1/2 inline-flex h-5 w-5 cursor-pointer -translate-y-1/2 items-center justify-center rounded-[0.45rem] border border-border-3 bg-background-1 text-text-3 transition-colors hover:border-border-2 hover:bg-background-2 hover:text-text-1"
           aria-label="기간 초기화"
         >
           <Icon icon={refreshLinear} width="12" />
@@ -489,15 +489,15 @@ function DateRangePicker({
               week: "grid grid-cols-7",
               day: "h-10 w-10 p-0 text-sm leading-none",
               day_button:
-                "h-10 w-10 rounded-[0.75rem] text-sm leading-none text-text-2 transition-colors hover:bg-background-2 hover:text-text-1",
+                "h-10 w-10 cursor-pointer rounded-[0.75rem] text-sm leading-none text-text-2 transition-colors hover:bg-background-2 hover:text-text-1",
               selected:
                 "[&>button]:bg-primary-1 [&>button]:text-white [&>button]:hover:bg-primary-1",
               range_start:
-                "[&>button]:bg-primary-1 [&>button]:text-white [&>button]:hover:bg-primary-1",
+                "[&>button]:rounded-r-none [&>button]:bg-primary-1 [&>button]:text-white [&>button]:hover:bg-primary-1",
               range_end:
-                "[&>button]:bg-primary-1 [&>button]:text-white [&>button]:hover:bg-primary-1",
+                "[&>button]:rounded-l-none [&>button]:bg-primary-1 [&>button]:text-white [&>button]:hover:bg-primary-1",
               range_middle:
-                "[&>button]:rounded-none [&>button]:bg-primary-1/10 [&>button]:text-primary-1",
+                "[&>button]:cursor-pointer [&>button]:rounded-none [&>button]:bg-primary-1 [&>button]:text-white [&>button]:hover:bg-primary-1",
               today: "[&>button]:border [&>button]:border-primary-1/30",
               outside: "[&>button]:text-text-4 [&>button]:opacity-40",
               disabled: "[&>button]:text-text-4 [&>button]:opacity-30",

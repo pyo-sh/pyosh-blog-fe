@@ -444,7 +444,12 @@ export function AdminCommentsPage() {
 
   return (
     <>
-      <section className="-mx-4 -my-6 bg-background-1 px-4 py-6 md:-mx-6 md:px-6">
+      <section
+        className={cn(
+          "-mx-4 -my-6 bg-background-1 px-4 py-6 md:-mx-6 md:px-6",
+          selectedIds.length > 0 && "pb-24 md:pb-28",
+        )}
+      >
         <div className="flex flex-wrap items-end justify-start gap-3 pb-4">
           <CommentFilters
             status={filters.status}
@@ -459,66 +464,6 @@ export function AdminCommentsPage() {
             onDateChange={handleDateChange}
           />
         </div>
-
-        {selectedIds.length > 0 ? (
-          <div className="mt-4 flex flex-wrap items-center gap-3 rounded-[0.95rem] border border-primary-1/20 bg-primary-1/5 px-4 py-3">
-            <span className="text-sm font-medium text-text-1">
-              선택됨 {selectedIds.length}개
-              {selectedOnOtherPages > 0 ? (
-                <span className="ml-1 text-text-3">
-                  (다른 페이지 {selectedOnOtherPages}개 포함)
-                </span>
-              ) : null}
-            </span>
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedItems((current) => {
-                  const next = { ...current };
-                  rows.forEach((row) => {
-                    next[row.id] = row;
-                  });
-
-                  return next;
-                });
-              }}
-              className="rounded-[0.6rem] border border-border-3 px-3 py-1.5 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
-            >
-              현재 페이지 전체 선택
-            </button>
-            <button
-              type="button"
-              onClick={handleClearSelection}
-              className="rounded-[0.6rem] px-3 py-1.5 text-sm text-text-4 transition-colors hover:text-text-2"
-            >
-              전체 해제
-            </button>
-            <button
-              type="button"
-              onClick={() => handleOpenBulkAction("restore")}
-              disabled={!bulkAllowedActions.includes("restore")}
-              className="rounded-[0.6rem] border border-border-3 px-3 py-1.5 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
-            >
-              복원
-            </button>
-            <button
-              type="button"
-              onClick={() => handleOpenBulkAction("soft_delete")}
-              disabled={!bulkAllowedActions.includes("soft_delete")}
-              className="rounded-[0.6rem] border border-border-3 px-3 py-1.5 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
-            >
-              소프트 삭제
-            </button>
-            <button
-              type="button"
-              onClick={() => handleOpenBulkAction("hard_delete")}
-              disabled={!bulkAllowedActions.includes("hard_delete")}
-              className="rounded-[0.6rem] border border-negative-1/30 px-3 py-1.5 text-sm text-negative-1 transition-colors hover:bg-negative-1/10"
-            >
-              영구 삭제
-            </button>
-          </div>
-        ) : null}
 
         {actionError ? (
           <div className="mt-4 rounded-[1rem] border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-sm text-negative-1">
@@ -677,6 +622,71 @@ export function AdminCommentsPage() {
           </div>
         ) : null}
       </section>
+
+      {selectedIds.length > 0 ? (
+        <div className="fixed bottom-0 left-0 right-0 z-20 md:left-60">
+          <div className="flex flex-wrap items-center gap-3 border-t border-border-3 bg-[rgba(241,242,243,0.95)] px-4 py-3 backdrop-blur-[12px] md:px-6 dark:bg-[rgba(19,20,21,0.94)]">
+            <span className="text-sm font-medium text-text-1">
+              선택됨 {selectedIds.length}개
+              {selectedOnOtherPages > 0 ? (
+                <span className="ml-1 text-xs text-text-3">
+                  (다른 페이지 {selectedOnOtherPages}개 포함)
+                </span>
+              ) : null}
+            </span>
+
+            <div className="ml-auto flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedItems((current) => {
+                    const next = { ...current };
+                    rows.forEach((row) => {
+                      next[row.id] = row;
+                    });
+
+                    return next;
+                  });
+                }}
+                className="px-2 py-1.5 text-sm text-primary-1 transition-colors hover:text-primary-1/80"
+              >
+                전체 선택
+              </button>
+              <button
+                type="button"
+                onClick={handleClearSelection}
+                className="px-2 py-1.5 text-sm text-text-3 transition-colors hover:text-text-1"
+              >
+                전체 해제
+              </button>
+              <button
+                type="button"
+                onClick={() => handleOpenBulkAction("restore")}
+                disabled={!bulkAllowedActions.includes("restore")}
+                className="inline-flex h-9 items-center rounded-[0.7rem] border border-border-3 px-3 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                복원
+              </button>
+              <button
+                type="button"
+                onClick={() => handleOpenBulkAction("soft_delete")}
+                disabled={!bulkAllowedActions.includes("soft_delete")}
+                className="inline-flex h-9 items-center rounded-[0.7rem] border border-border-3 px-3 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                소프트 삭제
+              </button>
+              <button
+                type="button"
+                onClick={() => handleOpenBulkAction("hard_delete")}
+                disabled={!bulkAllowedActions.includes("hard_delete")}
+                className="inline-flex h-9 items-center rounded-[0.7rem] border border-negative-1/30 px-3 text-sm text-negative-1 transition-colors hover:bg-negative-1/10 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                영구 삭제
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {/* Detail modal */}
       <CommentDetailModal
