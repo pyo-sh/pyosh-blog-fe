@@ -27,6 +27,7 @@ import { EmptyState, Skeleton } from "@shared/ui/libs";
 
 const PAGE_SIZE = 10;
 const QUERY_KEY = ["admin-comments"] as const;
+const EMPTY_COMMENT_ROWS: AdminCommentItem[] = [];
 
 interface FilterState {
   status: CommentStatusFilter;
@@ -121,20 +122,28 @@ export function AdminCommentsPage() {
     queryFn: () => fetchAdminComments(queryParams),
   });
 
-  const rows = data?.data ?? [];
+  const rows = data?.data ?? EMPTY_COMMENT_ROWS;
   const meta = data?.meta;
 
   useEffect(() => {
     setSelectedItems((current) => {
+      if (rows.length === 0) {
+        return current;
+      }
+
       const next = { ...current };
+      let hasChanged = false;
 
       for (const row of rows) {
         if (next[row.id]) {
-          next[row.id] = row;
+          if (next[row.id] !== row) {
+            next[row.id] = row;
+            hasChanged = true;
+          }
         }
       }
 
-      return next;
+      return hasChanged ? next : current;
     });
   }, [rows]);
 

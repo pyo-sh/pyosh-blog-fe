@@ -28,6 +28,7 @@ const ACCEPTED_TYPES = new Set([
   "image/svg+xml",
 ]);
 const QUERY_KEY = ["admin-assets"] as const;
+const EMPTY_ASSETS: Asset[] = [];
 
 export function AssetUploader() {
   const queryClient = useQueryClient();
@@ -75,7 +76,7 @@ export function AssetUploader() {
     },
   });
 
-  const assets = assetsQuery.data?.data ?? [];
+  const assets = assetsQuery.data?.data ?? EMPTY_ASSETS;
   const meta = assetsQuery.data?.meta;
 
   const deleteMutation = useMutation({
@@ -130,9 +131,16 @@ export function AssetUploader() {
   }, [meta, page]);
 
   useEffect(() => {
-    setSelectedIds((current) =>
-      current.filter((id) => assets.some((asset) => asset.id === id)),
-    );
+    setSelectedIds((current) => {
+      const next = current.filter((id) =>
+        assets.some((asset) => asset.id === id),
+      );
+
+      return next.length === current.length &&
+        next.every((id, index) => id === current[index])
+        ? current
+        : next;
+    });
   }, [assets]);
 
   useEffect(() => {
