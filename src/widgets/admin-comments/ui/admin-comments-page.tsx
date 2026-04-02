@@ -23,6 +23,7 @@ import {
   type AdminCommentItem,
 } from "@entities/comment";
 import { getErrorMessage } from "@shared/lib/get-error-message";
+import { cn } from "@shared/lib/style-utils";
 import { EmptyState, Skeleton } from "@shared/ui/libs";
 
 const PAGE_SIZE = 10;
@@ -75,6 +76,30 @@ function getBulkAllowedActions(items: AdminCommentItem[]) {
 
     return current.filter((action) => allowedActions.includes(action));
   }, []);
+}
+
+function generatePageNumbers(
+  currentPage: number,
+  totalPages: number,
+  windowSize: number,
+): Array<number | "..."> {
+  if (totalPages <= 1) return [];
+
+  const windowStart = Math.max(2, currentPage - windowSize);
+  const windowEnd = Math.min(totalPages - 1, currentPage + windowSize);
+  const pages: Array<number | "..."> = [1];
+
+  if (windowStart > 2) pages.push("...");
+
+  for (let i = windowStart; i <= windowEnd; i++) {
+    pages.push(i);
+  }
+
+  if (windowEnd < totalPages - 1) pages.push("...");
+
+  pages.push(totalPages);
+
+  return pages;
 }
 
 export function AdminCommentsPage() {
@@ -224,17 +249,6 @@ export function AdminCommentsPage() {
 
     return `총 ${meta.total}개 중 ${start}-${end}`;
   }, [meta, rows.length]);
-
-  const pageStatusCounts = useMemo(() => {
-    return rows.reduce(
-      (counts, row) => {
-        counts[row.status] += 1;
-
-        return counts;
-      },
-      { active: 0, deleted: 0, hidden: 0 },
-    );
-  }, [rows]);
 
   function handleFilterChange(partial: Partial<FilterState>) {
     setFilters((prev) => ({ ...prev, ...partial }));
@@ -426,42 +440,10 @@ export function AdminCommentsPage() {
   const isSingleActionModalOpen =
     actionContext !== null && actionContext.type === "single";
   const bulkAllowedActions = getBulkAllowedActions(selectedList);
+  const pageNumbers = meta ? generatePageNumbers(page, meta.totalPages, 2) : [];
 
   return (
     <div className="space-y-6">
-      <section className="space-y-3">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h1 className="text-xl font-bold text-text-1">댓글 관리</h1>
-            <p className="mt-1 text-sm text-text-3">
-              댓글 상태와 연결된 게시글을 빠르게 확인하고 필요한 항목을
-              처리합니다.
-            </p>
-          </div>
-
-          <span className="inline-flex items-center rounded-[0.8rem] border border-border-3 bg-background-1 px-3 py-2 text-sm text-text-4">
-            페이지당 {PAGE_SIZE}개
-          </span>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-          <span className="text-text-2">전체 {meta?.total ?? 0}개</span>
-          <span className="text-positive-1">
-            정상 {pageStatusCounts.active}개
-          </span>
-          <span className="text-text-4">삭제 {pageStatusCounts.deleted}개</span>
-          <span className="text-yellow-1">
-            숨김 {pageStatusCounts.hidden}개
-          </span>
-        </div>
-
-        {meta && meta.total > rows.length ? (
-          <p className="text-xs text-text-4">
-            상태 집계는 현재 페이지 기준입니다.
-          </p>
-        ) : null}
-      </section>
-
       <section className="rounded-[1.5rem] border border-border-4 bg-background-1 p-5">
         <div className="flex flex-col gap-3 border-b border-border-4 pb-4 xl:flex-row xl:items-center xl:justify-between">
           <CommentFilters
@@ -616,28 +598,75 @@ export function AdminCommentsPage() {
 
             <nav
               aria-label="관리자 댓글 페이지네이션"
-              className="flex items-center gap-2"
+              className="flex items-center justify-center gap-0.5"
             >
               <button
                 type="button"
-                onClick={() => setPage((v) => Math.max(1, v - 1))}
-                disabled={page === 1}
-                className="inline-flex rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={() => setPage((value) => Math.max(1, value - 5))}
+                disabled={page <= 5}
+                className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:text-text-4"
+                aria-label="5 pages back"
               >
-                이전
+                &laquo;
               </button>
-
-              <span className="min-w-20 text-center text-sm text-text-2">
-                {page} / {meta.totalPages}
-              </span>
-
               <button
                 type="button"
-                onClick={() => setPage((v) => Math.min(meta.totalPages, v + 1))}
-                disabled={page === meta.totalPages}
-                className="inline-flex rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={() => setPage((value) => Math.max(1, value - 1))}
+                disabled={page === 1}
+                className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:text-text-4"
+                aria-label="Previous page"
               >
-                다음
+                &lsaquo;
+              </button>
+              {pageNumbers.map((pageNumber, index) =>
+                pageNumber === "..." ? (
+                  <span
+                    key={`ellipsis-${index}`}
+                    className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-4"
+                    aria-hidden="true"
+                  >
+                    &hellip;
+                  </span>
+                ) : (
+                  <button
+                    key={pageNumber}
+                    type="button"
+                    onClick={() => setPage(pageNumber)}
+                    disabled={pageNumber === page}
+                    className={cn(
+                      "inline-flex min-w-[2rem] items-center justify-center rounded px-2.5 py-1.5 text-sm transition-colors",
+                      pageNumber === page
+                        ? "pointer-events-none bg-primary-1 font-semibold text-white"
+                        : "text-text-1 hover:bg-background-2",
+                    )}
+                    aria-current={pageNumber === page ? "page" : undefined}
+                    aria-label={`Page ${pageNumber}`}
+                  >
+                    {pageNumber}
+                  </button>
+                ),
+              )}
+              <button
+                type="button"
+                onClick={() =>
+                  setPage((value) => Math.min(meta.totalPages, value + 1))
+                }
+                disabled={page === meta.totalPages}
+                className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:text-text-4"
+                aria-label="Next page"
+              >
+                &rsaquo;
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setPage((value) => Math.min(meta.totalPages, value + 5))
+                }
+                disabled={page + 5 > meta.totalPages}
+                className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:text-text-4"
+                aria-label="5 pages forward"
+              >
+                &raquo;
               </button>
             </nav>
           </div>

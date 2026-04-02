@@ -59,7 +59,7 @@ export function CommentTable({
         <table className="min-w-full">
           <thead className="bg-background-2 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-text-4">
             <tr>
-              <th className="w-10 px-3 py-3.5 font-medium">
+              <th className="w-10 whitespace-nowrap px-3 py-3.5 align-middle font-medium leading-none">
                 <input
                   type="checkbox"
                   checked={allPageSelected}
@@ -71,18 +71,30 @@ export function CommentTable({
                   aria-label="현재 페이지 전체 선택"
                 />
               </th>
-              <th className="px-3 py-3.5 font-medium">작성자</th>
-              <th className="px-3 py-3.5 font-medium">내용</th>
-              <th className="px-3 py-3.5 font-medium">게시글</th>
-              <th className="px-3 py-3.5 font-medium text-center">
+              <th className="whitespace-nowrap px-3 py-3.5 align-middle font-medium leading-none">
+                작성자
+              </th>
+              <th className="whitespace-nowrap px-3 py-3.5 align-middle font-medium leading-none">
+                내용
+              </th>
+              <th className="whitespace-nowrap px-3 py-3.5 align-middle font-medium leading-none">
+                게시글
+              </th>
+              <th className="whitespace-nowrap px-3 py-3.5 align-middle text-center font-medium leading-none">
                 <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-border-3 bg-background-1">
                   <Icon icon={lockKeyholeLinear} width="12" />
                 </span>
                 <span className="sr-only">비밀 여부</span>
               </th>
-              <th className="px-3 py-3.5 font-medium">상태</th>
-              <th className="px-3 py-3.5 font-medium">작성일</th>
-              <th className="px-3 py-3.5 font-medium text-center">액션</th>
+              <th className="whitespace-nowrap px-3 py-3.5 align-middle font-medium leading-none">
+                상태
+              </th>
+              <th className="whitespace-nowrap px-3 py-3.5 align-middle font-medium leading-none">
+                작성일
+              </th>
+              <th className="whitespace-nowrap px-3 py-3.5 align-middle text-center font-medium leading-none">
+                액션
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border-4">
@@ -96,11 +108,11 @@ export function CommentTable({
                 <tr
                   key={item.id}
                   className={cn(
-                    "align-top transition-colors hover:bg-background-2",
+                    "transition-colors hover:bg-background-2",
                     isSelected && "bg-primary-1/6",
                   )}
                 >
-                  <td className="px-3 py-3.5">
+                  <td className="whitespace-nowrap px-3 py-3.5 align-middle leading-none">
                     <input
                       type="checkbox"
                       checked={isSelected}
@@ -110,38 +122,38 @@ export function CommentTable({
                     />
                   </td>
 
-                  <td className="px-3 py-3.5">
+                  <td className="whitespace-nowrap px-3 py-3.5 align-middle leading-none">
                     <div className="flex items-center gap-2.5">
                       <span className="flex h-7 w-7 items-center justify-center rounded-full bg-background-3 text-xs font-semibold text-text-2">
                         {getAvatarLabel(item.author.name)}
                       </span>
-                      <div className="min-w-0 space-y-1">
+                      <div className="min-w-0 space-y-1 whitespace-nowrap">
                         <div className="flex items-center gap-2">
-                          <span className="truncate text-sm font-medium text-text-1">
+                          <span className="truncate text-sm font-medium leading-none text-text-1">
                             {item.author.name}
                           </span>
                           {isReply ? (
-                            <span className="inline-flex items-center rounded-md bg-info-1/10 px-1.5 py-0.5 text-[10px] font-medium text-info-1">
+                            <span className="inline-flex items-center rounded-md bg-info-1/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-info-1">
                               답글
                             </span>
                           ) : null}
                         </div>
-                        <span className="inline-flex w-fit items-center rounded-md bg-primary-1/10 px-1.5 py-0.5 text-[11px] font-medium text-primary-1">
+                        <span className="inline-flex w-fit items-center rounded-md bg-primary-1/10 px-1.5 py-0.5 text-[11px] font-medium leading-none text-primary-1">
                           {authorLabel}
                         </span>
                       </div>
                     </div>
                   </td>
 
-                  <td className="px-3 py-3.5">
+                  <td className="whitespace-nowrap px-3 py-3.5 align-middle leading-none">
                     <div className="max-w-[22rem]">
                       <button
                         type="button"
                         onClick={() => onClickComment(item)}
-                        className="block w-full text-left text-sm leading-6 text-text-2 transition-colors hover:text-primary-1"
+                        className="block w-full truncate text-left text-sm leading-none text-text-2 transition-colors hover:text-primary-1"
                         title="클릭하여 상세 보기"
                       >
-                        <span className="line-clamp-1 break-keep">
+                        <span className="block truncate">
                           {item.replyToName ? (
                             <span className="font-medium text-text-4">
                               @{item.replyToName}{" "}
@@ -153,11 +165,11 @@ export function CommentTable({
                     </div>
                   </td>
 
-                  <td className="px-3 py-3.5">
+                  <td className="whitespace-nowrap px-3 py-3.5 align-middle leading-none">
                     {item.post ? (
                       <Link
                         href={`/manage/posts/${item.postId}/preview`}
-                        className="line-clamp-1 max-w-[12rem] text-sm text-primary-1 transition-colors hover:underline"
+                        className="block max-w-[12rem] truncate text-sm leading-none text-primary-1 transition-colors hover:underline"
                       >
                         {item.post.title}
                       </Link>
@@ -166,7 +178,7 @@ export function CommentTable({
                     )}
                   </td>
 
-                  <td className="px-3 py-3.5 text-center">
+                  <td className="whitespace-nowrap px-3 py-3.5 align-middle text-center leading-none">
                     {item.isSecret ? (
                       <span
                         className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary-1/10 text-primary-1"
@@ -179,10 +191,10 @@ export function CommentTable({
                     )}
                   </td>
 
-                  <td className="px-3 py-3.5">
+                  <td className="whitespace-nowrap px-3 py-3.5 align-middle leading-none">
                     <span
                       className={cn(
-                        "inline-flex items-center rounded-md px-2 py-1 text-[11px] font-medium",
+                        "inline-flex items-center rounded-md px-2 py-1 text-[11px] font-medium leading-none",
                         item.status === "active" &&
                           "bg-positive-1/10 text-positive-1",
                         item.status === "deleted" &&
@@ -195,11 +207,11 @@ export function CommentTable({
                     </span>
                   </td>
 
-                  <td className="px-3 py-3.5 text-xs whitespace-nowrap text-text-4">
+                  <td className="whitespace-nowrap px-3 py-3.5 align-middle text-xs leading-none text-text-4">
                     {formatDate(item.createdAt)}
                   </td>
 
-                  <td className="px-3 py-3.5 text-center">
+                  <td className="whitespace-nowrap px-3 py-3.5 align-middle text-center leading-none">
                     <button
                       type="button"
                       disabled={deletingId === item.id}
