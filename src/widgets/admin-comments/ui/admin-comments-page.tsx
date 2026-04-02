@@ -443,7 +443,7 @@ export function AdminCommentsPage() {
   const pageNumbers = meta ? generatePageNumbers(page, meta.totalPages, 2) : [];
 
   return (
-    <div>
+    <>
       <section className="bg-background-1 p-0">
         <div className="flex flex-wrap items-end justify-start gap-3 pb-4">
           <CommentFilters
@@ -458,12 +458,6 @@ export function AdminCommentsPage() {
             onPostChange={(id) => handleFilterChange({ postId: id })}
             onDateChange={handleDateChange}
           />
-
-          <p className="text-sm text-text-4">
-            {isFetching && !isPending
-              ? "목록을 새로 불러오는 중..."
-              : paginationLabel}
-          </p>
         </div>
 
         {selectedIds.length > 0 ? (
@@ -593,12 +587,15 @@ export function AdminCommentsPage() {
         ) : null}
 
         {meta && meta.totalPages > 1 ? (
-          <div className="mt-5 flex flex-col gap-4 border-t border-border-4 pt-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-text-4">{paginationLabel}</p>
-
+          <div className="mt-5 border-t border-border-4 pt-4">
+            <p className="text-center text-sm text-text-4">
+              {isFetching && !isPending
+                ? "목록을 새로 불러오는 중..."
+                : paginationLabel}
+            </p>
             <nav
               aria-label="관리자 댓글 페이지네이션"
-              className="flex items-center justify-center gap-0.5"
+              className="mt-4 flex items-center justify-center gap-0.5"
             >
               <button
                 type="button"
@@ -670,6 +667,14 @@ export function AdminCommentsPage() {
               </button>
             </nav>
           </div>
+        ) : meta ? (
+          <div className="mt-5 border-t border-border-4 pt-4">
+            <p className="text-center text-sm text-text-4">
+              {isFetching && !isPending
+                ? "목록을 새로 불러오는 중..."
+                : paginationLabel}
+            </p>
+          </div>
         ) : null}
       </section>
 
@@ -709,6 +714,6 @@ export function AdminCommentsPage() {
           });
         }}
       />
-    </div>
+    </>
   );
 }
