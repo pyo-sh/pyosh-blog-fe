@@ -9,6 +9,7 @@ import { getErrorMessage } from "@shared/lib/get-error-message";
 interface TagChipInputProps {
   value: string[];
   onChange: (value: string[]) => void;
+  showHelperText?: boolean;
 }
 
 const MAX_TAG_LENGTH = 30;
@@ -17,7 +18,11 @@ function normalizeTag(value: string): string {
   return value.trim().replace(/\s+/g, " ");
 }
 
-export function TagChipInput({ value, onChange }: TagChipInputProps) {
+export function TagChipInput({
+  value,
+  onChange,
+  showHelperText = true,
+}: TagChipInputProps) {
   const listboxId = useId();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -228,7 +233,7 @@ export function TagChipInput({ value, onChange }: TagChipInputProps) {
         ) : null}
       </div>
 
-      {tagsQuery.isError ? (
+      {!showHelperText ? null : tagsQuery.isError ? (
         <p className="text-[11px] text-negative-1">
           {getErrorMessage(tagsQuery.error, "태그 목록을 불러오지 못했습니다.")}
         </p>

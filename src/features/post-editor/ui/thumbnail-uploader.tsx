@@ -153,7 +153,7 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
         </button>
         <button
           type="button"
-          onClick={() => setIsAwaitingPaste(true)}
+          onClick={() => setIsAwaitingPaste((current) => !current)}
           className={cn(
             "h-9 rounded-[0.75rem] border px-3 text-[11px] font-medium transition-colors",
             isAwaitingPaste

@@ -34,6 +34,7 @@ import {
 } from "../lib/markdown-commands";
 import { attachScrollSync } from "../lib/scroll-sync";
 import type { EditorView } from "@codemirror/view";
+import { AssetPickerModal } from "@entities/asset";
 import { type Asset } from "@entities/asset";
 import { fetchCategoriesAdmin, type Category } from "@entities/category";
 import {
@@ -181,10 +182,6 @@ function flattenCategoryOptions(
   });
 }
 
-function getVisibilityLabel(visibility: Post["visibility"]) {
-  return visibility === "public" ? "공개" : "비공개";
-}
-
 function getCommentStatusDescription(
   commentStatus: PostFormValues["commentStatus"],
 ) {
@@ -213,6 +210,33 @@ function CompactMetaLabel({
       </span>
       {children}
     </div>
+  );
+}
+
+function VisibilityToggle({
+  isPublic,
+  onToggle,
+}: {
+  isPublic: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className={cn(
+        "relative h-6 w-11 rounded-full transition-colors",
+        isPublic ? "bg-primary-1" : "bg-border-3",
+      )}
+      aria-label="공개 전환"
+    >
+      <span
+        className={cn(
+          "absolute left-[2px] top-[2px] h-5 w-5 rounded-full bg-white transition-transform",
+          isPublic ? "translate-x-5" : "translate-x-0",
+        )}
+      />
+    </button>
   );
 }
 
@@ -351,6 +375,7 @@ export function PostForm({
   const [showPublishConfirm, setShowPublishConfirm] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [showImageGallery, setShowImageGallery] = useState(false);
+  const [showThumbnailPicker, setShowThumbnailPicker] = useState(false);
   const [isDesktopPreview, setIsDesktopPreview] = useState(false);
   const [editorView, setEditorView] = useState<EditorView | null>(null);
   const [pendingImages, setPendingImages] = useState<Map<string, PendingImage>>(
@@ -820,7 +845,7 @@ export function PostForm({
         >
           {activeTab === "all" ? (
             <section className="border-b border-border-4 px-6 py-3">
-              <div className="flex flex-col gap-3 xl:flex-row xl:flex-wrap xl:items-center xl:gap-x-5 xl:gap-y-3">
+              <div className="flex flex-wrap items-center gap-4">
                 <CompactMetaLabel label="카테고리">
                   <div className="min-w-[10rem]">
                     <InlineCustomSelect
@@ -843,6 +868,7 @@ export function PostForm({
                   <div className="min-w-[16rem] flex-1">
                     <TagChipInput
                       value={values.tags}
+                      showHelperText={false}
                       onChange={(nextTags) =>
                         handleFieldChange("tags", nextTags)
                       }
@@ -854,10 +880,10 @@ export function PostForm({
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => setActiveTab("info")}
+                      onClick={() => setShowThumbnailPicker(true)}
                       className="inline-flex items-center rounded-[0.7rem] border border-border-3 bg-background-1 px-2.5 py-1.5 text-xs font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
                     >
-                      에셋 갤러리에서 선택
+                      에셋 갤러리
                     </button>
                     <div className="overflow-hidden rounded-[0.6rem] border border-border-3 bg-background-2">
                       {values.thumbnailUrl ? (
@@ -899,31 +925,15 @@ export function PostForm({
                 </CompactMetaLabel>
 
                 <CompactMetaLabel label="공개">
-                  <button
-                    type="button"
-                    onClick={() =>
+                  <VisibilityToggle
+                    isPublic={values.visibility === "public"}
+                    onToggle={() =>
                       handleFieldChange(
                         "visibility",
                         values.visibility === "public" ? "private" : "public",
                       )
                     }
-                    className={cn(
-                      "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
-                      values.visibility === "public"
-                        ? "border-primary-1/20 bg-primary-1/10 text-primary-1"
-                        : "border-border-3 bg-background-1 text-text-3",
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "h-2.5 w-2.5 rounded-full",
-                        values.visibility === "public"
-                          ? "bg-primary-1"
-                          : "bg-text-4",
-                      )}
-                    />
-                    {getVisibilityLabel(values.visibility)}
-                  </button>
+                  />
                 </CompactMetaLabel>
 
                 <CompactMetaLabel label="댓글 상태">
@@ -975,9 +985,9 @@ export function PostForm({
 
                   <MetaFormRow label="공개 설정">
                     <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() =>
+                      <VisibilityToggle
+                        isPublic={values.visibility === "public"}
+                        onToggle={() =>
                           handleFieldChange(
                             "visibility",
                             values.visibility === "public"
@@ -985,23 +995,7 @@ export function PostForm({
                               : "public",
                           )
                         }
-                        className={cn(
-                          "relative h-6 w-11 rounded-full transition-colors",
-                          values.visibility === "public"
-                            ? "bg-primary-1"
-                            : "bg-border-3",
-                        )}
-                        aria-label="공개 전환"
-                      >
-                        <span
-                          className={cn(
-                            "absolute left-[2px] top-[2px] h-5 w-5 rounded-full bg-white transition-transform",
-                            values.visibility === "public"
-                              ? "translate-x-5"
-                              : "translate-x-0",
-                          )}
-                        />
-                      </button>
+                      />
                       <span className="text-[13px] font-medium text-text-2">
                         공개
                       </span>
@@ -1258,6 +1252,16 @@ export function PostForm({
         onClose={() => setShowImageGallery(false)}
         onSelectAsset={insertExistingAsset}
         onSelectLocalFiles={insertPendingFiles}
+      />
+
+      <AssetPickerModal
+        isOpen={showThumbnailPicker}
+        onClose={() => setShowThumbnailPicker(false)}
+        onSelect={(url) => {
+          handleFieldChange("thumbnailUrl", url);
+          setShowThumbnailPicker(false);
+          toast.success("에셋 갤러리에서 썸네일을 선택했습니다.");
+        }}
       />
     </>
   );
