@@ -371,6 +371,7 @@ export function PostForm({
     () => JSON.stringify(nextInitialValues),
     [nextInitialValues],
   );
+  const initialStatusRef = useRef(nextInitialValues.status);
   const hydrationRef = useRef({
     postId,
     signature: nextInitialSignature,
@@ -411,6 +412,7 @@ export function PostForm({
       setValues(nextInitialValues);
       setIsDirty(false);
       setIsSummaryManuallyEdited(Boolean(nextInitialValues.summary.trim()));
+      initialStatusRef.current = nextInitialValues.status;
       hydrationRef.current = {
         postId,
         signature: nextInitialSignature,
@@ -569,6 +571,7 @@ export function PostForm({
       setPendingImages(new Map());
       setIsDirty(false);
       setIsSummaryManuallyEdited(Boolean(persistedValues.summary.trim()));
+      initialStatusRef.current = persistedValues.status;
       setPendingIntent(null);
       setShowPublishConfirm(false);
       hydrationRef.current = {
@@ -703,16 +706,20 @@ export function PostForm({
   }
 
   function submitWithIntent(intent: SubmitIntent) {
+    const nextStatus =
+      intent === "publish"
+        ? "published"
+        : intent === "archive"
+          ? "archived"
+          : intent === "restore-draft" || intent === "unpublish"
+            ? "draft"
+            : values.status === "published" &&
+                initialStatusRef.current !== "published"
+              ? "draft"
+              : values.status;
     const nextValues: PostFormValues = {
       ...values,
-      status:
-        intent === "publish"
-          ? "published"
-          : intent === "archive"
-            ? "archived"
-            : intent === "restore-draft" || intent === "unpublish"
-              ? "draft"
-              : values.status,
+      status: nextStatus,
       summary: isSummaryManuallyEdited
         ? values.summary
         : extractPlainText(values.contentMd, 200),
@@ -921,7 +928,15 @@ export function PostForm({
                       <button
                         key={status}
                         type="button"
-                        onClick={() => handleFieldChange("status", status)}
+                        onClick={() => {
+                          if (status === "published") {
+                            setShowPublishConfirm(true);
+
+                            return;
+                          }
+
+                          handleFieldChange("status", status);
+                        }}
                         className={cn(
                           "h-10 rounded-[0.55rem] px-3 text-xs font-medium transition-colors",
                           values.status === status

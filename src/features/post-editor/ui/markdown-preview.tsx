@@ -2,7 +2,6 @@
 
 import type { RefObject } from "react";
 import { useEffect, useRef, useState } from "react";
-import { renderMarkdown } from "@shared/lib/markdown";
 import { cn } from "@shared/lib/style-utils";
 
 interface MarkdownPreviewProps {
@@ -23,34 +22,73 @@ export function MarkdownPreview({
   const [html, setHtml] = useState("");
   const [isRendering, setIsRendering] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const workerRef = useRef<Worker | null>(null);
   const requestIdRef = useRef(0);
+  const latestValueRef = useRef(value);
+  const skipNextValueEffectRef = useRef(true);
 
   useEffect(() => {
-    setIsRendering(true);
-    const requestId = requestIdRef.current + 1;
-    requestIdRef.current = requestId;
+    latestValueRef.current = value;
+  }, [value]);
 
-    void renderMarkdown(value)
-      .then((nextHtml) => {
-        if (requestId !== requestIdRef.current) {
-          return;
-        }
+  useEffect(() => {
+    const worker = new Worker(
+      new URL("./markdown-preview.worker.ts", import.meta.url),
+    );
 
-        setHtml(nextHtml);
+    worker.onmessage = (
+      event: MessageEvent<{ id: number; html?: string; error?: string }>,
+    ) => {
+      if (event.data.id !== requestIdRef.current) {
+        return;
+      }
+
+      if (event.data.error) {
+        setError(event.data.error);
+      } else {
+        setHtml(event.data.html ?? "");
         setError(null);
-      })
-      .catch(() => {
-        if (requestId !== requestIdRef.current) {
-          return;
-        }
+      }
 
-        setError("미리보기를 렌더링할 수 없습니다.");
-      })
-      .finally(() => {
-        if (requestId === requestIdRef.current) {
-          setIsRendering(false);
-        }
-      });
+      setIsRendering(false);
+    };
+
+    workerRef.current = worker;
+    setIsRendering(true);
+    requestIdRef.current = 1;
+    worker.postMessage({
+      id: requestIdRef.current,
+      value: latestValueRef.current,
+    });
+
+    return () => {
+      worker.terminate();
+      workerRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (workerRef.current === null) {
+      return;
+    }
+
+    if (skipNextValueEffectRef.current) {
+      skipNextValueEffectRef.current = false;
+
+      return;
+    }
+
+    setIsRendering(true);
+
+    const timeoutId = window.setTimeout(() => {
+      const requestId = requestIdRef.current + 1;
+      requestIdRef.current = requestId;
+      workerRef.current?.postMessage({ id: requestId, value });
+    }, 120);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
   }, [value]);
 
   return (

@@ -115,11 +115,8 @@ export function ManageLayoutShell({ children }: { children: React.ReactNode }) {
         </header>
 
         <main
-          className="overflow-hidden"
-          style={{
-            height: `calc(100dvh - ${ADMIN_CHROME_HEIGHT})`,
-            minHeight: `calc(100dvh - ${ADMIN_CHROME_HEIGHT})`,
-          }}
+          className="px-4 py-6 md:px-6"
+          style={{ minHeight: `calc(100dvh - ${ADMIN_CHROME_HEIGHT})` }}
         >
           {children}
         </main>
