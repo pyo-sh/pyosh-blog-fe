@@ -88,8 +88,8 @@ export function CategoryTreeRow({
         <div
           ref={draggable.setNodeRef}
           className={cn(
-            "flex items-center gap-2 rounded-lg px-3 py-2.5 transition-colors",
-            "hover:bg-background-3/50",
+            "flex items-center gap-2 rounded-[1rem] border border-transparent bg-background-1 px-3 py-3 transition-colors",
+            "hover:border-border-3 hover:bg-background-2",
             !category.isVisible && "opacity-50",
             isDragging && "z-10 opacity-50 shadow-lg",
             currentDropPosition === "inside" &&
@@ -111,9 +111,9 @@ export function CategoryTreeRow({
             aria-label="하위 카테고리 토글"
             aria-expanded={hasVisibleChildren ? isExpanded : undefined}
             className={cn(
-              "flex h-5 w-5 shrink-0 items-center justify-center text-xs text-text-3 transition-colors",
+              "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs text-text-3 transition-colors",
               hasVisibleChildren
-                ? "cursor-pointer hover:text-text-1"
+                ? "cursor-pointer hover:bg-background-3 hover:text-text-1"
                 : "cursor-default",
             )}
           >
@@ -147,9 +147,11 @@ export function CategoryTreeRow({
               {category.name}
             </span>
             {!category.isVisible ? (
-              <span className="shrink-0 text-sm text-text-3">(숨김)</span>
+              <span className="shrink-0 rounded-full bg-background-3 px-2 py-0.5 text-[11px] font-medium text-text-3">
+                숨김
+              </span>
             ) : null}
-            <span className="shrink-0 rounded-full bg-background-3 px-2 py-0.5 text-xs text-text-4">
+            <span className="shrink-0 rounded-full border border-border-3 bg-background-2 px-2 py-0.5 text-[11px] text-text-4">
               {category.slug}
             </span>
             {changeMarker ? (
@@ -159,7 +161,7 @@ export function CategoryTreeRow({
             ) : null}
           </div>
 
-          <span className="shrink-0 text-sm text-text-3">
+          <span className="shrink-0 rounded-full bg-primary-1/8 px-3 py-1 text-xs font-medium text-text-3">
             발행 {category.publishedPostCount ?? 0} / 전체{" "}
             {category.totalPostCount ?? 0}
           </span>

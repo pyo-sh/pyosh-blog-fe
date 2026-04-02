@@ -1,6 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { Icon } from "@iconify/react";
+import checkCircleLinear from "@iconify-icons/solar/check-circle-linear";
+import galleryWideLinear from "@iconify-icons/solar/gallery-wide-linear";
+import linkMinimalistic2Linear from "@iconify-icons/solar/link-minimalistic-2-linear";
+import trashBinMinimalisticLinear from "@iconify-icons/solar/trash-bin-minimalistic-linear";
 import { useLongPress } from "../lib/use-long-press";
 import type { Asset } from "@entities/asset";
 import {
@@ -76,6 +81,35 @@ export function AssetGrid({
               선택
             </button>
           ) : null}
+        </div>
+
+        <div className="mt-6 grid gap-3 md:grid-cols-3">
+          <div className="rounded-[1.15rem] border border-border-3 bg-background-1 px-4 py-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-4">
+              Assets
+            </p>
+            <p className="mt-1 text-lg font-semibold text-text-1">
+              {assets.length}
+            </p>
+          </div>
+          <div className="rounded-[1.15rem] border border-border-3 bg-background-1 px-4 py-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-4">
+              Selection
+            </p>
+            <p className="mt-1 text-sm text-text-2">
+              {selectionMode
+                ? `${selectedIds.length}개 선택 중`
+                : "선택 모드 꺼짐"}
+            </p>
+          </div>
+          <div className="rounded-[1.15rem] border border-border-3 bg-background-1 px-4 py-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-4">
+              Actions
+            </p>
+            <p className="mt-1 text-sm text-text-2">
+              상세 보기, URL 복사, 삭제
+            </p>
+          </div>
         </div>
 
         {selectionMode ? (
@@ -211,7 +245,7 @@ function AssetGridCard({
         "group relative overflow-hidden rounded-[1.4rem] border bg-background-1 transition-all",
         isSelected
           ? "border-primary-1 shadow-[0_0_0_3px_rgba(138,111,224,0.12)]"
-          : "border-border-3 hover:border-border-2",
+          : "border-border-3 hover:-translate-y-0.5 hover:border-border-2",
         longPress.isPressing && "border-primary-1 bg-primary-1/5",
       )}
     >
@@ -248,7 +282,7 @@ function AssetGridCard({
                   : "border-border-3 bg-background-1/90 text-text-3",
               )}
             >
-              {isSelected ? "선택" : ""}
+              {isSelected ? <Icon icon={checkCircleLinear} width="16" /> : ""}
             </span>
           </div>
         ) : null}
@@ -264,8 +298,9 @@ function AssetGridCard({
                 event.stopPropagation();
                 onCopyUrl(asset);
               }}
-              className="inline-flex h-10 items-center justify-center rounded-full border border-border-3 bg-background-1/90 px-3 text-xs font-medium text-text-2 opacity-0 shadow-sm backdrop-blur transition-all group-hover:opacity-100 group-focus-within:opacity-100 hover:border-border-2 hover:text-text-1"
+              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full border border-border-3 bg-background-1/90 px-3 text-xs font-medium text-text-2 opacity-0 shadow-sm backdrop-blur transition-all group-hover:opacity-100 group-focus-within:opacity-100 hover:border-border-2 hover:text-text-1"
             >
+              <Icon icon={linkMinimalistic2Linear} width="14" />
               {isCopied ? "복사됨" : "URL 복사"}
             </button>
           </div>
@@ -273,9 +308,14 @@ function AssetGridCard({
 
         <div className="space-y-3 p-4">
           <div>
-            <p className="truncate text-sm font-semibold text-text-1">
-              {getAssetFilename(asset.url)}
-            </p>
+            <div className="flex items-start justify-between gap-3">
+              <p className="truncate text-sm font-semibold text-text-1">
+                {getAssetFilename(asset.url)}
+              </p>
+              <span className="shrink-0 rounded-full bg-background-3 px-2 py-1 text-[11px] font-medium text-text-3">
+                #{asset.id}
+              </span>
+            </div>
             <p className="mt-1 text-xs text-text-4">
               {formatAssetFileSize(asset.sizeBytes)} ·{" "}
               {formatAssetResolution(asset.width, asset.height)}
@@ -286,7 +326,7 @@ function AssetGridCard({
             <span className="truncate">{asset.mimeType}</span>
             <span
               className={cn(
-                "rounded-full px-2 py-1",
+                "rounded-full px-2 py-1 text-[11px] font-medium",
                 isDeleting
                   ? "bg-negative-1/10 text-negative-1"
                   : "bg-background-3 text-text-3",
@@ -300,14 +340,25 @@ function AssetGridCard({
 
       {selectionMode ? null : (
         <div className="border-t border-border-3 px-4 py-3">
-          <button
-            type="button"
-            onClick={() => onRequestDelete([asset.id])}
-            disabled={isPending}
-            className="inline-flex items-center justify-center rounded-[0.8rem] border border-negative-1/20 px-3 py-2 text-xs font-medium text-negative-1 transition-colors hover:bg-negative-1/10 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            삭제
-          </button>
+          <div className="flex items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={() => onOpenDetail(asset.id)}
+              className="inline-flex items-center justify-center gap-1.5 rounded-[0.8rem] border border-border-3 px-3 py-2 text-xs font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+            >
+              <Icon icon={galleryWideLinear} width="14" />
+              상세
+            </button>
+            <button
+              type="button"
+              onClick={() => onRequestDelete([asset.id])}
+              disabled={isPending}
+              className="inline-flex items-center justify-center gap-1.5 rounded-[0.8rem] border border-negative-1/20 px-3 py-2 text-xs font-medium text-negative-1 transition-colors hover:bg-negative-1/10 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Icon icon={trashBinMinimalisticLinear} width="14" />
+              삭제
+            </button>
+          </div>
         </div>
       )}
     </article>

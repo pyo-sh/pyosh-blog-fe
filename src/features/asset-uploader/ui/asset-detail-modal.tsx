@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { Icon } from "@iconify/react";
+import closeCircleLinear from "@iconify-icons/solar/close-circle-linear";
+import linkMinimalistic2Linear from "@iconify-icons/solar/link-minimalistic-2-linear";
+import trashBinMinimalisticLinear from "@iconify-icons/solar/trash-bin-minimalistic-linear";
 import type { Asset } from "@entities/asset";
 import {
   buildAssetMarkdown,
@@ -98,7 +102,7 @@ export function AssetDetailModal({
             className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border-3 text-text-3 transition-colors hover:border-border-2 hover:text-text-1"
             aria-label="에셋 상세 닫기"
           >
-            ×
+            <Icon icon={closeCircleLinear} width="18" />
           </button>
         </div>
 
@@ -185,15 +189,17 @@ export function AssetDetailModal({
               <button
                 type="button"
                 onClick={() => onCopy(asset, "url")}
-                className="inline-flex items-center justify-center rounded-[0.9rem] border border-border-3 px-4 py-3 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+                className="inline-flex items-center justify-center gap-2 rounded-[0.9rem] border border-border-3 px-4 py-3 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
               >
+                <Icon icon={linkMinimalistic2Linear} width="16" />
                 {copiedType === "url" ? "URL 복사됨" : "URL 복사"}
               </button>
               <button
                 type="button"
                 onClick={() => onCopy(asset, "markdown")}
-                className="inline-flex items-center justify-center rounded-[0.9rem] border border-border-3 px-4 py-3 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+                className="inline-flex items-center justify-center gap-2 rounded-[0.9rem] border border-border-3 px-4 py-3 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
               >
+                <Icon icon={linkMinimalistic2Linear} width="16" />
                 {copiedType === "markdown"
                   ? "마크다운 복사됨"
                   : "마크다운 복사"}
@@ -201,8 +207,9 @@ export function AssetDetailModal({
               <button
                 type="button"
                 onClick={() => onRequestDelete(asset)}
-                className="ml-auto inline-flex items-center justify-center rounded-[0.9rem] bg-negative-1 px-4 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                className="ml-auto inline-flex items-center justify-center gap-2 rounded-[0.9rem] bg-negative-1 px-4 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90"
               >
+                <Icon icon={trashBinMinimalisticLinear} width="16" />
                 삭제
               </button>
             </div>

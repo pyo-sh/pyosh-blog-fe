@@ -186,16 +186,23 @@ export function CategoryManager() {
       </header>
 
       <section className="rounded-[1.75rem] border border-border-3 bg-background-2 p-6">
-        <div className="flex flex-col gap-3 border-b border-border-3 pb-5 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-4 border-b border-border-3 pb-5 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="text-lg font-semibold text-text-1">카테고리 트리</h2>
             <p className="mt-1 text-sm text-text-3">
               숨김 상태와 계층 구조를 한 번에 확인할 수 있습니다.
             </p>
           </div>
-          <span className="text-sm text-text-4">
-            총 {countCategories(categories)}개
-          </span>
+          <div className="flex gap-3">
+            <div className="rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-4">
+                Total
+              </p>
+              <p className="mt-1 text-lg font-semibold text-text-1">
+                {countCategories(categories)}
+              </p>
+            </div>
+          </div>
         </div>
 
         <div className="mt-6">

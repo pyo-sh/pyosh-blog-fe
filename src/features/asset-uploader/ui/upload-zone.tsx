@@ -1,6 +1,9 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { Icon } from "@iconify/react";
+import galleryWideLinear from "@iconify-icons/solar/gallery-wide-linear";
+import linkMinimalistic2Linear from "@iconify-icons/solar/link-minimalistic-2-linear";
 import { cn } from "@shared/lib/style-utils";
 import { Spinner } from "@shared/ui/libs";
 
@@ -73,6 +76,29 @@ export function UploadZone({
               `${files.length}개 업로드`
             )}
           </button>
+        </div>
+      </div>
+
+      <div className="mt-6 grid gap-3 md:grid-cols-3">
+        <div className="rounded-[1.15rem] border border-border-3 bg-background-1 px-4 py-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-4">
+            Queue
+          </p>
+          <p className="mt-1 text-lg font-semibold text-text-1">
+            {files.length}/5
+          </p>
+        </div>
+        <div className="rounded-[1.15rem] border border-border-3 bg-background-1 px-4 py-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-4">
+            Types
+          </p>
+          <p className="mt-1 text-sm text-text-2">JPG PNG GIF WebP SVG</p>
+        </div>
+        <div className="rounded-[1.15rem] border border-border-3 bg-background-1 px-4 py-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-4">
+            Limit
+          </p>
+          <p className="mt-1 text-sm text-text-2">파일당 10MB</p>
         </div>
       </div>
 
@@ -248,7 +274,10 @@ function DropArea({
         onFilesAdded(event.dataTransfer.files);
       }}
     >
-      <p className="text-body-xs uppercase tracking-[0.24em] text-text-4">
+      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-border-3 bg-background-1 text-primary-1">
+        <Icon icon={galleryWideLinear} width="24" />
+      </div>
+      <p className="mt-4 text-body-xs uppercase tracking-[0.24em] text-text-4">
         Drag and drop
       </p>
       {isDragging ? (
@@ -267,8 +296,9 @@ function DropArea({
         type="button"
         onClick={onPick}
         disabled={disabled}
-        className="mt-5 inline-flex items-center justify-center rounded-full border border-border-3 px-5 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed"
+        className="mt-5 inline-flex items-center justify-center gap-2 rounded-full border border-border-3 px-5 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed"
       >
+        <Icon icon={linkMinimalistic2Linear} width="15" />
         대기열에 파일 추가
       </button>
     </div>
