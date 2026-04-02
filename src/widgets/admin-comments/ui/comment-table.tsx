@@ -75,6 +75,9 @@ export function CommentTable({
                 작성자
               </th>
               <th className="whitespace-nowrap px-3 py-3.5 align-middle font-medium leading-none">
+                타입
+              </th>
+              <th className="whitespace-nowrap px-3 py-3.5 align-middle font-medium leading-none">
                 내용
               </th>
               <th className="whitespace-nowrap px-3 py-3.5 align-middle font-medium leading-none">
@@ -102,7 +105,6 @@ export function CommentTable({
               const isSelected = selectedIds.has(item.id);
               const authorLabel =
                 item.author.type === "oauth" ? "OAuth" : "게스트";
-              const isReply = item.depth > 0;
 
               return (
                 <tr
@@ -127,22 +129,16 @@ export function CommentTable({
                       <span className="flex h-7 w-7 items-center justify-center rounded-full bg-background-3 text-xs font-semibold text-text-2">
                         {getAvatarLabel(item.author.name)}
                       </span>
-                      <div className="min-w-0 space-y-1 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <span className="truncate text-sm font-medium leading-none text-text-1">
-                            {item.author.name}
-                          </span>
-                          {isReply ? (
-                            <span className="inline-flex items-center rounded-md bg-info-1/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-info-1">
-                              답글
-                            </span>
-                          ) : null}
-                        </div>
-                        <span className="inline-flex w-fit items-center rounded-md bg-primary-1/10 px-1.5 py-0.5 text-[11px] font-medium leading-none text-primary-1">
-                          {authorLabel}
-                        </span>
-                      </div>
+                      <span className="truncate text-sm font-medium leading-none text-text-1">
+                        {item.author.name}
+                      </span>
                     </div>
+                  </td>
+
+                  <td className="whitespace-nowrap px-3 py-3.5 align-middle leading-none">
+                    <span className="inline-flex w-fit items-center rounded-md bg-primary-1/10 px-1.5 py-0.5 text-[11px] font-medium leading-none text-primary-1">
+                      {authorLabel}
+                    </span>
                   </td>
 
                   <td className="whitespace-nowrap px-3 py-3.5 align-middle leading-none">

@@ -43,12 +43,7 @@ const AUTHOR_TYPE_OPTIONS: Array<SelectOption<CommentAuthorTypeFilter>> = [
   { label: "게스트", value: "guest", triggerLabel: "작성자" },
 ];
 
-const DATE_RANGE_PRESETS = [
-  { label: "전체", value: "all" },
-  { label: "7일", value: "7d" },
-  { label: "30일", value: "30d" },
-  { label: "90일", value: "90d" },
-] as const;
+type DateRangePresetValue = "all" | "7d" | "30d" | "90d" | "custom";
 
 function toDateInputValue(date: Date) {
   const year = date.getFullYear();
@@ -69,7 +64,7 @@ function buildRelativeStart(days: number) {
 function detectPreset(
   startDate: string | undefined,
   endDate: string | undefined,
-): (typeof DATE_RANGE_PRESETS)[number]["value"] | null {
+): DateRangePresetValue {
   if (!startDate && !endDate) {
     return "all";
   }
@@ -77,14 +72,14 @@ function detectPreset(
   const today = toDateInputValue(new Date());
 
   if (endDate !== today) {
-    return null;
+    return "custom";
   }
 
   if (startDate === buildRelativeStart(7)) return "7d";
   if (startDate === buildRelativeStart(30)) return "30d";
   if (startDate === buildRelativeStart(90)) return "90d";
 
-  return null;
+  return "custom";
 }
 
 function FilterCustomSelect<T extends string>({
@@ -303,6 +298,13 @@ export function CommentFilters({
   const [postLoading, setPostLoading] = useState(false);
   const postDropdownRef = useRef<HTMLDivElement>(null);
   const activePreset = detectPreset(startDate, endDate);
+  const dateRangeOptions: Array<SelectOption<DateRangePresetValue>> = [
+    { label: "전체", value: "all", triggerLabel: "기간" },
+    { label: "7일", value: "7d", triggerLabel: "기간" },
+    { label: "30일", value: "30d", triggerLabel: "기간" },
+    { label: "90일", value: "90d", triggerLabel: "기간" },
+    { label: "사용자 지정", value: "custom", triggerLabel: "기간" },
+  ];
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -367,11 +369,20 @@ export function CommentFilters({
     onPostChange(undefined, undefined);
   }
 
-  function handlePresetClick(
-    preset: (typeof DATE_RANGE_PRESETS)[number]["value"],
-  ) {
+  function handlePresetChange(preset: DateRangePresetValue) {
     if (preset === "all") {
       onDateChange(undefined, undefined);
+
+      return;
+    }
+
+    if (preset === "custom") {
+      if (!startDate && !endDate) {
+        onDateChange(
+          toDateInputValue(new Date()),
+          toDateInputValue(new Date()),
+        );
+      }
 
       return;
     }
@@ -489,27 +500,16 @@ export function CommentFilters({
         />
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 rounded-[1rem] border border-border-3 bg-background-2/60 px-3 py-3">
-        <div className="flex flex-wrap items-center gap-2">
-          {DATE_RANGE_PRESETS.map((preset) => (
-            <button
-              key={preset.value}
-              type="button"
-              onClick={() => handlePresetClick(preset.value)}
-              className={cn(
-                "inline-flex h-9 items-center rounded-[0.7rem] border px-3 text-sm leading-none transition-colors",
-                activePreset === preset.value
-                  ? "border-primary-1/30 bg-primary-1/10 text-primary-1"
-                  : "border-border-3 bg-background-1 text-text-3 hover:border-border-2 hover:text-text-1",
-              )}
-            >
-              {preset.label}
-            </button>
-          ))}
-        </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <FilterCustomSelect
+          label="기간"
+          value={activePreset}
+          options={dateRangeOptions}
+          onChange={handlePresetChange}
+        />
 
-        <div className="flex min-w-[20rem] flex-1 flex-wrap items-center gap-2 rounded-[0.85rem] border border-border-3 bg-background-1 px-3 py-2.5">
-          <span className="text-sm leading-none text-text-3">기간</span>
+        <div className="flex min-w-[20rem] flex-1 flex-wrap items-center gap-2 rounded-[0.8rem] border border-border-3 bg-background-1 px-3 py-2.5">
+          <span className="text-sm leading-none text-text-3">시작</span>
           <input
             type="date"
             value={startDate ?? ""}
@@ -518,6 +518,7 @@ export function CommentFilters({
             aria-label="시작일"
           />
           <span className="text-xs leading-none text-text-4">-</span>
+          <span className="text-sm leading-none text-text-3">종료</span>
           <input
             type="date"
             value={endDate ?? ""}
