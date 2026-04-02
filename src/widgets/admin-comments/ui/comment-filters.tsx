@@ -147,12 +147,14 @@ function FilterCustomSelect<T extends string>({
   options,
   onChange,
   className,
+  triggerClassName,
 }: {
   label: string;
   value: T;
   options: Array<SelectOption<T>>;
   onChange: (value: T) => void;
   className?: string;
+  triggerClassName?: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -287,8 +289,11 @@ function FilterCustomSelect<T extends string>({
         aria-expanded={isOpen}
         aria-controls={listboxIdRef.current}
         aria-haspopup="listbox"
-        className="relative flex h-10 w-fit items-center whitespace-nowrap rounded-[0.8rem] border border-border-3 bg-background-1 px-3 pr-8 text-left text-sm leading-none text-text-2 outline-none transition-colors hover:border-border-2 focus-visible:border-primary-1"
-        style={{ width: triggerWidth }}
+        className={cn(
+          "relative flex h-10 w-fit items-center whitespace-nowrap rounded-[0.8rem] border border-border-3 bg-background-1 px-3 pr-8 text-left text-sm leading-none text-text-2 outline-none transition-colors hover:border-border-2 focus-visible:border-primary-1",
+          triggerClassName,
+        )}
+        style={triggerClassName ? undefined : { width: triggerWidth }}
       >
         <span className="truncate">
           {selected?.value === "all"
@@ -738,6 +743,7 @@ export function CommentFilters({
         value={status}
         options={STATUS_OPTIONS}
         onChange={onStatusChange}
+        triggerClassName="w-[8em]"
       />
 
       <FilterCustomSelect
