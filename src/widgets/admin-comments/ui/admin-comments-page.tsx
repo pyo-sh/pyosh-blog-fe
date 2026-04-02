@@ -444,7 +444,7 @@ export function AdminCommentsPage() {
 
   return (
     <>
-      <section className="bg-background-1 p-0">
+      <section className="-mx-4 -my-6 bg-background-1 px-4 py-6 md:-mx-6 md:px-6">
         <div className="flex flex-wrap items-end justify-start gap-3 pb-4">
           <CommentFilters
             status={filters.status}
@@ -588,7 +588,7 @@ export function AdminCommentsPage() {
 
         {meta && meta.totalPages > 1 ? (
           <div className="mt-5 border-t border-border-4 pt-4">
-            <p className="text-center text-sm text-text-4">
+            <p className="text-right text-sm text-text-4">
               {isFetching && !isPending
                 ? "목록을 새로 불러오는 중..."
                 : paginationLabel}
@@ -669,7 +669,7 @@ export function AdminCommentsPage() {
           </div>
         ) : meta ? (
           <div className="mt-5 border-t border-border-4 pt-4">
-            <p className="text-center text-sm text-text-4">
+            <p className="text-right text-sm text-text-4">
               {isFetching && !isPending
                 ? "목록을 새로 불러오는 중..."
                 : paginationLabel}

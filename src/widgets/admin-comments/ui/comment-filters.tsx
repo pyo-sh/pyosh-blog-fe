@@ -119,6 +119,20 @@ function formatRangeLabel(range: DateRange | undefined) {
   return "날짜 범위";
 }
 
+function getSelectTriggerWidthCh<T extends string>(
+  label: string,
+  options: Array<SelectOption<T>>,
+) {
+  const longest = options.reduce((max, option) => {
+    const triggerText =
+      option.value === "all" ? (option.triggerLabel ?? label) : option.label;
+
+    return Math.max(max, triggerText.length);
+  }, label.length);
+
+  return `${Math.max(longest + 3, 6)}ch`;
+}
+
 function FilterCustomSelect<T extends string>({
   label,
   value,
@@ -141,6 +155,7 @@ function FilterCustomSelect<T extends string>({
   const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const selected = options.find((option) => option.value === value);
   const selectedIndex = options.findIndex((option) => option.value === value);
+  const triggerWidth = getSelectTriggerWidthCh(label, options);
 
   useEffect(() => {
     optionRefs.current = [];
@@ -264,7 +279,8 @@ function FilterCustomSelect<T extends string>({
         aria-expanded={isOpen}
         aria-controls={listboxIdRef.current}
         aria-haspopup="listbox"
-        className="relative flex h-10 min-w-[9rem] items-center rounded-[0.8rem] border border-border-3 bg-background-1 px-3 pr-8 text-left text-sm leading-none text-text-2 outline-none transition-colors hover:border-border-2 focus-visible:border-primary-1"
+        className="relative flex h-10 w-fit items-center whitespace-nowrap rounded-[0.8rem] border border-border-3 bg-background-1 px-3 pr-8 text-left text-sm leading-none text-text-2 outline-none transition-colors hover:border-border-2 focus-visible:border-primary-1"
+        style={{ width: triggerWidth }}
       >
         <span className="truncate">
           {selected?.value === "all"
@@ -359,33 +375,37 @@ function DateRangePicker({
     return (
       <div
         className={cn(
-          "relative flex h-8 items-center justify-center px-12 text-center",
+          "relative flex h-8 items-center justify-center pr-8 text-center",
           className,
         )}
       >
-        <button
-          type="button"
-          onClick={() => (previousMonth ? goToMonth(previousMonth) : undefined)}
-          disabled={!previousMonth}
-          className="absolute left-0 top-1/2 inline-flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-[0.55rem] border border-border-3 bg-background-1 text-text-3 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-30"
-          aria-label="이전 달"
-        >
-          <components.Chevron orientation="left" size={14} />
-        </button>
+        <div className="flex items-center justify-center gap-1.5">
+          <button
+            type="button"
+            onClick={() =>
+              previousMonth ? goToMonth(previousMonth) : undefined
+            }
+            disabled={!previousMonth}
+            className="inline-flex h-5 w-5 items-center justify-center rounded-[0.45rem] text-text-3 transition-colors hover:bg-background-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-30"
+            aria-label="이전 달"
+          >
+            <components.Chevron orientation="left" size={13} />
+          </button>
 
-        <span className="text-sm font-semibold leading-none text-text-1">
-          {format(calendarMonth.date, "yyyy년 M월", { locale: ko })}
-        </span>
+          <span className="text-sm font-semibold leading-none text-text-1">
+            {format(calendarMonth.date, "yyyy년 M월", { locale: ko })}
+          </span>
 
-        <button
-          type="button"
-          onClick={() => (nextMonth ? goToMonth(nextMonth) : undefined)}
-          disabled={!nextMonth}
-          className="absolute right-8 top-1/2 inline-flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-[0.55rem] border border-border-3 bg-background-1 text-text-3 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-30"
-          aria-label="다음 달"
-        >
-          <components.Chevron orientation="right" size={14} />
-        </button>
+          <button
+            type="button"
+            onClick={() => (nextMonth ? goToMonth(nextMonth) : undefined)}
+            disabled={!nextMonth}
+            className="inline-flex h-5 w-5 items-center justify-center rounded-[0.45rem] text-text-3 transition-colors hover:bg-background-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-30"
+            aria-label="다음 달"
+          >
+            <components.Chevron orientation="right" size={13} />
+          </button>
+        </div>
 
         <button
           type="button"
@@ -393,7 +413,7 @@ function DateRangePicker({
             onDateChange(undefined, undefined);
             setIsOpen(false);
           }}
-          className="absolute right-0 top-1/2 inline-flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-[0.55rem] border border-border-3 bg-background-1 text-text-3 transition-colors hover:border-border-2 hover:text-text-1"
+          className="absolute right-0 top-1/2 inline-flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-[0.45rem] text-text-3 transition-colors hover:bg-background-2 hover:text-text-1"
           aria-label="기간 초기화"
         >
           <Icon icon={refreshLinear} width="12" />
@@ -458,8 +478,9 @@ function DateRangePicker({
               root: "rdp-root",
               months: "flex",
               month: "space-y-3",
+              nav: "hidden",
               month_caption:
-                "relative flex h-8 items-center justify-center px-12 text-center",
+                "relative flex h-8 items-center justify-center pr-8 text-center",
               caption_label: "text-sm font-semibold leading-none text-text-1",
               month_grid: "border-separate border-spacing-y-1.5",
               weekdays: "grid grid-cols-7",
