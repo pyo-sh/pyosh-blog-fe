@@ -1,9 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { DayPicker, type DateRange } from "react-day-picker";
 import { Icon } from "@iconify/react";
+import calendarLinear from "@iconify-icons/solar/calendar-linear";
 import closeCircleLinear from "@iconify-icons/solar/close-circle-linear";
 import magniferLinear from "@iconify-icons/solar/magnifer-linear";
+import { addDays, format, parseISO } from "date-fns";
+import { ko } from "date-fns/locale";
 import type { Post } from "@entities/post";
 import { fetchAdminPosts } from "@entities/post";
 import { cn } from "@shared/lib/style-utils";
@@ -80,6 +84,33 @@ function detectPreset(
   if (startDate === buildRelativeStart(90)) return "90d";
 
   return "custom";
+}
+
+function parseDateValue(value: string | undefined) {
+  if (!value) {
+    return undefined;
+  }
+
+  return parseISO(value);
+}
+
+function formatRangeLabel(range: DateRange | undefined) {
+  if (!range?.from && !range?.to) {
+    return "날짜 범위";
+  }
+
+  if (range.from && !range.to) {
+    return `${format(range.from, "yyyy.MM.dd")} -`;
+  }
+
+  if (range.from && range.to) {
+    return `${format(range.from, "yyyy.MM.dd")} - ${format(
+      range.to,
+      "yyyy.MM.dd",
+    )}`;
+  }
+
+  return "날짜 범위";
 }
 
 function FilterCustomSelect<T extends string>({
@@ -271,6 +302,151 @@ function FilterCustomSelect<T extends string>({
               );
             })}
           </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function DateRangePicker({
+  startDate,
+  endDate,
+  onDateChange,
+}: {
+  startDate: string | undefined;
+  endDate: string | undefined;
+  onDateChange: (start: string | undefined, end: string | undefined) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const range: DateRange | undefined =
+    startDate || endDate
+      ? {
+          from: parseDateValue(startDate),
+          to: parseDateValue(endDate),
+        }
+      : undefined;
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+    };
+  }, [isOpen]);
+
+  return (
+    <div ref={rootRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setIsOpen((current) => !current)}
+        className={cn(
+          "relative flex h-10 min-w-[17rem] items-center gap-2 rounded-[0.8rem] border px-3 pr-10 text-left text-sm leading-none outline-none transition-colors",
+          range?.from
+            ? "border-primary-1/30 bg-primary-1/8 text-text-1"
+            : "border-border-3 bg-background-1 text-text-2 hover:border-border-2",
+        )}
+      >
+        <Icon
+          icon={calendarLinear}
+          width="16"
+          className="shrink-0 text-text-4"
+        />
+        <span className="truncate">{formatRangeLabel(range)}</span>
+        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-text-4">
+          ▾
+        </span>
+      </button>
+
+      {isOpen ? (
+        <div className="absolute left-0 top-full z-30 mt-2 rounded-[1.2rem] border border-border-3 bg-background-1 p-4 shadow-[0px_18px_48px_0px_rgba(0,0,0,0.16)]">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium leading-none text-text-1">
+                사용자 지정 기간
+              </p>
+              <p className="mt-1 text-xs leading-none text-text-4">
+                시작일과 종료일을 직접 선택합니다.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                onDateChange(undefined, undefined);
+                setIsOpen(false);
+              }}
+              className="rounded-[0.65rem] border border-border-3 px-2.5 py-2 text-xs leading-none text-text-3 transition-colors hover:border-border-2 hover:text-text-1"
+            >
+              초기화
+            </button>
+          </div>
+
+          <DayPicker
+            locale={ko}
+            mode="range"
+            selected={range}
+            defaultMonth={range?.from ?? new Date()}
+            onSelect={(nextRange) => {
+              if (!nextRange?.from && !nextRange?.to) {
+                onDateChange(undefined, undefined);
+
+                return;
+              }
+
+              onDateChange(
+                nextRange?.from
+                  ? format(nextRange.from, "yyyy-MM-dd")
+                  : undefined,
+                nextRange?.to
+                  ? format(nextRange.to, "yyyy-MM-dd")
+                  : nextRange?.from
+                    ? format(addDays(nextRange.from, 0), "yyyy-MM-dd")
+                    : undefined,
+              );
+            }}
+            className="rdp-comment"
+            classNames={{
+              root: "rdp-root",
+              months: "flex",
+              month: "space-y-3",
+              caption: "flex h-8 items-center justify-between px-1",
+              caption_label: "text-sm font-semibold leading-none text-text-1",
+              nav: "flex items-center gap-1",
+              button_previous:
+                "inline-flex h-8 w-8 items-center justify-center rounded-[0.7rem] border border-border-3 bg-background-1 text-text-3 transition-colors hover:border-border-2 hover:text-text-1",
+              button_next:
+                "inline-flex h-8 w-8 items-center justify-center rounded-[0.7rem] border border-border-3 bg-background-1 text-text-3 transition-colors hover:border-border-2 hover:text-text-1",
+              month_grid: "border-separate border-spacing-y-1.5",
+              weekdays: "grid grid-cols-7",
+              weekday:
+                "h-8 w-10 text-center text-[11px] font-medium leading-none text-text-4",
+              week: "grid grid-cols-7",
+              day: "h-10 w-10 p-0 text-sm leading-none",
+              day_button:
+                "h-10 w-10 rounded-[0.75rem] text-sm leading-none text-text-2 transition-colors hover:bg-background-2 hover:text-text-1",
+              selected:
+                "[&>button]:bg-primary-1 [&>button]:text-white [&>button]:hover:bg-primary-1",
+              range_start:
+                "[&>button]:bg-primary-1 [&>button]:text-white [&>button]:hover:bg-primary-1",
+              range_end:
+                "[&>button]:bg-primary-1 [&>button]:text-white [&>button]:hover:bg-primary-1",
+              range_middle:
+                "[&>button]:rounded-none [&>button]:bg-primary-1/10 [&>button]:text-primary-1",
+              today: "[&>button]:border [&>button]:border-primary-1/30",
+              outside: "[&>button]:text-text-4 [&>button]:opacity-40",
+              disabled: "[&>button]:text-text-4 [&>button]:opacity-30",
+            }}
+          />
         </div>
       ) : null}
     </div>
@@ -508,28 +684,11 @@ export function CommentFilters({
           onChange={handlePresetChange}
         />
 
-        <div className="flex min-w-[20rem] flex-1 flex-wrap items-center gap-2 rounded-[0.8rem] border border-border-3 bg-background-1 px-3 py-2.5">
-          <span className="text-sm leading-none text-text-3">시작</span>
-          <input
-            type="date"
-            value={startDate ?? ""}
-            onChange={(e) => onDateChange(e.target.value || undefined, endDate)}
-            className="min-w-[8.75rem] bg-transparent text-sm leading-none text-text-2 outline-none"
-            aria-label="시작일"
-          />
-          <span className="text-xs leading-none text-text-4">-</span>
-          <span className="text-sm leading-none text-text-3">종료</span>
-          <input
-            type="date"
-            value={endDate ?? ""}
-            min={startDate}
-            onChange={(e) =>
-              onDateChange(startDate, e.target.value || undefined)
-            }
-            className="min-w-[8.75rem] bg-transparent text-sm leading-none text-text-2 outline-none"
-            aria-label="종료일"
-          />
-        </div>
+        <DateRangePicker
+          startDate={startDate}
+          endDate={endDate}
+          onDateChange={onDateChange}
+        />
       </div>
 
       {dateError ? (
