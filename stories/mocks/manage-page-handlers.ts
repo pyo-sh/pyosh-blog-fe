@@ -9,6 +9,16 @@ import { mockAdminGuestbookEntries } from "./data/guestbook";
 import { mockPosts } from "./data/posts";
 
 const API_BASE_URL = "http://localhost:5500";
+const STORYBOOK_TIMESTAMP = "2026-04-02T09:00:00.000Z";
+
+const mockCurrentAdminUser = {
+  type: "admin" as const,
+  id: 1,
+  username: "admin",
+  createdAt: "2025-01-01T00:00:00.000Z",
+  updatedAt: "2026-04-01T00:00:00.000Z",
+  lastLoginAt: "2026-04-02T08:30:00.000Z",
+};
 
 const adminCategories = mockCategories.map((category, index) => ({
   ...category,
@@ -91,10 +101,22 @@ function emptyMutation(
   );
 }
 
+function jsonMutation(
+  method: "post" | "put" | "patch",
+  path: string,
+  resolver: Parameters<(typeof http)[typeof method]>[1],
+) {
+  return withBaseUrl(path).map((url) => http[method](url, resolver));
+}
+
 function sharedAdminHandlers() {
   return [
     ...jsonGet("/api/auth/csrf-token", () =>
       HttpResponse.json({ token: "storybook-csrf-token" }),
+    ),
+    ...jsonGet("/api/auth/me", () => HttpResponse.json(mockCurrentAdminUser)),
+    ...withBaseUrl("/api/auth/admin/logout").map((url) =>
+      http.post(url, () => new HttpResponse(null, { status: 204 })),
     ),
     ...jsonGet("/api/admin/posts", () =>
       HttpResponse.json({
@@ -125,7 +147,34 @@ export function createManageCategoriesHandlers(options?: {
 
       return HttpResponse.json({ categories: categoriesPayload });
     }),
-    ...emptyMutation("post", "/api/categories"),
+    ...jsonMutation("post", "/api/categories", async ({ request }) => {
+      const body = (await request.json()) as {
+        name?: string;
+        parentId?: number | null;
+        isVisible?: boolean;
+      };
+
+      return HttpResponse.json({
+        category: {
+          id: Date.now(),
+          parentId: body.parentId ?? null,
+          name: body.name?.trim() || "새 카테고리",
+          slug:
+            body.name
+              ?.trim()
+              .toLowerCase()
+              .replace(/\s+/g, "-")
+              .replace(/[^a-z0-9-_]/g, "") || "new-category",
+          sortOrder: categoriesPayload.length,
+          isVisible: body.isVisible ?? true,
+          createdAt: STORYBOOK_TIMESTAMP,
+          updatedAt: STORYBOOK_TIMESTAMP,
+          publishedPostCount: 0,
+          totalPostCount: 0,
+          children: [],
+        },
+      });
+    }),
     ...emptyMutation("patch", "/api/categories/tree"),
     ...emptyMutation("patch", "/api/categories/order"),
     ...withBaseUrl("/api/categories/:id").flatMap((url) => [
@@ -199,7 +248,15 @@ export function createManageGuestbookHandlers(options?: {
         mode === "empty" ? adminGuestbookEmptyResponse : adminGuestbookResponse,
       );
     }),
-    ...emptyMutation("patch", "/api/admin/settings/guestbook"),
+    ...jsonMutation(
+      "patch",
+      "/api/admin/settings/guestbook",
+      async ({ request }) => {
+        const body = (await request.json()) as { enabled?: boolean };
+
+        return HttpResponse.json({ enabled: body.enabled ?? false });
+      },
+    ),
     ...emptyMutation("delete", "/api/admin/guestbook/bulk"),
     ...emptyMutation("delete", "/api/admin/guestbook/:id"),
   ];
