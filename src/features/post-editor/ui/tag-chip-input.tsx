@@ -133,21 +133,15 @@ export function TagChipInput({ value, onChange }: TagChipInputProps) {
   return (
     <div className="space-y-1.5" ref={containerRef}>
       <div
-        className="relative rounded-[0.75rem] border border-border-3 bg-background-1 px-3 py-2.5 transition-colors focus-within:border-primary-1"
+        className="relative rounded-[0.75rem] border border-border-3 bg-background-1 px-[10px] py-[6px] transition-colors focus-within:border-primary-1"
         onClick={() => inputRef.current?.focus()}
       >
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
           {value.map((tag) => {
-            const isExisting = existingNames.has(tag.toLowerCase());
-
             return (
               <span
                 key={tag}
-                className={
-                  isExisting
-                    ? "inline-flex items-center gap-2 rounded-full bg-background-3 px-2.5 py-1 text-[11px] text-text-2"
-                    : "inline-flex items-center gap-2 rounded-full bg-primary-1/10 px-2.5 py-1 text-[11px] text-primary-1"
-                }
+                className="inline-flex items-center gap-1 leading-none rounded-full bg-primary-1/10 px-2 py-[2px] text-[12px] text-primary-1"
               >
                 {tag}
                 <button
@@ -156,7 +150,7 @@ export function TagChipInput({ value, onChange }: TagChipInputProps) {
                     event.stopPropagation();
                     onChange(value.filter((item) => item !== tag));
                   }}
-                  className="text-current/70 transition-opacity hover:opacity-100"
+                  className="flex h-[14px] w-[14px] items-center justify-center leading-none text-current/70 transition-opacity hover:opacity-100"
                   aria-label={`${tag} 태그 삭제`}
                 >
                   ×
@@ -192,7 +186,7 @@ export function TagChipInput({ value, onChange }: TagChipInputProps) {
             aria-label="태그"
             aria-expanded={suggestions.length > 0}
             aria-controls={suggestions.length > 0 ? listboxId : undefined}
-            className="min-w-[9rem] flex-1 bg-transparent px-1 py-0.5 text-[13px] text-text-2 outline-none placeholder:text-text-4"
+            className="min-w-[80px] h-[26px] flex-1 bg-transparent px-0 py-0 text-[12px] leading-none text-text-2 outline-none placeholder:text-text-4"
           />
         </div>
 

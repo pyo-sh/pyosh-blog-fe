@@ -761,7 +761,7 @@ export function PostForm({
         </div>
 
         {shouldRenderTitleField ? (
-          <div className="flex items-center border-b border-border-4 px-6 py-4">
+          <div className="flex items-center border-b border-border-4 px-6 pb-3 pt-4">
             <input
               id="title"
               name="title"
@@ -773,7 +773,7 @@ export function PostForm({
               }
               placeholder="제목을 입력하세요"
               aria-label="제목"
-              className="w-full border-b-2 border-transparent bg-transparent py-3 text-[1.8rem] font-semibold tracking-[-0.03em] text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 md:text-[2rem]"
+              className="h-16 w-full border-b-2 border-transparent bg-transparent px-0 py-3 text-[1.8rem] font-semibold tracking-[-0.03em] text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 md:text-[2rem]"
             />
           </div>
         ) : null}
