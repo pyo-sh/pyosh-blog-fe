@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Icon } from "@iconify/react";
+import clipboardLinear from "@iconify-icons/solar/clipboard-linear";
+import galleryWideLinear from "@iconify-icons/solar/gallery-wide-linear";
+import linkMinimalistic2Linear from "@iconify-icons/solar/link-minimalistic-2-linear";
 import { toast } from "sonner";
 import { AssetPickerModal, uploadAssets } from "@entities/asset";
 import { cn } from "@shared/lib/style-utils";
@@ -131,8 +135,8 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
   }
 
   return (
-    <div className="space-y-3" ref={containerRef}>
-      <div className="flex flex-wrap gap-2">
+    <div className="space-y-2.5" ref={containerRef}>
+      <div className="flex gap-2 overflow-x-auto">
         <button
           type="button"
           onClick={() => {
@@ -140,27 +144,30 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
             setIsPickerOpen(true);
           }}
           disabled={isUploading}
-          className="rounded-[0.8rem] border border-border-3 px-3 py-2 text-xs font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap leading-none rounded-[0.75rem] border border-border-3 px-3 text-[11px] font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-60"
         >
+          <Icon icon={galleryWideLinear} width="14" aria-hidden="true" />
           에셋 갤러리
         </button>
         <button
           type="button"
           onClick={() => setShowUrlInput((current) => !current)}
-          className="rounded-[0.8rem] border border-border-3 px-3 py-2 text-xs font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap leading-none rounded-[0.75rem] border border-border-3 px-3 text-[11px] font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
         >
-          URL 입력
+          <Icon icon={linkMinimalistic2Linear} width="14" aria-hidden="true" />
+          URL
         </button>
         <button
           type="button"
-          onClick={() => setIsAwaitingPaste(true)}
+          onClick={() => setIsAwaitingPaste((current) => !current)}
           className={cn(
-            "rounded-[0.8rem] border px-3 py-2 text-xs font-medium transition-colors",
+            "inline-flex h-9 items-center gap-1.5 whitespace-nowrap leading-none rounded-[0.75rem] border px-3 text-[11px] font-medium transition-colors",
             isAwaitingPaste
               ? "border-primary-1 bg-primary-1/10 text-primary-1"
               : "border-border-3 text-text-2 hover:border-border-2 hover:text-text-1",
           )}
         >
+          <Icon icon={clipboardLinear} width="14" aria-hidden="true" />
           {isAwaitingPaste ? "붙여넣기 대기 중..." : "클립보드"}
         </button>
         <button
@@ -169,7 +176,7 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
             onChange("");
             setPendingFile(null);
           }}
-          className="rounded-[0.8rem] border border-negative-1/20 px-3 py-2 text-xs font-medium text-negative-1 transition-colors hover:bg-negative-1/10"
+          className="inline-flex h-9 shrink-0 items-center whitespace-nowrap leading-none rounded-[0.75rem] border border-negative-1/20 px-3 text-[11px] font-medium text-negative-1 transition-colors hover:bg-negative-1/10"
         >
           삭제
         </button>
@@ -188,9 +195,9 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
             }}
             placeholder="https://example.com/thumbnail.jpg"
             aria-label="썸네일 URL"
-            className="flex-1 rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
+            className="h-10 flex-1 rounded-[0.75rem] border border-border-3 bg-background-1 px-3 text-[13px] text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
           />
-          <p className="text-xs text-text-4">
+          <p className="text-[11px] text-text-4">
             URL 입력은 실시간으로 반영됩니다.
           </p>
         </div>
@@ -198,7 +205,7 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
 
       <div
         className={cn(
-          "flex min-h-[16rem] flex-col items-center justify-center rounded-[1.25rem] border border-dashed bg-background-1 p-5 text-center transition-colors",
+          "flex min-h-[13rem] flex-col items-center justify-center rounded-[1rem] border border-dashed bg-background-1 p-4 text-center transition-colors",
           isDragging ? "border-primary-1 bg-primary-1/5" : "border-border-3",
         )}
         onDragOver={(event) => {
@@ -220,14 +227,14 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
           <img
             src={previewUrl ?? value}
             alt="썸네일 미리보기"
-            className="max-h-56 rounded-[1rem] object-cover shadow-[0px_18px_40px_0px_rgba(0,0,0,0.08)]"
+            className="max-h-44 rounded-[0.85rem] object-cover shadow-[0px_18px_40px_0px_rgba(0,0,0,0.08)]"
           />
         ) : (
           <div className="space-y-2">
-            <p className="text-sm font-medium text-text-2">
+            <p className="text-[13px] font-medium text-text-2">
               드래그 앤 드롭 또는 버튼으로 썸네일을 선택하세요.
             </p>
-            <p className="text-xs text-text-4">
+            <p className="text-[11px] text-text-4">
               JPEG, PNG, GIF, WebP, SVG · 최대 10MB
             </p>
           </div>
@@ -237,7 +244,7 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="rounded-[0.8rem] border border-border-3 px-3 py-2 text-xs font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+            className="h-9 rounded-[0.75rem] border border-border-3 px-3 text-[11px] font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
           >
             파일 선택
           </button>
@@ -246,7 +253,7 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
               type="button"
               onClick={() => void uploadFile(pendingFile)}
               disabled={isUploading}
-              className="inline-flex items-center gap-2 rounded-[0.8rem] bg-primary-1 px-3 py-2 text-xs font-semibold text-white transition-opacity disabled:opacity-60"
+              className="inline-flex h-9 items-center gap-2 rounded-[0.75rem] bg-primary-1 px-3 text-[11px] font-semibold text-white transition-opacity disabled:opacity-60"
             >
               {isUploading ? <Spinner size="sm" /> : null}
               업로드

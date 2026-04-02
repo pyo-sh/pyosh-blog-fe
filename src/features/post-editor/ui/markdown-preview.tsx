@@ -9,6 +9,7 @@ interface MarkdownPreviewProps {
   containerRef?: RefObject<HTMLDivElement>;
   className?: string;
   headerTitle?: string;
+  showHeader?: boolean;
 }
 
 export function MarkdownPreview({
@@ -16,12 +17,19 @@ export function MarkdownPreview({
   containerRef,
   className,
   headerTitle = "Preview",
+  showHeader = true,
 }: MarkdownPreviewProps) {
   const [html, setHtml] = useState("");
   const [isRendering, setIsRendering] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const workerRef = useRef<Worker | null>(null);
   const requestIdRef = useRef(0);
+  const latestValueRef = useRef(value);
+  const skipNextValueEffectRef = useRef(true);
+
+  useEffect(() => {
+    latestValueRef.current = value;
+  }, [value]);
 
   useEffect(() => {
     const worker = new Worker(
@@ -46,6 +54,12 @@ export function MarkdownPreview({
     };
 
     workerRef.current = worker;
+    setIsRendering(true);
+    requestIdRef.current = 1;
+    worker.postMessage({
+      id: requestIdRef.current,
+      value: latestValueRef.current,
+    });
 
     return () => {
       worker.terminate();
@@ -58,13 +72,19 @@ export function MarkdownPreview({
       return;
     }
 
+    if (skipNextValueEffectRef.current) {
+      skipNextValueEffectRef.current = false;
+
+      return;
+    }
+
     setIsRendering(true);
-    const requestId = requestIdRef.current + 1;
-    requestIdRef.current = requestId;
 
     const timeoutId = window.setTimeout(() => {
+      const requestId = requestIdRef.current + 1;
+      requestIdRef.current = requestId;
       workerRef.current?.postMessage({ id: requestId, value });
-    }, 300);
+    }, 120);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -74,21 +94,23 @@ export function MarkdownPreview({
   return (
     <div
       className={cn(
-        "relative flex min-h-[60vh] flex-col overflow-hidden rounded-[1.25rem] border border-border-3 bg-background-1",
+        "relative flex h-full min-h-0 flex-col overflow-hidden bg-background-1",
         className,
       )}
     >
-      <div className="flex items-center justify-between border-b border-border-3 px-4 py-3 text-xs uppercase tracking-[0.2em] text-text-4">
-        <span>{headerTitle}</span>
-        <span>{isRendering ? "렌더링 중" : "실시간 반영"}</span>
-      </div>
+      {showHeader ? (
+        <div className="flex items-center justify-between border-b border-border-3 bg-background-2 px-4 py-3 text-xs font-medium text-text-4">
+          <span>{headerTitle}</span>
+          <span>{isRendering ? "렌더링 중" : "실시간 반영"}</span>
+        </div>
+      ) : null}
 
       {error ? (
         <div className="p-6 text-sm text-negative-1">{error}</div>
       ) : (
         <div ref={containerRef} className="min-h-0 flex-1 overflow-y-auto">
           <div
-            className="markdown-content prose max-w-none px-4 py-6"
+            className="markdown-content prose max-w-none px-6 py-5"
             dangerouslySetInnerHTML={{ __html: html }}
           />
         </div>

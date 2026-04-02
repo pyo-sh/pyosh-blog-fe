@@ -55,7 +55,7 @@ export function CategoryTreeSelect({
       }
       disabled={disabled}
       aria-label="카테고리"
-      className="rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+      className="h-10 rounded-[0.75rem] border border-border-3 bg-background-1 px-3 text-[13px] text-text-2 outline-none transition-colors focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
     >
       <option value="">
         {disabled ? "카테고리 불러오는 중..." : "카테고리 선택"}

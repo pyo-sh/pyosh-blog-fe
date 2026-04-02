@@ -5,11 +5,17 @@ import { Modal } from "@shared/ui/libs";
 
 interface PreviewModalProps {
   isOpen: boolean;
+  title?: string;
   value: string;
   onClose: () => void;
 }
 
-export function PreviewModal({ isOpen, value, onClose }: PreviewModalProps) {
+export function PreviewModal({
+  isOpen,
+  title,
+  value,
+  onClose,
+}: PreviewModalProps) {
   return (
     <Modal
       isOpen={isOpen}
@@ -17,14 +23,12 @@ export function PreviewModal({ isOpen, value, onClose }: PreviewModalProps) {
       withBackground
       aria-label="마크다운 미리보기"
     >
-      <div className="flex h-[min(88vh,60rem)] w-[min(92vw,72rem)] flex-col overflow-hidden rounded-[1.5rem] bg-background-1 text-left">
-        <div className="flex items-center justify-between border-b border-border-3 px-6 py-4">
-          <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-text-4">
-              Preview
-            </p>
-            <h2 className="mt-2 text-xl font-semibold text-text-1">
-              마크다운 미리보기
+      <div className="flex h-[min(88vh,60rem)] w-[min(94vw,76rem)] flex-col overflow-hidden rounded-[1.5rem] border border-border-3 bg-background-1 text-left shadow-[0px_28px_90px_0px_rgba(15,23,42,0.18)]">
+        <div className="flex items-center justify-between border-b border-border-3 bg-background-2 px-6 py-4">
+          <div className="min-w-0">
+            <p className="text-xs font-medium text-text-4">실제 글 미리보기</p>
+            <h2 className="mt-1 truncate text-base font-semibold text-text-1">
+              {title?.trim() || "제목 없음"}
             </h2>
           </div>
           <button
@@ -36,11 +40,11 @@ export function PreviewModal({ isOpen, value, onClose }: PreviewModalProps) {
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 px-6 py-6">
+        <div className="min-h-0 flex-1">
           <MarkdownPreview
             value={value}
             className="h-full min-h-0"
-            headerTitle="Modal Preview"
+            showHeader={false}
           />
         </div>
       </div>
