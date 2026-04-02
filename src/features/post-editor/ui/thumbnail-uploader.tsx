@@ -136,7 +136,7 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
 
   return (
     <div className="space-y-2.5" ref={containerRef}>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex gap-2 overflow-x-auto">
         <button
           type="button"
           onClick={() => {
@@ -144,7 +144,7 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
             setIsPickerOpen(true);
           }}
           disabled={isUploading}
-          className="h-9 rounded-[0.75rem] border border-border-3 px-3 text-[11px] font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-[0.75rem] border border-border-3 px-3 text-[11px] font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-60"
         >
           <Icon icon={galleryWideLinear} width="14" aria-hidden="true" />
           에셋 갤러리
@@ -152,7 +152,7 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
         <button
           type="button"
           onClick={() => setShowUrlInput((current) => !current)}
-          className="h-9 rounded-[0.75rem] border border-border-3 px-3 text-[11px] font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-[0.75rem] border border-border-3 px-3 text-[11px] font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
         >
           <Icon icon={linkMinimalistic2Linear} width="14" aria-hidden="true" />
           URL

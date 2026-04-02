@@ -888,7 +888,7 @@ export function PostForm({
                     <button
                       type="button"
                       onClick={() => setShowThumbnailPicker(true)}
-                      className="inline-flex items-center rounded-[0.7rem] border border-border-3 bg-background-1 px-2.5 py-1.5 text-xs font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+                      className="inline-flex h-10 items-center whitespace-nowrap rounded-[0.7rem] border border-border-3 bg-background-1 px-3 text-xs font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
                     >
                       에셋 갤러리
                     </button>
@@ -917,7 +917,7 @@ export function PostForm({
                         type="button"
                         onClick={() => handleFieldChange("status", status)}
                         className={cn(
-                          "rounded-[0.55rem] px-3 py-1.5 text-xs font-medium transition-colors",
+                          "h-10 rounded-[0.55rem] px-3 text-xs font-medium transition-colors",
                           values.status === status
                             ? status === "published"
                               ? "bg-positive-1/12 text-positive-1"
