@@ -53,6 +53,22 @@ function buildToolbarItems(): ToolbarItem[] {
     }),
     "separator",
     btn({
+      label: "H1",
+      title: "제목 1",
+      action: (v) => toggleLinePrefix(v, "# "),
+    }),
+    btn({
+      label: "H2",
+      title: "제목 2",
+      action: (v) => toggleLinePrefix(v, "## "),
+    }),
+    btn({
+      label: "H3",
+      title: "제목 3",
+      action: (v) => toggleLinePrefix(v, "### "),
+    }),
+    "separator",
+    btn({
       label: "링크",
       title: "링크 (Ctrl+K)",
       action: (v) => insertLink(v),

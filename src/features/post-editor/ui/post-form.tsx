@@ -1,6 +1,10 @@
 "use client";
 
-import type { FormEvent, ReactNode } from "react";
+import type {
+  FormEvent,
+  KeyboardEvent as ReactKeyboardEvent,
+  ReactNode,
+} from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import archiveLinear from "@iconify-icons/solar/archive-linear";
@@ -262,8 +266,28 @@ function InlineCustomSelect<T extends string | number>({
   className?: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const listboxIdRef = useRef(
+    `inline-select-${Math.random().toString(36).slice(2)}`,
+  );
+  const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const selected = options.find((option) => option.value === value);
+  const selectedIndex = options.findIndex((option) => option.value === value);
+
+  useEffect(() => {
+    optionRefs.current = [];
+  }, [options]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setActiveIndex(-1);
+
+      return;
+    }
+
+    setActiveIndex(selectedIndex >= 0 ? selectedIndex : 0);
+  }, [isOpen, selectedIndex]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -283,12 +307,103 @@ function InlineCustomSelect<T extends string | number>({
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen || activeIndex < 0) {
+      return;
+    }
+
+    optionRefs.current[activeIndex]?.focus();
+  }, [activeIndex, isOpen]);
+
+  const commitSelection = (index: number) => {
+    const option = options[index];
+
+    if (!option) {
+      return;
+    }
+
+    onChange(option.value);
+    setIsOpen(false);
+  };
+
+  const handleTriggerKeyDown = (
+    event: ReactKeyboardEvent<HTMLButtonElement>,
+  ) => {
+    if (disabled) {
+      return;
+    }
+
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      setIsOpen(true);
+      setActiveIndex(selectedIndex >= 0 ? selectedIndex : 0);
+
+      return;
+    }
+
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      setIsOpen((current) => !current);
+    }
+  };
+
+  const handleOptionKeyDown = (
+    event: ReactKeyboardEvent<HTMLButtonElement>,
+    index: number,
+  ) => {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setActiveIndex((index + 1) % options.length);
+
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setActiveIndex((index - 1 + options.length) % options.length);
+
+      return;
+    }
+
+    if (event.key === "Home") {
+      event.preventDefault();
+      setActiveIndex(0);
+
+      return;
+    }
+
+    if (event.key === "End") {
+      event.preventDefault();
+      setActiveIndex(options.length - 1);
+
+      return;
+    }
+
+    if (event.key === "Escape") {
+      event.preventDefault();
+      setIsOpen(false);
+
+      return;
+    }
+
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      commitSelection(index);
+    }
+  };
+
   return (
     <div ref={rootRef} className={cn("relative w-full", className)}>
       <button
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen((current) => !current)}
+        onKeyDown={handleTriggerKeyDown}
+        role="combobox"
+        aria-autocomplete="none"
+        aria-expanded={isOpen}
+        aria-controls={listboxIdRef.current}
+        aria-haspopup="listbox"
         className="flex h-10 w-full items-center rounded-[0.5rem] border border-border-3 bg-background-1 px-3 pr-8 text-left text-[13px] text-text-2 outline-none transition-colors focus-visible:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
       >
         <span className="truncate">
@@ -300,15 +415,30 @@ function InlineCustomSelect<T extends string | number>({
       </button>
 
       {isOpen ? (
-        <div className="absolute left-0 top-[calc(100%+0.25rem)] z-30 min-w-full overflow-hidden rounded-[0.5rem] border border-border-3 bg-background-1 shadow-[0px_8px_24px_rgba(15,23,42,0.08)]">
-          {options.map((option) => (
+        <div
+          id={listboxIdRef.current}
+          role="listbox"
+          aria-activedescendant={
+            activeIndex >= 0
+              ? `${listboxIdRef.current}-option-${activeIndex}`
+              : undefined
+          }
+          className="absolute left-0 top-[calc(100%+0.25rem)] z-30 min-w-full overflow-hidden rounded-[0.5rem] border border-border-3 bg-background-1 shadow-[0px_8px_24px_rgba(15,23,42,0.08)]"
+        >
+          {options.map((option, index) => (
             <button
               key={String(option.value)}
-              type="button"
-              onClick={() => {
-                onChange(option.value);
-                setIsOpen(false);
+              id={`${listboxIdRef.current}-option-${index}`}
+              ref={(element) => {
+                optionRefs.current[index] = element;
               }}
+              type="button"
+              role="option"
+              aria-selected={option.value === value}
+              tabIndex={activeIndex === index ? 0 : -1}
+              onKeyDown={(event) => handleOptionKeyDown(event, index)}
+              onFocus={() => setActiveIndex(index)}
+              onClick={() => commitSelection(index)}
               className={cn(
                 "flex w-full items-center px-3 py-2 text-left text-[13px] transition-colors hover:bg-background-2",
                 option.value === value
@@ -360,6 +490,8 @@ export function PostForm({
   mode = "create",
   postId,
   initialValues,
+  cancelLabel,
+  onCancel,
   onSuccess,
 }: PostFormProps) {
   const queryClient = useQueryClient();
@@ -1191,6 +1323,15 @@ export function PostForm({
         <div className="border-t border-border-3 bg-background-2 px-6 py-3">
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
             <div className="flex flex-wrap items-center gap-3">
+              {onCancel ? (
+                <button
+                  type="button"
+                  onClick={onCancel}
+                  className={SECONDARY_BUTTON_CLASS}
+                >
+                  {cancelLabel ?? "취소"}
+                </button>
+              ) : null}
               <button
                 type="button"
                 disabled={mutation.isPending || isCategoryUnavailable}
