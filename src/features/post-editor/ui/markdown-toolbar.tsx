@@ -137,7 +137,7 @@ export function MarkdownToolbar({
       role="toolbar"
       aria-label="마크다운 서식 툴바"
       onKeyDown={handleKeyDown}
-      className="flex flex-wrap items-center gap-0.5 border-b border-r border-border-3 bg-background-2 px-3 py-2"
+      className="flex flex-wrap items-center gap-0.5 border-b border-border-3 bg-background-2 px-3 py-2"
     >
       {items.map((item, itemIdx) => {
         if (item === "separator") {

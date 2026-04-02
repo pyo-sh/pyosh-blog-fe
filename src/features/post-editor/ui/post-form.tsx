@@ -10,7 +10,6 @@ import eyeLinear from "@iconify-icons/solar/eye-linear";
 import uploadLinear from "@iconify-icons/solar/upload-linear";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { CategoryTreeSelect } from "./category-tree-select";
 import { ImageGalleryModal } from "./image-gallery-modal";
 import { MarkdownEditor } from "./markdown-editor";
 import { MarkdownPreview } from "./markdown-preview";
@@ -75,6 +74,11 @@ interface PostFormProps {
   cancelLabel?: string;
   onCancel?: () => void;
   onSuccess?: (post: Post) => void;
+}
+
+interface InlineSelectOption<T extends string | number> {
+  label: string;
+  value: T;
 }
 
 const DEFAULT_VALUES: PostFormValues = {
@@ -163,6 +167,20 @@ function sortCategories(categories: Category[]): Category[] {
     }));
 }
 
+function flattenCategoryOptions(
+  categories: Category[],
+  depth = 0,
+): Array<{ label: string; value: number }> {
+  return categories.flatMap((category) => {
+    const prefix = depth === 0 ? "" : `\u3000`.repeat(depth);
+
+    return [
+      { label: `${prefix}${category.name}`, value: category.id },
+      ...flattenCategoryOptions(category.children ?? [], depth + 1),
+    ];
+  });
+}
+
 function getVisibilityLabel(visibility: Post["visibility"]) {
   return visibility === "public" ? "공개" : "비공개";
 }
@@ -198,6 +216,83 @@ function CompactMetaLabel({
   );
 }
 
+function InlineCustomSelect<T extends string | number>({
+  value,
+  options,
+  onChange,
+  placeholder,
+  disabled,
+  className,
+}: {
+  value: T | null;
+  options: Array<InlineSelectOption<T>>;
+  onChange: (value: T) => void;
+  placeholder?: string;
+  disabled?: boolean;
+  className?: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const selected = options.find((option) => option.value === value);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+    };
+  }, [isOpen]);
+
+  return (
+    <div ref={rootRef} className={cn("relative w-full", className)}>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setIsOpen((current) => !current)}
+        className="flex h-10 w-full items-center rounded-[0.5rem] border border-border-3 bg-background-1 px-3 pr-8 text-left text-[13px] text-text-2 outline-none transition-colors focus-visible:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        <span className="truncate">{selected?.label ?? placeholder ?? ""}</span>
+        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-text-4">
+          ▾
+        </span>
+      </button>
+
+      {isOpen ? (
+        <div className="absolute left-0 top-[calc(100%+0.25rem)] z-30 min-w-full overflow-hidden rounded-[0.5rem] border border-border-3 bg-background-1 shadow-[0px_8px_24px_rgba(15,23,42,0.08)]">
+          {options.map((option) => (
+            <button
+              key={String(option.value)}
+              type="button"
+              onClick={() => {
+                onChange(option.value);
+                setIsOpen(false);
+              }}
+              className={cn(
+                "flex w-full items-center px-3 py-2 text-left text-[13px] transition-colors hover:bg-background-2",
+                option.value === value
+                  ? "font-medium text-primary-1"
+                  : "text-text-2",
+              )}
+            >
+              <span className="truncate">{option.label}</span>
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function MetaFormRow({
   label,
   children,
@@ -208,8 +303,8 @@ function MetaFormRow({
   hint?: string;
 }) {
   return (
-    <div className="grid gap-2.5 border-b border-border-4 pb-4 last:border-b-0 last:pb-0 md:grid-cols-[6rem_minmax(0,1fr)] md:items-start">
-      <div className="pt-2 text-[13px] font-medium text-text-3">{label}</div>
+    <div className="mb-5 flex flex-col gap-1.5 last:mb-0">
+      <div className="text-[12px] font-semibold text-text-2">{label}</div>
       <div className="min-w-0">
         {children}
         {hint ? <p className="mt-1.5 text-[11px] text-text-4">{hint}</p> : null}
@@ -468,6 +563,18 @@ export function PostForm({
 
     return "";
   }, [categories, values.categoryId]);
+  const categoryOptions = useMemo(
+    () => flattenCategoryOptions(categories),
+    [categories],
+  );
+  const commentStatusOptions = useMemo(
+    () =>
+      COMMENT_STATUS_OPTIONS.map((option) => ({
+        label: option.label,
+        value: option.value,
+      })),
+    [],
+  );
   const isCategoryUnavailable =
     categoriesQuery.isPending ||
     (!categoriesQuery.isError && categories.length === 0);
@@ -666,7 +773,7 @@ export function PostForm({
               }
               placeholder="제목을 입력하세요"
               aria-label="제목"
-              className="w-full border-none bg-transparent text-[1.8rem] font-semibold tracking-[-0.03em] text-text-1 outline-none placeholder:text-text-4 md:text-[2rem]"
+              className="w-full border-b-2 border-transparent bg-transparent pb-3 text-[1.8rem] font-semibold tracking-[-0.03em] text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 md:text-[2rem]"
             />
           </div>
         ) : null}
@@ -705,10 +812,15 @@ export function PostForm({
               <div className="flex flex-col gap-3 xl:flex-row xl:flex-wrap xl:items-center xl:gap-x-5 xl:gap-y-3">
                 <CompactMetaLabel label="카테고리">
                   <div className="min-w-[10rem]">
-                    <CategoryTreeSelect
-                      categories={categories}
+                    <InlineCustomSelect
                       value={values.categoryId}
+                      options={categoryOptions}
                       disabled={categoriesQuery.isPending}
+                      placeholder={
+                        categoriesQuery.isPending
+                          ? "카테고리 불러오는 중..."
+                          : "카테고리 선택"
+                      }
                       onChange={(value) =>
                         handleFieldChange("categoryId", value)
                       }
@@ -805,24 +917,16 @@ export function PostForm({
 
                 <CompactMetaLabel label="댓글 상태">
                   <div className="min-w-[7rem]">
-                    <select
-                      id="commentStatusCompact"
+                    <InlineCustomSelect
                       value={values.commentStatus}
-                      onChange={(event) =>
+                      options={commentStatusOptions}
+                      onChange={(value) =>
                         handleFieldChange(
                           "commentStatus",
-                          event.target.value as PostFormValues["commentStatus"],
+                          value as PostFormValues["commentStatus"],
                         )
                       }
-                      aria-label="댓글 상태"
-                      className="w-full rounded-[0.75rem] border border-border-3 bg-background-1 px-3 py-1.5 text-sm text-text-1 outline-none transition-colors focus:border-primary-1"
-                    >
-                      {COMMENT_STATUS_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
+                    />
                   </div>
                 </CompactMetaLabel>
               </div>
@@ -834,10 +938,15 @@ export function PostForm({
               <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_20rem]">
                 <div className="space-y-5">
                   <MetaFormRow label="카테고리">
-                    <CategoryTreeSelect
-                      categories={categories}
+                    <InlineCustomSelect
                       value={values.categoryId}
+                      options={categoryOptions}
                       disabled={categoriesQuery.isPending}
+                      placeholder={
+                        categoriesQuery.isPending
+                          ? "카테고리 불러오는 중..."
+                          : "카테고리 선택"
+                      }
                       onChange={(value) =>
                         handleFieldChange("categoryId", value)
                       }
@@ -896,26 +1005,16 @@ export function PostForm({
                     }: ${getCommentStatusDescription(values.commentStatus)}`}
                   >
                     <div className="max-w-[14rem]">
-                      <select
-                        id="commentStatus"
-                        name="commentStatus"
+                      <InlineCustomSelect
                         value={values.commentStatus}
-                        onChange={(event) =>
+                        options={commentStatusOptions}
+                        onChange={(value) =>
                           handleFieldChange(
                             "commentStatus",
-                            event.target
-                              .value as PostFormValues["commentStatus"],
+                            value as PostFormValues["commentStatus"],
                           )
                         }
-                        aria-label="댓글 상태"
-                        className="h-10 w-full rounded-[0.75rem] border border-border-3 bg-background-1 px-3 text-[13px] text-text-2 outline-none transition-colors focus:border-primary-1"
-                      >
-                        {COMMENT_STATUS_OPTIONS.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
+                      />
                     </div>
                   </MetaFormRow>
 
@@ -1044,7 +1143,7 @@ export function PostForm({
                 </div>
 
                 {shouldRenderInlinePreview ? (
-                  <div className="h-full min-h-0 min-w-0 bg-background-1">
+                  <div className="h-full min-h-0 min-w-0 border-l border-border-3 bg-background-1">
                     <MarkdownPreview
                       value={previewContent}
                       containerRef={previewRef}
