@@ -295,16 +295,27 @@ function InlineCustomSelect<T extends string | number>({
 
 function MetaFormRow({
   label,
+  labelSuffix,
   children,
   hint,
 }: {
   label: string;
+  labelSuffix?: ReactNode;
   children: ReactNode;
   hint?: string;
 }) {
   return (
     <div className="mb-5 flex flex-col gap-1.5 last:mb-0">
-      <div className="text-[12px] font-semibold text-text-2">{label}</div>
+      <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
+        <div className="whitespace-nowrap text-[12px] font-semibold text-text-2">
+          {label}
+        </div>
+        {labelSuffix ? (
+          <div className="whitespace-nowrap text-right text-[11px] text-text-4">
+            {labelSuffix}
+          </div>
+        ) : null}
+      </div>
       <div className="min-w-0">
         {children}
         {hint ? <p className="mt-1.5 text-[11px] text-text-4">{hint}</p> : null}
@@ -997,16 +1008,14 @@ export function PostForm({
                     </div>
                   </MetaFormRow>
 
-                  <MetaFormRow label="댓글 상태">
-                    <div className="mb-1 flex items-end">
-                      <span className="ml-auto text-right text-[11px] text-text-4">
-                        {`${
-                          COMMENT_STATUS_OPTIONS.find(
-                            (option) => option.value === values.commentStatus,
-                          )?.label ?? "열림"
-                        }: ${getCommentStatusDescription(values.commentStatus)}`}
-                      </span>
-                    </div>
+                  <MetaFormRow
+                    label="댓글 상태"
+                    labelSuffix={`${
+                      COMMENT_STATUS_OPTIONS.find(
+                        (option) => option.value === values.commentStatus,
+                      )?.label ?? "열림"
+                    }: ${getCommentStatusDescription(values.commentStatus)}`}
+                  >
                     <div className="max-w-[14rem]">
                       <InlineCustomSelect
                         value={values.commentStatus}
