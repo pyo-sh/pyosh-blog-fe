@@ -216,6 +216,17 @@ export function AdminCommentsPage() {
     return `총 ${meta.total}개 중 ${start}-${end}`;
   }, [meta, rows.length]);
 
+  const pageStatusCounts = useMemo(() => {
+    return rows.reduce(
+      (counts, row) => {
+        counts[row.status] += 1;
+
+        return counts;
+      },
+      { active: 0, deleted: 0, hidden: 0 },
+    );
+  }, [rows]);
+
   function handleFilterChange(partial: Partial<FilterState>) {
     setFilters((prev) => ({ ...prev, ...partial }));
     setPage(1);
@@ -409,26 +420,41 @@ export function AdminCommentsPage() {
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-col gap-4 rounded-[1.75rem] border border-border-3 bg-background-2 p-6 shadow-[0px_18px_60px_0px_rgba(0,0,0,0.06)] md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="text-body-xs uppercase tracking-[0.24em] text-text-4">
-            Comments
-          </p>
-          <h1 className="mt-3 text-2xl font-semibold text-text-1">댓글 관리</h1>
-          <p className="mt-2 text-sm text-text-3">
-            공개 댓글과 비밀 댓글을 함께 확인하고, 상태를 검토한 뒤 필요한
-            항목을 강제로 삭제할 수 있습니다.
-          </p>
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 className="text-xl font-bold text-text-1">댓글 관리</h1>
+            <p className="mt-1 text-sm text-text-3">
+              댓글 상태와 연결된 게시글을 빠르게 확인하고 필요한 항목을
+              처리합니다.
+            </p>
+          </div>
+
+          <span className="inline-flex items-center rounded-[0.8rem] border border-border-3 bg-background-1 px-3 py-2 text-sm text-text-4">
+            페이지당 {PAGE_SIZE}개
+          </span>
         </div>
 
-        <span className="inline-flex items-center justify-center rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm font-medium text-text-4">
-          페이지당 {PAGE_SIZE}개
-        </span>
-      </header>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+          <span className="text-text-2">전체 {meta?.total ?? 0}개</span>
+          <span className="text-positive-1">
+            정상 {pageStatusCounts.active}개
+          </span>
+          <span className="text-text-4">삭제 {pageStatusCounts.deleted}개</span>
+          <span className="text-yellow-1">
+            숨김 {pageStatusCounts.hidden}개
+          </span>
+        </div>
 
-      <section className="rounded-[1.75rem] border border-border-3 bg-background-2 p-6">
-        {/* Filters */}
-        <div className="mb-5 border-b border-border-3 pb-5">
+        {meta && meta.total > rows.length ? (
+          <p className="text-xs text-text-4">
+            상태 집계는 현재 페이지 기준입니다.
+          </p>
+        ) : null}
+      </section>
+
+      <section className="rounded-[1.5rem] border border-border-4 bg-background-1 p-5">
+        <div className="flex flex-col gap-3 border-b border-border-4 pb-4 xl:flex-row xl:items-center xl:justify-between">
           <CommentFilters
             status={filters.status}
             authorType={filters.authorType}
@@ -441,11 +467,16 @@ export function AdminCommentsPage() {
             onPostChange={(id) => handleFilterChange({ postId: id })}
             onDateChange={handleDateChange}
           />
+
+          <p className="text-sm text-text-4">
+            {isFetching && !isPending
+              ? "목록을 새로 불러오는 중..."
+              : paginationLabel}
+          </p>
         </div>
 
-        {/* Bulk selection bar */}
         {selectedIds.length > 0 ? (
-          <div className="mb-4 flex flex-wrap items-center gap-3 rounded-[1rem] border border-primary-1/20 bg-primary-1/5 px-4 py-3">
+          <div className="mt-4 flex flex-wrap items-center gap-3 rounded-[0.95rem] border border-primary-1/20 bg-primary-1/5 px-4 py-3">
             <span className="text-sm font-medium text-text-1">
               선택됨 {selectedIds.length}개
               {selectedOnOtherPages > 0 ? (
@@ -505,52 +536,33 @@ export function AdminCommentsPage() {
         ) : null}
 
         {actionError ? (
-          <div className="mb-4 rounded-[1rem] border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-sm text-negative-1">
+          <div className="mt-4 rounded-[1rem] border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-sm text-negative-1">
             {actionError}
           </div>
         ) : null}
 
-        {/* Table header */}
-        <div className="flex flex-col gap-3 pb-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-text-1">댓글 목록</h2>
-            <p className="mt-1 text-sm text-text-3">
-              최신 순으로 댓글을 살펴보고 비밀 여부, 상태, 답글 관계를 함께
-              확인할 수 있습니다.
-            </p>
-          </div>
-
-          <p className="text-sm text-text-4">
-            {isFetching && !isPending
-              ? "목록을 새로 불러오는 중..."
-              : paginationLabel}
-          </p>
-        </div>
-
-        {/* Loading skeleton */}
         {isPending ? (
-          <div className="overflow-hidden rounded-[1.5rem] border border-border-3 bg-background-2">
-            <div className="grid grid-cols-7 gap-4 border-b border-border-3 px-6 py-4">
-              {Array.from({ length: 7 }).map((_, i) => (
+          <div className="mt-4 overflow-hidden rounded-[1rem] border border-border-4 bg-background-1">
+            <div className="grid grid-cols-8 gap-3 border-b border-border-4 bg-background-2 px-4 py-3.5">
+              {Array.from({ length: 8 }).map((_, i) => (
                 <Skeleton key={i} />
               ))}
             </div>
-            <div className="space-y-4 px-6 py-5">
-              {Array.from({ length: 5 }).map((_, i) => (
+            <div className="space-y-3 px-4 py-4">
+              {Array.from({ length: 6 }).map((_, i) => (
                 <Skeleton
                   key={i}
                   variant="rect"
-                  height="2.5rem"
-                  className="rounded-[1rem]"
+                  height="3.25rem"
+                  className="rounded-[0.9rem]"
                 />
               ))}
             </div>
           </div>
         ) : null}
 
-        {/* Error */}
         {!isPending && isError ? (
-          <div className="rounded-[1.5rem] border border-negative-1/20 bg-negative-1/10 px-6 py-8 text-center">
+          <div className="mt-4 rounded-[1.25rem] border border-negative-1/20 bg-negative-1/10 px-6 py-8 text-center">
             <p className="text-sm text-negative-1">
               {getErrorMessage(error, "댓글 목록을 불러오지 못했습니다.")}
             </p>
@@ -564,30 +576,33 @@ export function AdminCommentsPage() {
           </div>
         ) : null}
 
-        {/* Table */}
         {!isPending && !isError ? (
           rows.length > 0 ? (
-            <CommentTable
-              rows={rows}
-              selectedIds={selectedIdSet}
-              deletingId={
-                actionMutation.isPending && actionItems.length === 1
-                  ? (actionItems[0]?.id ?? null)
-                  : null
-              }
-              onToggleSelect={handleToggleSelect}
-              onToggleSelectPage={handleToggleSelectPage}
-              onClickComment={setOpenedComment}
-              onManage={handleOpenActionModal}
-            />
+            <div className="mt-4">
+              <CommentTable
+                rows={rows}
+                selectedIds={selectedIdSet}
+                deletingId={
+                  actionMutation.isPending && actionItems.length === 1
+                    ? (actionItems[0]?.id ?? null)
+                    : null
+                }
+                onToggleSelect={handleToggleSelect}
+                onToggleSelectPage={handleToggleSelectPage}
+                onClickComment={setOpenedComment}
+                onManage={handleOpenActionModal}
+              />
+            </div>
           ) : (
-            <EmptyState message="현재 등록된 댓글이 없습니다." />
+            <EmptyState
+              message="현재 등록된 댓글이 없습니다."
+              className="mt-4"
+            />
           )
         ) : null}
 
-        {/* Pagination */}
         {meta && meta.totalPages > 1 ? (
-          <div className="mt-6 flex flex-col gap-4 border-t border-border-3 pt-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-5 flex flex-col gap-4 border-t border-border-4 pt-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-text-4">{paginationLabel}</p>
 
             <nav

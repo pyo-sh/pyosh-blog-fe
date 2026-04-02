@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Icon } from "@iconify/react";
+import closeCircleLinear from "@iconify-icons/solar/close-circle-linear";
+import magniferLinear from "@iconify-icons/solar/magnifer-linear";
 import type { Post } from "@entities/post";
 import { fetchAdminPosts } from "@entities/post";
 import { cn } from "@shared/lib/style-utils";
@@ -125,114 +128,140 @@ export function CommentFilters({
   }
 
   return (
-    <div className="flex flex-wrap gap-3">
-      {/* Status filter */}
-      <label className="flex flex-col gap-1.5">
-        <span className="text-xs font-medium text-text-2">상태</span>
-        <select
-          value={status}
-          onChange={(e) =>
-            onStatusChange(e.target.value as CommentStatusFilter)
-          }
-          className="min-w-28 rounded-[0.75rem] border border-border-3 bg-background-1 px-3 py-2 text-sm text-text-1 outline-none transition-colors focus:border-primary-1"
-        >
-          {STATUS_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      {/* Author type filter */}
-      <label className="flex flex-col gap-1.5">
-        <span className="text-xs font-medium text-text-2">작성자</span>
-        <select
-          value={authorType}
-          onChange={(e) =>
-            onAuthorTypeChange(e.target.value as CommentAuthorTypeFilter)
-          }
-          className="min-w-28 rounded-[0.75rem] border border-border-3 bg-background-1 px-3 py-2 text-sm text-text-1 outline-none transition-colors focus:border-primary-1"
-        >
-          {AUTHOR_TYPE_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      {/* Post search filter */}
-      <div className="flex flex-col gap-1.5" ref={postDropdownRef}>
-        <span className="text-xs font-medium text-text-2">글</span>
-        <div className="relative">
-          <input
-            type="text"
-            value={postSearch}
-            onChange={(e) => {
-              setPostSearch(e.target.value);
-              if (selectedPostTitle) {
-                setSelectedPostTitle(undefined);
-                onPostChange(undefined, undefined);
-              }
-            }}
-            onFocus={handlePostInputFocus}
-            placeholder="글 제목 검색"
+    <div className="space-y-2">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative" ref={postDropdownRef}>
+          <button
+            type="button"
+            onClick={handlePostInputFocus}
             className={cn(
-              "w-52 rounded-[0.75rem] border bg-background-1 px-3 py-2 pr-8 text-sm text-text-1 outline-none transition-colors placeholder:text-text-4",
+              "inline-flex min-w-[12rem] items-center gap-2 rounded-[0.8rem] border px-3 py-2.5 text-sm text-text-2 transition-colors",
               selectedPostTitle
-                ? "border-primary-1"
-                : "border-border-3 focus:border-primary-1",
+                ? "border-primary-1/30 bg-primary-1/8 text-text-1"
+                : "border-border-3 bg-background-1 hover:border-border-2",
             )}
-          />
-          {postSearch ? (
-            <button
-              type="button"
-              onClick={handleClearPost}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-4 hover:text-text-2"
-              aria-label="글 필터 초기화"
-            >
-              ✕
-            </button>
-          ) : null}
+          >
+            <span className="max-w-[15rem] truncate">
+              {selectedPostTitle ?? "전체 게시글"}
+            </span>
+          </button>
 
           {postDropdownOpen ? (
-            <div className="absolute top-full left-0 z-20 mt-1 w-full min-w-[16rem] overflow-hidden rounded-[0.75rem] border border-border-3 bg-background-2 shadow-lg">
-              {postLoading ? (
-                <div className="px-4 py-3 text-sm text-text-4">검색 중...</div>
-              ) : postOptions.length > 0 ? (
-                <ul className="max-h-48 overflow-y-auto py-1">
-                  {postOptions.map((post) => (
-                    <li key={post.id}>
-                      <button
-                        type="button"
-                        onClick={() => handleSelectPost(post)}
-                        className="w-full px-4 py-2.5 text-left text-sm text-text-1 transition-colors hover:bg-background-3"
-                      >
-                        <span className="line-clamp-1">{post.title}</span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <div className="px-4 py-3 text-sm text-text-4">
-                  검색 결과 없음
+            <div className="absolute left-0 top-full z-20 mt-2 w-[20rem] overflow-hidden rounded-[1rem] border border-border-3 bg-background-1 shadow-[0px_16px_40px_0px_rgba(0,0,0,0.12)]">
+              <div className="border-b border-border-3 p-3">
+                <div className="relative">
+                  <Icon
+                    icon={magniferLinear}
+                    width="16"
+                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-4"
+                  />
+                  <input
+                    type="text"
+                    value={postSearch}
+                    onChange={(e) => {
+                      setPostSearch(e.target.value);
+                      if (selectedPostTitle) {
+                        setSelectedPostTitle(undefined);
+                        onPostChange(undefined, undefined);
+                      }
+                    }}
+                    placeholder="게시글 제목 검색"
+                    className="w-full rounded-[0.8rem] border border-border-3 bg-background-2 py-2.5 pl-9 pr-10 text-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
+                  />
+                  {postSearch ? (
+                    <button
+                      type="button"
+                      onClick={handleClearPost}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-text-4 transition-colors hover:text-text-2"
+                      aria-label="글 필터 초기화"
+                    >
+                      <Icon icon={closeCircleLinear} width="16" />
+                    </button>
+                  ) : null}
                 </div>
-              )}
+              </div>
+
+              <div className="max-h-56 overflow-y-auto py-1">
+                <button
+                  type="button"
+                  onClick={handleClearPost}
+                  className={cn(
+                    "w-full px-4 py-3 text-left text-sm transition-colors hover:bg-background-2",
+                    postId === undefined ? "text-primary-1" : "text-text-1",
+                  )}
+                >
+                  전체 게시글
+                </button>
+
+                {postLoading ? (
+                  <div className="px-4 py-3 text-sm text-text-4">
+                    검색 중...
+                  </div>
+                ) : postOptions.length > 0 ? (
+                  <ul>
+                    {postOptions.map((post) => (
+                      <li key={post.id}>
+                        <button
+                          type="button"
+                          onClick={() => handleSelectPost(post)}
+                          className="w-full px-4 py-3 text-left text-sm text-text-1 transition-colors hover:bg-background-2"
+                        >
+                          <span className="line-clamp-1">{post.title}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="px-4 py-3 text-sm text-text-4">
+                    검색 결과 없음
+                  </div>
+                )}
+              </div>
             </div>
           ) : null}
         </div>
-      </div>
 
-      {/* Date range filter */}
-      <div className="flex flex-col gap-1.5">
-        <span className="text-xs font-medium text-text-2">기간</span>
-        <div className="flex items-center gap-2">
+        <label>
+          <span className="sr-only">상태</span>
+          <select
+            value={status}
+            onChange={(e) =>
+              onStatusChange(e.target.value as CommentStatusFilter)
+            }
+            className="min-w-[8.5rem] rounded-[0.8rem] border border-border-3 bg-background-1 px-3 py-2.5 text-sm text-text-2 outline-none transition-colors hover:border-border-2 focus:border-primary-1"
+          >
+            {STATUS_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.value === "all" ? "상태: 전체" : `상태: ${opt.label}`}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          <span className="sr-only">작성자</span>
+          <select
+            value={authorType}
+            onChange={(e) =>
+              onAuthorTypeChange(e.target.value as CommentAuthorTypeFilter)
+            }
+            className="min-w-[9rem] rounded-[0.8rem] border border-border-3 bg-background-1 px-3 py-2.5 text-sm text-text-2 outline-none transition-colors hover:border-border-2 focus:border-primary-1"
+          >
+            {AUTHOR_TYPE_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.value === "all" ? "작성자: 전체" : `작성자: ${opt.label}`}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <div className="flex flex-wrap items-center gap-2 rounded-[0.8rem] border border-border-3 bg-background-1 px-3 py-2">
+          <span className="text-sm text-text-3">기간</span>
           <input
             type="date"
             value={startDate ?? ""}
             onChange={(e) => onDateChange(e.target.value || undefined, endDate)}
-            className="rounded-[0.75rem] border border-border-3 bg-background-1 px-3 py-2 text-sm text-text-1 outline-none transition-colors focus:border-primary-1"
+            className="min-w-[8.75rem] bg-transparent text-sm text-text-2 outline-none"
             aria-label="시작일"
           />
           <span className="text-xs text-text-4">~</span>
@@ -243,17 +272,15 @@ export function CommentFilters({
             onChange={(e) =>
               onDateChange(startDate, e.target.value || undefined)
             }
-            className={cn(
-              "rounded-[0.75rem] border bg-background-1 px-3 py-2 text-sm text-text-1 outline-none transition-colors focus:border-primary-1",
-              dateError ? "border-negative-1" : "border-border-3",
-            )}
+            className="min-w-[8.75rem] bg-transparent text-sm text-text-2 outline-none"
             aria-label="종료일"
           />
         </div>
-        {dateError ? (
-          <p className="text-xs text-negative-1">{dateError}</p>
-        ) : null}
       </div>
+
+      {dateError ? (
+        <p className="text-xs text-negative-1">{dateError}</p>
+      ) : null}
     </div>
   );
 }
