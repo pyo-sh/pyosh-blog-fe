@@ -12,14 +12,11 @@ type GuestbookDetailAction =
   | AdminGuestbookDeleteAction
   | AdminGuestbookPatchAction;
 
-type GuestbookStatusOption = "active" | "hidden" | "deleted";
-
 interface GuestbookDetailModalProps {
   item: AdminGuestbookItem | null;
   isOpen: boolean;
   onClose: () => void;
   onSelectAction: (action: GuestbookDetailAction) => void;
-  onApplyStatusChange: (action: GuestbookDetailAction) => void;
   isPending?: boolean;
 }
 
@@ -79,33 +76,11 @@ function getAvailableActions(status: AdminGuestbookItem["status"]) {
   ];
 }
 
-function mapStatusChangeToAction(
-  currentStatus: AdminGuestbookItem["status"],
-  nextStatus: GuestbookStatusOption,
-): GuestbookDetailAction | null {
-  if (currentStatus === nextStatus) {
-    return null;
-  }
-
-  if (nextStatus === "active") {
-    return currentStatus === "hidden" || currentStatus === "deleted"
-      ? "restore"
-      : null;
-  }
-
-  if (nextStatus === "hidden") {
-    return currentStatus === "active" ? "hide" : null;
-  }
-
-  return nextStatus === "deleted" ? "soft_delete" : null;
-}
-
 export function GuestbookDetailModal({
   item,
   isOpen,
   onClose,
   onSelectAction,
-  onApplyStatusChange,
   isPending = false,
 }: GuestbookDetailModalProps) {
   if (!item) {
@@ -172,56 +147,21 @@ export function GuestbookDetailModal({
           </p>
 
           <div className="mb-4 flex items-center gap-2">
-            <div className="flex items-center gap-1">
-              <span className="text-xs text-text-3">상태 전환:</span>
-              {(
-                [
-                  { value: "active", label: "정상" },
-                  { value: "hidden", label: "숨김" },
-                  { value: "deleted", label: "삭제" },
-                ] as const
-              ).map((option) => {
-                const action = mapStatusChangeToAction(
-                  item.status,
-                  option.value,
-                );
-                const isCurrent = item.status === option.value;
-                const isDisabled = !isCurrent && action === null;
-
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => {
-                      if (action) {
-                        onApplyStatusChange(action);
-                      }
-                    }}
-                    disabled={isPending || isDisabled || isCurrent}
-                    className={cn(
-                      "inline-flex items-center rounded-md px-2 py-1 text-[11px] font-medium leading-none transition-colors",
-                      option.value === "active" &&
-                        (isCurrent
-                          ? "bg-positive-1/10 text-positive-1"
-                          : "border border-border-3 text-text-2 hover:border-border-2 hover:text-text-1"),
-                      option.value === "hidden" &&
-                        (isCurrent
-                          ? "bg-background-3 text-text-3"
-                          : "border border-border-3 text-text-2 hover:border-border-2 hover:text-text-1"),
-                      option.value === "deleted" &&
-                        (isCurrent
-                          ? "bg-negative-1/10 text-negative-1"
-                          : "border border-border-3 text-text-2 hover:border-border-2 hover:text-text-1"),
-                      !isCurrent && !isDisabled && "cursor-pointer",
-                      isCurrent && "cursor-default",
-                      isDisabled && !isCurrent && "cursor-not-allowed",
-                    )}
-                  >
-                    {option.label}
-                  </button>
-                );
-              })}
-            </div>
+            <span className="text-xs text-text-3">상태:</span>
+            <span
+              className={cn(
+                "inline-flex items-center rounded-md px-2 py-1 text-[11px] font-medium leading-none",
+                item.status === "active" && "bg-positive-1/10 text-positive-1",
+                item.status === "hidden" && "bg-background-3 text-text-3",
+                item.status === "deleted" && "bg-negative-1/10 text-negative-1",
+              )}
+            >
+              {item.status === "active"
+                ? "정상"
+                : item.status === "hidden"
+                  ? "숨김"
+                  : "삭제"}
+            </span>
           </div>
         </div>
 

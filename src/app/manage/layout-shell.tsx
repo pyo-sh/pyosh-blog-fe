@@ -73,8 +73,6 @@ export function ManageLayoutShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="relative min-h-screen bg-background-1 text-text-1">
-      <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(circle_at_top_right,rgba(138,111,224,0.08),transparent_26%),linear-gradient(to_bottom,rgba(249,249,250,0.15),rgba(249,249,250,0))] dark:bg-[radial-gradient(circle_at_top_right,rgba(165,145,232,0.08),transparent_26%),linear-gradient(to_bottom,rgba(19,20,21,0.18),rgba(19,20,21,0))]" />
-
       <AdminSidebar
         isCollapsed={sidebarCollapsed}
         isOpen={sidebarOpen}
