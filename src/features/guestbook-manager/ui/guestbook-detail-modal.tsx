@@ -139,18 +139,18 @@ export function GuestbookDetailModal({
 
           <p
             className={cn(
-              "mb-6 whitespace-pre-wrap break-words text-sm leading-relaxed text-text-2",
+              "mb-5 whitespace-pre-wrap break-words text-sm leading-relaxed text-text-2",
               item.status === "deleted" && "text-text-4",
             )}
           >
             {item.body || "삭제된 방명록입니다."}
           </p>
 
-          <div className="mb-4 flex items-center gap-2">
-            <span className="text-xs text-text-3">상태:</span>
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <span className="whitespace-nowrap text-xs text-text-3">상태:</span>
             <span
               className={cn(
-                "inline-flex items-center rounded-md px-2 py-1 text-[11px] font-medium leading-none",
+                "inline-flex items-center whitespace-nowrap rounded-md px-2 py-1 text-[11px] font-medium leading-none",
                 item.status === "active" && "bg-positive-1/10 text-positive-1",
                 item.status === "hidden" && "bg-background-3 text-text-3",
                 item.status === "deleted" && "bg-negative-1/10 text-negative-1",
@@ -165,7 +165,7 @@ export function GuestbookDetailModal({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-end gap-2 px-6 pb-6">
+        <div className="flex flex-wrap items-center justify-end gap-2 px-6 pb-5">
           {actions.map((action) => (
             <button
               key={action.value}
@@ -173,7 +173,7 @@ export function GuestbookDetailModal({
               onClick={() => onSelectAction(action.value)}
               disabled={isPending}
               className={cn(
-                "inline-flex items-center justify-center gap-1 rounded-[0.75rem] px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+                "inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-[0.75rem] px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
                 action.tone === "danger"
                   ? "bg-negative-1 text-white hover:opacity-90"
                   : "border border-border-3 text-text-2 hover:border-border-2 hover:text-text-1",
