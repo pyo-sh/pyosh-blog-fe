@@ -4,11 +4,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import closeCircleLinear from "@iconify-icons/solar/close-circle-linear";
 import lockKeyholeLinear from "@iconify-icons/solar/lock-keyhole-linear";
-import restartLinear from "@iconify-icons/solar/restart-linear";
 import trashBinMinimalisticLinear from "@iconify-icons/solar/trash-bin-minimalistic-linear";
 import Link from "next/link";
-import type { AdminCommentItem } from "@entities/comment";
-import { fetchAdminCommentThread } from "@entities/comment";
+import {
+  canTransitionAdminCommentStatus,
+  fetchAdminCommentThread,
+  type AdminCommentItem,
+} from "@entities/comment";
 import { cn } from "@shared/lib/style-utils";
 import { Modal } from "@shared/ui/libs";
 
@@ -24,6 +26,12 @@ const statusLabelMap: Record<AdminCommentItem["status"], string> = {
   active: "정상",
   deleted: "삭제됨",
   hidden: "숨김",
+};
+
+const statusToneMap: Record<AdminCommentItem["status"], string> = {
+  active: "bg-positive-1/10 text-positive-1 border-positive-1/20",
+  deleted: "bg-negative-1/10 text-negative-1 border-negative-1/20",
+  hidden: "bg-background-3 text-text-3 border-border-3",
 };
 
 const authorTypeLabel = (type: "oauth" | "guest") =>
@@ -45,8 +53,14 @@ interface CommentDetailModalProps {
   comment: AdminCommentItem | null;
   isOpen: boolean;
   isActionPending?: boolean;
+  isStatusPending?: boolean;
+  statusError?: string | null;
   onClose: () => void;
   onCommentChange?: (comment: AdminCommentItem) => void;
+  onSelectStatus?: (
+    comment: AdminCommentItem,
+    status: AdminCommentItem["status"],
+  ) => void;
   onSelectAction: (
     comment: AdminCommentItem,
     action: "restore" | "soft_delete" | "hard_delete",
@@ -57,8 +71,11 @@ export function CommentDetailModal({
   comment,
   isOpen,
   isActionPending = false,
+  isStatusPending = false,
+  statusError = null,
   onClose,
   onCommentChange,
+  onSelectStatus,
   onSelectAction,
 }: CommentDetailModalProps) {
   const [mode, setMode] = useState<ModalMode>("detail");
@@ -223,9 +240,14 @@ export function CommentDetailModal({
               threadLoading={thread.isLoading}
               threadError={threadError}
               isActionPending={isActionPending}
+              isStatusPending={isStatusPending}
+              statusError={statusError}
               onToggleParent={() => void handleToggleParent()}
               onOpenThread={() => void handleOpenThread()}
               onClose={onClose}
+              onSelectStatus={(status) =>
+                onSelectStatus?.(currentComment, status)
+              }
               onSelectAction={(action) =>
                 onSelectAction(currentComment, action)
               }
@@ -255,9 +277,12 @@ interface DetailViewProps {
   threadLoading: boolean;
   threadError: string | null;
   isActionPending: boolean;
+  isStatusPending: boolean;
+  statusError: string | null;
   onToggleParent: () => void;
   onOpenThread: () => void;
   onClose: () => void;
+  onSelectStatus: (status: AdminCommentItem["status"]) => void;
   onSelectAction: (action: "restore" | "soft_delete" | "hard_delete") => void;
 }
 
@@ -269,56 +294,16 @@ function DetailView({
   threadLoading,
   threadError,
   isActionPending,
+  isStatusPending,
+  statusError,
   onToggleParent,
   onOpenThread,
   onClose,
+  onSelectStatus,
   onSelectAction,
 }: DetailViewProps) {
   const isReply = comment.depth > 0;
-  const actionButtons =
-    comment.status === "deleted"
-      ? [
-          {
-            value: "restore" as const,
-            label: "복원",
-            tone: "primary" as const,
-          },
-          {
-            value: "hard_delete" as const,
-            label: "영구 삭제",
-            tone: "danger" as const,
-          },
-        ]
-      : comment.status === "hidden"
-        ? [
-            {
-              value: "restore" as const,
-              label: "복원",
-              tone: "primary" as const,
-            },
-            {
-              value: "soft_delete" as const,
-              label: "소프트 삭제",
-              tone: "default" as const,
-            },
-            {
-              value: "hard_delete" as const,
-              label: "영구 삭제",
-              tone: "danger" as const,
-            },
-          ]
-        : [
-            {
-              value: "soft_delete" as const,
-              label: "소프트 삭제",
-              tone: "default" as const,
-            },
-            {
-              value: "hard_delete" as const,
-              label: "영구 삭제",
-              tone: "danger" as const,
-            },
-          ];
+  const isAnyPending = isActionPending || isStatusPending;
 
   return (
     <div className="space-y-5">
@@ -382,19 +367,56 @@ function DetailView({
           <dt className="min-w-[3.75rem] shrink-0 text-right text-text-3">
             상태:
           </dt>
-          <dd>
-            <span
-              className={cn(
-                "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium",
-                comment.status === "active" &&
-                  "bg-positive-1/10 text-positive-1",
-                comment.status === "deleted" &&
-                  "bg-negative-1/10 text-negative-1",
-                comment.status === "hidden" && "bg-background-3 text-text-3",
-              )}
-            >
-              {statusLabelMap[comment.status]}
-            </span>
+          <dd className="flex-1">
+            <div className="space-y-2">
+              <div className="flex flex-wrap gap-2">
+                {(
+                  ["active", "hidden", "deleted"] as Array<
+                    AdminCommentItem["status"]
+                  >
+                ).map((status) => {
+                  const isCurrent = comment.status === status;
+                  const isAvailable = canTransitionAdminCommentStatus(
+                    comment.status,
+                    status,
+                  );
+
+                  return (
+                    <button
+                      key={status}
+                      type="button"
+                      onClick={() => {
+                        if (status === "deleted") {
+                          onSelectAction("soft_delete");
+
+                          return;
+                        }
+
+                        onSelectStatus(status);
+                      }}
+                      disabled={isAnyPending || isCurrent || !isAvailable}
+                      aria-pressed={isCurrent}
+                      className={cn(
+                        "inline-flex min-w-[4.5rem] items-center justify-center rounded-full border px-3 py-1.5 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+                        isCurrent
+                          ? statusToneMap[status]
+                          : "border-border-3 bg-background-1 text-text-3 hover:border-border-2 hover:text-text-1",
+                      )}
+                    >
+                      {statusLabelMap[status]}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-text-4">
+                {isStatusPending
+                  ? "상태를 변경하는 중입니다..."
+                  : `현재 상태: ${statusLabelMap[comment.status]}`}
+              </p>
+              {statusError ? (
+                <p className="text-sm text-negative-1">{statusError}</p>
+              ) : null}
+            </div>
           </dd>
         </div>
 
@@ -484,34 +506,19 @@ function DetailView({
       <div className="border-t border-border-4 pt-4">
         <div className="flex flex-wrap items-center justify-center gap-3">
           <div className="flex flex-wrap items-center justify-center gap-2">
-            {actionButtons.map((action) => (
-              <button
-                key={action.value}
-                type="button"
-                onClick={() => onSelectAction(action.value)}
-                disabled={isActionPending}
-                className={cn(
-                  "inline-flex min-w-fit items-center justify-center gap-1 whitespace-nowrap rounded-[0.75rem] px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
-                  action.tone === "primary" &&
-                    "bg-primary-1 text-white hover:opacity-90",
-                  action.tone === "danger"
-                    ? "bg-negative-1 text-white hover:opacity-90"
-                    : "border border-border-3 text-text-2 hover:border-border-2 hover:text-text-1",
-                )}
-              >
-                {action.value === "restore" ? (
-                  <Icon icon={restartLinear} width="16" aria-hidden="true" />
-                ) : null}
-                {action.value === "hard_delete" ? (
-                  <Icon
-                    icon={trashBinMinimalisticLinear}
-                    width="16"
-                    aria-hidden="true"
-                  />
-                ) : null}
-                {action.label}
-              </button>
-            ))}
+            <button
+              type="button"
+              onClick={() => onSelectAction("hard_delete")}
+              disabled={isAnyPending}
+              className="inline-flex min-w-fit items-center justify-center gap-1 whitespace-nowrap rounded-[0.75rem] bg-negative-1 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Icon
+                icon={trashBinMinimalisticLinear}
+                width="16"
+                aria-hidden="true"
+              />
+              영구 삭제
+            </button>
             <button
               type="button"
               onClick={onClose}

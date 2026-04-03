@@ -20,6 +20,7 @@ export type {
 export {
   adminBulkOperateComments,
   adminDeleteComment,
+  adminHideComment,
   adminRestoreComment,
   createComment,
   deleteComment,
@@ -29,3 +30,7 @@ export {
   fetchComments,
   revealSecretComment,
 } from "./api";
+export {
+  canTransitionAdminCommentStatus,
+  useAdminCommentStatusMutation,
+} from "./use-admin-comment-status-mutation";

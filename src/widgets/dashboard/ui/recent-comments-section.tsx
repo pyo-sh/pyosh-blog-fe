@@ -12,6 +12,7 @@ import {
   fetchAdminComments,
   fetchAdminCommentThread,
   type AdminCommentItem,
+  useAdminCommentStatusMutation,
 } from "@entities/comment";
 import { formatNumber } from "@shared/lib/format-number";
 import { getErrorMessage } from "@shared/lib/get-error-message";
@@ -202,6 +203,13 @@ export function RecentCommentsSection() {
     queryKey: QUERY_KEY,
     queryFn: () => fetchAdminComments({ limit: 5 }),
   });
+  const statusMutation = useAdminCommentStatusMutation({
+    onSuccess: (updatedComment) => {
+      setOpenedComment((current) =>
+        current?.id === updatedComment.id ? updatedComment : current,
+      );
+    },
+  });
 
   const deleteMutation = useMutation({
     mutationFn: async ({
@@ -238,6 +246,10 @@ export function RecentCommentsSection() {
       setDeleteError(getErrorMessage(err, "댓글 삭제에 실패했습니다."));
     },
   });
+
+  useEffect(() => {
+    statusMutation.resetState();
+  }, [openedComment?.id]);
 
   const comments = data?.data ?? [];
   const totalComments = data?.meta.total ?? 0;
@@ -383,8 +395,13 @@ export function RecentCommentsSection() {
         isActionPending={
           deleteMutation.isPending && activeDeleteId === openedComment?.id
         }
+        isStatusPending={statusMutation.isPending}
+        statusError={statusMutation.errorMessage}
         onClose={() => setOpenedComment(null)}
         onCommentChange={setOpenedComment}
+        onSelectStatus={(comment, status) => {
+          void statusMutation.changeStatus(comment, status);
+        }}
         onSelectAction={(comment, action) =>
           handleOpenActionModal(comment, action)
         }
