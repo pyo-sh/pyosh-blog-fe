@@ -98,7 +98,7 @@ export function CategoryTreeRow({
     >
       <div
         ref={beforeDrop.setNodeRef}
-        className="flex h-3 items-center"
+        className="flex h-[12px] items-center"
         aria-hidden="true"
       >
         <DropLine
@@ -110,7 +110,7 @@ export function CategoryTreeRow({
         <div
           ref={draggable.setNodeRef}
           className={cn(
-            "flex h-[52px] items-center justify-between gap-2 px-4 transition-colors",
+            "flex h-[28px] items-center justify-between gap-2 px-4 transition-colors",
             isDragging && "z-10 opacity-50 shadow-lg",
             currentDropPosition === "inside" &&
               !isInvalidDropTarget &&
@@ -214,21 +214,6 @@ export function CategoryTreeRow({
                   type="button"
                   onClick={(event) => {
                     event.stopPropagation();
-                    onEdit(category);
-                  }}
-                  aria-label={`${category.name} 수정`}
-                  className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-text-4 transition-colors hover:bg-background-3 hover:text-text-2"
-                >
-                  <Icon
-                    icon={penNewRoundLinear}
-                    width="16"
-                    aria-hidden="true"
-                  />
-                </button>
-                <button
-                  type="button"
-                  onClick={(event) => {
-                    event.stopPropagation();
                     onToggleVisibility(category);
                   }}
                   aria-label={`${category.name} 표시 여부`}
@@ -247,6 +232,21 @@ export function CategoryTreeRow({
                       )}
                     />
                   </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onEdit(category);
+                  }}
+                  aria-label={`${category.name} 수정`}
+                  className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-text-4 transition-colors hover:bg-background-3 hover:text-text-2"
+                >
+                  <Icon
+                    icon={penNewRoundLinear}
+                    width="16"
+                    aria-hidden="true"
+                  />
                 </button>
                 <button
                   type="button"
@@ -271,7 +271,7 @@ export function CategoryTreeRow({
 
       <div
         ref={afterDrop.setNodeRef}
-        className="flex h-3 items-center"
+        className="flex h-[12px] items-center"
         aria-hidden="true"
       >
         <DropLine
