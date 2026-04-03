@@ -352,27 +352,6 @@ export function AssetUploader() {
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-col gap-4 rounded-[1.75rem] border border-border-3 bg-background-2 p-6 shadow-[0px_18px_60px_0px_rgba(0,0,0,0.06)] md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="text-body-xs uppercase tracking-[0.24em] text-text-4">
-            Assets
-          </p>
-          <h1 className="mt-3 text-2xl font-semibold text-text-1">
-            에셋 라이브러리
-          </h1>
-          <p className="mt-2 text-sm text-text-3">
-            업로드 대기열을 확인한 뒤 배치 업로드하고, 갤러리에서 상세 정보, URL
-            복사, 선택 삭제를 관리할 수 있습니다.
-          </p>
-        </div>
-
-        <div className="rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-4">
-          {assetsQuery.isFetching && !assetsQuery.isPending
-            ? "목록을 새로 불러오는 중..."
-            : paginationLabel}
-        </div>
-      </header>
-
       <UploadZone
         files={pendingFiles}
         isUploading={uploadMutation.isPending}
@@ -424,18 +403,67 @@ export function AssetUploader() {
             copiedAssetId={copiedState?.type === "url" ? copiedState.id : null}
             isPending={deleteMutation.isPending}
             onEnterSelectionMode={enterSelectionMode}
-            onExitSelectionMode={exitSelectionMode}
             onToggleSelect={toggleSelect}
-            onSelectAll={selectAll}
             onCopyUrl={(asset) => void handleCopy(asset, "url")}
             onOpenDetail={setDetailAssetId}
             onRequestDelete={requestDelete}
           />
-          <PaginationControls
-            currentPage={meta?.page ?? 1}
-            totalPages={meta?.totalPages ?? 1}
-            onPageChange={handlePageChange}
-          />
+          <div className="flex flex-col gap-4">
+            {selectionMode ? (
+              <div className="fixed bottom-0 left-0 right-0 z-20 md:left-60">
+                <div className="flex flex-wrap items-center gap-3 border-t border-border-3 bg-[rgba(241,242,243,0.95)] px-4 py-3 backdrop-blur-[12px] md:px-6 dark:bg-[rgba(19,20,21,0.94)]">
+                  <span className="text-sm font-medium text-text-1">
+                    선택됨 {selectedIds.length}개
+                  </span>
+                  <div className="ml-auto flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        selectAll(
+                          !assets.every((asset) =>
+                            selectedIds.includes(asset.id),
+                          ),
+                        )
+                      }
+                      className="cursor-pointer px-2 py-1.5 text-sm text-primary-1 transition-colors hover:text-primary-1/80"
+                    >
+                      {assets.length > 0 &&
+                      assets.every((asset) => selectedIds.includes(asset.id))
+                        ? "전체 해제"
+                        : "전체 선택"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => requestDelete(selectedIds)}
+                      disabled={
+                        selectedIds.length === 0 || deleteMutation.isPending
+                      }
+                      className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] border border-negative-1/30 px-3 text-sm text-negative-1 transition-colors hover:bg-negative-1/10 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      삭제
+                    </button>
+                    <button
+                      type="button"
+                      onClick={exitSelectionMode}
+                      className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] bg-primary-1 px-3 text-sm text-white transition-opacity hover:opacity-90"
+                    >
+                      완료
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+            <PaginationControls
+              currentPage={meta?.page ?? 1}
+              totalPages={meta?.totalPages ?? 1}
+              onPageChange={handlePageChange}
+            />
+            <p className="text-right text-sm text-text-3">
+              {assetsQuery.isFetching && !assetsQuery.isPending
+                ? "목록을 새로 불러오는 중..."
+                : paginationLabel}
+            </p>
+          </div>
         </>
       ) : null}
 

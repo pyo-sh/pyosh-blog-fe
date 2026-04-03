@@ -23,13 +23,11 @@ interface AssetGridProps {
   copiedAssetId: number | null;
   isPending: boolean;
   onEnterSelectionMode: () => void;
-  onExitSelectionMode: () => void;
   onToggleSelect: (
     id: number,
     index: number,
     options?: { shiftKey: boolean },
   ) => void;
-  onSelectAll: (checked: boolean) => void;
   onCopyUrl: (asset: Asset) => void;
   onOpenDetail: (assetId: number) => void;
   onRequestDelete: (ids: number[]) => void;
@@ -43,116 +41,29 @@ export function AssetGrid({
   copiedAssetId,
   isPending,
   onEnterSelectionMode,
-  onExitSelectionMode,
   onToggleSelect,
-  onSelectAll,
   onCopyUrl,
   onOpenDetail,
   onRequestDelete,
 }: AssetGridProps) {
-  const allSelected =
-    assets.length > 0 &&
-    assets.every((asset) => selectedIds.includes(asset.id));
-
   return (
-    <section className="rounded-[1.75rem] border border-border-3 bg-background-2 p-6">
-      <div className="border-b border-border-3 pb-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-body-xs uppercase tracking-[0.24em] text-text-4">
-              Library
-            </p>
-            <h2 className="mt-3 text-xl font-semibold text-text-1">
-              에셋 갤러리
-            </h2>
-            <p className="mt-2 text-sm text-text-3">
-              이미지를 클릭하면 상세 보기를 열고, 길게 누르거나 선택 버튼으로
-              여러 항목을 골라 삭제할 수 있습니다.
-            </p>
-          </div>
-
-          {!selectionMode ? (
-            <button
-              type="button"
-              onClick={onEnterSelectionMode}
-              disabled={assets.length === 0 || isPending}
-              className="inline-flex items-center justify-center rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              선택
-            </button>
-          ) : null}
-        </div>
-
-        <div className="mt-6 grid gap-3 md:grid-cols-3">
-          <div className="rounded-[1.15rem] border border-border-3 bg-background-1 px-4 py-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-4">
-              Assets
-            </p>
-            <p className="mt-1 text-lg font-semibold text-text-1">
-              {assets.length}
-            </p>
-          </div>
-          <div className="rounded-[1.15rem] border border-border-3 bg-background-1 px-4 py-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-4">
-              Selection
-            </p>
-            <p className="mt-1 text-sm text-text-2">
-              {selectionMode
-                ? `${selectedIds.length}개 선택 중`
-                : "선택 모드 꺼짐"}
-            </p>
-          </div>
-          <div className="rounded-[1.15rem] border border-border-3 bg-background-1 px-4 py-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-4">
-              Actions
-            </p>
-            <p className="mt-1 text-sm text-text-2">
-              상세 보기, URL 복사, 삭제
-            </p>
-          </div>
-        </div>
-
-        {selectionMode ? (
-          <div className="sticky top-16 z-10 mt-5 flex flex-col gap-3 rounded-[1.2rem] border border-primary-1/20 bg-background-1 px-4 py-4 shadow-[0px_12px_32px_0px_rgba(0,0,0,0.06)] md:flex-row md:items-center md:justify-between">
-            <div className="text-sm text-text-2">
-              선택됨{" "}
-              <span className="font-semibold text-text-1">
-                {selectedIds.length}
-              </span>
-              개
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={() => onSelectAll(!allSelected)}
-                disabled={assets.length === 0 || isPending}
-                className="inline-flex items-center justify-center rounded-[0.85rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {allSelected ? "전체 해제" : "전체 선택"}
-              </button>
-              <button
-                type="button"
-                onClick={() => onRequestDelete(selectedIds)}
-                disabled={selectedIds.length === 0 || isPending}
-                className="inline-flex items-center justify-center rounded-[0.85rem] border border-negative-1/20 px-4 py-2.5 text-sm font-medium text-negative-1 transition-colors hover:bg-negative-1/10 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                삭제
-              </button>
-              <button
-                type="button"
-                onClick={onExitSelectionMode}
-                disabled={isPending}
-                className="inline-flex items-center justify-center rounded-[0.85rem] bg-primary-1 px-4 py-2.5 text-sm font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                완료
-              </button>
-            </div>
-          </div>
+    <section>
+      <div className="mb-4 flex items-center justify-between">
+        <p className="text-sm text-text-3">총 {assets.length}개</p>
+        {!selectionMode ? (
+          <button
+            type="button"
+            onClick={onEnterSelectionMode}
+            disabled={assets.length === 0 || isPending}
+            className="inline-flex h-8 items-center justify-center rounded-lg border border-border-3 px-3 text-[13px] font-normal text-text-2 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            선택
+          </button>
         ) : null}
       </div>
 
       {assets.length > 0 ? (
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {assets.map((asset, index) => (
             <AssetGridCard
               key={asset.id}
@@ -172,7 +83,7 @@ export function AssetGrid({
           ))}
         </div>
       ) : (
-        <div className="mt-6 rounded-[1.25rem] border border-dashed border-border-3 px-6 py-12 text-center">
+        <div className="rounded-[1.25rem] border border-dashed border-border-3 px-6 py-12 text-center">
           <p className="text-lg font-semibold text-text-1">에셋이 없습니다.</p>
           <p className="mt-2 text-sm text-text-4">
             먼저 이미지를 업로드한 뒤 갤러리에서 상세 보기와 선택 모드를 사용할
@@ -242,7 +153,7 @@ function AssetGridCard({
   return (
     <article
       className={cn(
-        "group relative overflow-hidden rounded-[1.4rem] border bg-background-1 transition-all",
+        "group relative overflow-hidden rounded-xl border bg-background-2 transition-all",
         isSelected
           ? "border-primary-1 shadow-[0_0_0_3px_rgba(138,111,224,0.12)]"
           : "border-border-3 hover:-translate-y-0.5 hover:border-border-2",
@@ -306,7 +217,7 @@ function AssetGridCard({
           </div>
         ) : null}
 
-        <div className="space-y-3 p-4">
+        <div className="p-3">
           <div>
             <div className="flex items-start justify-between gap-3">
               <p className="truncate text-sm font-semibold text-text-1">
@@ -339,12 +250,12 @@ function AssetGridCard({
       </div>
 
       {selectionMode ? null : (
-        <div className="border-t border-border-3 px-4 py-3">
-          <div className="flex items-center justify-between gap-3">
+        <div className="border-t border-border-3 px-3 py-2">
+          <div className="flex items-center justify-between gap-2">
             <button
               type="button"
               onClick={() => onOpenDetail(asset.id)}
-              className="inline-flex items-center justify-center gap-1.5 rounded-[0.8rem] border border-border-3 px-3 py-2 text-xs font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+              className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-border-3 px-3 text-xs font-normal text-text-2 transition-colors hover:bg-background-1"
             >
               <Icon icon={galleryWideLinear} width="14" />
               상세
@@ -353,7 +264,7 @@ function AssetGridCard({
               type="button"
               onClick={() => onRequestDelete([asset.id])}
               disabled={isPending}
-              className="inline-flex items-center justify-center gap-1.5 rounded-[0.8rem] border border-negative-1/20 px-3 py-2 text-xs font-medium text-negative-1 transition-colors hover:bg-negative-1/10 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-negative-1/20 px-3 text-xs font-normal text-negative-1 transition-colors hover:bg-negative-1/10 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Icon icon={trashBinMinimalisticLinear} width="14" />
               삭제
