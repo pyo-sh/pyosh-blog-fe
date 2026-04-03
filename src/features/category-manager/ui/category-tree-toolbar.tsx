@@ -45,9 +45,7 @@ export function CategoryTreeToolbar({
   onCancelEditMode,
   onSaveEditMode,
 }: CategoryTreeToolbarProps) {
-  if (mode === "select") {
-    return null;
-  }
+  const isSelectMode = mode === "select";
 
   if (mode === "edit") {
     return (
@@ -130,32 +128,34 @@ export function CategoryTreeToolbar({
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={onEnterSelectMode}
-          className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-4 text-sm font-normal leading-none text-text-2 transition-colors hover:bg-background-3"
-        >
-          <Icon icon={checkSquareLinear} width="18" aria-hidden="true" />
-          일괄 선택
-        </button>
-        <button
-          type="button"
-          onClick={onEnterEditMode}
-          className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-4 text-sm font-normal leading-none text-text-2 transition-colors hover:bg-background-3"
-        >
-          <Icon icon={sortVerticalLinear} width="18" aria-hidden="true" />
-          배치 편집
-        </button>
-        <button
-          type="button"
-          onClick={onCreate}
-          className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-primary-1 px-4 text-sm font-normal leading-none text-white transition-opacity hover:opacity-90"
-        >
-          <Icon icon={addFolderLinear} width="18" aria-hidden="true" />
-          카테고리 추가
-        </button>
-      </div>
+      {!isSelectMode ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={onEnterSelectMode}
+            className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-4 text-sm font-normal leading-none text-text-2 transition-colors hover:bg-background-3"
+          >
+            <Icon icon={checkSquareLinear} width="18" aria-hidden="true" />
+            일괄 선택
+          </button>
+          <button
+            type="button"
+            onClick={onEnterEditMode}
+            className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-4 text-sm font-normal leading-none text-text-2 transition-colors hover:bg-background-3"
+          >
+            <Icon icon={sortVerticalLinear} width="18" aria-hidden="true" />
+            배치 편집
+          </button>
+          <button
+            type="button"
+            onClick={onCreate}
+            className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-primary-1 px-4 text-sm font-normal leading-none text-white transition-opacity hover:opacity-90"
+          >
+            <Icon icon={addFolderLinear} width="18" aria-hidden="true" />
+            카테고리 추가
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }
