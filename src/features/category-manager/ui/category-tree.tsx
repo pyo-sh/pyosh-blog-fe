@@ -353,21 +353,27 @@ export function CategoryTree({
 
     const targetMeta = rowMetaMap.get(parsedTarget.targetId);
     const rect = over.rect;
-    const pointerY = (activatorEvent as PointerEvent).clientY + delta.y;
-    const pointerX = (activatorEvent as PointerEvent).clientX + delta.x;
-    const relativeY = (pointerY - rect.top) / Math.max(rect.height, 1);
-    const rowIndent = rect.left + (targetMeta?.depth ?? 0) * 24 + 28;
     let nextPosition: "before" | "inside" | "after";
+    const isPointerEvent = activatorEvent instanceof PointerEvent;
 
-    if (relativeY <= 0.25) {
-      nextPosition = "before";
-    } else if (relativeY >= 0.75) {
-      nextPosition = "after";
+    if (!isPointerEvent) {
+      nextPosition = delta.y < 0 ? "before" : "after";
     } else {
-      nextPosition = "inside";
+      const pointerY = activatorEvent.clientY + delta.y;
+      const pointerX = activatorEvent.clientX + delta.x;
+      const relativeY = (pointerY - rect.top) / Math.max(rect.height, 1);
+      const rowIndent = rect.left + (targetMeta?.depth ?? 0) * 24 + 28;
 
-      if (pointerX < rowIndent - 8) {
-        nextPosition = relativeY < 0.5 ? "before" : "after";
+      if (relativeY <= 0.25) {
+        nextPosition = "before";
+      } else if (relativeY >= 0.75) {
+        nextPosition = "after";
+      } else {
+        nextPosition = "inside";
+
+        if (pointerX < rowIndent - 8) {
+          nextPosition = relativeY < 0.5 ? "before" : "after";
+        }
       }
     }
 

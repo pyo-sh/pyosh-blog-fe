@@ -512,6 +512,8 @@ export function GuestbookManager() {
               status={status}
               authorType={authorType}
               period={period}
+              startDate={startDate}
+              endDate={endDate}
               searchInput={searchInput}
               selectedIds={selectedIds}
               allCurrentSelected={allCurrentSelected}
@@ -533,6 +535,14 @@ export function GuestbookManager() {
                   setStartDate(buildRelativeStart(days));
                   setEndDate(toDateInputValue(new Date()));
                 }
+                resetToFirstPage();
+              }}
+              onStartDateChange={(value) => {
+                setStartDate(value);
+                resetToFirstPage();
+              }}
+              onEndDateChange={(value) => {
+                setEndDate(value);
                 resetToFirstPage();
               }}
               onSearchInputChange={setSearchInput}

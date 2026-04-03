@@ -25,6 +25,8 @@ interface GuestbookTableProps {
   status: AdminGuestbookFilterStatus;
   authorType: AdminGuestbookAuthorType | "all";
   period: GuestbookPeriodFilter;
+  startDate: string;
+  endDate: string;
   searchInput: string;
   selectedIds: number[];
   allCurrentSelected: boolean;
@@ -32,6 +34,8 @@ interface GuestbookTableProps {
   onStatusChange: (value: AdminGuestbookFilterStatus) => void;
   onAuthorTypeChange: (value: AdminGuestbookAuthorType | "all") => void;
   onPeriodChange: (value: GuestbookPeriodFilter) => void;
+  onStartDateChange: (value: string) => void;
+  onEndDateChange: (value: string) => void;
   onSearchInputChange: (value: string) => void;
   onSearchSubmit: () => void;
   onClearSearch: () => void;
@@ -288,6 +292,8 @@ export function GuestbookTable({
   status,
   authorType,
   period,
+  startDate,
+  endDate,
   searchInput,
   selectedIds,
   allCurrentSelected,
@@ -295,6 +301,8 @@ export function GuestbookTable({
   onStatusChange,
   onAuthorTypeChange,
   onPeriodChange,
+  onStartDateChange,
+  onEndDateChange,
   onSearchInputChange,
   onSearchSubmit,
   onClearSearch,
@@ -343,6 +351,24 @@ export function GuestbookTable({
           onChange={onPeriodChange}
           triggerClassName="w-[9em]"
         />
+
+        <div className="flex items-center gap-2">
+          <input
+            type="date"
+            value={startDate}
+            onChange={(event) => onStartDateChange(event.target.value)}
+            className="h-10 rounded-[0.8rem] border border-border-3 bg-background-1 px-3 text-sm leading-none text-text-1 outline-none transition-colors focus:border-primary-1"
+            aria-label="시작일"
+          />
+          <span className="text-sm leading-none text-text-4">~</span>
+          <input
+            type="date"
+            value={endDate}
+            onChange={(event) => onEndDateChange(event.target.value)}
+            className="h-10 rounded-[0.8rem] border border-border-3 bg-background-1 px-3 text-sm leading-none text-text-1 outline-none transition-colors focus:border-primary-1"
+            aria-label="종료일"
+          />
+        </div>
 
         <form onSubmit={handleSubmit} className="flex min-w-[18rem] flex-1">
           <div className="relative w-full">
