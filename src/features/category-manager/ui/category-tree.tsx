@@ -8,7 +8,7 @@ import {
   PointerSensor,
   closestCenter,
   pointerWithin,
-  type DragOverEvent,
+  type DragMoveEvent,
   type DragStartEvent,
   type CollisionDetection,
   useSensor,
@@ -96,6 +96,7 @@ export function CategoryTree({
   );
   const hoverExpandTargetRef = useRef<number | null>(null);
   const autoExpandedIdsRef = useRef<Set<number>>(new Set());
+  const prevDropTargetRef = useRef<DropTarget | null>(null);
 
   useEffect(() => {
     if (mode !== "edit") {
@@ -321,12 +322,15 @@ export function CategoryTree({
     autoExpandedIdsRef.current.clear();
   };
 
-  const handleDragOver = ({ active, over }: DragOverEvent) => {
+  const handleDragMove = ({ over, activatorEvent, delta }: DragMoveEvent) => {
     if (!over || activeDragId === null) {
       if (hoverExpandTargetRef.current !== null) {
         collapseAutoExpandedNode(hoverExpandTargetRef.current);
       }
-      setDropTarget(null);
+      if (prevDropTargetRef.current !== null) {
+        prevDropTargetRef.current = null;
+        setDropTarget(null);
+      }
       clearHoverExpandTimer();
 
       return;
@@ -338,20 +342,21 @@ export function CategoryTree({
       if (hoverExpandTargetRef.current !== null) {
         collapseAutoExpandedNode(hoverExpandTargetRef.current);
       }
-      setDropTarget(null);
+      if (prevDropTargetRef.current !== null) {
+        prevDropTargetRef.current = null;
+        setDropTarget(null);
+      }
       clearHoverExpandTimer();
 
       return;
     }
 
     const targetMeta = rowMetaMap.get(parsedTarget.targetId);
-    const translatedRect = over.rect;
-    const pointerRect = active.rect.current.translated ?? over.rect;
-    const pointerY = pointerRect.top + Math.max(pointerRect.height / 2, 1);
-    const pointerX = pointerRect.left + Math.min(pointerRect.width / 2, 24);
-    const relativeY =
-      (pointerY - translatedRect.top) / Math.max(translatedRect.height, 1);
-    const rowIndent = translatedRect.left + (targetMeta?.depth ?? 0) * 24 + 28;
+    const rect = over.rect;
+    const pointerY = (activatorEvent as PointerEvent).clientY + delta.y;
+    const pointerX = (activatorEvent as PointerEvent).clientX + delta.x;
+    const relativeY = (pointerY - rect.top) / Math.max(rect.height, 1);
+    const rowIndent = rect.left + (targetMeta?.depth ?? 0) * 24 + 28;
     let nextPosition: "before" | "inside" | "after";
 
     if (relativeY <= 0.25) {
@@ -407,7 +412,7 @@ export function CategoryTree({
       clearHoverExpandTimer();
     }
 
-    setDropTarget({
+    const nextDropTarget: DropTarget = {
       targetId: parsedTarget.targetId,
       position: nextPosition,
       invalid: isDropBlocked(
@@ -415,11 +420,24 @@ export function CategoryTree({
         activeDragId,
         parsedTarget.targetId,
       ),
-    });
+    };
+
+    const prev = prevDropTargetRef.current;
+
+    if (
+      !prev ||
+      prev.targetId !== nextDropTarget.targetId ||
+      prev.position !== nextDropTarget.position ||
+      prev.invalid !== nextDropTarget.invalid
+    ) {
+      prevDropTargetRef.current = nextDropTarget;
+      setDropTarget(nextDropTarget);
+    }
   };
 
   const handleDragEnd = () => {
     clearHoverExpandTimer();
+    prevDropTargetRef.current = null;
 
     if (activeDragId !== null && dropTarget && !dropTarget.invalid) {
       if (dropTarget.position === "inside") {
@@ -483,11 +501,12 @@ export function CategoryTree({
           sensors={sensors}
           collisionDetection={collisionDetection}
           onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
+          onDragMove={handleDragMove}
           onDragEnd={handleDragEnd}
           onDragCancel={() => {
             collapseAutoExpandedNodes();
             clearHoverExpandTimer();
+            prevDropTargetRef.current = null;
             setActiveDragId(null);
             setDropTarget(null);
           }}

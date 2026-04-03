@@ -1,7 +1,6 @@
 "use client";
 
 import { useDraggable, useDroppable } from "@dnd-kit/core";
-import { CSS } from "@dnd-kit/utilities";
 import { Icon } from "@iconify/react";
 import altArrowRightLinear from "@iconify-icons/solar/alt-arrow-right-linear";
 import menuDotsLinear from "@iconify-icons/solar/menu-dots-linear";
@@ -72,18 +71,16 @@ export function CategoryTreeRow({
   const isInvalidDropTarget =
     dropTarget?.targetId === category.id && dropTarget.invalid;
   const isDragging = draggable.isDragging;
-  const transformStyle =
-    draggable.transform && mode === "edit"
-      ? {
-          transform: CSS.Translate.toString(draggable.transform),
-        }
-      : undefined;
 
   const rowOpacity = !category.isVisible ? "opacity-50" : undefined;
 
   return (
     <li
-      className="relative cursor-pointer border-b border-border-4 transition-colors last:border-b-0 hover:bg-background-3"
+      ref={rowDrop.setNodeRef}
+      className={cn(
+        "relative border-b border-border-4 transition-colors last:border-b-0",
+        isDragging ? "opacity-20" : "cursor-pointer hover:bg-background-3",
+      )}
       onClick={() => {
         if (hasVisibleChildren) {
           onToggle(category.id);
@@ -101,13 +98,12 @@ export function CategoryTreeRow({
         />
       </div>
 
-      <div ref={rowDrop.setNodeRef}>
+      <div>
         <div
           ref={draggable.setNodeRef}
           className={cn(
             "flex h-[28px] items-center justify-between gap-2 px-4 transition-colors",
             mode === "edit" ? "cursor-grab active:cursor-grabbing" : "",
-            isDragging && "z-10 opacity-50 shadow-lg",
             currentDropPosition === "inside" &&
               !isInvalidDropTarget &&
               "bg-primary-1/10 ring-1 ring-primary-1/30",
@@ -115,9 +111,6 @@ export function CategoryTreeRow({
               isInvalidDropTarget &&
               "cursor-not-allowed opacity-30",
           )}
-          style={{
-            ...transformStyle,
-          }}
           {...(mode === "edit" ? draggable.attributes : {})}
           {...(mode === "edit" ? draggable.listeners : {})}
         >
