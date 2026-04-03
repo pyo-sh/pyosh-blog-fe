@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -80,6 +80,10 @@ export function CategoryTree({
   const [activeDragId, setActiveDragId] = useState<number | null>(null);
   const [dropTarget, setDropTarget] = useState<DropTarget | null>(null);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const hoverExpandTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const hoverExpandTargetRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (mode !== "edit") {
@@ -113,6 +117,25 @@ export function CategoryTree({
     ? visibleRows.find(({ category }) => category.id === activeDragId)
     : null;
   const selectedCount = selectedIds.size;
+  const rowMetaMap = useMemo(
+    () =>
+      new Map(
+        visibleRows.map(({ category, hasVisibleChildren }) => [
+          category.id,
+          { hasVisibleChildren },
+        ]),
+      ),
+    [visibleRows],
+  );
+
+  const clearHoverExpandTimer = useCallback(() => {
+    if (hoverExpandTimerRef.current) {
+      clearTimeout(hoverExpandTimerRef.current);
+      hoverExpandTimerRef.current = null;
+    }
+
+    hoverExpandTargetRef.current = null;
+  }, []);
 
   const handleToggle = useCallback((id: number) => {
     setExpandedIds((prev) => {
@@ -252,8 +275,37 @@ export function CategoryTree({
 
     if (!parsedTarget) {
       setDropTarget(null);
+      clearHoverExpandTimer();
 
       return;
+    }
+
+    const targetMeta = rowMetaMap.get(parsedTarget.targetId);
+    const shouldExpandOnHover =
+      parsedTarget.position === "inside" &&
+      targetMeta?.hasVisibleChildren &&
+      !expandedIds.has(parsedTarget.targetId);
+
+    if (shouldExpandOnHover) {
+      if (hoverExpandTargetRef.current !== parsedTarget.targetId) {
+        clearHoverExpandTimer();
+        hoverExpandTargetRef.current = parsedTarget.targetId;
+        hoverExpandTimerRef.current = setTimeout(() => {
+          setExpandedIds((prev) => {
+            if (prev.has(parsedTarget.targetId)) {
+              return prev;
+            }
+
+            const next = new Set(prev);
+            next.add(parsedTarget.targetId);
+
+            return next;
+          });
+          hoverExpandTimerRef.current = null;
+        }, 450);
+      }
+    } else {
+      clearHoverExpandTimer();
     }
 
     setDropTarget({
@@ -267,6 +319,8 @@ export function CategoryTree({
   };
 
   const handleDragEnd = () => {
+    clearHoverExpandTimer();
+
     if (activeDragId !== null && dropTarget && !dropTarget.invalid) {
       setWorkingCategories((prev) =>
         moveCategory(prev, activeDragId, {
@@ -279,6 +333,12 @@ export function CategoryTree({
     setActiveDragId(null);
     setDropTarget(null);
   };
+
+  useEffect(() => {
+    return () => {
+      clearHoverExpandTimer();
+    };
+  }, [clearHoverExpandTimer]);
 
   if (categories.length === 0) {
     return (
@@ -310,6 +370,7 @@ export function CategoryTree({
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
           onDragCancel={() => {
+            clearHoverExpandTimer();
             setActiveDragId(null);
             setDropTarget(null);
           }}
