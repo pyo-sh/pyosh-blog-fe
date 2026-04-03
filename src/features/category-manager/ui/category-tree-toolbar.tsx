@@ -15,10 +15,7 @@ interface CategoryTreeToolbarProps {
   mode: CategoryTreeMode;
   showHidden: boolean;
   showSlug: boolean;
-  selectedCount: number;
   pendingChangeCount: number;
-  allDisplayedSelected: boolean;
-  isBulkUpdating: boolean;
   isSavingTree: boolean;
   onShowHiddenChange: (nextValue: boolean) => void;
   onShowSlugChange: (nextValue: boolean) => void;
@@ -27,11 +24,6 @@ interface CategoryTreeToolbarProps {
   onCreate: () => void;
   onEnterSelectMode: () => void;
   onEnterEditMode: () => void;
-  onToggleSelectAll: () => void;
-  onClearSelection: () => void;
-  onCompleteSelectMode: () => void;
-  onHideSelected: () => void;
-  onShowSelected: () => void;
   onCancelEditMode: () => void;
   onSaveEditMode: () => void;
 }
@@ -41,10 +33,7 @@ export function CategoryTreeToolbar({
   mode,
   showHidden,
   showSlug,
-  selectedCount,
   pendingChangeCount,
-  allDisplayedSelected,
-  isBulkUpdating,
   isSavingTree,
   onShowHiddenChange,
   onShowSlugChange,
@@ -53,65 +42,11 @@ export function CategoryTreeToolbar({
   onCreate,
   onEnterSelectMode,
   onEnterEditMode,
-  onToggleSelectAll,
-  onClearSelection,
-  onCompleteSelectMode,
-  onHideSelected,
-  onShowSelected,
   onCancelEditMode,
   onSaveEditMode,
 }: CategoryTreeToolbarProps) {
   if (mode === "select") {
-    return (
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={onToggleSelectAll}
-            className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-2.5 text-sm font-medium leading-none text-text-2 transition-colors hover:bg-background-3"
-          >
-            <Icon icon={checkSquareLinear} width="16" aria-hidden="true" />
-            {allDisplayedSelected ? "전체 해제" : "전체 선택"}
-          </button>
-          <button
-            type="button"
-            onClick={onHideSelected}
-            disabled={selectedCount === 0 || isBulkUpdating}
-            className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-2.5 text-sm font-medium leading-none text-text-2 transition-colors hover:bg-background-3 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            숨기기
-          </button>
-          <button
-            type="button"
-            onClick={onShowSelected}
-            disabled={selectedCount === 0 || isBulkUpdating}
-            className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-2.5 text-sm font-medium leading-none text-text-2 transition-colors hover:bg-background-3 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            보이기
-          </button>
-          <span className="ml-1 whitespace-nowrap text-sm font-medium leading-none text-primary-1">
-            {selectedCount}개 선택됨
-          </span>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={onClearSelection}
-            disabled={selectedCount === 0}
-            className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-2.5 text-sm font-medium leading-none text-text-2 transition-colors hover:bg-background-3 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            선택 해제
-          </button>
-          <button
-            type="button"
-            onClick={onCompleteSelectMode}
-            className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-primary-1 px-2.5 text-sm font-medium leading-none text-white transition-opacity hover:opacity-90"
-          >
-            완료
-          </button>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   if (mode === "edit") {
@@ -127,7 +62,7 @@ export function CategoryTreeToolbar({
             type="button"
             onClick={onCancelEditMode}
             disabled={isSavingTree}
-            className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-4 text-sm font-medium leading-none text-text-2 transition-colors hover:bg-background-3 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-4 text-sm font-normal leading-none text-text-2 transition-colors hover:bg-background-3 disabled:cursor-not-allowed disabled:opacity-50"
           >
             취소
           </button>
@@ -135,7 +70,7 @@ export function CategoryTreeToolbar({
             type="button"
             onClick={onSaveEditMode}
             disabled={pendingChangeCount === 0 || isSavingTree}
-            className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-primary-1 px-4 text-sm font-medium leading-none text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-primary-1 px-4 text-sm font-normal leading-none text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <Icon icon={checkReadLinear} width="18" aria-hidden="true" />
             {isSavingTree ? "저장 중..." : "저장"}
@@ -155,7 +90,7 @@ export function CategoryTreeToolbar({
           <button
             type="button"
             onClick={onExpandAll}
-            className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-2.5 text-sm font-medium leading-none text-text-2 transition-colors hover:bg-background-3"
+            className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-3 text-sm font-normal leading-none text-text-2 transition-colors hover:bg-background-3"
           >
             <Icon icon={altArrowDownLinear} width="16" aria-hidden="true" />
             전체 펼침
@@ -163,7 +98,7 @@ export function CategoryTreeToolbar({
           <button
             type="button"
             onClick={onCollapseAll}
-            className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-2.5 text-sm font-medium leading-none text-text-2 transition-colors hover:bg-background-3"
+            className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-3 text-sm font-normal leading-none text-text-2 transition-colors hover:bg-background-3"
           >
             <Icon icon={altArrowUpLinear} width="16" aria-hidden="true" />
             전체 접힘
@@ -171,7 +106,9 @@ export function CategoryTreeToolbar({
         </div>
         <div className="flex flex-wrap items-center gap-3 border-l border-border-4 pl-3">
           <label className="flex cursor-pointer items-center gap-2 whitespace-nowrap">
-            <span className="text-sm leading-none text-text-3">숨김 표시</span>
+            <span className="text-[13px] leading-none text-text-3">
+              숨김 표시
+            </span>
             <ToggleSwitch
               checked={showHidden}
               onChange={onShowHiddenChange}
@@ -180,7 +117,9 @@ export function CategoryTreeToolbar({
             />
           </label>
           <label className="flex cursor-pointer items-center gap-2 whitespace-nowrap">
-            <span className="text-sm leading-none text-text-3">slug 표시</span>
+            <span className="text-[13px] leading-none text-text-3">
+              slug 표시
+            </span>
             <ToggleSwitch
               checked={showSlug}
               onChange={onShowSlugChange}
@@ -195,7 +134,7 @@ export function CategoryTreeToolbar({
         <button
           type="button"
           onClick={onEnterSelectMode}
-          className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-4 text-sm font-medium leading-none text-text-2 transition-colors hover:bg-background-3"
+          className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-4 text-sm font-normal leading-none text-text-2 transition-colors hover:bg-background-3"
         >
           <Icon icon={checkSquareLinear} width="18" aria-hidden="true" />
           일괄 선택
@@ -203,7 +142,7 @@ export function CategoryTreeToolbar({
         <button
           type="button"
           onClick={onEnterEditMode}
-          className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-4 text-sm font-medium leading-none text-text-2 transition-colors hover:bg-background-3"
+          className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-4 text-sm font-normal leading-none text-text-2 transition-colors hover:bg-background-3"
         >
           <Icon icon={sortVerticalLinear} width="18" aria-hidden="true" />
           배치 편집
@@ -211,7 +150,7 @@ export function CategoryTreeToolbar({
         <button
           type="button"
           onClick={onCreate}
-          className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-primary-1 px-4 text-sm font-medium leading-none text-white transition-opacity hover:opacity-90"
+          className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-primary-1 px-4 text-sm font-normal leading-none text-white transition-opacity hover:opacity-90"
         >
           <Icon icon={addFolderLinear} width="18" aria-hidden="true" />
           카테고리 추가

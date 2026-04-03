@@ -112,9 +112,7 @@ export function CategoryTree({
   const activeRow = activeDragId
     ? visibleRows.find(({ category }) => category.id === activeDragId)
     : null;
-  const allDisplayedSelected =
-    displayedCategoryIds.length > 0 &&
-    displayedCategoryIds.every((id) => selectedIds.has(id));
+  const selectedCount = selectedIds.size;
 
   const handleToggle = useCallback((id: number) => {
     setExpandedIds((prev) => {
@@ -290,16 +288,13 @@ export function CategoryTree({
 
   return (
     <>
-      <div>
+      <div className={mode === "select" && selectedCount > 0 ? "pb-24" : ""}>
         <CategoryTreeToolbar
           totalCount={totalCount}
           mode={mode}
           showHidden={showHidden}
           showSlug={showSlug}
-          selectedCount={selectedIds.size}
           pendingChangeCount={pendingChanges.length}
-          allDisplayedSelected={allDisplayedSelected}
-          isBulkUpdating={isBulkUpdating}
           isSavingTree={isSavingTree}
           onShowHiddenChange={setShowHidden}
           onShowSlugChange={setShowSlug}
@@ -308,11 +303,6 @@ export function CategoryTree({
           onCreate={onCreate}
           onEnterSelectMode={handleEnterSelectMode}
           onEnterEditMode={handleEnterEditMode}
-          onToggleSelectAll={handleToggleSelectAll}
-          onClearSelection={() => setSelectedIds(new Set())}
-          onCompleteSelectMode={handleExitSelectMode}
-          onHideSelected={() => void handleApplyVisibility(false)}
-          onShowSelected={() => void handleApplyVisibility(true)}
           onCancelEditMode={handleCancelEditMode}
           onSaveEditMode={() => void handleSaveEditMode()}
         />
@@ -364,6 +354,56 @@ export function CategoryTree({
             ) : null}
           </DragOverlay>
         </DndContext>
+
+        {mode === "select" && selectedCount > 0 ? (
+          <div className="fixed bottom-0 left-0 right-0 z-20 md:left-60">
+            <div className="flex flex-wrap items-center gap-3 border-t border-border-3 bg-[rgba(241,242,243,0.95)] px-4 py-3 backdrop-blur-[12px] md:px-6 dark:bg-[rgba(19,20,21,0.94)]">
+              <span className="text-sm font-medium text-text-1">
+                선택됨 {selectedCount}개
+              </span>
+
+              <div className="ml-auto flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleToggleSelectAll}
+                  className="cursor-pointer px-2 py-1.5 text-sm text-primary-1 transition-colors hover:text-primary-1/80"
+                >
+                  전체 선택
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedIds(new Set())}
+                  className="cursor-pointer px-2 py-1.5 text-sm text-text-3 transition-colors hover:text-text-1"
+                >
+                  전체 해제
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleApplyVisibility(false)}
+                  disabled={selectedCount === 0 || isBulkUpdating}
+                  className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] border border-border-3 px-3 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  숨기기
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleApplyVisibility(true)}
+                  disabled={selectedCount === 0 || isBulkUpdating}
+                  className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] border border-border-3 px-3 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  보이기
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExitSelectMode}
+                  className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] bg-primary-1 px-3 text-sm text-white transition-opacity hover:opacity-90"
+                >
+                  완료
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </div>
 
       <ConfirmDialog

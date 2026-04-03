@@ -5,6 +5,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { Icon } from "@iconify/react";
 import altArrowRightLinear from "@iconify-icons/solar/alt-arrow-right-linear";
 import menuDotsLinear from "@iconify-icons/solar/menu-dots-linear";
+import penNewRoundLinear from "@iconify-icons/solar/pen-new-round-linear";
 import trashBinMinimalisticLinear from "@iconify-icons/solar/trash-bin-minimalistic-linear";
 import { buildDropZoneId } from "../lib/tree-utils";
 import type {
@@ -85,7 +86,15 @@ export function CategoryTreeRow({
   return (
     <li
       className="relative cursor-pointer border-b border-border-4 transition-colors last:border-b-0 hover:bg-background-3"
-      onClick={() => onEdit(category)}
+      onClick={() => {
+        if (hasVisibleChildren) {
+          onToggle(category.id);
+        }
+      }}
+      onContextMenu={(event) => {
+        event.preventDefault();
+        onEdit(category);
+      }}
     >
       <div
         ref={beforeDrop.setNodeRef}
@@ -101,7 +110,7 @@ export function CategoryTreeRow({
         <div
           ref={draggable.setNodeRef}
           className={cn(
-            "flex items-center justify-between gap-2 px-4 py-3 transition-colors",
+            "flex h-[52px] items-center justify-between gap-2 px-4 transition-colors",
             isDragging && "z-10 opacity-50 shadow-lg",
             currentDropPosition === "inside" &&
               !isInvalidDropTarget &&
@@ -201,6 +210,21 @@ export function CategoryTreeRow({
 
             {mode === "view" ? (
               <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onEdit(category);
+                  }}
+                  aria-label={`${category.name} 수정`}
+                  className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-text-4 transition-colors hover:bg-background-3 hover:text-text-2"
+                >
+                  <Icon
+                    icon={penNewRoundLinear}
+                    width="16"
+                    aria-hidden="true"
+                  />
+                </button>
                 <button
                   type="button"
                   onClick={(event) => {
