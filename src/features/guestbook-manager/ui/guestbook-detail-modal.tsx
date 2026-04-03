@@ -103,91 +103,73 @@ export function GuestbookDetailModal({
       onClose={onClose}
       withBackground
       aria-label="방명록 상세 보기"
-      className="w-full max-w-[44rem]"
+      className="w-full max-w-[35rem]"
     >
       <div className="flex max-h-[80vh] flex-col text-left">
-        <div className="flex items-start justify-between gap-4 border-b border-border-3 px-6 py-5">
-          <div className="space-y-1">
-            <h2 className="text-lg font-semibold text-text-1">방명록 상세</h2>
-            <p className="text-sm text-text-3">
-              작성자와 원문을 확인하고 상태를 변경할 수 있습니다.
-            </p>
-          </div>
+        <div className="flex items-center justify-between px-6 py-5">
+          <h2 className="text-lg font-bold text-text-1">방명록 상세</h2>
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border-3 text-text-3 transition-colors hover:border-border-2 hover:text-text-1"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-text-3 transition-colors hover:bg-background-3 hover:text-text-1"
             aria-label="방명록 상세 닫기"
           >
             ×
           </button>
         </div>
 
-        <div className="space-y-6 overflow-y-auto px-6 py-6">
-          <dl className="grid gap-4 md:grid-cols-2">
-            <div>
-              <dt className="text-xs font-medium uppercase tracking-[0.16em] text-text-4">
-                작성자
-              </dt>
-              <dd className="mt-2 text-sm font-medium text-text-1">
+        <div className="overflow-y-auto px-6 pb-6">
+          <div className="mb-4 flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-background-3 text-sm font-semibold text-text-2">
+              {item.author.name.trim().charAt(0) || "?"}
+            </span>
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-text-1">
                 {item.author.name}
-                <span className="ml-2 rounded-full bg-background-1 px-2.5 py-1 text-xs font-medium text-text-4">
-                  {item.author.type === "oauth" ? "OAuth" : "게스트"}
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-text-3">
+                  {item.author.type === "guest" && item.author.email
+                    ? item.author.email
+                    : item.author.type === "oauth"
+                      ? "OAuth"
+                      : "-"}
                 </span>
-              </dd>
+                <span className="text-xs text-text-4">|</span>
+                <span className="text-xs text-text-4">
+                  {dateTimeFormatter.format(new Date(item.createdAt))}
+                </span>
+              </div>
             </div>
-            <div>
-              <dt className="text-xs font-medium uppercase tracking-[0.16em] text-text-4">
-                이메일
-              </dt>
-              <dd className="mt-2 text-sm text-text-2">
-                {item.author.type === "guest" && item.author.email
-                  ? item.author.email
-                  : "-"}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-xs font-medium uppercase tracking-[0.16em] text-text-4">
-                작성일
-              </dt>
-              <dd className="mt-2 text-sm text-text-2">
-                {dateTimeFormatter.format(new Date(item.createdAt))}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-xs font-medium uppercase tracking-[0.16em] text-text-4">
-                비밀 여부
-              </dt>
-              <dd className="mt-2 text-sm text-text-2">
-                {item.isSecret ? "비밀" : "공개"}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-xs font-medium uppercase tracking-[0.16em] text-text-4">
-                상태
-              </dt>
-              <dd className="mt-2 text-sm text-text-2">
-                {getStatusLabel(item.status)}
-              </dd>
-            </div>
-          </dl>
+          </div>
 
-          <div className="rounded-[1.25rem] border border-border-3 bg-background-1 p-5">
-            <p className="text-xs font-medium uppercase tracking-[0.16em] text-text-4">
-              본문
-            </p>
-            <p
+          <div className="mb-4 border-b border-border-4" />
+
+          <p
+            className={cn(
+              "mb-6 whitespace-pre-wrap break-words text-sm leading-relaxed text-text-2",
+              item.status === "deleted" && "text-text-4",
+            )}
+          >
+            {item.body || "삭제된 방명록입니다."}
+          </p>
+
+          <div className="mb-4 flex items-center gap-2">
+            <span className="text-xs text-text-3">상태:</span>
+            <span
               className={cn(
-                "mt-4 whitespace-pre-wrap break-words text-sm leading-7",
-                item.status === "deleted" ? "text-text-4" : "text-text-2",
+                "inline-flex items-center rounded-md px-2 py-1 text-[11px] font-medium leading-none",
+                item.status === "active" && "bg-positive-1/10 text-positive-1",
+                item.status === "hidden" && "bg-background-3 text-text-3",
+                item.status === "deleted" && "bg-negative-1/10 text-negative-1",
               )}
             >
-              {item.body || "삭제된 방명록입니다."}
-            </p>
+              {getStatusLabel(item.status)}
+            </span>
           </div>
         </div>
 
-        <div className="flex flex-wrap justify-end gap-3 border-t border-border-3 px-6 py-5">
+        <div className="flex flex-wrap items-center justify-end gap-2 px-6 pb-6">
           {actions.map((action) => (
             <button
               key={action.value}
@@ -195,12 +177,13 @@ export function GuestbookDetailModal({
               onClick={() => onSelectAction(action.value)}
               disabled={isPending}
               className={cn(
-                "inline-flex items-center justify-center rounded-[0.75rem] px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+                "inline-flex items-center justify-center gap-1 rounded-[0.75rem] px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
                 action.tone === "danger"
-                  ? "border border-negative-1/30 text-negative-1 hover:bg-negative-1/10"
+                  ? "bg-negative-1 text-white hover:opacity-90"
                   : "border border-border-3 text-text-2 hover:border-border-2 hover:text-text-1",
               )}
             >
+              {action.value === "hide" ? "숨기기" : null}
               {action.label}
             </button>
           ))}
