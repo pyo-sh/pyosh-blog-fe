@@ -10,6 +10,7 @@ import trashBinMinimalisticLinear from "@iconify-icons/solar/trash-bin-minimalis
 import { buildDropZoneId } from "../lib/tree-utils";
 import type {
   ChangeMarker,
+  DropPosition,
   CategoryTreeMode,
   DropTarget,
 } from "../lib/tree-utils";
@@ -285,10 +286,14 @@ export function CategoryTreeRowPreview({
   category,
   depth,
   changeMarker,
+  dropPosition,
+  invalidDrop,
 }: {
   category: Category;
   depth: number;
   changeMarker?: ChangeMarker;
+  dropPosition: DropPosition | null;
+  invalidDrop: boolean;
 }) {
   return (
     <div className="flex min-w-[18rem] items-center justify-between gap-2 rounded-xl border border-border-3 bg-background-2 px-4 py-3 shadow-[0px_18px_40px_0px_rgba(0,0,0,0.14)]">
@@ -315,6 +320,22 @@ export function CategoryTreeRowPreview({
       <span className="whitespace-nowrap rounded-[4px] bg-[rgba(219,221,224,0.30)] px-1.5 py-px text-[12px] leading-4 text-text-3">
         발행 {category.publishedPostCount ?? 0} / 전체{" "}
         {category.totalPostCount ?? 0}
+      </span>
+      <span
+        className={cn(
+          "whitespace-nowrap rounded-full px-2 py-1 text-[11px] font-medium leading-none",
+          invalidDrop
+            ? "bg-negative-1/10 text-negative-1"
+            : dropPosition === "inside"
+              ? "bg-primary-1/10 text-primary-1"
+              : "bg-background-3 text-text-3",
+        )}
+      >
+        {invalidDrop
+          ? "이동 불가"
+          : dropPosition === "inside"
+            ? "자식으로 이동"
+            : "순서 변경"}
       </span>
     </div>
   );

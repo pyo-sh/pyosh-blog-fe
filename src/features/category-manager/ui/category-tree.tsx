@@ -7,8 +7,10 @@ import {
   KeyboardSensor,
   PointerSensor,
   closestCenter,
+  pointerWithin,
   type DragOverEvent,
   type DragStartEvent,
+  type CollisionDetection,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -56,6 +58,15 @@ export function CategoryTree({
   isBulkUpdating,
   isSavingTree,
 }: CategoryTreeProps) {
+  const collisionDetection: CollisionDetection = useCallback((args) => {
+    const pointerCollisions = pointerWithin(args);
+
+    if (pointerCollisions.length > 0) {
+      return pointerCollisions;
+    }
+
+    return closestCenter(args);
+  }, []);
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -322,6 +333,15 @@ export function CategoryTree({
     clearHoverExpandTimer();
 
     if (activeDragId !== null && dropTarget && !dropTarget.invalid) {
+      if (dropTarget.position === "inside") {
+        setExpandedIds((prev) => {
+          const next = new Set(prev);
+          next.add(dropTarget.targetId);
+
+          return next;
+        });
+      }
+
       setWorkingCategories((prev) =>
         moveCategory(prev, activeDragId, {
           targetId: dropTarget.targetId,
@@ -365,7 +385,7 @@ export function CategoryTree({
 
         <DndContext
           sensors={sensors}
-          collisionDetection={closestCenter}
+          collisionDetection={collisionDetection}
           onDragStart={handleDragStart}
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
@@ -407,6 +427,8 @@ export function CategoryTree({
                 category={activeRow.category}
                 depth={activeRow.depth}
                 changeMarker={changeMarkerMap.get(activeRow.category.id)}
+                dropPosition={dropTarget?.position ?? null}
+                invalidDrop={dropTarget?.invalid ?? false}
               />
             ) : null}
           </DragOverlay>
