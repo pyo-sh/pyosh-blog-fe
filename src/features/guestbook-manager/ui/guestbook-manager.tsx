@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   GuestbookActionModal,
@@ -203,6 +208,7 @@ export function GuestbookManager() {
         endDate: endDate || undefined,
         q: searchQuery || undefined,
       }),
+    placeholderData: keepPreviousData,
   });
 
   const settingsQuery = useQuery({
@@ -434,44 +440,13 @@ export function GuestbookManager() {
         </div>
       ) : null}
 
-      <section className="bg-background-1 p-0">
-        {selectedIds.length > 0 ? (
-          <div className="mb-4 flex flex-wrap items-center gap-3 rounded-[0.95rem] border border-primary-1/20 bg-primary-1/5 px-4 py-3">
-            <label className="flex items-center gap-2 text-sm font-medium text-text-1">
-              <input
-                type="checkbox"
-                checked={allCurrentSelected}
-                onChange={handleToggleSelectAllCurrent}
-                className="h-4 w-4 rounded border-border-3 accent-primary-1"
-              />
-              전체
-            </label>
-            <span className="text-sm text-text-2">
-              선택됨 {selectedIds.length}개
-              {offPageCount > 0 ? ` (다른 페이지 ${offPageCount}개 포함)` : ""}
-            </span>
-            <button
-              type="button"
-              onClick={() =>
-                setActionContext({
-                  type: "bulk",
-                  items: selectedList,
-                })
-              }
-              className="rounded-[0.75rem] bg-primary-1 px-3 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-            >
-              일괄 작업
-            </button>
-            <button
-              type="button"
-              onClick={handleClearSelection}
-              className="text-sm text-text-4 transition-colors hover:text-text-2"
-            >
-              전체 해제
-            </button>
-          </div>
-        ) : null}
-
+      <section
+        className={
+          selectedIds.length > 0
+            ? "bg-background-1 pb-24 md:pb-28"
+            : "bg-background-1 p-0"
+        }
+      >
         {guestbookQuery.isLoading ? (
           <div className="space-y-4">
             <div className="flex gap-3">
@@ -551,6 +526,13 @@ export function GuestbookManager() {
               onToggleSelect={handleToggleSelect}
               onToggleSelectAllCurrent={handleToggleSelectAllCurrent}
               onOpenDetail={(item) => setDetailItem(item)}
+              onSelectAction={(item, action) =>
+                setActionContext({
+                  type: "single",
+                  item,
+                  defaultAction: action,
+                })
+              }
               emptyMessage={
                 searchQuery ||
                 status !== "all" ||
@@ -641,6 +623,59 @@ export function GuestbookManager() {
           </>
         ) : null}
       </section>
+
+      {selectedIds.length > 0 ? (
+        <div className="fixed bottom-0 left-0 right-0 z-20 md:left-60">
+          <div className="flex flex-wrap items-center gap-3 border-t border-border-3 bg-[rgba(241,242,243,0.95)] px-4 py-3 backdrop-blur-[12px] md:px-6 dark:bg-[rgba(19,20,21,0.94)]">
+            <span className="text-sm font-medium text-text-1">
+              선택됨 {selectedIds.length}개
+              {offPageCount > 0 ? (
+                <span className="ml-1 text-xs text-text-3">
+                  (다른 페이지 {offPageCount}개 포함)
+                </span>
+              ) : null}
+            </span>
+
+            <div className="ml-auto flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedItems((current) => {
+                    const next = { ...current };
+                    rows.forEach((row) => {
+                      next[row.id] = row;
+                    });
+
+                    return next;
+                  });
+                }}
+                className="cursor-pointer px-2 py-1.5 text-sm text-primary-1 transition-colors hover:text-primary-1/80"
+              >
+                전체 선택
+              </button>
+              <button
+                type="button"
+                onClick={handleClearSelection}
+                className="cursor-pointer px-2 py-1.5 text-sm text-text-3 transition-colors hover:text-text-1"
+              >
+                전체 해제
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setActionContext({
+                    type: "bulk",
+                    items: selectedList,
+                  })
+                }
+                className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] border border-border-3 px-3 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+              >
+                일괄 작업
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <GuestbookDetailModal
         item={detailItem}
