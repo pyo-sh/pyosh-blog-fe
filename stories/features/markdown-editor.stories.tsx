@@ -47,7 +47,7 @@ function ControlledEditor(args: { placeholderText?: string; initialValue?: strin
 }
 
 const meta: Meta<typeof ControlledEditor> = {
-  title: "Features/MarkdownEditor",
+  title: "Features/Manage/MarkdownEditor",
   component: ControlledEditor,
   parameters: {
     layout: "padded",

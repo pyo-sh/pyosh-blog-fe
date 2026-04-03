@@ -77,15 +77,15 @@ export function GuestbookActionModal({
       aria-label={title}
       className="w-full max-w-[34rem]"
     >
-      <div className="flex flex-col gap-5 p-6 text-left">
-        <div className="space-y-2">
+      <div className="text-left">
+        <div className="space-y-2 border-b border-border-3 px-6 py-5">
           <h2 className="text-lg font-semibold text-text-1">{title}</h2>
           {description ? (
             <p className="text-sm leading-6 text-text-3">{description}</p>
           ) : null}
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-3 px-6 py-5">
           {options.map((option) => (
             <label
               key={option.value}
@@ -115,7 +115,7 @@ export function GuestbookActionModal({
           ))}
         </div>
 
-        <div className="flex justify-end gap-3">
+        <div className="flex justify-end gap-3 border-t border-border-3 px-6 py-5">
           <button
             type="button"
             onClick={handleClose}

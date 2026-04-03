@@ -3,7 +3,7 @@ import { http, HttpResponse } from "msw";
 import { PostForm } from "@features/post-editor";
 
 const meta: Meta<typeof PostForm> = {
-  title: "Widgets/Admin/PostEditor",
+  title: "Widgets/Manage/PostEditor",
   component: PostForm,
   parameters: {
     layout: "padded",

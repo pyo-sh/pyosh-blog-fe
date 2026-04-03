@@ -32,7 +32,7 @@ function EditorAndPreviewStory() {
 }
 
 const meta: Meta<typeof EditorAndPreviewStory> = {
-  title: "Features/MarkdownPreview",
+  title: "Features/Manage/MarkdownPreview",
   component: EditorAndPreviewStory,
   parameters: {
     layout: "fullscreen",

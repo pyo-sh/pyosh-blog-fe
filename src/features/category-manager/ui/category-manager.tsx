@@ -120,6 +120,24 @@ export function CategoryManager() {
     },
   });
 
+  const visibilityMutation = useMutation({
+    mutationFn: (category: Category) =>
+      updateCategory(category.id, { isVisible: !category.isVisible }),
+    onSuccess: async (_data, category) => {
+      await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      toast.success(
+        category.isVisible
+          ? "카테고리를 숨겼습니다."
+          : "카테고리를 표시했습니다.",
+      );
+    },
+    onError: (error) => {
+      toast.error(
+        getErrorMessage(error, "카테고리 표시 상태 변경에 실패했습니다."),
+      );
+    },
+  });
+
   const treeUpdateMutation = useMutation({
     mutationFn: (changes: CategoryTreeChange[]) => updateCategoryTree(changes),
     onSuccess: async (_data, changes) => {
@@ -161,44 +179,9 @@ export function CategoryManager() {
   };
 
   return (
-    <div className="space-y-6">
-      <header className="flex flex-col gap-4 rounded-[1.75rem] border border-border-3 bg-background-2 p-6 shadow-[0px_18px_60px_0px_rgba(0,0,0,0.06)] md:flex-row md:items-end md:justify-between">
+    <div className="space-y-4">
+      <section className="bg-background-1 p-0">
         <div>
-          <p className="text-body-xs uppercase tracking-[0.24em] text-text-4">
-            Categories
-          </p>
-          <h1 className="mt-3 text-2xl font-semibold text-text-1">
-            카테고리 관리
-          </h1>
-          <p className="mt-2 text-sm text-text-3">
-            카테고리 구조를 확인하고, 노출 여부와 부모 관계를 조정할 수
-            있습니다.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={handleCreate}
-          className="inline-flex items-center justify-center rounded-[0.9rem] bg-primary-1 px-4 py-3 text-sm font-medium text-text-1"
-        >
-          카테고리 추가
-        </button>
-      </header>
-
-      <section className="rounded-[1.75rem] border border-border-3 bg-background-2 p-6">
-        <div className="flex flex-col gap-3 border-b border-border-3 pb-5 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-text-1">카테고리 트리</h2>
-            <p className="mt-1 text-sm text-text-3">
-              숨김 상태와 계층 구조를 한 번에 확인할 수 있습니다.
-            </p>
-          </div>
-          <span className="text-sm text-text-4">
-            총 {countCategories(categories)}개
-          </span>
-        </div>
-
-        <div className="mt-6">
           {categoriesQuery.isPending ? (
             <div className="space-y-4">
               {Array.from({ length: 4 }).map((_, index) => (
@@ -233,8 +216,13 @@ export function CategoryManager() {
           {!categoriesQuery.isPending && !categoriesQuery.isError ? (
             <CategoryTree
               categories={categories}
+              totalCount={countCategories(categories)}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              onToggleVisibility={async (category) => {
+                await visibilityMutation.mutateAsync(category);
+              }}
+              onCreate={handleCreate}
               onBulkVisibilityChange={async (ids, isVisible) => {
                 await bulkVisibilityMutation.mutateAsync({ ids, isVisible });
               }}

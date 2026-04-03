@@ -241,7 +241,7 @@ function AdminPostListStory({
 }
 
 const meta: Meta<typeof AdminPostListStory> = {
-  title: "Widgets/Admin/PostList",
+  title: "Widgets/Manage/PostList",
   component: AdminPostListStory,
   parameters: {
     layout: "padded",

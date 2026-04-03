@@ -23,10 +23,12 @@ import {
   type AdminCommentItem,
 } from "@entities/comment";
 import { getErrorMessage } from "@shared/lib/get-error-message";
+import { cn } from "@shared/lib/style-utils";
 import { EmptyState, Skeleton } from "@shared/ui/libs";
 
 const PAGE_SIZE = 10;
 const QUERY_KEY = ["admin-comments"] as const;
+const EMPTY_COMMENT_ROWS: AdminCommentItem[] = [];
 
 interface FilterState {
   status: CommentStatusFilter;
@@ -76,6 +78,30 @@ function getBulkAllowedActions(items: AdminCommentItem[]) {
   }, []);
 }
 
+function generatePageNumbers(
+  currentPage: number,
+  totalPages: number,
+  windowSize: number,
+): Array<number | "..."> {
+  if (totalPages <= 1) return [];
+
+  const windowStart = Math.max(2, currentPage - windowSize);
+  const windowEnd = Math.min(totalPages - 1, currentPage + windowSize);
+  const pages: Array<number | "..."> = [1];
+
+  if (windowStart > 2) pages.push("...");
+
+  for (let i = windowStart; i <= windowEnd; i++) {
+    pages.push(i);
+  }
+
+  if (windowEnd < totalPages - 1) pages.push("...");
+
+  pages.push(totalPages);
+
+  return pages;
+}
+
 export function AdminCommentsPage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
@@ -121,20 +147,28 @@ export function AdminCommentsPage() {
     queryFn: () => fetchAdminComments(queryParams),
   });
 
-  const rows = data?.data ?? [];
+  const rows = data?.data ?? EMPTY_COMMENT_ROWS;
   const meta = data?.meta;
 
   useEffect(() => {
     setSelectedItems((current) => {
+      if (rows.length === 0) {
+        return current;
+      }
+
       const next = { ...current };
+      let hasChanged = false;
 
       for (const row of rows) {
         if (next[row.id]) {
-          next[row.id] = row;
+          if (next[row.id] !== row) {
+            next[row.id] = row;
+            hasChanged = true;
+          }
         }
       }
 
-      return next;
+      return hasChanged ? next : current;
     });
   }, [rows]);
 
@@ -406,29 +440,17 @@ export function AdminCommentsPage() {
   const isSingleActionModalOpen =
     actionContext !== null && actionContext.type === "single";
   const bulkAllowedActions = getBulkAllowedActions(selectedList);
+  const pageNumbers = meta ? generatePageNumbers(page, meta.totalPages, 2) : [];
 
   return (
-    <div className="space-y-6">
-      <header className="flex flex-col gap-4 rounded-[1.75rem] border border-border-3 bg-background-2 p-6 shadow-[0px_18px_60px_0px_rgba(0,0,0,0.06)] md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="text-body-xs uppercase tracking-[0.24em] text-text-4">
-            Comments
-          </p>
-          <h1 className="mt-3 text-2xl font-semibold text-text-1">댓글 관리</h1>
-          <p className="mt-2 text-sm text-text-3">
-            공개 댓글과 비밀 댓글을 함께 확인하고, 상태를 검토한 뒤 필요한
-            항목을 강제로 삭제할 수 있습니다.
-          </p>
-        </div>
-
-        <span className="inline-flex items-center justify-center rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm font-medium text-text-4">
-          페이지당 {PAGE_SIZE}개
-        </span>
-      </header>
-
-      <section className="rounded-[1.75rem] border border-border-3 bg-background-2 p-6">
-        {/* Filters */}
-        <div className="mb-5 border-b border-border-3 pb-5">
+    <>
+      <section
+        className={cn(
+          "-mx-4 -my-6 bg-background-1 px-4 py-6 md:-mx-6 md:px-6",
+          selectedIds.length > 0 && "pb-24 md:pb-28",
+        )}
+      >
+        <div className="flex flex-wrap items-end justify-start gap-3 pb-4">
           <CommentFilters
             status={filters.status}
             authorType={filters.authorType}
@@ -443,114 +465,34 @@ export function AdminCommentsPage() {
           />
         </div>
 
-        {/* Bulk selection bar */}
-        {selectedIds.length > 0 ? (
-          <div className="mb-4 flex flex-wrap items-center gap-3 rounded-[1rem] border border-primary-1/20 bg-primary-1/5 px-4 py-3">
-            <span className="text-sm font-medium text-text-1">
-              선택됨 {selectedIds.length}개
-              {selectedOnOtherPages > 0 ? (
-                <span className="ml-1 text-text-3">
-                  (다른 페이지 {selectedOnOtherPages}개 포함)
-                </span>
-              ) : null}
-            </span>
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedItems((current) => {
-                  const next = { ...current };
-                  rows.forEach((row) => {
-                    next[row.id] = row;
-                  });
-
-                  return next;
-                });
-              }}
-              className="rounded-[0.6rem] border border-border-3 px-3 py-1.5 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
-            >
-              현재 페이지 전체 선택
-            </button>
-            <button
-              type="button"
-              onClick={handleClearSelection}
-              className="rounded-[0.6rem] px-3 py-1.5 text-sm text-text-4 transition-colors hover:text-text-2"
-            >
-              전체 해제
-            </button>
-            <button
-              type="button"
-              onClick={() => handleOpenBulkAction("restore")}
-              disabled={!bulkAllowedActions.includes("restore")}
-              className="rounded-[0.6rem] border border-border-3 px-3 py-1.5 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
-            >
-              복원
-            </button>
-            <button
-              type="button"
-              onClick={() => handleOpenBulkAction("soft_delete")}
-              disabled={!bulkAllowedActions.includes("soft_delete")}
-              className="rounded-[0.6rem] border border-border-3 px-3 py-1.5 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
-            >
-              소프트 삭제
-            </button>
-            <button
-              type="button"
-              onClick={() => handleOpenBulkAction("hard_delete")}
-              disabled={!bulkAllowedActions.includes("hard_delete")}
-              className="rounded-[0.6rem] border border-negative-1/30 px-3 py-1.5 text-sm text-negative-1 transition-colors hover:bg-negative-1/10"
-            >
-              영구 삭제
-            </button>
-          </div>
-        ) : null}
-
         {actionError ? (
-          <div className="mb-4 rounded-[1rem] border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-sm text-negative-1">
+          <div className="mt-4 rounded-[1rem] border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-sm text-negative-1">
             {actionError}
           </div>
         ) : null}
 
-        {/* Table header */}
-        <div className="flex flex-col gap-3 pb-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-text-1">댓글 목록</h2>
-            <p className="mt-1 text-sm text-text-3">
-              최신 순으로 댓글을 살펴보고 비밀 여부, 상태, 답글 관계를 함께
-              확인할 수 있습니다.
-            </p>
-          </div>
-
-          <p className="text-sm text-text-4">
-            {isFetching && !isPending
-              ? "목록을 새로 불러오는 중..."
-              : paginationLabel}
-          </p>
-        </div>
-
-        {/* Loading skeleton */}
         {isPending ? (
-          <div className="overflow-hidden rounded-[1.5rem] border border-border-3 bg-background-2">
-            <div className="grid grid-cols-7 gap-4 border-b border-border-3 px-6 py-4">
-              {Array.from({ length: 7 }).map((_, i) => (
+          <div className="mt-4 overflow-hidden rounded-[1rem] border border-border-4 bg-background-1">
+            <div className="grid grid-cols-8 gap-3 border-b border-border-4 bg-background-2 px-4 py-3.5">
+              {Array.from({ length: 8 }).map((_, i) => (
                 <Skeleton key={i} />
               ))}
             </div>
-            <div className="space-y-4 px-6 py-5">
-              {Array.from({ length: 5 }).map((_, i) => (
+            <div className="space-y-3 px-4 py-4">
+              {Array.from({ length: 6 }).map((_, i) => (
                 <Skeleton
                   key={i}
                   variant="rect"
-                  height="2.5rem"
-                  className="rounded-[1rem]"
+                  height="3.25rem"
+                  className="rounded-[0.9rem]"
                 />
               ))}
             </div>
           </div>
         ) : null}
 
-        {/* Error */}
         {!isPending && isError ? (
-          <div className="rounded-[1.5rem] border border-negative-1/20 bg-negative-1/10 px-6 py-8 text-center">
+          <div className="mt-4 rounded-[1.25rem] border border-negative-1/20 bg-negative-1/10 px-6 py-8 text-center">
             <p className="text-sm text-negative-1">
               {getErrorMessage(error, "댓글 목록을 불러오지 못했습니다.")}
             </p>
@@ -564,61 +506,187 @@ export function AdminCommentsPage() {
           </div>
         ) : null}
 
-        {/* Table */}
         {!isPending && !isError ? (
           rows.length > 0 ? (
-            <CommentTable
-              rows={rows}
-              selectedIds={selectedIdSet}
-              deletingId={
-                actionMutation.isPending && actionItems.length === 1
-                  ? (actionItems[0]?.id ?? null)
-                  : null
-              }
-              onToggleSelect={handleToggleSelect}
-              onToggleSelectPage={handleToggleSelectPage}
-              onClickComment={setOpenedComment}
-              onManage={handleOpenActionModal}
-            />
+            <div className="mt-4">
+              <CommentTable
+                rows={rows}
+                selectedIds={selectedIdSet}
+                deletingId={
+                  actionMutation.isPending && actionItems.length === 1
+                    ? (actionItems[0]?.id ?? null)
+                    : null
+                }
+                onToggleSelect={handleToggleSelect}
+                onToggleSelectPage={handleToggleSelectPage}
+                onClickComment={setOpenedComment}
+                onManage={handleOpenActionModal}
+              />
+            </div>
           ) : (
-            <EmptyState message="현재 등록된 댓글이 없습니다." />
+            <EmptyState
+              message="현재 등록된 댓글이 없습니다."
+              className="mt-4"
+            />
           )
         ) : null}
 
-        {/* Pagination */}
         {meta && meta.totalPages > 1 ? (
-          <div className="mt-6 flex flex-col gap-4 border-t border-border-3 pt-5 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-text-4">{paginationLabel}</p>
-
+          <div className="mt-5 border-t border-border-4 pt-4">
+            <p className="text-right text-sm text-text-4">
+              {isFetching && !isPending
+                ? "목록을 새로 불러오는 중..."
+                : paginationLabel}
+            </p>
             <nav
               aria-label="관리자 댓글 페이지네이션"
-              className="flex items-center gap-2"
+              className="mt-4 flex items-center justify-center gap-0.5"
             >
               <button
                 type="button"
-                onClick={() => setPage((v) => Math.max(1, v - 1))}
-                disabled={page === 1}
-                className="inline-flex rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={() => setPage((value) => Math.max(1, value - 5))}
+                disabled={page <= 5}
+                className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:text-text-4"
+                aria-label="5 pages back"
               >
-                이전
+                &laquo;
               </button>
-
-              <span className="min-w-20 text-center text-sm text-text-2">
-                {page} / {meta.totalPages}
-              </span>
-
               <button
                 type="button"
-                onClick={() => setPage((v) => Math.min(meta.totalPages, v + 1))}
-                disabled={page === meta.totalPages}
-                className="inline-flex rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={() => setPage((value) => Math.max(1, value - 1))}
+                disabled={page === 1}
+                className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:text-text-4"
+                aria-label="Previous page"
               >
-                다음
+                &lsaquo;
+              </button>
+              {pageNumbers.map((pageNumber, index) =>
+                pageNumber === "..." ? (
+                  <span
+                    key={`ellipsis-${index}`}
+                    className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-4"
+                    aria-hidden="true"
+                  >
+                    &hellip;
+                  </span>
+                ) : (
+                  <button
+                    key={pageNumber}
+                    type="button"
+                    onClick={() => setPage(pageNumber)}
+                    disabled={pageNumber === page}
+                    className={cn(
+                      "inline-flex min-w-[2rem] items-center justify-center rounded px-2.5 py-1.5 text-sm transition-colors",
+                      pageNumber === page
+                        ? "pointer-events-none bg-primary-1 font-semibold text-white"
+                        : "text-text-1 hover:bg-background-2",
+                    )}
+                    aria-current={pageNumber === page ? "page" : undefined}
+                    aria-label={`Page ${pageNumber}`}
+                  >
+                    {pageNumber}
+                  </button>
+                ),
+              )}
+              <button
+                type="button"
+                onClick={() =>
+                  setPage((value) => Math.min(meta.totalPages, value + 1))
+                }
+                disabled={page === meta.totalPages}
+                className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:text-text-4"
+                aria-label="Next page"
+              >
+                &rsaquo;
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setPage((value) => Math.min(meta.totalPages, value + 5))
+                }
+                disabled={page + 5 > meta.totalPages}
+                className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:text-text-4"
+                aria-label="5 pages forward"
+              >
+                &raquo;
               </button>
             </nav>
           </div>
+        ) : meta ? (
+          <div className="mt-5 border-t border-border-4 pt-4">
+            <p className="text-right text-sm text-text-4">
+              {isFetching && !isPending
+                ? "목록을 새로 불러오는 중..."
+                : paginationLabel}
+            </p>
+          </div>
         ) : null}
       </section>
+
+      {selectedIds.length > 0 ? (
+        <div className="fixed bottom-0 left-0 right-0 z-20 md:left-[var(--admin-sidebar-offset)]">
+          <div className="flex flex-wrap items-center gap-3 border-t border-border-3 bg-[rgba(241,242,243,0.95)] px-4 py-3 backdrop-blur-[12px] md:px-6 dark:bg-[rgba(19,20,21,0.94)]">
+            <span className="text-sm font-medium text-text-1">
+              선택됨 {selectedIds.length}개
+              {selectedOnOtherPages > 0 ? (
+                <span className="ml-1 text-xs text-text-3">
+                  (다른 페이지 {selectedOnOtherPages}개 포함)
+                </span>
+              ) : null}
+            </span>
+
+            <div className="ml-auto flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedItems((current) => {
+                    const next = { ...current };
+                    rows.forEach((row) => {
+                      next[row.id] = row;
+                    });
+
+                    return next;
+                  });
+                }}
+                className="cursor-pointer px-2 py-1.5 text-sm text-primary-1 transition-colors hover:text-primary-1/80"
+              >
+                현재 페이지 전체 선택
+              </button>
+              <button
+                type="button"
+                onClick={handleClearSelection}
+                className="cursor-pointer px-2 py-1.5 text-sm text-text-3 transition-colors hover:text-text-1"
+              >
+                전체 해제
+              </button>
+              <button
+                type="button"
+                onClick={() => handleOpenBulkAction("restore")}
+                disabled={!bulkAllowedActions.includes("restore")}
+                className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] border border-border-3 px-3 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                복원
+              </button>
+              <button
+                type="button"
+                onClick={() => handleOpenBulkAction("soft_delete")}
+                disabled={!bulkAllowedActions.includes("soft_delete")}
+                className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] border border-border-3 px-3 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                소프트 삭제
+              </button>
+              <button
+                type="button"
+                onClick={() => handleOpenBulkAction("hard_delete")}
+                disabled={!bulkAllowedActions.includes("hard_delete")}
+                className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] border border-negative-1/30 px-3 text-sm text-negative-1 transition-colors hover:bg-negative-1/10 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                영구 삭제
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {/* Detail modal */}
       <CommentDetailModal
@@ -656,6 +724,6 @@ export function AdminCommentsPage() {
           });
         }}
       />
-    </div>
+    </>
   );
 }

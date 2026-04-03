@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { Footer } from "@widgets/footer";
 
 const meta: Meta<typeof Footer> = {
-  title: "Widgets/Footer",
+  title: "Widgets/Public/Footer",
   component: Footer,
   parameters: {
     layout: "fullscreen",

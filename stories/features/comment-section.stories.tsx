@@ -3,7 +3,7 @@ import { CommentList } from "@features/comment-section";
 import { mockComments, mockCommentMeta } from "../mocks/data/comments";
 
 const meta: Meta<typeof CommentList> = {
-  title: "Features/CommentSection/CommentList",
+  title: "Features/Public/CommentSection/CommentList",
   component: CommentList,
   parameters: {
     layout: "padded",

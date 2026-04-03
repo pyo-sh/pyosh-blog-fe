@@ -1,14 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   GuestbookActionModal,
   type GuestbookManageAction,
 } from "./guestbook-action-modal";
 import { GuestbookDetailModal } from "./guestbook-detail-modal";
-import { GuestbookTable } from "./guestbook-table";
+import { GuestbookTable, type GuestbookPeriodFilter } from "./guestbook-table";
 import {
   adminBulkDeleteGuestbookEntries,
   adminBulkPatchGuestbookEntries,
@@ -55,20 +60,59 @@ function getAllowedActionsForStatus(status: AdminGuestbookItem["status"]) {
   return ["hide", "soft_delete", "hard_delete"] as const;
 }
 
-function getPageLabel(
-  total: number,
-  page: number,
-  limit: number,
-  count: number,
-) {
-  if (count === 0) {
-    return "표시할 방명록이 없습니다.";
+function toDateInputValue(date: Date) {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function buildRelativeStart(days: number) {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  date.setDate(date.getDate() - (days - 1));
+
+  return toDateInputValue(date);
+}
+
+function detectPeriodFilter(
+  startDate: string,
+  endDate: string,
+): GuestbookPeriodFilter {
+  if (!startDate && !endDate) {
+    return "all";
   }
 
-  const start = (page - 1) * limit + 1;
-  const end = start + count - 1;
+  const today = toDateInputValue(new Date());
+  if (endDate !== today) {
+    return "all";
+  }
 
-  return `총 ${total.toLocaleString("ko-KR")}개 중 ${start}-${end}`;
+  if (startDate === buildRelativeStart(7)) return "7d";
+  if (startDate === buildRelativeStart(30)) return "30d";
+  if (startDate === buildRelativeStart(90)) return "90d";
+
+  return "all";
+}
+
+function generatePageNumbers(
+  currentPage: number,
+  totalPages: number,
+  windowSize: number,
+): Array<number | "..."> {
+  if (totalPages <= 1) return [];
+
+  const windowStart = Math.max(2, currentPage - windowSize);
+  const windowEnd = Math.min(totalPages - 1, currentPage + windowSize);
+  const pages: Array<number | "..."> = [1];
+
+  if (windowStart > 2) pages.push("...");
+  for (let i = windowStart; i <= windowEnd; i++) pages.push(i);
+  if (windowEnd < totalPages - 1) pages.push("...");
+  pages.push(totalPages);
+
+  return pages;
 }
 
 function isPatchAction(
@@ -89,8 +133,8 @@ function getBulkOptions(items: AdminGuestbookItem[]) {
   > = {
     hide: {
       value: "hide",
-      label: "숨기기",
-      description: "선택한 방명록을 공개 페이지에서 숨깁니다.",
+      label: "비공개 전환",
+      description: "선택한 방명록을 공개 페이지에서 비공개 상태로 전환합니다.",
     },
     restore: {
       value: "restore",
@@ -126,6 +170,20 @@ function getBulkOptions(items: AdminGuestbookItem[]) {
   return commonActions.map((action) => optionMap[action]);
 }
 
+function getBulkAllowedActions(items: AdminGuestbookItem[]) {
+  return items.reduce<readonly GuestbookManageAction[]>((current, item) => {
+    const allowedActions = [
+      ...getAllowedActionsForStatus(item.status),
+    ] as readonly GuestbookManageAction[];
+
+    if (current.length === 0) {
+      return [...allowedActions];
+    }
+
+    return current.filter((action) => allowedActions.includes(action));
+  }, []);
+}
+
 export function GuestbookManager() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
@@ -135,6 +193,7 @@ export function GuestbookManager() {
   >("all");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [dateError, setDateError] = useState<string | undefined>(undefined);
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedItems, setSelectedItems] = useState<
@@ -142,6 +201,7 @@ export function GuestbookManager() {
   >({});
   const [detailItem, setDetailItem] = useState<AdminGuestbookItem | null>(null);
   const [actionContext, setActionContext] = useState<ActionContext>(null);
+  const period = detectPeriodFilter(startDate, endDate);
 
   const guestbookQuery = useQuery({
     queryKey: [
@@ -163,6 +223,7 @@ export function GuestbookManager() {
         endDate: endDate || undefined,
         q: searchQuery || undefined,
       }),
+    placeholderData: keepPreviousData,
   });
 
   const settingsQuery = useQuery({
@@ -255,6 +316,8 @@ export function GuestbookManager() {
   const offPageCount = selectedList.filter(
     (item) => !currentPageIds.includes(item.id),
   ).length;
+  const pageNumbers = meta ? generatePageNumbers(page, meta.totalPages, 2) : [];
+  const bulkAllowedActions = getBulkAllowedActions(selectedList);
 
   useEffect(() => {
     setSelectedItems((current) => {
@@ -354,255 +417,351 @@ export function GuestbookManager() {
         : [];
 
   return (
-    <div className="space-y-6">
-      <header className="flex flex-col gap-4 rounded-[1.75rem] border border-border-3 bg-background-2 p-6 shadow-[0px_18px_60px_0px_rgba(0,0,0,0.06)] md:flex-row md:items-start md:justify-between">
-        <div>
-          <p className="text-body-xs uppercase tracking-[0.24em] text-text-4">
-            Guestbook
-          </p>
-          <h1 className="mt-3 text-2xl font-semibold text-text-1">
-            방명록 관리
-          </h1>
-          <p className="mt-2 text-sm text-text-3">
-            방명록 상태를 필터링하고, 상세 내용을 확인한 뒤 숨김 또는 삭제를
-            처리합니다.
-          </p>
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm font-medium leading-none text-text-2">
+          전체 {meta?.total.toLocaleString("ko-KR") ?? 0}개
+        </p>
+        <div className="flex items-center gap-3">
+          {settingsQuery.isLoading ? <Spinner size="sm" /> : null}
+          <span className="text-sm font-medium leading-none text-text-2">
+            방명록 기능 {settingsStatusLabel}
+          </span>
+          {settingsQuery.isError ? (
+            <button
+              type="button"
+              onClick={() => void settingsQuery.refetch()}
+              className="rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+            >
+              다시 시도
+            </button>
+          ) : null}
+          <ToggleSwitch
+            checked={settingsQuery.data?.enabled ?? false}
+            disabled={isSettingsToggleDisabled}
+            onChange={(nextChecked) => {
+              void settingMutation.mutateAsync(nextChecked);
+            }}
+            aria-label="방명록 기능 활성화 토글"
+          />
         </div>
+      </div>
 
-        <div className="rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3">
-          <p className="text-xs uppercase tracking-[0.16em] text-text-4">
-            페이지 크기
-          </p>
-          <p className="mt-2 text-sm font-medium text-text-2">
-            페이지당 {PAGE_SIZE}개
-          </p>
+      {settingsQuery.isError ? (
+        <div className="rounded-[1rem] border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-sm text-negative-1">
+          {getErrorMessage(
+            settingsQuery.error,
+            "방명록 설정을 불러오지 못했습니다. 상태를 확인한 뒤 다시 시도해 주세요.",
+          )}
         </div>
-      </header>
+      ) : null}
 
-      <section className="rounded-[1.75rem] border border-border-3 bg-background-2 p-6">
-        <div className="flex flex-col gap-5 rounded-[1.25rem] border border-border-3 bg-background-1 p-5 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-sm font-semibold text-text-1">방명록 기능</p>
-            <p className="mt-1 text-sm text-text-3">
-              공개 페이지 방명록 영역과 작성 API를 함께 제어합니다.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {settingsQuery.isLoading ? <Spinner size="sm" /> : null}
-            <span className="text-sm font-medium text-text-2">
-              {settingsStatusLabel}
-            </span>
-            {settingsQuery.isError ? (
-              <button
-                type="button"
-                onClick={() => void settingsQuery.refetch()}
-                className="rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
-              >
-                다시 시도
-              </button>
-            ) : null}
-            <ToggleSwitch
-              checked={settingsQuery.data?.enabled ?? false}
-              disabled={isSettingsToggleDisabled}
-              onChange={(nextChecked) => {
-                void settingMutation.mutateAsync(nextChecked);
-              }}
-              aria-label="방명록 기능 활성화 토글"
-            />
-          </div>
-        </div>
-
-        {settingsQuery.isError ? (
-          <div className="mt-4 rounded-[1rem] border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-sm text-negative-1">
-            {getErrorMessage(
-              settingsQuery.error,
-              "방명록 설정을 불러오지 못했습니다. 상태를 확인한 뒤 다시 시도해 주세요.",
-            )}
+      <section
+        className={
+          selectedIds.length > 0
+            ? "bg-background-1 pb-24 md:pb-28"
+            : "bg-background-1 p-0"
+        }
+      >
+        {guestbookQuery.isLoading && !guestbookQuery.data ? (
+          <div className="space-y-4">
+            <div className="flex gap-3">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <Skeleton
+                  key={index}
+                  variant="rect"
+                  height="2.5rem"
+                  className="w-[8rem] rounded-[0.8rem]"
+                />
+              ))}
+            </div>
+            <div className="space-y-3">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <Skeleton
+                  key={index}
+                  variant="rect"
+                  height="3.25rem"
+                  className="rounded-[0.9rem]"
+                />
+              ))}
+            </div>
           </div>
         ) : null}
 
-        <div className="mt-6 flex flex-col gap-3 border-b border-border-3 pb-5 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-text-1">방명록 목록</h2>
-            <p className="mt-1 text-sm text-text-3">
-              검색과 필터를 조합해 필요한 항목만 빠르게 확인할 수 있습니다.
+        {!guestbookQuery.isLoading && guestbookQuery.isError ? (
+          <div className="rounded-[1.5rem] border border-negative-1/20 bg-negative-1/10 px-6 py-8 text-center">
+            <p className="text-sm text-negative-1">
+              {getErrorMessage(
+                guestbookQuery.error,
+                "방명록 목록을 불러오지 못했습니다.",
+              )}
             </p>
-          </div>
-
-          <p className="text-sm text-text-4">
-            {guestbookQuery.isFetching && !guestbookQuery.isLoading
-              ? "목록을 새로 불러오는 중..."
-              : meta
-                ? getPageLabel(meta.total, meta.page, meta.limit, rows.length)
-                : "목록을 준비 중입니다."}
-          </p>
-        </div>
-
-        {selectedIds.length > 0 ? (
-          <div className="mt-6 flex flex-wrap items-center gap-3 rounded-[1rem] border border-primary-1/20 bg-primary-1/5 px-4 py-3">
-            <label className="flex items-center gap-2 text-sm font-medium text-text-1">
-              <input
-                type="checkbox"
-                checked={allCurrentSelected}
-                onChange={handleToggleSelectAllCurrent}
-                className="h-4 w-4 rounded border-border-3 accent-primary-1"
-              />
-              전체
-            </label>
-            <span className="text-sm text-text-2">
-              선택됨 {selectedIds.length}개
-              {offPageCount > 0 ? ` (다른 페이지 ${offPageCount}개 포함)` : ""}
-            </span>
             <button
               type="button"
-              onClick={() =>
+              onClick={() => void guestbookQuery.refetch()}
+              className="mt-4 inline-flex rounded-[0.75rem] border border-negative-1/20 px-4 py-2 text-sm font-medium text-negative-1 transition-colors hover:bg-negative-1/10"
+            >
+              다시 시도
+            </button>
+          </div>
+        ) : null}
+
+        {!guestbookQuery.isLoading && !guestbookQuery.isError ? (
+          <>
+            <GuestbookTable
+              items={rows}
+              status={status}
+              authorType={authorType}
+              period={period}
+              startDate={startDate}
+              endDate={endDate}
+              dateError={dateError}
+              searchInput={searchInput}
+              selectedIds={selectedIds}
+              allCurrentSelected={allCurrentSelected}
+              someCurrentSelected={someCurrentSelected}
+              onStatusChange={(nextStatus) => {
+                setStatus(nextStatus);
+                resetToFirstPage();
+              }}
+              onAuthorTypeChange={(nextAuthorType) => {
+                setAuthorType(nextAuthorType);
+                resetToFirstPage();
+              }}
+              onPeriodChange={(value) => {
+                if (value === "all") {
+                  setStartDate("");
+                  setEndDate("");
+                  setDateError(undefined);
+                } else {
+                  const days = Number.parseInt(value.replace("d", ""), 10);
+                  setStartDate(buildRelativeStart(days));
+                  setEndDate(toDateInputValue(new Date()));
+                  setDateError(undefined);
+                }
+                resetToFirstPage();
+              }}
+              onStartDateChange={(value) => {
+                if (endDate && value && value > endDate) {
+                  setDateError("시작일은 종료일보다 늦을 수 없습니다.");
+
+                  return;
+                }
+
+                setStartDate(value);
+                setDateError(undefined);
+                resetToFirstPage();
+              }}
+              onEndDateChange={(value) => {
+                if (startDate && value && value < startDate) {
+                  setDateError("종료일은 시작일보다 빠를 수 없습니다.");
+
+                  return;
+                }
+
+                setEndDate(value);
+                setDateError(undefined);
+                resetToFirstPage();
+              }}
+              onSearchInputChange={setSearchInput}
+              onSearchSubmit={handleSearchSubmit}
+              onClearSearch={handleClearSearch}
+              onToggleSelect={handleToggleSelect}
+              onToggleSelectAllCurrent={handleToggleSelectAllCurrent}
+              onOpenDetail={(item) => setDetailItem(item)}
+              onOpenAction={(item) =>
                 setActionContext({
-                  type: "bulk",
-                  items: selectedList,
+                  type: "single",
+                  item,
                 })
               }
-              className="rounded-[0.75rem] bg-primary-1 px-3 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-            >
-              일괄 작업
-            </button>
-            <button
-              type="button"
-              onClick={handleClearSelection}
-              className="text-sm text-text-4 transition-colors hover:text-text-2"
-            >
-              전체 해제
-            </button>
-          </div>
+              emptyMessage={
+                searchQuery ||
+                status !== "all" ||
+                authorType !== "all" ||
+                startDate ||
+                endDate
+                  ? "검색 결과가 없습니다."
+                  : "현재 등록된 방명록이 없습니다."
+              }
+            />
+
+            {meta && meta.totalPages > 1 ? (
+              <div className="mt-5 border-t border-border-4 pt-4">
+                <nav
+                  aria-label="관리자 방명록 페이지네이션"
+                  className="flex items-center justify-center gap-0.5"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setPage((value) => Math.max(1, value - 5))}
+                    disabled={page <= 5}
+                    className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:text-text-4"
+                    aria-label="5 pages back"
+                  >
+                    &laquo;
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPage((value) => Math.max(1, value - 1))}
+                    disabled={page === 1}
+                    className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:text-text-4"
+                    aria-label="Previous page"
+                  >
+                    &lsaquo;
+                  </button>
+                  {pageNumbers.map((pageNumber, index) =>
+                    pageNumber === "..." ? (
+                      <span
+                        key={`ellipsis-${index}`}
+                        className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-4"
+                        aria-hidden="true"
+                      >
+                        &hellip;
+                      </span>
+                    ) : (
+                      <button
+                        key={pageNumber}
+                        type="button"
+                        onClick={() => setPage(pageNumber)}
+                        disabled={pageNumber === page}
+                        className={
+                          pageNumber === page
+                            ? "pointer-events-none inline-flex min-w-[2rem] items-center justify-center rounded bg-primary-1 px-2.5 py-1.5 text-sm font-semibold text-white"
+                            : "inline-flex min-w-[2rem] items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2"
+                        }
+                        aria-current={pageNumber === page ? "page" : undefined}
+                        aria-label={`Page ${pageNumber}`}
+                      >
+                        {pageNumber}
+                      </button>
+                    ),
+                  )}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setPage((value) => Math.min(meta.totalPages, value + 1))
+                    }
+                    disabled={page === meta.totalPages}
+                    className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:text-text-4"
+                    aria-label="Next page"
+                  >
+                    &rsaquo;
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setPage((value) => Math.min(meta.totalPages, value + 5))
+                    }
+                    disabled={page + 5 > meta.totalPages}
+                    className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:text-text-4"
+                    aria-label="5 pages forward"
+                  >
+                    &raquo;
+                  </button>
+                </nav>
+              </div>
+            ) : null}
+          </>
         ) : null}
+      </section>
 
-        <div className="mt-6">
-          {guestbookQuery.isLoading ? (
-            <div className="space-y-4">
-              <div className="grid gap-3 md:grid-cols-5">
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <Skeleton
-                    key={index}
-                    variant="rect"
-                    height="4.5rem"
-                    className="rounded-[1rem]"
-                  />
-                ))}
-              </div>
-              <div className="space-y-3">
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <Skeleton
-                    key={index}
-                    variant="rect"
-                    height="3.75rem"
-                    className="rounded-[1rem]"
-                  />
-                ))}
-              </div>
-            </div>
-          ) : null}
+      {selectedIds.length > 0 ? (
+        <div className="fixed bottom-0 left-0 right-0 z-20 md:left-[var(--admin-sidebar-offset)]">
+          <div className="flex flex-wrap items-center gap-3 border-t border-border-3 bg-[rgba(241,242,243,0.95)] px-4 py-3 backdrop-blur-[12px] md:px-6 dark:bg-[rgba(19,20,21,0.94)]">
+            <span className="text-sm font-medium text-text-1">
+              선택됨 {selectedIds.length}개
+              {offPageCount > 0 ? (
+                <span className="ml-1 text-xs text-text-3">
+                  (다른 페이지 {offPageCount}개 포함)
+                </span>
+              ) : null}
+            </span>
 
-          {!guestbookQuery.isLoading && guestbookQuery.isError ? (
-            <div className="rounded-[1.5rem] border border-negative-1/20 bg-negative-1/10 px-6 py-8 text-center">
-              <p className="text-sm text-negative-1">
-                {getErrorMessage(
-                  guestbookQuery.error,
-                  "방명록 목록을 불러오지 못했습니다.",
-                )}
-              </p>
+            <div className="ml-auto flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                onClick={() => void guestbookQuery.refetch()}
-                className="mt-4 inline-flex rounded-[0.75rem] border border-negative-1/20 px-4 py-2 text-sm font-medium text-negative-1 transition-colors hover:bg-negative-1/10"
+                onClick={() => {
+                  setSelectedItems((current) => {
+                    const next = { ...current };
+                    rows.forEach((row) => {
+                      next[row.id] = row;
+                    });
+
+                    return next;
+                  });
+                }}
+                className="cursor-pointer px-2 py-1.5 text-sm text-primary-1 transition-colors hover:text-primary-1/80"
               >
-                다시 시도
+                현재 페이지 전체 선택
+              </button>
+              <button
+                type="button"
+                onClick={handleClearSelection}
+                className="cursor-pointer px-2 py-1.5 text-sm text-text-3 transition-colors hover:text-text-1"
+              >
+                전체 해제
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setActionContext({
+                    type: "bulk",
+                    items: selectedList,
+                    defaultAction: "restore",
+                  })
+                }
+                disabled={!bulkAllowedActions.includes("restore")}
+                className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] border border-border-3 px-3 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                복원
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setActionContext({
+                    type: "bulk",
+                    items: selectedList,
+                    defaultAction: "hide",
+                  })
+                }
+                disabled={!bulkAllowedActions.includes("hide")}
+                className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] border border-border-3 px-3 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                숨김
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setActionContext({
+                    type: "bulk",
+                    items: selectedList,
+                    defaultAction: "soft_delete",
+                  })
+                }
+                disabled={!bulkAllowedActions.includes("soft_delete")}
+                className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] border border-border-3 px-3 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                소프트 삭제
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setActionContext({
+                    type: "bulk",
+                    items: selectedList,
+                    defaultAction: "hard_delete",
+                  })
+                }
+                disabled={!bulkAllowedActions.includes("hard_delete")}
+                className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] border border-negative-1/30 px-3 text-sm text-negative-1 transition-colors hover:bg-negative-1/10 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                영구 삭제
               </button>
             </div>
-          ) : null}
-
-          {!guestbookQuery.isLoading && !guestbookQuery.isError ? (
-            <>
-              <GuestbookTable
-                items={rows}
-                status={status}
-                authorType={authorType}
-                startDate={startDate}
-                endDate={endDate}
-                searchQuery={searchQuery}
-                searchInput={searchInput}
-                selectedIds={selectedIds}
-                allCurrentSelected={allCurrentSelected}
-                someCurrentSelected={someCurrentSelected}
-                onStatusChange={(nextStatus) => {
-                  setStatus(nextStatus);
-                  resetToFirstPage();
-                }}
-                onAuthorTypeChange={(nextAuthorType) => {
-                  setAuthorType(nextAuthorType);
-                  resetToFirstPage();
-                }}
-                onStartDateChange={(value) => {
-                  setStartDate(value);
-                  resetToFirstPage();
-                }}
-                onEndDateChange={(value) => {
-                  setEndDate(value);
-                  resetToFirstPage();
-                }}
-                onSearchInputChange={setSearchInput}
-                onSearchSubmit={handleSearchSubmit}
-                onClearSearch={handleClearSearch}
-                onToggleSelect={handleToggleSelect}
-                onToggleSelectAllCurrent={handleToggleSelectAllCurrent}
-                onOpenDetail={(item) => setDetailItem(item)}
-                emptyMessage={
-                  searchQuery ||
-                  status !== "all" ||
-                  authorType !== "all" ||
-                  startDate ||
-                  endDate
-                    ? "검색 결과가 없습니다."
-                    : "현재 등록된 방명록이 없습니다."
-                }
-              />
-
-              {meta && meta.totalPages > 1 ? (
-                <div className="mt-6 flex items-center justify-between gap-3">
-                  <p className="text-sm text-text-4">
-                    페이지 {meta.page} / {meta.totalPages}
-                  </p>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setPage((current) => Math.max(1, current - 1))
-                      }
-                      disabled={page <= 1}
-                      className="rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      이전
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setPage((current) =>
-                          meta
-                            ? Math.min(meta.totalPages, current + 1)
-                            : current,
-                        )
-                      }
-                      disabled={!meta || page >= meta.totalPages}
-                      className="rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      다음
-                    </button>
-                  </div>
-                </div>
-              ) : null}
-            </>
-          ) : null}
+          </div>
         </div>
-      </section>
+      ) : null}
 
       <GuestbookDetailModal
         item={detailItem}

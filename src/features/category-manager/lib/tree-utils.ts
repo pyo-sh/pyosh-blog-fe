@@ -16,7 +16,7 @@ export interface DropTarget {
   invalid: boolean;
 }
 
-const DROP_ZONE_PREFIX = "category-drop";
+const ROW_DROP_PREFIX = "category-row";
 
 export function cloneCategoryTree(categories: Category[]): Category[] {
   return categories.map((category) => ({
@@ -233,22 +233,14 @@ export function moveCategory(
   return normalizeTree(clonedTree, null);
 }
 
-export function buildDropZoneId(
-  categoryId: number,
-  position: DropPosition,
-): string {
-  return `${DROP_ZONE_PREFIX}:${position}:${categoryId}`;
+export function buildRowDropId(categoryId: number): string {
+  return `${ROW_DROP_PREFIX}:${categoryId}`;
 }
 
-export function parseDropZoneId(
-  value: string,
-): { targetId: number; position: DropPosition } | null {
-  const [prefix, position, categoryId] = value.split(":");
+export function parseRowDropId(value: string): { targetId: number } | null {
+  const [prefix, categoryId] = value.split(":");
 
-  if (
-    prefix !== DROP_ZONE_PREFIX ||
-    (position !== "before" && position !== "inside" && position !== "after")
-  ) {
+  if (prefix !== ROW_DROP_PREFIX) {
     return null;
   }
 
@@ -260,7 +252,6 @@ export function parseDropZoneId(
 
   return {
     targetId,
-    position,
   };
 }
 

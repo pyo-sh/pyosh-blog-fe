@@ -1,14 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   DndContext,
   DragOverlay,
   KeyboardSensor,
   PointerSensor,
   closestCenter,
-  type DragOverEvent,
+  pointerWithin,
+  type DragMoveEvent,
   type DragStartEvent,
+  type CollisionDetection,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -23,7 +25,7 @@ import {
   getDisplayedCategoryIds,
   isDropBlocked,
   moveCategory,
-  parseDropZoneId,
+  parseRowDropId,
   type CategoryTreeMode,
   type DropTarget,
 } from "../lib/tree-utils";
@@ -33,8 +35,11 @@ import { EmptyState } from "@shared/ui/libs";
 
 interface CategoryTreeProps {
   categories: Category[];
+  totalCount: number;
   onEdit: (category: Category) => void;
   onDelete: (category: Category) => void;
+  onToggleVisibility: (category: Category) => Promise<void>;
+  onCreate: () => void;
   onBulkVisibilityChange: (ids: number[], isVisible: boolean) => Promise<void>;
   onSaveTree: (changes: CategoryTreeChange[]) => Promise<void>;
   isBulkUpdating: boolean;
@@ -43,13 +48,25 @@ interface CategoryTreeProps {
 
 export function CategoryTree({
   categories,
+  totalCount,
   onEdit,
   onDelete,
+  onToggleVisibility,
+  onCreate,
   onBulkVisibilityChange,
   onSaveTree,
   isBulkUpdating,
   isSavingTree,
 }: CategoryTreeProps) {
+  const collisionDetection: CollisionDetection = useCallback((args) => {
+    const pointerCollisions = pointerWithin(args);
+
+    if (pointerCollisions.length > 0) {
+      return pointerCollisions;
+    }
+
+    return closestCenter(args);
+  }, []);
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -61,6 +78,7 @@ export function CategoryTree({
   const [mode, setMode] = useState<CategoryTreeMode>("view");
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
   const [showHidden, setShowHidden] = useState(false);
+  const [showSlug, setShowSlug] = useState(true);
   const [restoreShowHidden, setRestoreShowHidden] = useState(false);
   const [workingCategories, setWorkingCategories] = useState<Category[]>(
     cloneCategoryTree(categories),
@@ -73,6 +91,12 @@ export function CategoryTree({
   const [activeDragId, setActiveDragId] = useState<number | null>(null);
   const [dropTarget, setDropTarget] = useState<DropTarget | null>(null);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const hoverExpandTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const hoverExpandTargetRef = useRef<number | null>(null);
+  const autoExpandedIdsRef = useRef<Set<number>>(new Set());
+  const prevDropTargetRef = useRef<DropTarget | null>(null);
 
   useEffect(() => {
     if (mode !== "edit") {
@@ -105,9 +129,70 @@ export function CategoryTree({
   const activeRow = activeDragId
     ? visibleRows.find(({ category }) => category.id === activeDragId)
     : null;
-  const allDisplayedSelected =
-    displayedCategoryIds.length > 0 &&
-    displayedCategoryIds.every((id) => selectedIds.has(id));
+  const selectedCount = selectedIds.size;
+  const rowMetaMap = useMemo(
+    () =>
+      new Map(
+        visibleRows.map(({ category, hasVisibleChildren, depth }) => [
+          category.id,
+          { hasVisibleChildren, depth },
+        ]),
+      ),
+    [visibleRows],
+  );
+
+  const clearHoverExpandTimer = useCallback(() => {
+    if (hoverExpandTimerRef.current) {
+      clearTimeout(hoverExpandTimerRef.current);
+      hoverExpandTimerRef.current = null;
+    }
+
+    hoverExpandTargetRef.current = null;
+  }, []);
+
+  const collapseAutoExpandedNode = useCallback((targetId: number) => {
+    if (!autoExpandedIdsRef.current.has(targetId)) {
+      return;
+    }
+
+    setExpandedIds((prev) => {
+      if (!prev.has(targetId)) {
+        return prev;
+      }
+
+      const next = new Set(prev);
+      next.delete(targetId);
+
+      return next;
+    });
+    autoExpandedIdsRef.current.delete(targetId);
+  }, []);
+
+  const collapseAutoExpandedNodes = useCallback((keepId?: number) => {
+    const ids = Array.from(autoExpandedIdsRef.current);
+
+    if (ids.length === 0) {
+      return;
+    }
+
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+
+      ids.forEach((id) => {
+        if (id !== keepId) {
+          next.delete(id);
+        }
+      });
+
+      return next;
+    });
+
+    if (keepId === undefined) {
+      autoExpandedIdsRef.current.clear();
+    } else {
+      autoExpandedIdsRef.current = new Set(ids.filter((id) => id === keepId));
+    }
+  }, []);
 
   const handleToggle = useCallback((id: number) => {
     setExpandedIds((prev) => {
@@ -142,7 +227,6 @@ export function CategoryTree({
     setRestoreShowHidden(showHidden);
     setShowHidden(true);
     setOriginalTree(cloneCategoryTree(workingCategories));
-    setExpandedIds(collectExpandableIds(workingCategories, true));
     setSelectedIds(new Set());
     setMode("edit");
   };
@@ -165,6 +249,7 @@ export function CategoryTree({
     setActiveDragId(null);
     setDropTarget(null);
     setIsCancelDialogOpen(false);
+    autoExpandedIdsRef.current.clear();
   };
 
   const handleToggleSelect = (id: number) => {
@@ -234,46 +319,166 @@ export function CategoryTree({
     }
 
     setActiveDragId(nextId);
+    autoExpandedIdsRef.current.clear();
   };
 
-  const handleDragOver = ({ over }: DragOverEvent) => {
+  const handleDragMove = ({ over, activatorEvent, delta }: DragMoveEvent) => {
     if (!over || activeDragId === null) {
-      setDropTarget(null);
+      if (hoverExpandTargetRef.current !== null) {
+        collapseAutoExpandedNode(hoverExpandTargetRef.current);
+      }
+      if (prevDropTargetRef.current !== null) {
+        prevDropTargetRef.current = null;
+        setDropTarget(null);
+      }
+      clearHoverExpandTimer();
 
       return;
     }
 
-    const parsedTarget = parseDropZoneId(String(over.id));
+    const parsedTarget = parseRowDropId(String(over.id));
 
     if (!parsedTarget) {
-      setDropTarget(null);
+      if (hoverExpandTargetRef.current !== null) {
+        collapseAutoExpandedNode(hoverExpandTargetRef.current);
+      }
+      if (prevDropTargetRef.current !== null) {
+        prevDropTargetRef.current = null;
+        setDropTarget(null);
+      }
+      clearHoverExpandTimer();
 
       return;
     }
 
-    setDropTarget({
-      ...parsedTarget,
+    const targetMeta = rowMetaMap.get(parsedTarget.targetId);
+    const rect = over.rect;
+    let nextPosition: "before" | "inside" | "after";
+    const isPointerEvent = activatorEvent instanceof PointerEvent;
+
+    if (!isPointerEvent) {
+      nextPosition = delta.y < 0 ? "before" : "after";
+    } else {
+      const pointerY = activatorEvent.clientY + delta.y;
+      const pointerX = activatorEvent.clientX + delta.x;
+      const relativeY = (pointerY - rect.top) / Math.max(rect.height, 1);
+      const rowIndent = rect.left + (targetMeta?.depth ?? 0) * 24 + 28;
+
+      if (relativeY <= 0.25) {
+        nextPosition = "before";
+      } else if (relativeY >= 0.75) {
+        nextPosition = "after";
+      } else {
+        nextPosition = "inside";
+
+        if (pointerX < rowIndent - 8) {
+          nextPosition = relativeY < 0.5 ? "before" : "after";
+        }
+      }
+    }
+
+    if (
+      hoverExpandTargetRef.current !== null &&
+      hoverExpandTargetRef.current !== parsedTarget.targetId
+    ) {
+      collapseAutoExpandedNode(hoverExpandTargetRef.current);
+    }
+
+    const shouldExpandOnHover =
+      nextPosition === "inside" &&
+      targetMeta?.hasVisibleChildren &&
+      !expandedIds.has(parsedTarget.targetId);
+
+    if (shouldExpandOnHover) {
+      if (hoverExpandTargetRef.current !== parsedTarget.targetId) {
+        clearHoverExpandTimer();
+        hoverExpandTargetRef.current = parsedTarget.targetId;
+        hoverExpandTimerRef.current = setTimeout(() => {
+          setExpandedIds((prev) => {
+            if (prev.has(parsedTarget.targetId)) {
+              return prev;
+            }
+
+            const next = new Set(prev);
+            next.add(parsedTarget.targetId);
+
+            return next;
+          });
+          autoExpandedIdsRef.current.add(parsedTarget.targetId);
+          hoverExpandTimerRef.current = null;
+        }, 450);
+      }
+    } else {
+      if (
+        hoverExpandTargetRef.current !== null &&
+        autoExpandedIdsRef.current.has(hoverExpandTargetRef.current)
+      ) {
+        collapseAutoExpandedNode(hoverExpandTargetRef.current);
+      }
+      clearHoverExpandTimer();
+    }
+
+    const nextDropTarget: DropTarget = {
+      targetId: parsedTarget.targetId,
+      position: nextPosition,
       invalid: isDropBlocked(
         workingCategories,
         activeDragId,
         parsedTarget.targetId,
       ),
-    });
+    };
+
+    const prev = prevDropTargetRef.current;
+
+    if (
+      !prev ||
+      prev.targetId !== nextDropTarget.targetId ||
+      prev.position !== nextDropTarget.position ||
+      prev.invalid !== nextDropTarget.invalid
+    ) {
+      prevDropTargetRef.current = nextDropTarget;
+      setDropTarget(nextDropTarget);
+    }
   };
 
   const handleDragEnd = () => {
+    clearHoverExpandTimer();
+    prevDropTargetRef.current = null;
+
     if (activeDragId !== null && dropTarget && !dropTarget.invalid) {
+      if (dropTarget.position === "inside") {
+        setExpandedIds((prev) => {
+          const next = new Set(prev);
+          next.add(dropTarget.targetId);
+
+          return next;
+        });
+        autoExpandedIdsRef.current.delete(dropTarget.targetId);
+      }
+
       setWorkingCategories((prev) =>
         moveCategory(prev, activeDragId, {
           targetId: dropTarget.targetId,
           position: dropTarget.position,
         }),
       );
+      collapseAutoExpandedNodes(
+        dropTarget.position === "inside" ? dropTarget.targetId : undefined,
+      );
+    } else {
+      collapseAutoExpandedNodes();
     }
 
     setActiveDragId(null);
     setDropTarget(null);
   };
+
+  useEffect(() => {
+    return () => {
+      clearHoverExpandTimer();
+      autoExpandedIdsRef.current.clear();
+    };
+  }, [clearHoverExpandTimer]);
 
   if (categories.length === 0) {
     return (
@@ -283,59 +488,60 @@ export function CategoryTree({
 
   return (
     <>
-      <div>
+      <div className={mode === "select" || mode === "edit" ? "pb-24" : ""}>
         <CategoryTreeToolbar
+          totalCount={totalCount}
           mode={mode}
           showHidden={showHidden}
-          selectedCount={selectedIds.size}
-          pendingChangeCount={pendingChanges.length}
-          allDisplayedSelected={allDisplayedSelected}
-          isBulkUpdating={isBulkUpdating}
-          isSavingTree={isSavingTree}
+          showSlug={showSlug}
           onShowHiddenChange={setShowHidden}
+          onShowSlugChange={setShowSlug}
           onExpandAll={handleExpandAll}
           onCollapseAll={handleCollapseAll}
+          onCreate={onCreate}
           onEnterSelectMode={handleEnterSelectMode}
           onEnterEditMode={handleEnterEditMode}
-          onToggleSelectAll={handleToggleSelectAll}
-          onClearSelection={() => setSelectedIds(new Set())}
-          onCompleteSelectMode={handleExitSelectMode}
-          onHideSelected={() => void handleApplyVisibility(false)}
-          onShowSelected={() => void handleApplyVisibility(true)}
-          onCancelEditMode={handleCancelEditMode}
-          onSaveEditMode={() => void handleSaveEditMode()}
         />
 
         <DndContext
           sensors={sensors}
-          collisionDetection={closestCenter}
+          collisionDetection={collisionDetection}
           onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
+          onDragMove={handleDragMove}
           onDragEnd={handleDragEnd}
           onDragCancel={() => {
+            collapseAutoExpandedNodes();
+            clearHoverExpandTimer();
+            prevDropTargetRef.current = null;
             setActiveDragId(null);
             setDropTarget(null);
           }}
         >
-          <ul>
-            {visibleRows.map(({ category, depth, hasVisibleChildren }) => (
-              <CategoryTreeRow
-                key={category.id}
-                category={category}
-                depth={depth}
-                mode={mode}
-                hasVisibleChildren={hasVisibleChildren}
-                isExpanded={expandedIds.has(category.id)}
-                isSelected={selectedIds.has(category.id)}
-                changeMarker={changeMarkerMap.get(category.id)}
-                dropTarget={dropTarget}
-                onToggle={handleToggle}
-                onSelectToggle={handleToggleSelect}
-                onEdit={onEdit}
-                onDelete={onDelete}
-              />
-            ))}
-          </ul>
+          <div className="overflow-hidden rounded-xl border border-border-4 bg-background-2">
+            <ul>
+              {visibleRows.map(({ category, depth, hasVisibleChildren }) => (
+                <CategoryTreeRow
+                  key={category.id}
+                  category={category}
+                  depth={depth}
+                  mode={mode}
+                  hasVisibleChildren={hasVisibleChildren}
+                  isExpanded={expandedIds.has(category.id)}
+                  isSelected={selectedIds.has(category.id)}
+                  showSlug={showSlug}
+                  changeMarker={changeMarkerMap.get(category.id)}
+                  dropTarget={dropTarget}
+                  onToggle={handleToggle}
+                  onToggleVisibility={(nextCategory) =>
+                    void onToggleVisibility(nextCategory)
+                  }
+                  onSelectToggle={handleToggleSelect}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                />
+              ))}
+            </ul>
+          </div>
 
           <DragOverlay>
             {activeRow ? (
@@ -343,10 +549,91 @@ export function CategoryTree({
                 category={activeRow.category}
                 depth={activeRow.depth}
                 changeMarker={changeMarkerMap.get(activeRow.category.id)}
+                dropPosition={dropTarget?.position ?? null}
+                invalidDrop={dropTarget?.invalid ?? false}
               />
             ) : null}
           </DragOverlay>
         </DndContext>
+
+        {mode === "select" ? (
+          <div className="fixed bottom-0 left-0 right-0 z-20 md:left-[var(--admin-sidebar-offset)]">
+            <div className="flex flex-wrap items-center gap-3 border-t border-border-3 bg-[rgba(241,242,243,0.95)] px-4 py-3 backdrop-blur-[12px] md:px-6 dark:bg-[rgba(19,20,21,0.94)]">
+              <span className="text-sm font-medium text-text-1">
+                선택됨 {selectedCount}개
+              </span>
+
+              <div className="ml-auto flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleToggleSelectAll}
+                  className="cursor-pointer px-2 py-1.5 text-sm text-primary-1 transition-colors hover:text-primary-1/80"
+                >
+                  전체 선택
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedIds(new Set())}
+                  className="cursor-pointer px-2 py-1.5 text-sm text-text-3 transition-colors hover:text-text-1"
+                >
+                  전체 해제
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleApplyVisibility(false)}
+                  disabled={selectedCount === 0 || isBulkUpdating}
+                  className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] border border-border-3 px-3 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  숨기기
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleApplyVisibility(true)}
+                  disabled={selectedCount === 0 || isBulkUpdating}
+                  className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] border border-border-3 px-3 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  보이기
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExitSelectMode}
+                  className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] bg-primary-1 px-3 text-sm text-white transition-opacity hover:opacity-90"
+                >
+                  취소
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {mode === "edit" ? (
+          <div className="fixed bottom-0 left-0 right-0 z-20 md:left-[var(--admin-sidebar-offset)]">
+            <div className="flex flex-wrap items-center gap-3 border-t border-border-3 bg-[rgba(241,242,243,0.95)] px-4 py-3 backdrop-blur-[12px] md:px-6 dark:bg-[rgba(19,20,21,0.94)]">
+              <span className="text-sm font-medium text-text-1">
+                변경사항 {pendingChanges.length}건
+              </span>
+
+              <div className="ml-auto flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleCancelEditMode}
+                  disabled={isSavingTree}
+                  className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] border border-border-3 px-3 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  취소
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleSaveEditMode()}
+                  disabled={pendingChanges.length === 0 || isSavingTree}
+                  className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] bg-primary-1 px-3 text-sm text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  {isSavingTree ? "저장 중..." : "저장"}
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </div>
 
       <ConfirmDialog

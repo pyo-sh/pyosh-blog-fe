@@ -3,7 +3,7 @@ import { PostListItem } from "@features/post-list";
 import { mockPosts } from "../mocks/data/posts";
 
 const meta: Meta<typeof PostListItem> = {
-  title: "Features/PostListItem",
+  title: "Features/Public/PostListItem",
   component: PostListItem,
   parameters: {
     layout: "fullscreen",

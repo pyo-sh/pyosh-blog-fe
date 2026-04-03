@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AssetDetailModal } from "./asset-detail-modal";
@@ -28,6 +28,28 @@ const ACCEPTED_TYPES = new Set([
   "image/svg+xml",
 ]);
 const QUERY_KEY = ["admin-assets"] as const;
+const EMPTY_ASSETS: Asset[] = [];
+
+function generatePageNumbers(
+  currentPage: number,
+  totalPages: number,
+  windowSize: number,
+): Array<number | "..."> {
+  if (totalPages <= 1) return [1];
+
+  const windowStart = Math.max(2, currentPage - windowSize);
+  const windowEnd = Math.min(totalPages - 1, currentPage + windowSize);
+  const pages: Array<number | "..."> = [1];
+
+  if (windowStart > 2) pages.push("...");
+  for (let index = windowStart; index <= windowEnd; index += 1) {
+    pages.push(index);
+  }
+  if (windowEnd < totalPages - 1) pages.push("...");
+  pages.push(totalPages);
+
+  return pages;
+}
 
 export function AssetUploader() {
   const queryClient = useQueryClient();
@@ -75,7 +97,7 @@ export function AssetUploader() {
     },
   });
 
-  const assets = assetsQuery.data?.data ?? [];
+  const assets = assetsQuery.data?.data ?? EMPTY_ASSETS;
   const meta = assetsQuery.data?.meta;
 
   const deleteMutation = useMutation({
@@ -130,9 +152,16 @@ export function AssetUploader() {
   }, [meta, page]);
 
   useEffect(() => {
-    setSelectedIds((current) =>
-      current.filter((id) => assets.some((asset) => asset.id === id)),
-    );
+    setSelectedIds((current) => {
+      const next = current.filter((id) =>
+        assets.some((asset) => asset.id === id),
+      );
+
+      return next.length === current.length &&
+        next.every((id, index) => id === current[index])
+        ? current
+        : next;
+    });
   }, [assets]);
 
   useEffect(() => {
@@ -172,16 +201,7 @@ export function AssetUploader() {
     return () => window.clearTimeout(timeout);
   }, [copiedState]);
 
-  const paginationLabel = useMemo(() => {
-    if (!meta || assets.length === 0) {
-      return "표시할 에셋이 없습니다.";
-    }
-
-    const start = (meta.page - 1) * meta.limit + 1;
-    const end = start + assets.length - 1;
-
-    return `총 ${meta.total}개 중 ${start}-${end}`;
-  }, [assets.length, meta]);
+  const pageNumbers = meta ? generatePageNumbers(page, meta.totalPages, 2) : [];
 
   function clearPendingFiles() {
     setPendingFiles((current) => {
@@ -344,27 +364,6 @@ export function AssetUploader() {
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-col gap-4 rounded-[1.75rem] border border-border-3 bg-background-2 p-6 shadow-[0px_18px_60px_0px_rgba(0,0,0,0.06)] md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="text-body-xs uppercase tracking-[0.24em] text-text-4">
-            Assets
-          </p>
-          <h1 className="mt-3 text-2xl font-semibold text-text-1">
-            에셋 라이브러리
-          </h1>
-          <p className="mt-2 text-sm text-text-3">
-            업로드 대기열을 확인한 뒤 배치 업로드하고, 갤러리에서 상세 정보, URL
-            복사, 선택 삭제를 관리할 수 있습니다.
-          </p>
-        </div>
-
-        <div className="rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-4">
-          {assetsQuery.isFetching && !assetsQuery.isPending
-            ? "목록을 새로 불러오는 중..."
-            : paginationLabel}
-        </div>
-      </header>
-
       <UploadZone
         files={pendingFiles}
         isUploading={uploadMutation.isPending}
@@ -408,6 +407,7 @@ export function AssetUploader() {
         <>
           <AssetGrid
             assets={assets}
+            totalCount={meta?.total ?? assets.length}
             selectionMode={selectionMode}
             selectedIds={selectedIds}
             deletingIds={
@@ -416,18 +416,135 @@ export function AssetUploader() {
             copiedAssetId={copiedState?.type === "url" ? copiedState.id : null}
             isPending={deleteMutation.isPending}
             onEnterSelectionMode={enterSelectionMode}
-            onExitSelectionMode={exitSelectionMode}
             onToggleSelect={toggleSelect}
-            onSelectAll={selectAll}
             onCopyUrl={(asset) => void handleCopy(asset, "url")}
             onOpenDetail={setDetailAssetId}
-            onRequestDelete={requestDelete}
           />
-          <PaginationControls
-            currentPage={meta?.page ?? 1}
-            totalPages={meta?.totalPages ?? 1}
-            onPageChange={handlePageChange}
-          />
+          <div className="flex flex-col gap-4">
+            {selectionMode ? (
+              <div className="fixed bottom-0 left-0 right-0 z-20 md:left-[var(--admin-sidebar-offset)]">
+                <div className="flex flex-wrap items-center gap-3 border-t border-border-3 bg-[rgba(241,242,243,0.95)] px-4 py-3 backdrop-blur-[12px] md:px-6 dark:bg-[rgba(19,20,21,0.94)]">
+                  <span className="text-sm font-medium text-text-1">
+                    선택됨 {selectedIds.length}개
+                  </span>
+                  <div className="ml-auto flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        selectAll(
+                          !assets.every((asset) =>
+                            selectedIds.includes(asset.id),
+                          ),
+                        )
+                      }
+                      className="cursor-pointer px-2 py-1.5 text-sm text-primary-1 transition-colors hover:text-primary-1/80"
+                    >
+                      {assets.length > 0 &&
+                      assets.every((asset) => selectedIds.includes(asset.id))
+                        ? "전체 해제"
+                        : "전체 선택"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => requestDelete(selectedIds)}
+                      disabled={
+                        selectedIds.length === 0 || deleteMutation.isPending
+                      }
+                      className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] border border-negative-1/30 px-3 text-sm text-negative-1 transition-colors hover:bg-negative-1/10 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      삭제
+                    </button>
+                    <button
+                      type="button"
+                      onClick={exitSelectionMode}
+                      className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] bg-primary-1 px-3 text-sm text-white transition-opacity hover:opacity-90"
+                    >
+                      완료
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+            {meta ? (
+              <nav
+                aria-label="관리자 에셋 페이지네이션"
+                className="flex items-center justify-center gap-0.5"
+              >
+                <button
+                  type="button"
+                  onClick={() => handlePageChange(Math.max(1, page - 5))}
+                  disabled={page <= 5}
+                  className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:text-text-4"
+                  aria-label="5 pages back"
+                >
+                  &laquo;
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handlePageChange(Math.max(1, page - 1))}
+                  disabled={page === 1}
+                  className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:text-text-4"
+                  aria-label="Previous page"
+                >
+                  &lsaquo;
+                </button>
+                {pageNumbers.map((pageNumber, index) =>
+                  pageNumber === "..." ? (
+                    <span
+                      key={`ellipsis-${index}`}
+                      className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-4"
+                      aria-hidden="true"
+                    >
+                      &hellip;
+                    </span>
+                  ) : (
+                    <button
+                      key={pageNumber}
+                      type="button"
+                      onClick={() => handlePageChange(pageNumber)}
+                      disabled={pageNumber === page}
+                      className={
+                        pageNumber === page
+                          ? "pointer-events-none inline-flex min-w-[2rem] items-center justify-center rounded bg-primary-1 px-2.5 py-1.5 text-sm font-semibold text-white"
+                          : "inline-flex min-w-[2rem] items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2"
+                      }
+                      aria-current={pageNumber === page ? "page" : undefined}
+                      aria-label={`Page ${pageNumber}`}
+                    >
+                      {pageNumber}
+                    </button>
+                  ),
+                )}
+                <button
+                  type="button"
+                  onClick={() =>
+                    handlePageChange(Math.min(meta.totalPages, page + 1))
+                  }
+                  disabled={page === meta.totalPages}
+                  className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:text-text-4"
+                  aria-label="Next page"
+                >
+                  &rsaquo;
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    handlePageChange(Math.min(meta.totalPages, page + 5))
+                  }
+                  disabled={page + 5 > meta.totalPages}
+                  className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:text-text-4"
+                  aria-label="5 pages forward"
+                >
+                  &raquo;
+                </button>
+              </nav>
+            ) : null}
+            {assetsQuery.isFetching && !assetsQuery.isPending ? (
+              <p className="text-center text-sm text-text-3">
+                목록을 새로 불러오는 중...
+              </p>
+            ) : null}
+          </div>
         </>
       ) : null}
 
@@ -521,61 +638,6 @@ function DeleteAssetsModal({
         </button>
       </div>
     </Modal>
-  );
-}
-
-function PaginationControls({
-  currentPage,
-  totalPages,
-  onPageChange,
-}: {
-  currentPage: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
-}) {
-  if (totalPages <= 1) {
-    return null;
-  }
-
-  return (
-    <nav
-      aria-label="Asset pagination"
-      className="flex items-center justify-center gap-2"
-    >
-      <button
-        type="button"
-        onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        className="inline-flex items-center justify-center rounded-[0.85rem] border border-border-3 px-3 py-2 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        이전
-      </button>
-      {Array.from({ length: totalPages }, (_, index) => index + 1).map(
-        (page) => (
-          <button
-            key={page}
-            type="button"
-            onClick={() => onPageChange(page)}
-            disabled={page === currentPage}
-            className={
-              page === currentPage
-                ? "inline-flex h-10 min-w-10 items-center justify-center rounded-[0.85rem] bg-primary-1 px-3 text-sm font-semibold text-white"
-                : "inline-flex h-10 min-w-10 items-center justify-center rounded-[0.85rem] border border-border-3 px-3 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
-            }
-          >
-            {page}
-          </button>
-        ),
-      )}
-      <button
-        type="button"
-        onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        className="inline-flex items-center justify-center rounded-[0.85rem] border border-border-3 px-3 py-2 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        다음
-      </button>
-    </nav>
   );
 }
 

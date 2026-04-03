@@ -127,8 +127,8 @@ export function CommentDeleteModal({
       aria-label={title}
       className="w-full max-w-[34rem] overflow-hidden"
     >
-      <div className="max-h-[85vh] overflow-y-auto p-6 text-left">
-        <div className="space-y-2">
+      <div className="max-h-[85vh] overflow-y-auto text-left">
+        <div className="space-y-2 border-b border-border-3 px-6 py-5">
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-semibold text-text-1">{title}</h2>
             {count > 1 ? (
@@ -142,7 +142,7 @@ export function CommentDeleteModal({
           ) : null}
         </div>
 
-        <div className="mt-5 space-y-3">
+        <div className="space-y-3 px-6 py-5">
           {options.map((option) => (
             <label
               key={option.value}
@@ -172,7 +172,7 @@ export function CommentDeleteModal({
           ))}
         </div>
 
-        <div className="mt-5 flex justify-end gap-3">
+        <div className="flex justify-end gap-3 border-t border-border-3 px-6 py-5">
           <button
             type="button"
             onClick={handleClose}

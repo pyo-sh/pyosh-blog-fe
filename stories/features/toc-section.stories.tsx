@@ -12,7 +12,7 @@ const headings = [
 ];
 
 const meta: Meta<typeof TocSection> = {
-  title: "Features/TocSection",
+  title: "Features/Public/TocSection",
   component: TocSection,
   parameters: {
     layout: "padded",

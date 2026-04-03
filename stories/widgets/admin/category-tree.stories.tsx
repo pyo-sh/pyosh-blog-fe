@@ -3,7 +3,7 @@ import { http, HttpResponse } from "msw";
 import { CategoryManager } from "@features/category-manager";
 
 const meta: Meta<typeof CategoryManager> = {
-  title: "Widgets/Admin/CategoryTree",
+  title: "Widgets/Manage/CategoryTree",
   component: CategoryManager,
   parameters: {
     layout: "padded",
