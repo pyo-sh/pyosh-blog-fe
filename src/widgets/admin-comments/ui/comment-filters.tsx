@@ -12,7 +12,7 @@ import calendarLinear from "@iconify-icons/solar/calendar-linear";
 import closeCircleLinear from "@iconify-icons/solar/close-circle-linear";
 import magniferLinear from "@iconify-icons/solar/magnifer-linear";
 import refreshLinear from "@iconify-icons/solar/restart-linear";
-import { addDays, format, parseISO } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { ko } from "date-fns/locale";
 import type { Post } from "@entities/post";
 import { fetchAdminPosts } from "@entities/post";
@@ -477,11 +477,7 @@ function DateRangePicker({
                 nextRange?.from
                   ? format(nextRange.from, "yyyy-MM-dd")
                   : undefined,
-                nextRange?.to
-                  ? format(nextRange.to, "yyyy-MM-dd")
-                  : nextRange?.from
-                    ? format(addDays(nextRange.from, 0), "yyyy-MM-dd")
-                    : undefined,
+                nextRange?.to ? format(nextRange.to, "yyyy-MM-dd") : undefined,
               );
             }}
             className="rdp-comment"

@@ -690,6 +690,20 @@ export function GuestbookManager() {
                   setActionContext({
                     type: "bulk",
                     items: selectedList,
+                    defaultAction: "restore",
+                  })
+                }
+                disabled={!bulkAllowedActions.includes("restore")}
+                className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] border border-border-3 px-3 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                복원
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setActionContext({
+                    type: "bulk",
+                    items: selectedList,
                     defaultAction: "hide",
                   })
                 }
