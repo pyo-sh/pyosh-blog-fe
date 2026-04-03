@@ -19,6 +19,7 @@ interface GuestbookDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectAction: (action: GuestbookDetailAction) => void;
+  onApplyStatusChange: (action: GuestbookDetailAction) => void;
   isPending?: boolean;
 }
 
@@ -104,6 +105,7 @@ export function GuestbookDetailModal({
   isOpen,
   onClose,
   onSelectAction,
+  onApplyStatusChange,
   isPending = false,
 }: GuestbookDetailModalProps) {
   if (!item) {
@@ -192,12 +194,12 @@ export function GuestbookDetailModal({
                     type="button"
                     onClick={() => {
                       if (action) {
-                        onSelectAction(action);
+                        onApplyStatusChange(action);
                       }
                     }}
                     disabled={isPending || isDisabled || isCurrent}
                     className={cn(
-                      "inline-flex items-center rounded-md px-2 py-1 text-[11px] font-medium leading-none transition-colors disabled:opacity-40",
+                      "inline-flex items-center rounded-md px-2 py-1 text-[11px] font-medium leading-none transition-colors",
                       option.value === "active" &&
                         (isCurrent
                           ? "bg-positive-1/10 text-positive-1"
@@ -237,7 +239,6 @@ export function GuestbookDetailModal({
                   : "border border-border-3 text-text-2 hover:border-border-2 hover:text-text-1",
               )}
             >
-              {action.value === "hide" ? "숨기기" : null}
               {action.label}
             </button>
           ))}

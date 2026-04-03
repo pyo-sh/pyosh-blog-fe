@@ -725,6 +725,17 @@ export function GuestbookManager() {
         item={detailItem}
         isOpen={detailItem !== null}
         onClose={() => setDetailItem(null)}
+        onApplyStatusChange={async (action) => {
+          if (!detailItem) {
+            return;
+          }
+
+          await actionMutation.mutateAsync({
+            action,
+            itemIds: [detailItem.id],
+            singleId: detailItem.id,
+          });
+        }}
         onSelectAction={(action) => {
           if (detailItem) {
             setDetailItem(null);
