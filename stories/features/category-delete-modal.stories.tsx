@@ -80,7 +80,7 @@ function StoryModal({
 }
 
 const meta: Meta<typeof StoryModal> = {
-  title: "Features/CategoryDeleteModal",
+  title: "Features/Manage/CategoryDeleteModal",
   component: StoryModal,
   parameters: {
     layout: "centered",

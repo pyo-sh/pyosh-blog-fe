@@ -73,7 +73,7 @@ const popularHandlers = [
 ];
 
 const meta: Meta<typeof PopularPostList> = {
-  title: "Features/PopularPostList",
+  title: "Features/Public/PopularPostList",
   component: PopularPostList,
   parameters: {
     layout: "padded",

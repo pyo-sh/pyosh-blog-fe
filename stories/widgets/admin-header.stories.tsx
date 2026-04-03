@@ -10,7 +10,7 @@ function AdminHeaderStory() {
 }
 
 const meta: Meta<typeof AdminHeaderStory> = {
-  title: "Widgets/Admin/Header",
+  title: "Widgets/Manage/Header",
   component: AdminHeaderStory,
   parameters: {
     layout: "fullscreen",

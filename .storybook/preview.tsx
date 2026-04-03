@@ -78,6 +78,20 @@ const preview: Preview = {
   ],
   loaders: [mswLoader],
   parameters: {
+    options: {
+      storySort: {
+        order: [
+          "App",
+          "Manage",
+          ["DashboardHome", "PostList", "PostCreate", "Comments", "Categories", "Guestbook", "Assets"],
+          "Widgets",
+          ["Public", "Manage"],
+          "Features",
+          ["Public", "Manage"],
+          "Shared",
+        ],
+      },
+    },
     layout: "fullscreen",
     nextjs: {
       appDirectory: true,
