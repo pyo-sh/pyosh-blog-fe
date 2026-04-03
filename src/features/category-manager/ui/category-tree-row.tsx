@@ -18,6 +18,7 @@ interface CategoryTreeRowProps {
   hasVisibleChildren: boolean;
   isExpanded: boolean;
   isSelected: boolean;
+  showSlug: boolean;
   changeMarker?: ChangeMarker;
   dropTarget: DropTarget | null;
   onToggle: (id: number) => void;
@@ -33,6 +34,7 @@ export function CategoryTreeRow({
   hasVisibleChildren,
   isExpanded,
   isSelected,
+  showSlug,
   changeMarker,
   dropTarget,
   onToggle,
@@ -143,25 +145,27 @@ export function CategoryTreeRow({
           ) : null}
 
           <div className="flex min-w-0 flex-1 items-center gap-2">
-            <span className="truncate font-medium text-text-1">
+            <span className="truncate whitespace-nowrap font-medium leading-none text-text-1">
               {category.name}
             </span>
             {!category.isVisible ? (
-              <span className="shrink-0 rounded-full bg-background-3 px-2 py-0.5 text-[11px] font-medium text-text-3">
+              <span className="shrink-0 whitespace-nowrap rounded-full bg-background-3 px-2 py-0.5 text-[11px] font-medium leading-none text-text-3">
                 숨김
               </span>
             ) : null}
-            <span className="shrink-0 rounded-full border border-border-3 bg-background-2 px-2 py-0.5 text-[11px] text-text-4">
-              {category.slug}
-            </span>
+            {showSlug ? (
+              <span className="shrink-0 whitespace-nowrap rounded-full border border-border-3 bg-background-2 px-2 py-0.5 text-[11px] leading-none text-text-4">
+                {category.slug}
+              </span>
+            ) : null}
             {changeMarker ? (
-              <span className="shrink-0 rounded-full bg-primary-1/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-1">
+              <span className="shrink-0 whitespace-nowrap rounded-full bg-primary-1/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.08em] leading-none text-primary-1">
                 {changeMarker}
               </span>
             ) : null}
           </div>
 
-          <span className="shrink-0 rounded-full bg-primary-1/8 px-3 py-1 text-xs font-medium text-text-3">
+          <span className="shrink-0 whitespace-nowrap rounded-full bg-primary-1/8 px-3 py-1 text-xs font-medium leading-none text-text-3">
             발행 {category.publishedPostCount ?? 0} / 전체{" "}
             {category.totalPostCount ?? 0}
           </span>

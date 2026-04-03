@@ -33,8 +33,10 @@ import { EmptyState } from "@shared/ui/libs";
 
 interface CategoryTreeProps {
   categories: Category[];
+  totalCount: number;
   onEdit: (category: Category) => void;
   onDelete: (category: Category) => void;
+  onCreate: () => void;
   onBulkVisibilityChange: (ids: number[], isVisible: boolean) => Promise<void>;
   onSaveTree: (changes: CategoryTreeChange[]) => Promise<void>;
   isBulkUpdating: boolean;
@@ -43,8 +45,10 @@ interface CategoryTreeProps {
 
 export function CategoryTree({
   categories,
+  totalCount,
   onEdit,
   onDelete,
+  onCreate,
   onBulkVisibilityChange,
   onSaveTree,
   isBulkUpdating,
@@ -61,6 +65,7 @@ export function CategoryTree({
   const [mode, setMode] = useState<CategoryTreeMode>("view");
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
   const [showHidden, setShowHidden] = useState(false);
+  const [showSlug, setShowSlug] = useState(true);
   const [restoreShowHidden, setRestoreShowHidden] = useState(false);
   const [workingCategories, setWorkingCategories] = useState<Category[]>(
     cloneCategoryTree(categories),
@@ -285,16 +290,20 @@ export function CategoryTree({
     <>
       <div>
         <CategoryTreeToolbar
+          totalCount={totalCount}
           mode={mode}
           showHidden={showHidden}
+          showSlug={showSlug}
           selectedCount={selectedIds.size}
           pendingChangeCount={pendingChanges.length}
           allDisplayedSelected={allDisplayedSelected}
           isBulkUpdating={isBulkUpdating}
           isSavingTree={isSavingTree}
           onShowHiddenChange={setShowHidden}
+          onShowSlugChange={setShowSlug}
           onExpandAll={handleExpandAll}
           onCollapseAll={handleCollapseAll}
+          onCreate={onCreate}
           onEnterSelectMode={handleEnterSelectMode}
           onEnterEditMode={handleEnterEditMode}
           onToggleSelectAll={handleToggleSelectAll}
@@ -327,6 +336,7 @@ export function CategoryTree({
                 hasVisibleChildren={hasVisibleChildren}
                 isExpanded={expandedIds.has(category.id)}
                 isSelected={selectedIds.has(category.id)}
+                showSlug={showSlug}
                 changeMarker={changeMarkerMap.get(category.id)}
                 dropTarget={dropTarget}
                 onToggle={handleToggle}

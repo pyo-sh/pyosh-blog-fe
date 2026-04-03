@@ -4,16 +4,20 @@ import type { CategoryTreeMode } from "../lib/tree-utils";
 import { ToggleSwitch } from "@shared/ui/toggle-switch";
 
 interface CategoryTreeToolbarProps {
+  totalCount: number;
   mode: CategoryTreeMode;
   showHidden: boolean;
+  showSlug: boolean;
   selectedCount: number;
   pendingChangeCount: number;
   allDisplayedSelected: boolean;
   isBulkUpdating: boolean;
   isSavingTree: boolean;
   onShowHiddenChange: (nextValue: boolean) => void;
+  onShowSlugChange: (nextValue: boolean) => void;
   onExpandAll: () => void;
   onCollapseAll: () => void;
+  onCreate: () => void;
   onEnterSelectMode: () => void;
   onEnterEditMode: () => void;
   onToggleSelectAll: () => void;
@@ -26,16 +30,20 @@ interface CategoryTreeToolbarProps {
 }
 
 export function CategoryTreeToolbar({
+  totalCount,
   mode,
   showHidden,
+  showSlug,
   selectedCount,
   pendingChangeCount,
   allDisplayedSelected,
   isBulkUpdating,
   isSavingTree,
   onShowHiddenChange,
+  onShowSlugChange,
   onExpandAll,
   onCollapseAll,
+  onCreate,
   onEnterSelectMode,
   onEnterEditMode,
   onToggleSelectAll,
@@ -123,57 +131,69 @@ export function CategoryTreeToolbar({
   }
 
   return (
-    <div className="mb-4 rounded-[1.2rem] border border-border-3 bg-background-1 p-4">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-4">
-            Tree Controls
-          </p>
-          <p className="mt-1 text-sm text-text-3">
-            트리 표시 상태와 편집 모드를 여기서 전환합니다.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
+    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="whitespace-nowrap text-sm font-medium leading-none text-text-2">
+          전체 <strong className="text-text-1">{totalCount}개</strong> 카테고리
+        </span>
+        <div className="flex flex-wrap items-center gap-1 border-l border-border-4 pl-3">
           <button
             type="button"
             onClick={onExpandAll}
-            className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-3 py-1.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-[0.75rem] border border-border-3 px-3 py-1.5 text-sm font-medium leading-none text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
           >
             전체 펼침
           </button>
           <button
             type="button"
             onClick={onCollapseAll}
-            className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-3 py-1.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-[0.75rem] border border-border-3 px-3 py-1.5 text-sm font-medium leading-none text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
           >
             전체 접힘
           </button>
-          <label className="flex cursor-pointer items-center gap-2 rounded-[0.9rem] border border-border-3 bg-background-2 px-3 py-2">
+        </div>
+        <div className="flex flex-wrap items-center gap-3 border-l border-border-4 pl-3">
+          <label className="flex cursor-pointer items-center gap-2 whitespace-nowrap">
+            <span className="text-sm leading-none text-text-3">숨김 표시</span>
             <ToggleSwitch
               checked={showHidden}
               onChange={onShowHiddenChange}
               aria-label="숨김 카테고리 표시"
             />
-            <span className="text-sm text-text-3">
-              숨김 표시 {showHidden ? "on" : "off"}
-            </span>
           </label>
-          <button
-            type="button"
-            onClick={onEnterSelectMode}
-            className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-3 py-1.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
-          >
-            일괄 선택
-          </button>
-          <button
-            type="button"
-            onClick={onEnterEditMode}
-            className="inline-flex items-center justify-center rounded-[0.75rem] bg-primary-1 px-3 py-1.5 text-sm font-semibold text-text-1 transition-opacity hover:opacity-90"
-          >
-            배치 편집
-          </button>
+          <label className="flex cursor-pointer items-center gap-2 whitespace-nowrap">
+            <span className="text-sm leading-none text-text-3">slug 표시</span>
+            <ToggleSwitch
+              checked={showSlug}
+              onChange={onShowSlugChange}
+              aria-label="slug 표시"
+            />
+          </label>
         </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={onEnterSelectMode}
+          className="inline-flex items-center justify-center whitespace-nowrap rounded-[0.75rem] border border-border-3 px-3 py-1.5 text-sm font-medium leading-none text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+        >
+          일괄 선택
+        </button>
+        <button
+          type="button"
+          onClick={onEnterEditMode}
+          className="inline-flex items-center justify-center whitespace-nowrap rounded-[0.75rem] border border-border-3 px-3 py-1.5 text-sm font-medium leading-none text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+        >
+          배치 편집
+        </button>
+        <button
+          type="button"
+          onClick={onCreate}
+          className="inline-flex items-center justify-center whitespace-nowrap rounded-[0.75rem] bg-primary-1 px-3 py-1.5 text-sm font-semibold leading-none text-text-1 transition-opacity hover:opacity-90"
+        >
+          카테고리 추가
+        </button>
       </div>
     </div>
   );
