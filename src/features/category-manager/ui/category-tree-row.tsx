@@ -7,7 +7,7 @@ import altArrowRightLinear from "@iconify-icons/solar/alt-arrow-right-linear";
 import menuDotsLinear from "@iconify-icons/solar/menu-dots-linear";
 import penNewRoundLinear from "@iconify-icons/solar/pen-new-round-linear";
 import trashBinMinimalisticLinear from "@iconify-icons/solar/trash-bin-minimalistic-linear";
-import { buildDropZoneId } from "../lib/tree-utils";
+import { buildRowDropId } from "../lib/tree-utils";
 import type {
   ChangeMarker,
   DropPosition,
@@ -57,17 +57,14 @@ export function CategoryTreeRow({
     },
     disabled: mode !== "edit",
   });
-  const beforeDrop = useDroppable({
-    id: buildDropZoneId(category.id, "before"),
+  const rowDrop = useDroppable({
+    id: buildRowDropId(category.id),
     disabled: mode !== "edit",
-  });
-  const insideDrop = useDroppable({
-    id: buildDropZoneId(category.id, "inside"),
-    disabled: mode !== "edit",
-  });
-  const afterDrop = useDroppable({
-    id: buildDropZoneId(category.id, "after"),
-    disabled: mode !== "edit",
+    data: {
+      categoryId: category.id,
+      depth,
+      hasVisibleChildren,
+    },
   });
 
   const currentDropPosition =
@@ -97,17 +94,14 @@ export function CategoryTreeRow({
         onEdit(category);
       }}
     >
-      <div
-        ref={beforeDrop.setNodeRef}
-        className="flex h-[12px] items-center"
-        aria-hidden="true"
-      >
+      <div className="flex h-[12px] items-center" aria-hidden="true">
         <DropLine
           active={currentDropPosition === "before" && !isInvalidDropTarget}
+          depth={depth}
         />
       </div>
 
-      <div ref={insideDrop.setNodeRef}>
+      <div ref={rowDrop.setNodeRef}>
         <div
           ref={draggable.setNodeRef}
           className={cn(
@@ -269,13 +263,10 @@ export function CategoryTreeRow({
         </div>
       </div>
 
-      <div
-        ref={afterDrop.setNodeRef}
-        className="flex h-[12px] items-center"
-        aria-hidden="true"
-      >
+      <div className="flex h-[12px] items-center" aria-hidden="true">
         <DropLine
           active={currentDropPosition === "after" && !isInvalidDropTarget}
+          depth={depth}
         />
       </div>
     </li>
@@ -341,9 +332,10 @@ export function CategoryTreeRowPreview({
   );
 }
 
-function DropLine({ active }: { active: boolean }) {
+function DropLine({ active, depth }: { active: boolean; depth: number }) {
   return (
     <div
+      style={{ marginLeft: `${depth * 24 + 16}px` }}
       className={cn(
         "h-0.5 w-full rounded-full bg-transparent transition-colors",
         active && "bg-primary-1",

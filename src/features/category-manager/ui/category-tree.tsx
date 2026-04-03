@@ -25,7 +25,7 @@ import {
   getDisplayedCategoryIds,
   isDropBlocked,
   moveCategory,
-  parseDropZoneId,
+  parseRowDropId,
   type CategoryTreeMode,
   type DropTarget,
 } from "../lib/tree-utils";
@@ -95,6 +95,7 @@ export function CategoryTree({
     null,
   );
   const hoverExpandTargetRef = useRef<number | null>(null);
+  const autoExpandedIdsRef = useRef<Set<number>>(new Set());
 
   useEffect(() => {
     if (mode !== "edit") {
@@ -131,9 +132,9 @@ export function CategoryTree({
   const rowMetaMap = useMemo(
     () =>
       new Map(
-        visibleRows.map(({ category, hasVisibleChildren }) => [
+        visibleRows.map(({ category, hasVisibleChildren, depth }) => [
           category.id,
-          { hasVisibleChildren },
+          { hasVisibleChildren, depth },
         ]),
       ),
     [visibleRows],
@@ -146,6 +147,50 @@ export function CategoryTree({
     }
 
     hoverExpandTargetRef.current = null;
+  }, []);
+
+  const collapseAutoExpandedNode = useCallback((targetId: number) => {
+    if (!autoExpandedIdsRef.current.has(targetId)) {
+      return;
+    }
+
+    setExpandedIds((prev) => {
+      if (!prev.has(targetId)) {
+        return prev;
+      }
+
+      const next = new Set(prev);
+      next.delete(targetId);
+
+      return next;
+    });
+    autoExpandedIdsRef.current.delete(targetId);
+  }, []);
+
+  const collapseAutoExpandedNodes = useCallback((keepId?: number) => {
+    const ids = Array.from(autoExpandedIdsRef.current);
+
+    if (ids.length === 0) {
+      return;
+    }
+
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+
+      ids.forEach((id) => {
+        if (id !== keepId) {
+          next.delete(id);
+        }
+      });
+
+      return next;
+    });
+
+    if (keepId === undefined) {
+      autoExpandedIdsRef.current.clear();
+    } else {
+      autoExpandedIdsRef.current = new Set(ids.filter((id) => id === keepId));
+    }
   }, []);
 
   const handleToggle = useCallback((id: number) => {
@@ -181,7 +226,6 @@ export function CategoryTree({
     setRestoreShowHidden(showHidden);
     setShowHidden(true);
     setOriginalTree(cloneCategoryTree(workingCategories));
-    setExpandedIds(collectExpandableIds(workingCategories, true));
     setSelectedIds(new Set());
     setMode("edit");
   };
@@ -204,6 +248,7 @@ export function CategoryTree({
     setActiveDragId(null);
     setDropTarget(null);
     setIsCancelDialogOpen(false);
+    autoExpandedIdsRef.current.clear();
   };
 
   const handleToggleSelect = (id: number) => {
@@ -273,18 +318,26 @@ export function CategoryTree({
     }
 
     setActiveDragId(nextId);
+    autoExpandedIdsRef.current.clear();
   };
 
-  const handleDragOver = ({ over }: DragOverEvent) => {
+  const handleDragOver = ({ active, over }: DragOverEvent) => {
     if (!over || activeDragId === null) {
+      if (hoverExpandTargetRef.current !== null) {
+        collapseAutoExpandedNode(hoverExpandTargetRef.current);
+      }
       setDropTarget(null);
+      clearHoverExpandTimer();
 
       return;
     }
 
-    const parsedTarget = parseDropZoneId(String(over.id));
+    const parsedTarget = parseRowDropId(String(over.id));
 
     if (!parsedTarget) {
+      if (hoverExpandTargetRef.current !== null) {
+        collapseAutoExpandedNode(hoverExpandTargetRef.current);
+      }
       setDropTarget(null);
       clearHoverExpandTimer();
 
@@ -292,8 +345,36 @@ export function CategoryTree({
     }
 
     const targetMeta = rowMetaMap.get(parsedTarget.targetId);
+    const translatedRect = over.rect;
+    const pointerRect = active.rect.current.translated ?? over.rect;
+    const pointerY = pointerRect.top + Math.max(pointerRect.height / 2, 1);
+    const pointerX = pointerRect.left + Math.min(pointerRect.width / 2, 24);
+    const relativeY =
+      (pointerY - translatedRect.top) / Math.max(translatedRect.height, 1);
+    const rowIndent = translatedRect.left + (targetMeta?.depth ?? 0) * 24 + 28;
+    let nextPosition: "before" | "inside" | "after";
+
+    if (relativeY <= 0.25) {
+      nextPosition = "before";
+    } else if (relativeY >= 0.75) {
+      nextPosition = "after";
+    } else {
+      nextPosition = "inside";
+
+      if (pointerX < rowIndent - 8) {
+        nextPosition = relativeY < 0.5 ? "before" : "after";
+      }
+    }
+
+    if (
+      hoverExpandTargetRef.current !== null &&
+      hoverExpandTargetRef.current !== parsedTarget.targetId
+    ) {
+      collapseAutoExpandedNode(hoverExpandTargetRef.current);
+    }
+
     const shouldExpandOnHover =
-      parsedTarget.position === "inside" &&
+      nextPosition === "inside" &&
       targetMeta?.hasVisibleChildren &&
       !expandedIds.has(parsedTarget.targetId);
 
@@ -312,15 +393,23 @@ export function CategoryTree({
 
             return next;
           });
+          autoExpandedIdsRef.current.add(parsedTarget.targetId);
           hoverExpandTimerRef.current = null;
         }, 450);
       }
     } else {
+      if (
+        hoverExpandTargetRef.current !== null &&
+        autoExpandedIdsRef.current.has(hoverExpandTargetRef.current)
+      ) {
+        collapseAutoExpandedNode(hoverExpandTargetRef.current);
+      }
       clearHoverExpandTimer();
     }
 
     setDropTarget({
-      ...parsedTarget,
+      targetId: parsedTarget.targetId,
+      position: nextPosition,
       invalid: isDropBlocked(
         workingCategories,
         activeDragId,
@@ -340,6 +429,7 @@ export function CategoryTree({
 
           return next;
         });
+        autoExpandedIdsRef.current.delete(dropTarget.targetId);
       }
 
       setWorkingCategories((prev) =>
@@ -348,6 +438,11 @@ export function CategoryTree({
           position: dropTarget.position,
         }),
       );
+      collapseAutoExpandedNodes(
+        dropTarget.position === "inside" ? dropTarget.targetId : undefined,
+      );
+    } else {
+      collapseAutoExpandedNodes();
     }
 
     setActiveDragId(null);
@@ -357,6 +452,7 @@ export function CategoryTree({
   useEffect(() => {
     return () => {
       clearHoverExpandTimer();
+      autoExpandedIdsRef.current.clear();
     };
   }, [clearHoverExpandTimer]);
 
@@ -390,6 +486,7 @@ export function CategoryTree({
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
           onDragCancel={() => {
+            collapseAutoExpandedNodes();
             clearHoverExpandTimer();
             setActiveDragId(null);
             setDropTarget(null);
