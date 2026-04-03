@@ -194,7 +194,7 @@ export function CategoryTreeRow({
             ) : null}
             {changeMarker ? (
               <span className="shrink-0 whitespace-nowrap rounded-full bg-primary-1/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.08em] leading-none text-primary-1">
-                {changeMarker}
+                {formatChangeMarker(changeMarker)}
               </span>
             ) : null}
           </div>
@@ -309,7 +309,7 @@ export function CategoryTreeRowPreview({
         </span>
         {changeMarker ? (
           <span className="shrink-0 rounded-full bg-primary-1/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.08em] leading-none text-primary-1">
-            {changeMarker}
+            {formatChangeMarker(changeMarker)}
           </span>
         ) : null}
       </div>
@@ -330,4 +330,16 @@ function DropLine({ active }: { active: boolean }) {
       )}
     />
   );
+}
+
+function formatChangeMarker(marker: ChangeMarker) {
+  if (marker === "moved") {
+    return "옮김 작업";
+  }
+
+  if (marker === "new-parent") {
+    return "부모 변경";
+  }
+
+  return marker;
 }

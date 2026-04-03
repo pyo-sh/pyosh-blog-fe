@@ -288,14 +288,12 @@ export function CategoryTree({
 
   return (
     <>
-      <div className={mode === "select" ? "pb-24" : ""}>
+      <div className={mode === "select" || mode === "edit" ? "pb-24" : ""}>
         <CategoryTreeToolbar
           totalCount={totalCount}
           mode={mode}
           showHidden={showHidden}
           showSlug={showSlug}
-          pendingChangeCount={pendingChanges.length}
-          isSavingTree={isSavingTree}
           onShowHiddenChange={setShowHidden}
           onShowSlugChange={setShowSlug}
           onExpandAll={handleExpandAll}
@@ -303,8 +301,6 @@ export function CategoryTree({
           onCreate={onCreate}
           onEnterSelectMode={handleEnterSelectMode}
           onEnterEditMode={handleEnterEditMode}
-          onCancelEditMode={handleCancelEditMode}
-          onSaveEditMode={() => void handleSaveEditMode()}
         />
 
         <DndContext
@@ -399,6 +395,35 @@ export function CategoryTree({
                   className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] bg-primary-1 px-3 text-sm text-white transition-opacity hover:opacity-90"
                 >
                   취소
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {mode === "edit" ? (
+          <div className="fixed bottom-0 left-0 right-0 z-20 md:left-60">
+            <div className="flex flex-wrap items-center gap-3 border-t border-border-3 bg-[rgba(241,242,243,0.95)] px-4 py-3 backdrop-blur-[12px] md:px-6 dark:bg-[rgba(19,20,21,0.94)]">
+              <span className="text-sm font-medium text-text-1">
+                변경사항 {pendingChanges.length}건
+              </span>
+
+              <div className="ml-auto flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleCancelEditMode}
+                  disabled={isSavingTree}
+                  className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] border border-border-3 px-3 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  취소
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleSaveEditMode()}
+                  disabled={pendingChanges.length === 0 || isSavingTree}
+                  className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] bg-primary-1 px-3 text-sm text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  {isSavingTree ? "저장 중..." : "저장"}
                 </button>
               </div>
             </div>

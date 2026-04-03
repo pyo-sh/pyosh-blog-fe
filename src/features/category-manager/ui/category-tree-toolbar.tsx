@@ -4,7 +4,6 @@ import { Icon } from "@iconify/react";
 import addFolderLinear from "@iconify-icons/solar/add-folder-linear";
 import altArrowDownLinear from "@iconify-icons/solar/alt-arrow-down-linear";
 import altArrowUpLinear from "@iconify-icons/solar/alt-arrow-up-linear";
-import checkReadLinear from "@iconify-icons/solar/check-read-linear";
 import checkSquareLinear from "@iconify-icons/solar/check-square-linear";
 import sortVerticalLinear from "@iconify-icons/solar/sort-vertical-linear";
 import type { CategoryTreeMode } from "../lib/tree-utils";
@@ -15,8 +14,6 @@ interface CategoryTreeToolbarProps {
   mode: CategoryTreeMode;
   showHidden: boolean;
   showSlug: boolean;
-  pendingChangeCount: number;
-  isSavingTree: boolean;
   onShowHiddenChange: (nextValue: boolean) => void;
   onShowSlugChange: (nextValue: boolean) => void;
   onExpandAll: () => void;
@@ -24,8 +21,6 @@ interface CategoryTreeToolbarProps {
   onCreate: () => void;
   onEnterSelectMode: () => void;
   onEnterEditMode: () => void;
-  onCancelEditMode: () => void;
-  onSaveEditMode: () => void;
 }
 
 export function CategoryTreeToolbar({
@@ -33,8 +28,6 @@ export function CategoryTreeToolbar({
   mode,
   showHidden,
   showSlug,
-  pendingChangeCount,
-  isSavingTree,
   onShowHiddenChange,
   onShowSlugChange,
   onExpandAll,
@@ -42,41 +35,9 @@ export function CategoryTreeToolbar({
   onCreate,
   onEnterSelectMode,
   onEnterEditMode,
-  onCancelEditMode,
-  onSaveEditMode,
 }: CategoryTreeToolbarProps) {
   const isSelectMode = mode === "select";
-
-  if (mode === "edit") {
-    return (
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center whitespace-nowrap rounded-md bg-primary-1/12 px-2.5 py-1 text-[13px] font-medium leading-none text-primary-1">
-            변경사항: {pendingChangeCount}건
-          </span>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={onCancelEditMode}
-            disabled={isSavingTree}
-            className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-4 text-sm font-normal leading-none text-text-2 transition-colors hover:bg-background-3 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            취소
-          </button>
-          <button
-            type="button"
-            onClick={onSaveEditMode}
-            disabled={pendingChangeCount === 0 || isSavingTree}
-            className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-primary-1 px-4 text-sm font-normal leading-none text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <Icon icon={checkReadLinear} width="18" aria-hidden="true" />
-            {isSavingTree ? "저장 중..." : "저장"}
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const isEditMode = mode === "edit";
 
   return (
     <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -128,7 +89,7 @@ export function CategoryTreeToolbar({
         </div>
       </div>
 
-      {!isSelectMode ? (
+      {!isSelectMode && !isEditMode ? (
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
