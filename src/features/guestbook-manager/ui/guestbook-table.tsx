@@ -38,6 +38,7 @@ interface GuestbookTableProps {
   onToggleSelect: (item: AdminGuestbookItem) => void;
   onToggleSelectAllCurrent: () => void;
   onOpenDetail: (item: AdminGuestbookItem) => void;
+  onOpenAction: (item: AdminGuestbookItem) => void;
   emptyMessage?: string;
 }
 
@@ -300,6 +301,7 @@ export function GuestbookTable({
   onToggleSelect,
   onToggleSelectAllCurrent,
   onOpenDetail,
+  onOpenAction,
   emptyMessage,
 }: GuestbookTableProps) {
   const selectAllRef = useRef<HTMLInputElement>(null);
@@ -486,7 +488,7 @@ export function GuestbookTable({
                             type="button"
                             onClick={(event) => {
                               event.stopPropagation();
-                              onOpenDetail(item);
+                              onOpenAction(item);
                             }}
                             className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-text-3 transition-colors hover:bg-background-3 hover:text-text-1"
                             aria-label="방명록 처리"

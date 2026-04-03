@@ -60,7 +60,11 @@ function getAvailableActions(status: AdminGuestbookItem["status"]) {
   }
 
   return [
-    { value: "hide" as const, label: "비공개", tone: "default" as const },
+    {
+      value: "hide" as const,
+      label: "비공개 전환",
+      tone: "default" as const,
+    },
     {
       value: "soft_delete" as const,
       label: "소프트 삭제",
@@ -193,19 +197,22 @@ export function GuestbookDetailModal({
                     }}
                     disabled={isPending || isDisabled || isCurrent}
                     className={cn(
-                      "inline-flex items-center rounded-md px-2 py-1 text-[11px] font-medium leading-none transition-colors disabled:cursor-not-allowed disabled:opacity-40",
+                      "inline-flex items-center rounded-md px-2 py-1 text-[11px] font-medium leading-none transition-colors disabled:opacity-40",
                       option.value === "active" &&
                         (isCurrent
                           ? "bg-positive-1/10 text-positive-1"
-                          : "bg-positive-1/5 text-positive-1 hover:bg-positive-1/10"),
+                          : "border border-border-3 text-text-2 hover:border-border-2 hover:text-text-1"),
                       option.value === "hidden" &&
                         (isCurrent
                           ? "bg-background-3 text-text-3"
-                          : "bg-background-2 text-text-3 hover:bg-background-3"),
+                          : "border border-border-3 text-text-2 hover:border-border-2 hover:text-text-1"),
                       option.value === "deleted" &&
                         (isCurrent
                           ? "bg-negative-1/10 text-negative-1"
-                          : "bg-negative-1/5 text-negative-1 hover:bg-negative-1/10"),
+                          : "border border-border-3 text-text-2 hover:border-border-2 hover:text-text-1"),
+                      !isCurrent && !isDisabled && "cursor-pointer",
+                      isCurrent && "cursor-default",
+                      isDisabled && !isCurrent && "cursor-not-allowed",
                     )}
                   >
                     {option.label}

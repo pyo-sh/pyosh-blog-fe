@@ -541,6 +541,12 @@ export function GuestbookManager() {
               onToggleSelect={handleToggleSelect}
               onToggleSelectAllCurrent={handleToggleSelectAllCurrent}
               onOpenDetail={(item) => setDetailItem(item)}
+              onOpenAction={(item) =>
+                setActionContext({
+                  type: "single",
+                  item,
+                })
+              }
               emptyMessage={
                 searchQuery ||
                 status !== "all" ||
