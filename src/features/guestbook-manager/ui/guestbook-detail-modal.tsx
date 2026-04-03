@@ -31,18 +31,6 @@ const dateTimeFormatter = new Intl.DateTimeFormat("ko-KR", {
   second: "2-digit",
 });
 
-function getStatusLabel(status: AdminGuestbookItem["status"]) {
-  if (status === "hidden") {
-    return "숨김";
-  }
-
-  if (status === "deleted") {
-    return "삭제됨";
-  }
-
-  return "정상";
-}
-
 function getAvailableActions(status: AdminGuestbookItem["status"]) {
   if (status === "hidden") {
     return [
@@ -72,7 +60,7 @@ function getAvailableActions(status: AdminGuestbookItem["status"]) {
   }
 
   return [
-    { value: "hide" as const, label: "숨기기", tone: "default" as const },
+    { value: "hide" as const, label: "비공개", tone: "default" as const },
     {
       value: "soft_delete" as const,
       label: "소프트 삭제",
@@ -178,18 +166,7 @@ export function GuestbookDetailModal({
           </p>
 
           <div className="mb-4 flex items-center gap-2">
-            <span className="text-xs text-text-3">상태:</span>
-            <span
-              className={cn(
-                "inline-flex items-center rounded-md px-2 py-1 text-[11px] font-medium leading-none",
-                item.status === "active" && "bg-positive-1/10 text-positive-1",
-                item.status === "hidden" && "bg-background-3 text-text-3",
-                item.status === "deleted" && "bg-negative-1/10 text-negative-1",
-              )}
-            >
-              {getStatusLabel(item.status)}
-            </span>
-            <div className="ml-2 flex items-center gap-1">
+            <div className="flex items-center gap-1">
               <span className="text-xs text-text-3">상태 전환:</span>
               {(
                 [
@@ -216,10 +193,19 @@ export function GuestbookDetailModal({
                     }}
                     disabled={isPending || isDisabled || isCurrent}
                     className={cn(
-                      "inline-flex h-7 items-center rounded-[0.55rem] px-2 text-xs leading-none transition-colors disabled:cursor-not-allowed disabled:opacity-40",
-                      isCurrent
-                        ? "bg-primary-1/10 text-primary-1"
-                        : "text-text-3 hover:bg-background-3 hover:text-text-1",
+                      "inline-flex items-center rounded-md px-2 py-1 text-[11px] font-medium leading-none transition-colors disabled:cursor-not-allowed disabled:opacity-40",
+                      option.value === "active" &&
+                        (isCurrent
+                          ? "bg-positive-1/10 text-positive-1"
+                          : "bg-positive-1/5 text-positive-1 hover:bg-positive-1/10"),
+                      option.value === "hidden" &&
+                        (isCurrent
+                          ? "bg-background-3 text-text-3"
+                          : "bg-background-2 text-text-3 hover:bg-background-3"),
+                      option.value === "deleted" &&
+                        (isCurrent
+                          ? "bg-negative-1/10 text-negative-1"
+                          : "bg-negative-1/5 text-negative-1 hover:bg-negative-1/10"),
                     )}
                   >
                     {option.label}

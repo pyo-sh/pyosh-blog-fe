@@ -133,8 +133,8 @@ function getBulkOptions(items: AdminGuestbookItem[]) {
   > = {
     hide: {
       value: "hide",
-      label: "숨기기",
-      description: "선택한 방명록을 공개 페이지에서 숨깁니다.",
+      label: "비공개 전환",
+      description: "선택한 방명록을 공개 페이지에서 비공개 상태로 전환합니다.",
     },
     restore: {
       value: "restore",
@@ -541,13 +541,6 @@ export function GuestbookManager() {
               onToggleSelect={handleToggleSelect}
               onToggleSelectAllCurrent={handleToggleSelectAllCurrent}
               onOpenDetail={(item) => setDetailItem(item)}
-              onSelectAction={(item, action) =>
-                setActionContext({
-                  type: "single",
-                  item,
-                  defaultAction: action,
-                })
-              }
               emptyMessage={
                 searchQuery ||
                 status !== "all" ||

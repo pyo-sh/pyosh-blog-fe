@@ -8,11 +8,10 @@ import {
   type KeyboardEvent,
 } from "react";
 import { Icon } from "@iconify/react";
+import chatRoundDotsLinear from "@iconify-icons/solar/chat-round-dots-linear";
 import closeCircleLinear from "@iconify-icons/solar/close-circle-linear";
 import lockKeyholeLinear from "@iconify-icons/solar/lock-keyhole-linear";
 import magniferLinear from "@iconify-icons/solar/magnifer-linear";
-import restartLinear from "@iconify-icons/solar/restart-linear";
-import trashBinTrashLinear from "@iconify-icons/solar/trash-bin-trash-linear";
 import type {
   AdminGuestbookAuthorType,
   AdminGuestbookFilterStatus,
@@ -39,10 +38,6 @@ interface GuestbookTableProps {
   onToggleSelect: (item: AdminGuestbookItem) => void;
   onToggleSelectAllCurrent: () => void;
   onOpenDetail: (item: AdminGuestbookItem) => void;
-  onSelectAction: (
-    item: AdminGuestbookItem,
-    action: "hide" | "restore" | "soft_delete" | "hard_delete",
-  ) => void;
   emptyMessage?: string;
 }
 
@@ -305,7 +300,6 @@ export function GuestbookTable({
   onToggleSelect,
   onToggleSelectAllCurrent,
   onOpenDetail,
-  onSelectAction,
   emptyMessage,
 }: GuestbookTableProps) {
   const selectAllRef = useRef<HTMLInputElement>(null);
@@ -488,68 +482,16 @@ export function GuestbookTable({
                       </td>
                       <td className="whitespace-nowrap px-3 py-3.5 align-middle text-center leading-none">
                         <div className="flex items-center justify-center gap-1">
-                          {item.status === "active" ? (
-                            <button
-                              type="button"
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                onSelectAction(item, "hide");
-                              }}
-                              className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-negative-1 transition-colors hover:bg-negative-1/10"
-                              aria-label="상태 변경"
-                            >
-                              <Icon icon={trashBinTrashLinear} width="15" />
-                            </button>
-                          ) : null}
-                          {item.status === "hidden" ? (
-                            <>
-                              <button
-                                type="button"
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  onSelectAction(item, "restore");
-                                }}
-                                className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-positive-1 transition-colors hover:bg-positive-1/10"
-                                aria-label="복원"
-                              >
-                                <Icon icon={restartLinear} width="15" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  onSelectAction(item, "hard_delete");
-                                }}
-                                className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-negative-1 transition-colors hover:bg-negative-1/10"
-                                aria-label="영구 삭제"
-                              >
-                                <Icon icon={trashBinTrashLinear} width="15" />
-                              </button>
-                            </>
-                          ) : null}
-                          {item.status === "deleted" ? (
-                            <button
-                              type="button"
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                onSelectAction(item, "restore");
-                              }}
-                              className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-positive-1 transition-colors hover:bg-positive-1/10"
-                              aria-label="복원"
-                            >
-                              <Icon icon={restartLinear} width="15" />
-                            </button>
-                          ) : null}
                           <button
                             type="button"
                             onClick={(event) => {
                               event.stopPropagation();
-                              onSelectAction(item, "hard_delete");
+                              onOpenDetail(item);
                             }}
-                            className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-negative-1 transition-colors hover:bg-negative-1/10"
-                            aria-label="영구 삭제"
+                            className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-text-3 transition-colors hover:bg-background-3 hover:text-text-1"
+                            aria-label="방명록 처리"
                           >
-                            <Icon icon={trashBinTrashLinear} width="15" />
+                            <Icon icon={chatRoundDotsLinear} width="15" />
                           </button>
                         </div>
                       </td>
