@@ -153,7 +153,9 @@ export function useAdminCommentStatusMutation(
     ) => mutation.mutateAsync({ comment, nextStatus }),
     resetState: () => {
       setErrorMessage(null);
-      mutation.reset();
+      if (!mutation.isPending) {
+        mutation.reset();
+      }
     },
   };
 }

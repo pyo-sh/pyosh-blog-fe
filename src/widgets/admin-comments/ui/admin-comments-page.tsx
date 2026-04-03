@@ -719,10 +719,7 @@ export function AdminCommentsPage() {
           actionItems.length === 1 &&
           actionItems[0]?.id === openedComment?.id
         }
-        isStatusPending={
-          statusMutation.isPending &&
-          statusMutation.variables?.comment.id === openedComment?.id
-        }
+        isStatusPending={statusMutation.isPending}
         statusError={statusMutation.errorMessage}
         onClose={handleCloseModal}
         onCommentChange={setOpenedComment}

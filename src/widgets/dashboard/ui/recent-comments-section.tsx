@@ -395,10 +395,7 @@ export function RecentCommentsSection() {
         isActionPending={
           deleteMutation.isPending && activeDeleteId === openedComment?.id
         }
-        isStatusPending={
-          statusMutation.isPending &&
-          statusMutation.variables?.comment.id === openedComment?.id
-        }
+        isStatusPending={statusMutation.isPending}
         statusError={statusMutation.errorMessage}
         onClose={() => setOpenedComment(null)}
         onCommentChange={setOpenedComment}
