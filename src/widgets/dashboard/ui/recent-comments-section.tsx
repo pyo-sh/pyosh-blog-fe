@@ -247,6 +247,10 @@ export function RecentCommentsSection() {
     },
   });
 
+  useEffect(() => {
+    statusMutation.resetState();
+  }, [openedComment?.id]);
+
   const comments = data?.data ?? [];
   const totalComments = data?.meta.total ?? 0;
   const activeDeleteId = deleteMutation.variables?.item.id ?? null;

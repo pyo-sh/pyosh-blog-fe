@@ -151,5 +151,9 @@ export function useAdminCommentStatusMutation(
       comment: AdminCommentItem,
       nextStatus: AdminCommentItem["status"],
     ) => mutation.mutateAsync({ comment, nextStatus }),
+    resetState: () => {
+      setErrorMessage(null);
+      mutation.reset();
+    },
   };
 }

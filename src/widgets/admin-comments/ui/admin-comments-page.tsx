@@ -152,14 +152,16 @@ export function AdminCommentsPage() {
       setOpenedComment((current) =>
         current?.id === updatedComment.id ? updatedComment : current,
       );
-      setSelectedItems((current) =>
-        current[updatedComment.id]
-          ? {
-              ...current,
-              [updatedComment.id]: updatedComment,
-            }
-          : current,
-      );
+      setSelectedItems((current) => {
+        if (!current[updatedComment.id]) {
+          return current;
+        }
+
+        const next = { ...current };
+        delete next[updatedComment.id];
+
+        return next;
+      });
     },
   });
 
@@ -187,6 +189,10 @@ export function AdminCommentsPage() {
       return hasChanged ? next : current;
     });
   }, [rows]);
+
+  useEffect(() => {
+    statusMutation.resetState();
+  }, [openedComment?.id]);
 
   const actionMutation = useMutation({
     mutationFn: async (payload: {
