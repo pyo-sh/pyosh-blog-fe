@@ -111,6 +111,7 @@ export function CategoryTreeRow({
           ref={draggable.setNodeRef}
           className={cn(
             "flex h-[28px] items-center justify-between gap-2 px-4 transition-colors",
+            mode === "edit" ? "cursor-grab active:cursor-grabbing" : "",
             isDragging && "z-10 opacity-50 shadow-lg",
             currentDropPosition === "inside" &&
               !isInvalidDropTarget &&
@@ -122,6 +123,8 @@ export function CategoryTreeRow({
           style={{
             ...transformStyle,
           }}
+          {...(mode === "edit" ? draggable.attributes : {})}
+          {...(mode === "edit" ? draggable.listeners : {})}
         >
           <div
             className="flex min-w-0 flex-1 items-center gap-2"
@@ -139,16 +142,12 @@ export function CategoryTreeRow({
             ) : null}
 
             {mode === "edit" ? (
-              <button
-                type="button"
-                aria-label={`${category.name} 드래그 핸들`}
-                onClick={(event) => event.stopPropagation()}
-                className="inline-flex h-5 w-5 shrink-0 cursor-grab items-center justify-center text-text-4 active:cursor-grabbing"
-                {...draggable.attributes}
-                {...draggable.listeners}
+              <div
+                aria-hidden="true"
+                className="inline-flex h-5 w-5 shrink-0 items-center justify-center text-text-4"
               >
                 <Icon icon={menuDotsLinear} width="16" aria-hidden="true" />
-              </button>
+              </div>
             ) : null}
 
             {hasVisibleChildren ? (
@@ -334,7 +333,7 @@ function DropLine({ active }: { active: boolean }) {
 
 function formatChangeMarker(marker: ChangeMarker) {
   if (marker === "moved") {
-    return "옮김 작업";
+    return "바뀜";
   }
 
   if (marker === "new-parent") {
