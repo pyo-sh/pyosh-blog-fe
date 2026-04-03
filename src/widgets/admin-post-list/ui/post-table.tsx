@@ -5,11 +5,11 @@ import { useState } from "react";
 import { Icon } from "@iconify/react";
 import altArrowDownLinear from "@iconify-icons/solar/alt-arrow-down-linear";
 import altArrowUpLinear from "@iconify-icons/solar/alt-arrow-up-linear";
-import sortLinear from "@iconify-icons/solar/sort-linear";
 import chatRoundDotsLinear from "@iconify-icons/solar/chat-round-dots-linear";
 import eyeLinear from "@iconify-icons/solar/eye-linear";
 import pinBold from "@iconify-icons/solar/pin-bold";
 import pinLinear from "@iconify-icons/solar/pin-linear";
+import sortLinear from "@iconify-icons/solar/sort-linear";
 import trashBinMinimalisticLinear from "@iconify-icons/solar/trash-bin-minimalistic-linear";
 import Image from "next/image";
 import Link from "next/link";
@@ -140,10 +140,7 @@ function SortableHeader({
         icon={sortIcon}
         width="12"
         aria-hidden="true"
-        className={cn(
-          "shrink-0",
-          isActive ? "text-primary-1" : "text-text-4",
-        )}
+        className={cn("shrink-0", isActive ? "text-primary-1" : "text-text-4")}
       />
     </button>
   );
@@ -406,7 +403,9 @@ export function PostTable({
                           {post.category.name}
                         </span>
                       ) : (
-                        <span className="whitespace-nowrap text-[14px] leading-4 text-text-4">-</span>
+                        <span className="whitespace-nowrap text-[14px] leading-4 text-text-4">
+                          -
+                        </span>
                       )}
                     </td>
                     <td className="border-b border-border-4 px-3 py-3 align-middle text-[13px] leading-4 text-text-3">
@@ -676,7 +675,9 @@ export function PostTable({
                           {commentStatusLabelMap[post.commentStatus]}
                         </Badge>
                       ) : (
-                        <span className="whitespace-nowrap text-[14px] leading-5 text-text-4">-</span>
+                        <span className="whitespace-nowrap text-[14px] leading-5 text-text-4">
+                          -
+                        </span>
                       )}
                     </td>
                     <td className="border-b border-border-4 px-3 py-3 align-middle">

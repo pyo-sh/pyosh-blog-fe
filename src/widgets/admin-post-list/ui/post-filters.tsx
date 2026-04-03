@@ -99,10 +99,7 @@ function FilterSelect({
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
-      if (
-        rootRef.current &&
-        !rootRef.current.contains(event.target as Node)
-      ) {
+      if (rootRef.current && !rootRef.current.contains(event.target as Node)) {
         setOpen(false);
       }
     }
@@ -152,9 +149,7 @@ function FilterSelect({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={listboxId}
-        onClick={() =>
-          open ? setOpen(false) : openList(selectedIndex)
-        }
+        onClick={() => (open ? setOpen(false) : openList(selectedIndex))}
         onKeyDown={(event) => {
           if (event.key === "ArrowDown") {
             event.preventDefault();
@@ -336,11 +331,16 @@ export function PostFilters({
             ) : null}
           </button>
         </div>
-        {action ? <div className="shrink-0 whitespace-nowrap">{action}</div> : null}
+        {action ? (
+          <div className="shrink-0 whitespace-nowrap">{action}</div>
+        ) : null}
       </div>
 
       {tab === "active" ? (
-        <form onSubmit={handleSearch} className="flex flex-wrap items-center gap-3">
+        <form
+          onSubmit={handleSearch}
+          className="flex flex-wrap items-center gap-3"
+        >
           <FilterSelect
             value={status}
             onChange={(value) => onStatusChange(value as AdminPostStatusFilter)}

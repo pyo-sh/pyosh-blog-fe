@@ -21,6 +21,7 @@ import {
   fetchAdminCommentThread,
   fetchAdminComments,
   type AdminCommentItem,
+  useAdminCommentStatusMutation,
 } from "@entities/comment";
 import { getErrorMessage } from "@shared/lib/get-error-message";
 import { cn } from "@shared/lib/style-utils";
@@ -145,6 +146,21 @@ export function AdminCommentsPage() {
   const { data, isPending, isError, error, isFetching } = useQuery({
     queryKey,
     queryFn: () => fetchAdminComments(queryParams),
+  });
+  const statusMutation = useAdminCommentStatusMutation({
+    onSuccess: (updatedComment) => {
+      setOpenedComment((current) =>
+        current?.id === updatedComment.id ? updatedComment : current,
+      );
+      setSelectedItems((current) =>
+        current[updatedComment.id]
+          ? {
+              ...current,
+              [updatedComment.id]: updatedComment,
+            }
+          : current,
+      );
+    },
   });
 
   const rows = data?.data ?? EMPTY_COMMENT_ROWS;
@@ -697,8 +713,16 @@ export function AdminCommentsPage() {
           actionItems.length === 1 &&
           actionItems[0]?.id === openedComment?.id
         }
+        isStatusPending={
+          statusMutation.isPending &&
+          statusMutation.variables?.comment.id === openedComment?.id
+        }
+        statusError={statusMutation.errorMessage}
         onClose={handleCloseModal}
         onCommentChange={setOpenedComment}
+        onSelectStatus={(comment, status) => {
+          void statusMutation.changeStatus(comment, status);
+        }}
         onSelectAction={(comment, action) =>
           handleOpenActionModal(comment, action)
         }

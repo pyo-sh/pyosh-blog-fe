@@ -69,10 +69,7 @@ function BulkSelect({
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
-      if (
-        rootRef.current &&
-        !rootRef.current.contains(event.target as Node)
-      ) {
+      if (rootRef.current && !rootRef.current.contains(event.target as Node)) {
         setOpen(false);
       }
     }
@@ -122,9 +119,7 @@ function BulkSelect({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={listboxId}
-        onClick={() =>
-          open ? setOpen(false) : openList(selectedIndex)
-        }
+        onClick={() => (open ? setOpen(false) : openList(selectedIndex))}
         onKeyDown={(event) => {
           if (event.key === "ArrowDown") {
             event.preventDefault();
@@ -279,10 +274,7 @@ export function BulkActions({
     [flatCategories],
   );
   const commentStatusOptions = useMemo(
-    () => [
-      { label: "댓글 상태", value: "" },
-      ...COMMENT_STATUS_OPTIONS,
-    ],
+    () => [{ label: "댓글 상태", value: "" }, ...COMMENT_STATUS_OPTIONS],
     [],
   );
   const count = selectedIds.length;

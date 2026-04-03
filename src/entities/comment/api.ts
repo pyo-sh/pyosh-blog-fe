@@ -254,6 +254,12 @@ export async function adminRestoreComment(id: number): Promise<void> {
   });
 }
 
+export async function adminHideComment(id: number): Promise<void> {
+  await clientMutate<void>(`/api/admin/comments/${id}/hide`, {
+    method: "PUT",
+  });
+}
+
 export async function adminBulkOperateComments(
   ids: number[],
   action: AdminCommentBulkAction,
