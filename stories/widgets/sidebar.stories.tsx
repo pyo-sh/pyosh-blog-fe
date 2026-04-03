@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { AdminSidebar } from "@widgets/admin-sidebar";
 
 const meta: Meta<typeof AdminSidebar> = {
-  title: "Widgets/Sidebar",
+  title: "Widgets/Admin/Sidebar",
   component: AdminSidebar,
   parameters: {
     layout: "fullscreen",

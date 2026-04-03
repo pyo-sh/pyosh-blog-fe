@@ -13,7 +13,7 @@ const assets = Array.from({ length: 6 }, (_, index) => ({
 }));
 
 const meta: Meta<typeof AssetUploader> = {
-  title: "Widgets/Admin/AssetGallery",
+  title: "Widgets/AssetGallery",
   component: AssetUploader,
   parameters: {
     layout: "padded",

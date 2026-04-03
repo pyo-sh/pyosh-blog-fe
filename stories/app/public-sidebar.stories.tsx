@@ -59,7 +59,7 @@ function MobileSidebarStory(args: React.ComponentProps<typeof PublicSidebarPanel
 }
 
 const meta: Meta<typeof PublicSidebarContent> = {
-  title: "App/PublicSidebar",
+  title: "Widgets/Public/Sidebar",
   component: PublicSidebarContent,
   parameters: {
     layout: "fullscreen",

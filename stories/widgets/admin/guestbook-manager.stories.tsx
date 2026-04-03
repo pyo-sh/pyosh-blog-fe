@@ -3,7 +3,7 @@ import { http, HttpResponse } from "msw";
 import { GuestbookManager } from "@features/guestbook-manager";
 
 const meta: Meta<typeof GuestbookManager> = {
-  title: "Widgets/Admin/GuestbookManager",
+  title: "Widgets/GuestbookManager",
   component: GuestbookManager,
   parameters: {
     layout: "fullscreen",

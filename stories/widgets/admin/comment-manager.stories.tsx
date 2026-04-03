@@ -3,7 +3,7 @@ import { http, HttpResponse } from "msw";
 import { AdminCommentsPage } from "@widgets/admin-comments";
 
 const meta: Meta<typeof AdminCommentsPage> = {
-  title: "Widgets/Admin/CommentManager",
+  title: "Widgets/CommentManager",
   component: AdminCommentsPage,
   parameters: {
     layout: "fullscreen",

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { Header } from "@widgets/header";
 
 const meta: Meta<typeof Header> = {
-  title: "Widgets/Header",
+  title: "Widgets/Public/Header",
   component: Header,
   parameters: {
     layout: "fullscreen",
