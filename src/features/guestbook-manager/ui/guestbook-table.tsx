@@ -9,12 +9,9 @@ import {
 } from "react";
 import { Icon } from "@iconify/react";
 import closeCircleLinear from "@iconify-icons/solar/close-circle-linear";
-import eyeClosedLinear from "@iconify-icons/solar/eye-closed-linear";
-import eyeLinear from "@iconify-icons/solar/eye-linear";
 import lockKeyholeLinear from "@iconify-icons/solar/lock-keyhole-linear";
 import magniferLinear from "@iconify-icons/solar/magnifer-linear";
 import restartLinear from "@iconify-icons/solar/restart-linear";
-import trashBinMinimalisticLinear from "@iconify-icons/solar/trash-bin-minimalistic-linear";
 import trashBinTrashLinear from "@iconify-icons/solar/trash-bin-trash-linear";
 import type {
   AdminGuestbookAuthorType,
@@ -491,45 +488,18 @@ export function GuestbookTable({
                       </td>
                       <td className="whitespace-nowrap px-3 py-3.5 align-middle text-center leading-none">
                         <div className="flex items-center justify-center gap-1">
-                          <button
-                            type="button"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              onOpenDetail(item);
-                            }}
-                            className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-text-3 transition-colors hover:bg-background-3 hover:text-text-1"
-                            aria-label="보기"
-                          >
-                            <Icon icon={eyeLinear} width="15" />
-                          </button>
                           {item.status === "active" ? (
-                            <>
-                              <button
-                                type="button"
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  onSelectAction(item, "hide");
-                                }}
-                                className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-text-3 transition-colors hover:bg-background-3 hover:text-text-1"
-                                aria-label="숨기기"
-                              >
-                                <Icon icon={eyeClosedLinear} width="15" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  onSelectAction(item, "soft_delete");
-                                }}
-                                className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-text-3 transition-colors hover:bg-background-3 hover:text-text-1"
-                                aria-label="소프트 삭제"
-                              >
-                                <Icon
-                                  icon={trashBinMinimalisticLinear}
-                                  width="15"
-                                />
-                              </button>
-                            </>
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                onSelectAction(item, "hide");
+                              }}
+                              className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-negative-1 transition-colors hover:bg-negative-1/10"
+                              aria-label="상태 변경"
+                            >
+                              <Icon icon={trashBinTrashLinear} width="15" />
+                            </button>
                           ) : null}
                           {item.status === "hidden" ? (
                             <>
@@ -548,15 +518,12 @@ export function GuestbookTable({
                                 type="button"
                                 onClick={(event) => {
                                   event.stopPropagation();
-                                  onSelectAction(item, "soft_delete");
+                                  onSelectAction(item, "hard_delete");
                                 }}
-                                className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-text-3 transition-colors hover:bg-background-3 hover:text-text-1"
-                                aria-label="소프트 삭제"
+                                className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-negative-1 transition-colors hover:bg-negative-1/10"
+                                aria-label="영구 삭제"
                               >
-                                <Icon
-                                  icon={trashBinMinimalisticLinear}
-                                  width="15"
-                                />
+                                <Icon icon={trashBinTrashLinear} width="15" />
                               </button>
                             </>
                           ) : null}

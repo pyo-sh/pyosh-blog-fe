@@ -170,6 +170,20 @@ function getBulkOptions(items: AdminGuestbookItem[]) {
   return commonActions.map((action) => optionMap[action]);
 }
 
+function getBulkAllowedActions(items: AdminGuestbookItem[]) {
+  return items.reduce<readonly GuestbookManageAction[]>((current, item) => {
+    const allowedActions = [
+      ...getAllowedActionsForStatus(item.status),
+    ] as readonly GuestbookManageAction[];
+
+    if (current.length === 0) {
+      return [...allowedActions];
+    }
+
+    return current.filter((action) => allowedActions.includes(action));
+  }, []);
+}
+
 export function GuestbookManager() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
@@ -302,6 +316,7 @@ export function GuestbookManager() {
     (item) => !currentPageIds.includes(item.id),
   ).length;
   const pageNumbers = meta ? generatePageNumbers(page, meta.totalPages, 2) : [];
+  const bulkAllowedActions = getBulkAllowedActions(selectedList);
 
   useEffect(() => {
     setSelectedItems((current) => {
@@ -447,7 +462,7 @@ export function GuestbookManager() {
             : "bg-background-1 p-0"
         }
       >
-        {guestbookQuery.isLoading ? (
+        {guestbookQuery.isLoading && !guestbookQuery.data ? (
           <div className="space-y-4">
             <div className="flex gap-3">
               {Array.from({ length: 4 }).map((_, index) => (
@@ -666,11 +681,41 @@ export function GuestbookManager() {
                   setActionContext({
                     type: "bulk",
                     items: selectedList,
+                    defaultAction: "hide",
                   })
                 }
-                className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] border border-border-3 px-3 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+                disabled={!bulkAllowedActions.includes("hide")}
+                className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] border border-border-3 px-3 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                일괄 작업
+                숨김
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setActionContext({
+                    type: "bulk",
+                    items: selectedList,
+                    defaultAction: "soft_delete",
+                  })
+                }
+                disabled={!bulkAllowedActions.includes("soft_delete")}
+                className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] border border-border-3 px-3 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                소프트 삭제
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setActionContext({
+                    type: "bulk",
+                    items: selectedList,
+                    defaultAction: "hard_delete",
+                  })
+                }
+                disabled={!bulkAllowedActions.includes("hard_delete")}
+                className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] border border-negative-1/30 px-3 text-sm text-negative-1 transition-colors hover:bg-negative-1/10 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                영구 삭제
               </button>
             </div>
           </div>
