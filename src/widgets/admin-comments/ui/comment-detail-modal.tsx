@@ -385,7 +385,15 @@ function DetailView({
                     <button
                       key={status}
                       type="button"
-                      onClick={() => onSelectStatus(status)}
+                      onClick={() => {
+                        if (status === "deleted") {
+                          onSelectAction("soft_delete");
+
+                          return;
+                        }
+
+                        onSelectStatus(status);
+                      }}
                       disabled={isAnyPending || isCurrent || !isAvailable}
                       aria-pressed={isCurrent}
                       className={cn(
