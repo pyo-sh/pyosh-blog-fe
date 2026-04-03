@@ -30,6 +30,27 @@ const ACCEPTED_TYPES = new Set([
 const QUERY_KEY = ["admin-assets"] as const;
 const EMPTY_ASSETS: Asset[] = [];
 
+function generatePageNumbers(
+  currentPage: number,
+  totalPages: number,
+  windowSize: number,
+): Array<number | "..."> {
+  if (totalPages <= 1) return [];
+
+  const windowStart = Math.max(2, currentPage - windowSize);
+  const windowEnd = Math.min(totalPages - 1, currentPage + windowSize);
+  const pages: Array<number | "..."> = [1];
+
+  if (windowStart > 2) pages.push("...");
+  for (let index = windowStart; index <= windowEnd; index += 1) {
+    pages.push(index);
+  }
+  if (windowEnd < totalPages - 1) pages.push("...");
+  pages.push(totalPages);
+
+  return pages;
+}
+
 export function AssetUploader() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
@@ -190,6 +211,7 @@ export function AssetUploader() {
 
     return `총 ${meta.total}개 중 ${start}-${end}`;
   }, [assets.length, meta]);
+  const pageNumbers = meta ? generatePageNumbers(page, meta.totalPages, 2) : [];
 
   function clearPendingFiles() {
     setPendingFiles((current) => {
@@ -406,7 +428,6 @@ export function AssetUploader() {
             onToggleSelect={toggleSelect}
             onCopyUrl={(asset) => void handleCopy(asset, "url")}
             onOpenDetail={setDetailAssetId}
-            onRequestDelete={requestDelete}
           />
           <div className="flex flex-col gap-4">
             {selectionMode ? (
@@ -453,11 +474,80 @@ export function AssetUploader() {
                 </div>
               </div>
             ) : null}
-            <PaginationControls
-              currentPage={meta?.page ?? 1}
-              totalPages={meta?.totalPages ?? 1}
-              onPageChange={handlePageChange}
-            />
+            {meta && meta.totalPages > 1 ? (
+              <nav
+                aria-label="관리자 에셋 페이지네이션"
+                className="flex items-center justify-center gap-0.5"
+              >
+                <button
+                  type="button"
+                  onClick={() => handlePageChange(Math.max(1, page - 5))}
+                  disabled={page <= 5}
+                  className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:text-text-4"
+                  aria-label="5 pages back"
+                >
+                  &laquo;
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handlePageChange(Math.max(1, page - 1))}
+                  disabled={page === 1}
+                  className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:text-text-4"
+                  aria-label="Previous page"
+                >
+                  &lsaquo;
+                </button>
+                {pageNumbers.map((pageNumber, index) =>
+                  pageNumber === "..." ? (
+                    <span
+                      key={`ellipsis-${index}`}
+                      className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-4"
+                      aria-hidden="true"
+                    >
+                      &hellip;
+                    </span>
+                  ) : (
+                    <button
+                      key={pageNumber}
+                      type="button"
+                      onClick={() => handlePageChange(pageNumber)}
+                      disabled={pageNumber === page}
+                      className={
+                        pageNumber === page
+                          ? "pointer-events-none inline-flex min-w-[2rem] items-center justify-center rounded bg-primary-1 px-2.5 py-1.5 text-sm font-semibold text-white"
+                          : "inline-flex min-w-[2rem] items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2"
+                      }
+                      aria-current={pageNumber === page ? "page" : undefined}
+                      aria-label={`Page ${pageNumber}`}
+                    >
+                      {pageNumber}
+                    </button>
+                  ),
+                )}
+                <button
+                  type="button"
+                  onClick={() =>
+                    handlePageChange(Math.min(meta.totalPages, page + 1))
+                  }
+                  disabled={page === meta.totalPages}
+                  className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:text-text-4"
+                  aria-label="Next page"
+                >
+                  &rsaquo;
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    handlePageChange(Math.min(meta.totalPages, page + 5))
+                  }
+                  disabled={page + 5 > meta.totalPages}
+                  className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:text-text-4"
+                  aria-label="5 pages forward"
+                >
+                  &raquo;
+                </button>
+              </nav>
+            ) : null}
             <p className="text-right text-sm text-text-3">
               {assetsQuery.isFetching && !assetsQuery.isPending
                 ? "목록을 새로 불러오는 중..."
@@ -557,61 +647,6 @@ function DeleteAssetsModal({
         </button>
       </div>
     </Modal>
-  );
-}
-
-function PaginationControls({
-  currentPage,
-  totalPages,
-  onPageChange,
-}: {
-  currentPage: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
-}) {
-  if (totalPages <= 1) {
-    return null;
-  }
-
-  return (
-    <nav
-      aria-label="Asset pagination"
-      className="flex items-center justify-center gap-2"
-    >
-      <button
-        type="button"
-        onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        className="inline-flex items-center justify-center rounded-[0.85rem] border border-border-3 px-3 py-2 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        이전
-      </button>
-      {Array.from({ length: totalPages }, (_, index) => index + 1).map(
-        (page) => (
-          <button
-            key={page}
-            type="button"
-            onClick={() => onPageChange(page)}
-            disabled={page === currentPage}
-            className={
-              page === currentPage
-                ? "inline-flex h-10 min-w-10 items-center justify-center rounded-[0.85rem] bg-primary-1 px-3 text-sm font-semibold text-white"
-                : "inline-flex h-10 min-w-10 items-center justify-center rounded-[0.85rem] border border-border-3 px-3 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
-            }
-          >
-            {page}
-          </button>
-        ),
-      )}
-      <button
-        type="button"
-        onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        className="inline-flex items-center justify-center rounded-[0.85rem] border border-border-3 px-3 py-2 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        다음
-      </button>
-    </nav>
   );
 }
 

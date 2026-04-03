@@ -3,12 +3,11 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
 import checkCircleLinear from "@iconify-icons/solar/check-circle-linear";
-import galleryWideLinear from "@iconify-icons/solar/gallery-wide-linear";
 import linkMinimalistic2Linear from "@iconify-icons/solar/link-minimalistic-2-linear";
-import trashBinMinimalisticLinear from "@iconify-icons/solar/trash-bin-minimalistic-linear";
 import { useLongPress } from "../lib/use-long-press";
 import type { Asset } from "@entities/asset";
 import {
+  formatAssetDate,
   formatAssetFileSize,
   formatAssetResolution,
   getAssetFilename,
@@ -30,7 +29,6 @@ interface AssetGridProps {
   ) => void;
   onCopyUrl: (asset: Asset) => void;
   onOpenDetail: (assetId: number) => void;
-  onRequestDelete: (ids: number[]) => void;
 }
 
 export function AssetGrid({
@@ -44,12 +42,13 @@ export function AssetGrid({
   onToggleSelect,
   onCopyUrl,
   onOpenDetail,
-  onRequestDelete,
 }: AssetGridProps) {
   return (
     <section>
       <div className="mb-4 flex items-center justify-between">
-        <p className="text-sm text-text-3">총 {assets.length}개</p>
+        <p className="text-[13px] leading-none text-text-3">
+          총 {assets.length}개
+        </p>
         {!selectionMode ? (
           <button
             type="button"
@@ -63,7 +62,7 @@ export function AssetGrid({
       </div>
 
       {assets.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
           {assets.map((asset, index) => (
             <AssetGridCard
               key={asset.id}
@@ -78,7 +77,6 @@ export function AssetGrid({
               onToggleSelect={onToggleSelect}
               onCopyUrl={onCopyUrl}
               onOpenDetail={onOpenDetail}
-              onRequestDelete={onRequestDelete}
             />
           ))}
         </div>
@@ -107,7 +105,6 @@ function AssetGridCard({
   onToggleSelect,
   onCopyUrl,
   onOpenDetail,
-  onRequestDelete,
 }: {
   asset: Asset;
   index: number;
@@ -124,7 +121,6 @@ function AssetGridCard({
   ) => void;
   onCopyUrl: (asset: Asset) => void;
   onOpenDetail: (assetId: number) => void;
-  onRequestDelete: (ids: number[]) => void;
 }) {
   const longPress = useLongPress({
     onLongPress: () => {
@@ -153,10 +149,10 @@ function AssetGridCard({
   return (
     <article
       className={cn(
-        "group relative overflow-hidden rounded-xl border bg-background-2 transition-all",
+        "group relative overflow-hidden rounded-xl border border-border-4 bg-background-2 transition-all",
         isSelected
           ? "border-primary-1 shadow-[0_0_0_3px_rgba(138,111,224,0.12)]"
-          : "border-border-3 hover:-translate-y-0.5 hover:border-border-2",
+          : "hover:border-border-3",
         longPress.isPressing && "border-primary-1 bg-primary-1/5",
       )}
     >
@@ -185,9 +181,16 @@ function AssetGridCard({
 
         {selectionMode ? (
           <div className="absolute left-3 top-3 z-10">
+            <input
+              type="checkbox"
+              checked={isSelected}
+              readOnly
+              aria-hidden="true"
+              className="h-4 w-4 cursor-pointer rounded border-border-3 accent-primary-1"
+            />
             <span
               className={cn(
-                "inline-flex min-h-9 min-w-9 items-center justify-center rounded-full border px-2 text-xs font-semibold shadow-sm backdrop-blur",
+                "sr-only inline-flex min-h-9 min-w-9 items-center justify-center rounded-full border px-2 text-xs font-semibold shadow-sm backdrop-blur",
                 isSelected
                   ? "border-primary-1 bg-primary-1 text-white"
                   : "border-border-3 bg-background-1/90 text-text-3",
@@ -199,7 +202,7 @@ function AssetGridCard({
         ) : null}
 
         {!selectionMode ? (
-          <div className="absolute right-3 top-3 z-10 hidden sm:block">
+          <div className="absolute right-3 top-3 z-10">
             <button
               type="button"
               onPointerDown={(event) => event.stopPropagation()}
@@ -209,69 +212,37 @@ function AssetGridCard({
                 event.stopPropagation();
                 onCopyUrl(asset);
               }}
-              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full border border-border-3 bg-background-1/90 px-3 text-xs font-medium text-text-2 opacity-0 shadow-sm backdrop-blur transition-all group-hover:opacity-100 group-focus-within:opacity-100 hover:border-border-2 hover:text-text-1"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-black/35 p-0 text-white opacity-0 transition-all group-hover:opacity-100 group-focus-within:opacity-100 hover:bg-black/50"
+              title={isCopied ? "복사됨" : "URL 복사"}
             >
               <Icon icon={linkMinimalistic2Linear} width="14" />
-              {isCopied ? "복사됨" : "URL 복사"}
             </button>
           </div>
         ) : null}
 
         <div className="p-3">
-          <div>
-            <div className="flex items-start justify-between gap-3">
-              <p className="truncate text-sm font-semibold text-text-1">
-                {getAssetFilename(asset.url)}
-              </p>
-              <span className="shrink-0 rounded-full bg-background-3 px-2 py-1 text-[11px] font-medium text-text-3">
-                #{asset.id}
-              </span>
-            </div>
-            <p className="mt-1 text-xs text-text-4">
-              {formatAssetFileSize(asset.sizeBytes)} ·{" "}
-              {formatAssetResolution(asset.width, asset.height)}
+          <div className="space-y-1">
+            <p className="truncate text-[13px] font-medium leading-none text-text-1">
+              {getAssetFilename(asset.url)}
             </p>
-          </div>
-
-          <div className="flex items-center justify-between gap-3 text-xs text-text-4">
-            <span className="truncate">{asset.mimeType}</span>
-            <span
-              className={cn(
-                "rounded-full px-2 py-1 text-[11px] font-medium",
-                isDeleting
-                  ? "bg-negative-1/10 text-negative-1"
-                  : "bg-background-3 text-text-3",
-              )}
-            >
-              {isDeleting ? "삭제 중..." : "상세 보기"}
-            </span>
+            <p className="truncate text-[12px] leading-none text-text-4">
+              {formatAssetFileSize(asset.sizeBytes)} /{" "}
+              {formatAssetResolution(asset.width, asset.height)} /{" "}
+              {formatAssetDate(asset.createdAt)}
+            </p>
+            {isCopied ? (
+              <p className="text-[11px] leading-none text-primary-1">
+                URL 복사됨
+              </p>
+            ) : null}
+            {isDeleting ? (
+              <p className="text-[11px] leading-none text-negative-1">
+                삭제 중...
+              </p>
+            ) : null}
           </div>
         </div>
       </div>
-
-      {selectionMode ? null : (
-        <div className="border-t border-border-3 px-3 py-2">
-          <div className="flex items-center justify-between gap-2">
-            <button
-              type="button"
-              onClick={() => onOpenDetail(asset.id)}
-              className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-border-3 px-3 text-xs font-normal text-text-2 transition-colors hover:bg-background-1"
-            >
-              <Icon icon={galleryWideLinear} width="14" />
-              상세
-            </button>
-            <button
-              type="button"
-              onClick={() => onRequestDelete([asset.id])}
-              disabled={isPending}
-              className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-negative-1/20 px-3 text-xs font-normal text-negative-1 transition-colors hover:bg-negative-1/10 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <Icon icon={trashBinMinimalisticLinear} width="14" />
-              삭제
-            </button>
-          </div>
-        </div>
-      )}
     </article>
   );
 }

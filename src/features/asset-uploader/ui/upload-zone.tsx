@@ -80,6 +80,14 @@ export function UploadZone({
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
+              onClick={() => inputRef.current?.click()}
+              disabled={isUploading}
+              className="inline-flex h-8 cursor-pointer items-center justify-center rounded-lg border border-border-3 px-3 text-[13px] font-normal leading-none text-text-2 transition-colors hover:bg-background-1 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              파일 선택
+            </button>
+            <button
+              type="button"
               onClick={onClear}
               disabled={!hasFiles || isUploading}
               className="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-md px-2.5 text-[13px] font-normal leading-none text-negative-1 transition-colors hover:bg-background-1 disabled:cursor-not-allowed disabled:opacity-50"
