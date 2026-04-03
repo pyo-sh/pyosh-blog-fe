@@ -288,7 +288,7 @@ export function CategoryTree({
 
   return (
     <>
-      <div className={mode === "select" && selectedCount > 0 ? "pb-24" : ""}>
+      <div className={mode === "select" ? "pb-24" : ""}>
         <CategoryTreeToolbar
           totalCount={totalCount}
           mode={mode}
@@ -355,7 +355,7 @@ export function CategoryTree({
           </DragOverlay>
         </DndContext>
 
-        {mode === "select" && selectedCount > 0 ? (
+        {mode === "select" ? (
           <div className="fixed bottom-0 left-0 right-0 z-20 md:left-60">
             <div className="flex flex-wrap items-center gap-3 border-t border-border-3 bg-[rgba(241,242,243,0.95)] px-4 py-3 backdrop-blur-[12px] md:px-6 dark:bg-[rgba(19,20,21,0.94)]">
               <span className="text-sm font-medium text-text-1">
@@ -398,7 +398,7 @@ export function CategoryTree({
                   onClick={handleExitSelectMode}
                   className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] bg-primary-1 px-3 text-sm text-white transition-opacity hover:opacity-90"
                 >
-                  완료
+                  취소
                 </button>
               </div>
             </div>
