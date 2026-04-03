@@ -27,6 +27,7 @@ interface GuestbookTableProps {
   period: GuestbookPeriodFilter;
   startDate: string;
   endDate: string;
+  dateError?: string;
   searchInput: string;
   selectedIds: number[];
   allCurrentSelected: boolean;
@@ -294,6 +295,7 @@ export function GuestbookTable({
   period,
   startDate,
   endDate,
+  dateError,
   searchInput,
   selectedIds,
   allCurrentSelected,
@@ -365,6 +367,7 @@ export function GuestbookTable({
             type="date"
             value={endDate}
             onChange={(event) => onEndDateChange(event.target.value)}
+            min={startDate || undefined}
             className="h-10 rounded-[0.8rem] border border-border-3 bg-background-1 px-3 text-sm leading-none text-text-1 outline-none transition-colors focus:border-primary-1"
             aria-label="종료일"
           />
@@ -402,6 +405,10 @@ export function GuestbookTable({
           </div>
         </form>
       </div>
+
+      {dateError ? (
+        <p className="text-sm leading-none text-negative-1">{dateError}</p>
+      ) : null}
 
       {items.length > 0 ? (
         <div className="overflow-hidden rounded-[1rem] border border-border-4 bg-background-1">

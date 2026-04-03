@@ -193,6 +193,7 @@ export function GuestbookManager() {
   >("all");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [dateError, setDateError] = useState<string | undefined>(undefined);
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedItems, setSelectedItems] = useState<
@@ -514,6 +515,7 @@ export function GuestbookManager() {
               period={period}
               startDate={startDate}
               endDate={endDate}
+              dateError={dateError}
               searchInput={searchInput}
               selectedIds={selectedIds}
               allCurrentSelected={allCurrentSelected}
@@ -530,19 +532,35 @@ export function GuestbookManager() {
                 if (value === "all") {
                   setStartDate("");
                   setEndDate("");
+                  setDateError(undefined);
                 } else {
                   const days = Number.parseInt(value.replace("d", ""), 10);
                   setStartDate(buildRelativeStart(days));
                   setEndDate(toDateInputValue(new Date()));
+                  setDateError(undefined);
                 }
                 resetToFirstPage();
               }}
               onStartDateChange={(value) => {
+                if (endDate && value && value > endDate) {
+                  setDateError("시작일은 종료일보다 늦을 수 없습니다.");
+
+                  return;
+                }
+
                 setStartDate(value);
+                setDateError(undefined);
                 resetToFirstPage();
               }}
               onEndDateChange={(value) => {
+                if (startDate && value && value < startDate) {
+                  setDateError("종료일은 시작일보다 빠를 수 없습니다.");
+
+                  return;
+                }
+
                 setEndDate(value);
+                setDateError(undefined);
                 resetToFirstPage();
               }}
               onSearchInputChange={setSearchInput}
