@@ -174,33 +174,15 @@ export function AssetDetailModal({
             />
           </div>
 
-          <div className="mt-6 flex flex-wrap gap-2">
+          <div className="mt-6 flex justify-end">
             <button
               type="button"
-              onClick={() => onCopy(asset, "url")}
-              className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border-3 px-4 py-2 text-sm font-medium text-text-2 transition-colors hover:bg-background-2 hover:text-text-1"
+              onClick={() => onRequestDelete(asset)}
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-negative-1 px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
             >
-              <Icon icon={linkMinimalistic2Linear} width="16" />
-              URL 복사
+              <Icon icon={trashBinMinimalisticLinear} width="16" />
+              삭제
             </button>
-            <button
-              type="button"
-              onClick={() => onCopy(asset, "markdown")}
-              className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border-3 px-4 py-2 text-sm font-medium text-text-2 transition-colors hover:bg-background-2 hover:text-text-1"
-            >
-              <Icon icon={codeSquareLinear} width="16" />
-              마크다운 복사
-            </button>
-            <div className="ml-auto">
-              <button
-                type="button"
-                onClick={() => onRequestDelete(asset)}
-                className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-negative-1 px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
-              >
-                <Icon icon={trashBinMinimalisticLinear} width="16" />
-                삭제
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -246,10 +228,10 @@ function CodeInfoBlock({
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-[12px] font-normal leading-none text-text-3">
+      <dt className="mb-1.5 text-[12px] font-normal leading-none text-text-3">
         {label}
       </dt>
-      <dd className="mt-1 text-[13px] font-normal leading-[1.125rem] text-text-1">
+      <dd className="pl-2 text-[14px] font-normal leading-[1.25rem] text-text-1">
         {value}
       </dd>
     </div>
