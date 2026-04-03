@@ -145,8 +145,10 @@ export function GuestbookDetailModal({
           >
             {item.body || "삭제된 방명록입니다."}
           </p>
+        </div>
 
-          <div className="mb-3 flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-6 pb-5">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="whitespace-nowrap text-xs text-text-3">상태:</span>
             <span
               className={cn(
@@ -163,25 +165,25 @@ export function GuestbookDetailModal({
                   : "삭제"}
             </span>
           </div>
-        </div>
 
-        <div className="flex flex-wrap items-center justify-end gap-2 px-6 pb-5">
-          {actions.map((action) => (
-            <button
-              key={action.value}
-              type="button"
-              onClick={() => onSelectAction(action.value)}
-              disabled={isPending}
-              className={cn(
-                "inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-[0.75rem] px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
-                action.tone === "danger"
-                  ? "bg-negative-1 text-white hover:opacity-90"
-                  : "border border-border-3 text-text-2 hover:border-border-2 hover:text-text-1",
-              )}
-            >
-              {action.label}
-            </button>
-          ))}
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            {actions.map((action) => (
+              <button
+                key={action.value}
+                type="button"
+                onClick={() => onSelectAction(action.value)}
+                disabled={isPending}
+                className={cn(
+                  "inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-[0.75rem] px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+                  action.tone === "danger"
+                    ? "bg-negative-1 text-white hover:opacity-90"
+                    : "border border-border-3 text-text-2 hover:border-border-2 hover:text-text-1",
+                )}
+              >
+                {action.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </Modal>
