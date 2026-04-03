@@ -17,6 +17,7 @@ import { cn } from "@shared/lib/style-utils";
 
 interface AssetGridProps {
   assets: Asset[];
+  totalCount: number;
   selectionMode: boolean;
   selectedIds: number[];
   deletingIds: number[];
@@ -34,6 +35,7 @@ interface AssetGridProps {
 
 export function AssetGrid({
   assets,
+  totalCount,
   selectionMode,
   selectedIds,
   deletingIds,
@@ -48,7 +50,7 @@ export function AssetGrid({
     <section>
       <div className="mb-4 flex items-center justify-between">
         <p className="text-[13px] leading-none text-text-3">
-          총 {assets.length}개
+          총 {totalCount}개
         </p>
         {!selectionMode ? (
           <button

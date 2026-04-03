@@ -407,6 +407,7 @@ export function AssetUploader() {
         <>
           <AssetGrid
             assets={assets}
+            totalCount={meta?.total ?? assets.length}
             selectionMode={selectionMode}
             selectedIds={selectedIds}
             deletingIds={
