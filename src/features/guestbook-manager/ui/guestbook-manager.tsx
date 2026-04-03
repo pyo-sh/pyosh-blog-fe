@@ -639,7 +639,7 @@ export function GuestbookManager() {
       </section>
 
       {selectedIds.length > 0 ? (
-        <div className="fixed bottom-0 left-0 right-0 z-20 md:left-60">
+        <div className="fixed bottom-0 left-0 right-0 z-20 md:left-[var(--admin-sidebar-offset)]">
           <div className="flex flex-wrap items-center gap-3 border-t border-border-3 bg-[rgba(241,242,243,0.95)] px-4 py-3 backdrop-blur-[12px] md:px-6 dark:bg-[rgba(19,20,21,0.94)]">
             <span className="text-sm font-medium text-text-1">
               선택됨 {selectedIds.length}개
@@ -665,7 +665,7 @@ export function GuestbookManager() {
                 }}
                 className="cursor-pointer px-2 py-1.5 text-sm text-primary-1 transition-colors hover:text-primary-1/80"
               >
-                전체 선택
+                현재 페이지 전체 선택
               </button>
               <button
                 type="button"

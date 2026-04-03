@@ -85,6 +85,11 @@ export function ManageLayoutShell({ children }: { children: React.ReactNode }) {
           "relative z-10 min-h-screen transition-[padding] duration-300",
           sidebarCollapsed ? "md:pl-16" : "md:pl-60",
         )}
+        style={
+          {
+            "--admin-sidebar-offset": sidebarCollapsed ? "4rem" : "15rem",
+          } as React.CSSProperties
+        }
       >
         <header
           className={cn(
