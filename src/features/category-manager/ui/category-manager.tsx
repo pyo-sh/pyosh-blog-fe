@@ -120,6 +120,24 @@ export function CategoryManager() {
     },
   });
 
+  const visibilityMutation = useMutation({
+    mutationFn: (category: Category) =>
+      updateCategory(category.id, { isVisible: !category.isVisible }),
+    onSuccess: async (_data, category) => {
+      await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      toast.success(
+        category.isVisible
+          ? "카테고리를 숨겼습니다."
+          : "카테고리를 표시했습니다.",
+      );
+    },
+    onError: (error) => {
+      toast.error(
+        getErrorMessage(error, "카테고리 표시 상태 변경에 실패했습니다."),
+      );
+    },
+  });
+
   const treeUpdateMutation = useMutation({
     mutationFn: (changes: CategoryTreeChange[]) => updateCategoryTree(changes),
     onSuccess: async (_data, changes) => {
@@ -201,6 +219,9 @@ export function CategoryManager() {
               totalCount={countCategories(categories)}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              onToggleVisibility={async (category) => {
+                await visibilityMutation.mutateAsync(category);
+              }}
               onCreate={handleCreate}
               onBulkVisibilityChange={async (ids, isVisible) => {
                 await bulkVisibilityMutation.mutateAsync({ ids, isVisible });

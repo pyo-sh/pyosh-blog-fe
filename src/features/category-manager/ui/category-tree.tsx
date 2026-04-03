@@ -36,6 +36,7 @@ interface CategoryTreeProps {
   totalCount: number;
   onEdit: (category: Category) => void;
   onDelete: (category: Category) => void;
+  onToggleVisibility: (category: Category) => Promise<void>;
   onCreate: () => void;
   onBulkVisibilityChange: (ids: number[], isVisible: boolean) => Promise<void>;
   onSaveTree: (changes: CategoryTreeChange[]) => Promise<void>;
@@ -48,6 +49,7 @@ export function CategoryTree({
   totalCount,
   onEdit,
   onDelete,
+  onToggleVisibility,
   onCreate,
   onBulkVisibilityChange,
   onSaveTree,
@@ -326,26 +328,31 @@ export function CategoryTree({
             setDropTarget(null);
           }}
         >
-          <ul>
-            {visibleRows.map(({ category, depth, hasVisibleChildren }) => (
-              <CategoryTreeRow
-                key={category.id}
-                category={category}
-                depth={depth}
-                mode={mode}
-                hasVisibleChildren={hasVisibleChildren}
-                isExpanded={expandedIds.has(category.id)}
-                isSelected={selectedIds.has(category.id)}
-                showSlug={showSlug}
-                changeMarker={changeMarkerMap.get(category.id)}
-                dropTarget={dropTarget}
-                onToggle={handleToggle}
-                onSelectToggle={handleToggleSelect}
-                onEdit={onEdit}
-                onDelete={onDelete}
-              />
-            ))}
-          </ul>
+          <div className="overflow-hidden rounded-xl border border-border-4 bg-background-2">
+            <ul>
+              {visibleRows.map(({ category, depth, hasVisibleChildren }) => (
+                <CategoryTreeRow
+                  key={category.id}
+                  category={category}
+                  depth={depth}
+                  mode={mode}
+                  hasVisibleChildren={hasVisibleChildren}
+                  isExpanded={expandedIds.has(category.id)}
+                  isSelected={selectedIds.has(category.id)}
+                  showSlug={showSlug}
+                  changeMarker={changeMarkerMap.get(category.id)}
+                  dropTarget={dropTarget}
+                  onToggle={handleToggle}
+                  onToggleVisibility={(nextCategory) =>
+                    void onToggleVisibility(nextCategory)
+                  }
+                  onSelectToggle={handleToggleSelect}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                />
+              ))}
+            </ul>
+          </div>
 
           <DragOverlay>
             {activeRow ? (

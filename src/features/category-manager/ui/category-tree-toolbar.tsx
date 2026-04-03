@@ -1,5 +1,12 @@
 "use client";
 
+import { Icon } from "@iconify/react";
+import addFolderLinear from "@iconify-icons/solar/add-folder-linear";
+import altArrowDownLinear from "@iconify-icons/solar/alt-arrow-down-linear";
+import altArrowUpLinear from "@iconify-icons/solar/alt-arrow-up-linear";
+import checkReadLinear from "@iconify-icons/solar/check-read-linear";
+import checkSquareLinear from "@iconify-icons/solar/check-square-linear";
+import sortVerticalLinear from "@iconify-icons/solar/sort-vertical-linear";
 import type { CategoryTreeMode } from "../lib/tree-utils";
 import { ToggleSwitch } from "@shared/ui/toggle-switch";
 
@@ -56,20 +63,21 @@ export function CategoryTreeToolbar({
 }: CategoryTreeToolbarProps) {
   if (mode === "select") {
     return (
-      <div className="mb-4 rounded-[1.2rem] border border-primary-1/20 bg-primary-1/6 p-4">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={onToggleSelectAll}
-            className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-3 py-1.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+            className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-2.5 text-sm font-medium leading-none text-text-2 transition-colors hover:bg-background-3"
           >
+            <Icon icon={checkSquareLinear} width="16" aria-hidden="true" />
             {allDisplayedSelected ? "전체 해제" : "전체 선택"}
           </button>
           <button
             type="button"
             onClick={onHideSelected}
             disabled={selectedCount === 0 || isBulkUpdating}
-            className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-3 py-1.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-2.5 text-sm font-medium leading-none text-text-2 transition-colors hover:bg-background-3 disabled:cursor-not-allowed disabled:opacity-50"
           >
             숨기기
           </button>
@@ -77,23 +85,27 @@ export function CategoryTreeToolbar({
             type="button"
             onClick={onShowSelected}
             disabled={selectedCount === 0 || isBulkUpdating}
-            className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-3 py-1.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-2.5 text-sm font-medium leading-none text-text-2 transition-colors hover:bg-background-3 disabled:cursor-not-allowed disabled:opacity-50"
           >
             보이기
           </button>
-          <span className="text-sm text-text-4">{selectedCount}개 선택됨</span>
+          <span className="ml-1 whitespace-nowrap text-sm font-medium leading-none text-primary-1">
+            {selectedCount}개 선택됨
+          </span>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={onClearSelection}
             disabled={selectedCount === 0}
-            className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-3 py-1.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-2.5 text-sm font-medium leading-none text-text-2 transition-colors hover:bg-background-3 disabled:cursor-not-allowed disabled:opacity-50"
           >
             선택 해제
           </button>
           <button
             type="button"
             onClick={onCompleteSelectMode}
-            className="inline-flex items-center justify-center rounded-[0.75rem] bg-primary-1 px-3 py-1.5 text-sm font-semibold text-text-1 transition-opacity hover:opacity-90"
+            className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-primary-1 px-2.5 text-sm font-medium leading-none text-white transition-opacity hover:opacity-90"
           >
             완료
           </button>
@@ -104,16 +116,18 @@ export function CategoryTreeToolbar({
 
   if (mode === "edit") {
     return (
-      <div className="mb-4 rounded-[1.2rem] border border-primary-1/20 bg-primary-1/6 p-4">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full bg-background-3 px-3 py-1.5 text-sm font-medium text-text-2">
+          <span className="inline-flex items-center whitespace-nowrap rounded-md bg-primary-1/12 px-2.5 py-1 text-[13px] font-medium leading-none text-primary-1">
             변경사항: {pendingChangeCount}건
           </span>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={onCancelEditMode}
             disabled={isSavingTree}
-            className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-3 py-1.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-4 text-sm font-medium leading-none text-text-2 transition-colors hover:bg-background-3 disabled:cursor-not-allowed disabled:opacity-50"
           >
             취소
           </button>
@@ -121,8 +135,9 @@ export function CategoryTreeToolbar({
             type="button"
             onClick={onSaveEditMode}
             disabled={pendingChangeCount === 0 || isSavingTree}
-            className="inline-flex items-center justify-center rounded-[0.75rem] bg-primary-1 px-3 py-1.5 text-sm font-semibold text-text-1 transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-primary-1 px-4 text-sm font-medium leading-none text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
           >
+            <Icon icon={checkReadLinear} width="18" aria-hidden="true" />
             {isSavingTree ? "저장 중..." : "저장"}
           </button>
         </div>
@@ -131,7 +146,7 @@ export function CategoryTreeToolbar({
   }
 
   return (
-    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+    <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
       <div className="flex flex-wrap items-center gap-3">
         <span className="whitespace-nowrap text-sm font-medium leading-none text-text-2">
           전체 <strong className="text-text-1">{totalCount}개</strong> 카테고리
@@ -140,15 +155,17 @@ export function CategoryTreeToolbar({
           <button
             type="button"
             onClick={onExpandAll}
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-[0.75rem] border border-border-3 px-3 py-1.5 text-sm font-medium leading-none text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+            className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-2.5 text-sm font-medium leading-none text-text-2 transition-colors hover:bg-background-3"
           >
+            <Icon icon={altArrowDownLinear} width="16" aria-hidden="true" />
             전체 펼침
           </button>
           <button
             type="button"
             onClick={onCollapseAll}
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-[0.75rem] border border-border-3 px-3 py-1.5 text-sm font-medium leading-none text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+            className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-2.5 text-sm font-medium leading-none text-text-2 transition-colors hover:bg-background-3"
           >
+            <Icon icon={altArrowUpLinear} width="16" aria-hidden="true" />
             전체 접힘
           </button>
         </div>
@@ -158,6 +175,7 @@ export function CategoryTreeToolbar({
             <ToggleSwitch
               checked={showHidden}
               onChange={onShowHiddenChange}
+              size="sm"
               aria-label="숨김 카테고리 표시"
             />
           </label>
@@ -166,6 +184,7 @@ export function CategoryTreeToolbar({
             <ToggleSwitch
               checked={showSlug}
               onChange={onShowSlugChange}
+              size="sm"
               aria-label="slug 표시"
             />
           </label>
@@ -176,22 +195,25 @@ export function CategoryTreeToolbar({
         <button
           type="button"
           onClick={onEnterSelectMode}
-          className="inline-flex items-center justify-center whitespace-nowrap rounded-[0.75rem] border border-border-3 px-3 py-1.5 text-sm font-medium leading-none text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+          className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-4 text-sm font-medium leading-none text-text-2 transition-colors hover:bg-background-3"
         >
+          <Icon icon={checkSquareLinear} width="18" aria-hidden="true" />
           일괄 선택
         </button>
         <button
           type="button"
           onClick={onEnterEditMode}
-          className="inline-flex items-center justify-center whitespace-nowrap rounded-[0.75rem] border border-border-3 px-3 py-1.5 text-sm font-medium leading-none text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+          className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-4 text-sm font-medium leading-none text-text-2 transition-colors hover:bg-background-3"
         >
+          <Icon icon={sortVerticalLinear} width="18" aria-hidden="true" />
           배치 편집
         </button>
         <button
           type="button"
           onClick={onCreate}
-          className="inline-flex items-center justify-center whitespace-nowrap rounded-[0.75rem] bg-primary-1 px-3 py-1.5 text-sm font-semibold leading-none text-text-1 transition-opacity hover:opacity-90"
+          className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-primary-1 px-4 text-sm font-medium leading-none text-white transition-opacity hover:opacity-90"
         >
+          <Icon icon={addFolderLinear} width="18" aria-hidden="true" />
           카테고리 추가
         </button>
       </div>
