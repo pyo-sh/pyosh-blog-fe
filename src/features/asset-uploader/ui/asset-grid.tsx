@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
 import checkCircleLinear from "@iconify-icons/solar/check-circle-linear";
+import checkSquareLinear from "@iconify-icons/solar/check-square-linear";
 import linkMinimalistic2Linear from "@iconify-icons/solar/link-minimalistic-2-linear";
 import { useLongPress } from "../lib/use-long-press";
 import type { Asset } from "@entities/asset";
@@ -54,8 +55,9 @@ export function AssetGrid({
             type="button"
             onClick={onEnterSelectionMode}
             disabled={assets.length === 0 || isPending}
-            className="inline-flex h-8 items-center justify-center rounded-lg border border-border-3 px-3 text-[13px] font-normal text-text-2 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex h-8 w-[5.5rem] items-center justify-center gap-1.5 rounded-lg border border-border-3 px-3 text-[13px] font-normal leading-none text-text-2 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:opacity-60"
           >
+            <Icon icon={checkSquareLinear} width="16" />
             선택
           </button>
         ) : null}

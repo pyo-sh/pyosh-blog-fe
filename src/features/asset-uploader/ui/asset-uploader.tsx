@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AssetDetailModal } from "./asset-detail-modal";
@@ -35,7 +35,7 @@ function generatePageNumbers(
   totalPages: number,
   windowSize: number,
 ): Array<number | "..."> {
-  if (totalPages <= 1) return [];
+  if (totalPages <= 1) return [1];
 
   const windowStart = Math.max(2, currentPage - windowSize);
   const windowEnd = Math.min(totalPages - 1, currentPage + windowSize);
@@ -201,16 +201,6 @@ export function AssetUploader() {
     return () => window.clearTimeout(timeout);
   }, [copiedState]);
 
-  const paginationLabel = useMemo(() => {
-    if (!meta || assets.length === 0) {
-      return "표시할 에셋이 없습니다.";
-    }
-
-    const start = (meta.page - 1) * meta.limit + 1;
-    const end = start + assets.length - 1;
-
-    return `총 ${meta.total}개 중 ${start}-${end}`;
-  }, [assets.length, meta]);
   const pageNumbers = meta ? generatePageNumbers(page, meta.totalPages, 2) : [];
 
   function clearPendingFiles() {
@@ -474,7 +464,7 @@ export function AssetUploader() {
                 </div>
               </div>
             ) : null}
-            {meta && meta.totalPages > 1 ? (
+            {meta ? (
               <nav
                 aria-label="관리자 에셋 페이지네이션"
                 className="flex items-center justify-center gap-0.5"
@@ -548,11 +538,11 @@ export function AssetUploader() {
                 </button>
               </nav>
             ) : null}
-            <p className="text-right text-sm text-text-3">
-              {assetsQuery.isFetching && !assetsQuery.isPending
-                ? "목록을 새로 불러오는 중..."
-                : paginationLabel}
-            </p>
+            {assetsQuery.isFetching && !assetsQuery.isPending ? (
+              <p className="text-center text-sm text-text-3">
+                목록을 새로 불러오는 중...
+              </p>
+            ) : null}
           </div>
         </>
       ) : null}
