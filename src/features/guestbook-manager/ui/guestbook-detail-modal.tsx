@@ -12,6 +12,8 @@ type GuestbookDetailAction =
   | AdminGuestbookDeleteAction
   | AdminGuestbookPatchAction;
 
+type GuestbookStatusOption = "active" | "hidden" | "deleted";
+
 interface GuestbookDetailModalProps {
   item: AdminGuestbookItem | null;
   isOpen: boolean;
@@ -82,6 +84,27 @@ function getAvailableActions(status: AdminGuestbookItem["status"]) {
       tone: "danger" as const,
     },
   ];
+}
+
+function mapStatusChangeToAction(
+  currentStatus: AdminGuestbookItem["status"],
+  nextStatus: GuestbookStatusOption,
+): GuestbookDetailAction | null {
+  if (currentStatus === nextStatus) {
+    return null;
+  }
+
+  if (nextStatus === "active") {
+    return currentStatus === "hidden" || currentStatus === "deleted"
+      ? "restore"
+      : null;
+  }
+
+  if (nextStatus === "hidden") {
+    return currentStatus === "active" ? "hide" : null;
+  }
+
+  return nextStatus === "deleted" ? "soft_delete" : null;
 }
 
 export function GuestbookDetailModal({
@@ -166,6 +189,44 @@ export function GuestbookDetailModal({
             >
               {getStatusLabel(item.status)}
             </span>
+            <div className="ml-2 flex items-center gap-1">
+              <span className="text-xs text-text-3">상태 전환:</span>
+              {(
+                [
+                  { value: "active", label: "정상" },
+                  { value: "hidden", label: "숨김" },
+                  { value: "deleted", label: "삭제" },
+                ] as const
+              ).map((option) => {
+                const action = mapStatusChangeToAction(
+                  item.status,
+                  option.value,
+                );
+                const isCurrent = item.status === option.value;
+                const isDisabled = !isCurrent && action === null;
+
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => {
+                      if (action) {
+                        onSelectAction(action);
+                      }
+                    }}
+                    disabled={isPending || isDisabled || isCurrent}
+                    className={cn(
+                      "inline-flex h-7 items-center rounded-[0.55rem] px-2 text-xs leading-none transition-colors disabled:cursor-not-allowed disabled:opacity-40",
+                      isCurrent
+                        ? "bg-primary-1/10 text-primary-1"
+                        : "text-text-3 hover:bg-background-3 hover:text-text-1",
+                    )}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
