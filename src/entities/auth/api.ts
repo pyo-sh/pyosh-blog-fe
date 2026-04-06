@@ -1,5 +1,5 @@
 import type { AdminUser, CurrentUser, LoginCredentials } from "./model";
-import { clientFetch, serverFetch } from "@shared/api";
+import { clientFetch, clientMutate, serverFetch } from "@shared/api";
 
 export async function login(credentials: LoginCredentials): Promise<AdminUser> {
   return clientFetch<AdminUser>("/api/auth/admin/login", {
@@ -9,9 +9,7 @@ export async function login(credentials: LoginCredentials): Promise<AdminUser> {
 }
 
 export async function logout(): Promise<void> {
-  return clientFetch<void>("/api/auth/admin/logout", {
-    method: "POST",
-  });
+  return clientMutate<void>("/api/auth/admin/logout");
 }
 
 export async function fetchMe(): Promise<CurrentUser> {
