@@ -16,7 +16,7 @@ const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
 });
 
 export function PostCard({ post, className }: PostCardProps) {
-  const summary = post.summary?.trim();
+  const summary = post.summary?.trim() || post.description?.trim();
   const publishedDate = formatDate(post.publishedAt ?? post.createdAt);
   const canUseNextImage = supportsNextImage(post.thumbnailUrl);
 

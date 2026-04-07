@@ -1,15 +1,18 @@
-import { fetchPosts } from "@entities/post";
+import { fetchPostBySlug, fetchPosts } from "@entities/post";
 import {
   buildAbsoluteUrl,
+  extractPlainText,
   getSiteDescription,
   getSiteName,
   getSiteUrl,
 } from "@shared/lib/seo";
 
 const RSS_POST_LIMIT = 20;
+const RSS_DESCRIPTION_LIMIT = 220;
+
 export async function GET() {
   const response = await fetchPosts({ limit: RSS_POST_LIMIT });
-  const xml = buildRssXml(response.data);
+  const xml = await buildRssXml(response.data);
 
   return new Response(xml, {
     headers: {
@@ -19,13 +22,15 @@ export async function GET() {
   });
 }
 
-function buildRssXml(posts: Awaited<ReturnType<typeof fetchPosts>>["data"]) {
+async function buildRssXml(
+  posts: Awaited<ReturnType<typeof fetchPosts>>["data"],
+) {
   const siteUrl = getSiteUrl();
   const siteName = getSiteName();
   const siteDescription = getSiteDescription();
   const now = new Date().toUTCString();
-  const items = posts
-    .map((post) => {
+  const items = await Promise.all(
+    posts.map(async (post) => {
       const link = buildAbsoluteUrl(`/posts/${encodeURIComponent(post.slug)}`);
       const pubDate = new Date(
         post.publishedAt ?? post.createdAt,
@@ -33,8 +38,18 @@ function buildRssXml(posts: Awaited<ReturnType<typeof fetchPosts>>["data"]) {
       const categories = post.tags
         .map((tag) => `<category>${escapeXml(tag.name)}</category>`)
         .join("");
+      const detail =
+        post.description?.trim() || post.summary?.trim()
+          ? null
+          : await fetchPostBySlug(post.slug);
       const description = escapeXml(
-        post.description?.trim() || post.summary?.trim() || post.title,
+        post.description?.trim() ||
+          post.summary?.trim() ||
+          extractPlainText(
+            detail?.post.contentMd ?? "",
+            RSS_DESCRIPTION_LIMIT,
+          ) ||
+          post.title,
       );
 
       return [
@@ -47,8 +62,8 @@ function buildRssXml(posts: Awaited<ReturnType<typeof fetchPosts>>["data"]) {
         categories,
         "</item>",
       ].join("");
-    })
-    .join("");
+    }),
+  );
 
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
@@ -59,7 +74,7 @@ function buildRssXml(posts: Awaited<ReturnType<typeof fetchPosts>>["data"]) {
     `<description>${escapeXml(siteDescription)}</description>`,
     `<language>ko-kr</language>`,
     `<lastBuildDate>${now}</lastBuildDate>`,
-    items,
+    items.join(""),
     "</channel>",
     "</rss>",
   ].join("");
