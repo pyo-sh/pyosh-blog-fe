@@ -23,7 +23,6 @@ import { PreviewModal } from "./preview-modal";
 import { PublishConfirmModal } from "./publish-confirm-modal";
 import { TagChipInput } from "./tag-chip-input";
 import { ThumbnailUploader } from "./thumbnail-uploader";
-import { extractPlainText } from "../lib/extract-plain-text";
 import {
   createPendingImage,
   getPendingImageIds,
@@ -522,12 +521,6 @@ export function PostForm({
   const [pendingImages, setPendingImages] = useState<Map<string, PendingImage>>(
     () => new Map(),
   );
-  const [isSummaryManuallyEdited, setIsSummaryManuallyEdited] = useState(
-    Boolean(nextInitialValues.summary.trim()),
-  );
-  const [previewSummary, setPreviewSummary] = useState(
-    nextInitialValues.summary.trim(),
-  );
   const previewRef = useRef<HTMLDivElement | null>(null);
   const pendingImagesRef = useRef(pendingImages);
   const removedPendingImagesRef = useRef<Map<string, PendingImage>>(new Map());
@@ -546,8 +539,6 @@ export function PostForm({
     if (recordChanged || (!isDirty && initialChanged)) {
       setValues(nextInitialValues);
       setIsDirty(false);
-      setIsSummaryManuallyEdited(Boolean(nextInitialValues.summary.trim()));
-      setPreviewSummary(nextInitialValues.summary.trim());
       initialStatusRef.current = nextInitialValues.status;
       hydrationRef.current = {
         postId,
@@ -706,8 +697,6 @@ export function PostForm({
       setValues(persistedValues);
       setPendingImages(new Map());
       setIsDirty(false);
-      setIsSummaryManuallyEdited(Boolean(persistedValues.summary.trim()));
-      setPreviewSummary(persistedValues.summary.trim());
       initialStatusRef.current = persistedValues.status;
       setPendingIntent(null);
       setShowPublishConfirm(false);
@@ -1202,14 +1191,9 @@ export function PostForm({
                       maxLength={200}
                       rows={3}
                       value={values.summary}
-                      onChange={(event) => {
-                        const nextSummary = event.target.value;
-                        const hasSummary = Boolean(nextSummary.trim());
-
-                        setIsSummaryManuallyEdited(hasSummary);
-                        setPreviewSummary(nextSummary);
-                        handleFieldChange("summary", nextSummary);
-                      }}
+                      onChange={(event) =>
+                        handleFieldChange("summary", event.target.value)
+                      }
                       placeholder="글 목록에 표시될 요약문을 입력하세요"
                       aria-label="Summary"
                       className="w-full rounded-[0.75rem] border border-border-3 bg-background-1 px-3 py-2.5 text-[13px] text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
@@ -1247,7 +1231,7 @@ export function PostForm({
                       categoryName={selectedCategoryName}
                       tags={values.tags}
                       thumbnailUrl={values.thumbnailUrl}
-                      summary={values.summary.trim() || previewSummary}
+                      summary={values.summary}
                       visibility={values.visibility}
                       status={values.status}
                     />
@@ -1264,7 +1248,7 @@ export function PostForm({
                       categoryName={selectedCategoryName}
                       tags={values.tags}
                       thumbnailUrl={values.thumbnailUrl}
-                      summary={values.summary.trim() || previewSummary}
+                      summary={values.summary}
                       visibility={values.visibility}
                       status={values.status}
                       compact
@@ -1297,11 +1281,6 @@ export function PostForm({
                     onChange={(value) => handleFieldChange("contentMd", value)}
                     onImageButtonClick={() => setShowImageGallery(true)}
                     onImageFiles={insertPendingFiles}
-                    onBlur={(contentMd) => {
-                      if (!isSummaryManuallyEdited) {
-                        setPreviewSummary(extractPlainText(contentMd, 200));
-                      }
-                    }}
                     className="h-full min-h-0 [&_.cm-editor]:h-full [&_.cm-editor]:min-h-0 [&_.cm-scroller]:h-full [&_.cm-scroller]:min-h-0"
                   />
                 </div>
