@@ -46,7 +46,7 @@ import {
   createPost,
   updatePost,
   type CreatePostBody,
-  type Post,
+  type PostDetail,
 } from "@entities/post";
 import { getErrorMessage } from "@shared/lib/get-error-message";
 import { cn } from "@shared/lib/style-utils";
@@ -64,8 +64,8 @@ export interface PostFormValues {
   title: string;
   categoryId: number | null;
   tags: string[];
-  status: Post["status"];
-  visibility: Post["visibility"];
+  status: PostDetail["status"];
+  visibility: PostDetail["visibility"];
   commentStatus: "open" | "locked" | "disabled";
   thumbnailUrl: string;
   summary: string;
@@ -79,7 +79,7 @@ interface PostFormProps {
   initialValues?: Partial<PostFormValues>;
   cancelLabel?: string;
   onCancel?: () => void;
-  onSuccess?: (post: Post) => void;
+  onSuccess?: (post: PostDetail) => void;
 }
 
 interface InlineSelectOption<T extends string | number> {
@@ -150,7 +150,7 @@ function buildPayload(values: PostFormValues): CreatePostBody {
   };
 }
 
-function mapPostToFormValues(post: Post): PostFormValues {
+function mapPostToFormValues(post: PostDetail): PostFormValues {
   return {
     title: post.title,
     categoryId: post.categoryId,

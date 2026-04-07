@@ -15,7 +15,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { AdminPostTab } from "./post-filters";
-import type { FetchAdminPostsParams, Post } from "@entities/post";
+import type { FetchAdminPostsParams, PostListItem } from "@entities/post";
 import { cn } from "@shared/lib/style-utils";
 import { ConfirmDialog } from "@shared/ui/confirm-dialog";
 import { EmptyState, Skeleton } from "@shared/ui/libs";
@@ -25,7 +25,7 @@ export type SortOrder = "asc" | "desc";
 
 interface PostTableProps {
   tab: AdminPostTab;
-  posts: Post[];
+  posts: PostListItem[];
   isPending: boolean;
   isError: boolean;
   errorMessage: string;
@@ -36,8 +36,8 @@ interface PostTableProps {
   onToggleSelect: (id: number) => void;
   onToggleSelectAll: () => void;
   onSortChange: (field: SortField) => void;
-  onToggleVisibility: (post: Post) => void;
-  onTogglePin: (post: Post) => void;
+  onToggleVisibility: (post: PostListItem) => void;
+  onTogglePin: (post: PostListItem) => void;
   onDelete: (id: number) => Promise<void>;
   onRestore: (id: number) => void;
   onHardDelete: (id: number) => Promise<void>;
@@ -57,13 +57,13 @@ function formatDate(value: string | null): string {
   return dateFormatter.format(new Date(value));
 }
 
-const statusLabelMap: Record<Post["status"], string> = {
+const statusLabelMap: Record<PostListItem["status"], string> = {
   draft: "작성",
   published: "발행",
   archived: "보관",
 };
 
-const visibilityLabelMap: Record<Post["visibility"], string> = {
+const visibilityLabelMap: Record<PostListItem["visibility"], string> = {
   public: "공개",
   private: "비공개",
 };
@@ -258,10 +258,11 @@ export function PostTable({
   deleteId,
 }: PostTableProps) {
   const router = useRouter();
-  const [hardDeleteTarget, setHardDeleteTarget] = useState<Post | null>(null);
-  const [singleDeleteTarget, setSingleDeleteTarget] = useState<Post | null>(
+  const [hardDeleteTarget, setHardDeleteTarget] = useState<PostListItem | null>(
     null,
   );
+  const [singleDeleteTarget, setSingleDeleteTarget] =
+    useState<PostListItem | null>(null);
   const [isDeletePending, setIsDeletePending] = useState(false);
   const [isHardDeletePending, setIsHardDeletePending] = useState(false);
 

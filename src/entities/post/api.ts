@@ -4,9 +4,10 @@ import type {
   FetchAdminPostsParams,
   FetchPostsParams,
   PinnedPostCountResponse,
-  Post,
+  PostDetail,
   PostDetailResponse,
   PostDetailWithNavigationResponse,
+  PostListItem,
   PublishedPostSlugsResponse,
   UpdatePostBody,
 } from "./model";
@@ -76,11 +77,11 @@ function buildSearchParams(
 export async function fetchPosts(
   params: FetchPostsParams = {},
   cookieHeader?: string,
-): Promise<PaginatedResponse<Post>> {
+): Promise<PaginatedResponse<PostListItem>> {
   const queryString = buildPostSearchParams(params);
   const path = queryString ? `/api/posts?${queryString}` : "/api/posts";
 
-  return serverFetch<PaginatedResponse<Post>>(path, {}, cookieHeader);
+  return serverFetch<PaginatedResponse<PostListItem>>(path, {}, cookieHeader);
 }
 
 export async function fetchPostBySlug(
@@ -107,7 +108,7 @@ export async function fetchPublishedPostSlugs(
 export async function fetchAdminPost(
   id: number,
   cookieHeader?: string,
-): Promise<Post> {
+): Promise<PostDetail> {
   const response = cookieHeader
     ? await serverFetch<PostDetailResponse>(
         `/api/admin/posts/${id}`,
@@ -122,15 +123,15 @@ export async function fetchAdminPost(
 export async function fetchAdminPosts(
   params: FetchAdminPostsParams = {},
   cookieHeader?: string,
-): Promise<PaginatedResponse<Post>> {
+): Promise<PaginatedResponse<PostListItem>> {
   const queryString = buildAdminPostSearchParams(params);
   const path = queryString
     ? `/api/admin/posts?${queryString}`
     : "/api/admin/posts";
 
   return cookieHeader
-    ? serverFetch<PaginatedResponse<Post>>(path, {}, cookieHeader)
-    : clientFetch<PaginatedResponse<Post>>(path);
+    ? serverFetch<PaginatedResponse<PostListItem>>(path, {}, cookieHeader)
+    : clientFetch<PaginatedResponse<PostListItem>>(path);
 }
 
 export async function fetchPinnedPostCount(): Promise<number> {
@@ -141,7 +142,7 @@ export async function fetchPinnedPostCount(): Promise<number> {
   return response.pinnedCount;
 }
 
-export async function createPost(body: CreatePostBody): Promise<Post> {
+export async function createPost(body: CreatePostBody): Promise<PostDetail> {
   const response = await clientMutate<PostDetailResponse>("/api/admin/posts", {
     body: JSON.stringify(body),
   });
@@ -155,7 +156,7 @@ export async function deletePost(id: number): Promise<void> {
   });
 }
 
-export async function restorePost(id: number): Promise<Post> {
+export async function restorePost(id: number): Promise<PostDetail> {
   const response = await clientMutate<PostDetailResponse>(
     `/api/admin/posts/${id}/restore`,
     {
@@ -175,7 +176,7 @@ export async function hardDeletePost(id: number): Promise<void> {
 export async function updatePost(
   id: number,
   body: UpdatePostBody,
-): Promise<Post> {
+): Promise<PostDetail> {
   const response = await clientMutate<PostDetailResponse>(
     `/api/admin/posts/${id}`,
     {

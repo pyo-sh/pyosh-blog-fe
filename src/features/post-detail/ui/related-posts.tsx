@@ -2,10 +2,10 @@ import { Icon } from "@iconify/react";
 import documentTextLinear from "@iconify-icons/solar/document-text-linear";
 import Image from "next/image";
 import Link from "next/link";
-import type { Post } from "@entities/post";
+import type { PostListItem } from "@entities/post";
 
 interface RelatedPostsProps {
-  posts: Array<Pick<Post, "id" | "slug" | "title" | "thumbnailUrl">>;
+  posts: Array<Pick<PostListItem, "id" | "slug" | "title" | "thumbnailUrl">>;
 }
 
 export function RelatedPosts({ posts }: RelatedPostsProps) {

@@ -1,14 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { Post } from "@entities/post";
+import type { PostListItem } from "@entities/post";
 import { cn } from "@shared/lib/style-utils";
 
 interface PostCardProps {
-  post: Post;
+  post: PostListItem;
   className?: string;
 }
-
-const SUMMARY_LIMIT = 200;
 
 const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
   year: "numeric",
@@ -18,7 +16,7 @@ const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
 });
 
 export function PostCard({ post, className }: PostCardProps) {
-  const summary = post.summary?.trim() || createSummary(post.contentMd);
+  const summary = post.summary?.trim();
   const publishedDate = formatDate(post.publishedAt ?? post.createdAt);
   const canUseNextImage = supportsNextImage(post.thumbnailUrl);
 
@@ -63,9 +61,11 @@ export function PostCard({ post, className }: PostCardProps) {
           <h2 className="line-clamp-2 text-body-lg font-semibold text-text-1 transition-colors group-hover:text-primary-1">
             {post.title}
           </h2>
-          <p className="line-clamp-3 whitespace-pre-wrap text-body-sm text-text-3">
-            {summary}
-          </p>
+          {summary ? (
+            <p className="line-clamp-3 whitespace-pre-wrap text-body-sm text-text-3">
+              {summary}
+            </p>
+          ) : null}
         </div>
         {post.tags.length > 0 && (
           <ul className="mt-auto flex flex-wrap gap-2">
@@ -104,25 +104,4 @@ function supportsNextImage(src: string | null) {
   } catch {
     return false;
   }
-}
-
-function createSummary(contentMd: string) {
-  const plainText = contentMd
-    .replace(/```[\s\S]*?```/g, " ")
-    .replace(/`([^`]+)`/g, "$1")
-    .replace(/!\[([^\]]*)\]\([^)]+\)/g, "$1")
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-    .replace(/^#{1,6}\s+/gm, "")
-    .replace(/^\s*[-*+]\s+/gm, "")
-    .replace(/^\s*\d+\.\s+/gm, "")
-    .replace(/[>*_~]/g, "")
-    .replace(/\n+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  if (plainText.length <= SUMMARY_LIMIT) {
-    return plainText;
-  }
-
-  return `${plainText.slice(0, SUMMARY_LIMIT).trimEnd()}...`;
 }

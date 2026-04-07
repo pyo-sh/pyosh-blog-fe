@@ -3,10 +3,10 @@ import chatRoundDotsLinear from "@iconify-icons/solar/chat-round-dots-linear";
 import eyeLinear from "@iconify-icons/solar/eye-linear";
 import Link from "next/link";
 import { highlightText } from "../lib/highlight";
-import type { Post } from "@entities/post";
+import type { PostListItem } from "@entities/post";
 
 interface SearchResultItemProps {
-  post: Post;
+  post: PostListItem;
   query: string;
 }
 

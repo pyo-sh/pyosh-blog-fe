@@ -10,7 +10,7 @@ import tagLinear from "@iconify-icons/solar/tag-linear";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { Category } from "@entities/category";
-import type { Post } from "@entities/post";
+import type { PostListItem } from "@entities/post";
 import type { PopularPost, TotalViewsStats } from "@entities/stat";
 import type { Tag } from "@entities/tag";
 import type { TocItem } from "@shared/lib/markdown";
@@ -22,7 +22,7 @@ import { TotalViewCount } from "@features/total-view-count";
 import { cn } from "@shared/lib/style-utils";
 
 interface PublicSidebarContentProps {
-  recentPosts: Post[];
+  recentPosts: PostListItem[];
   popularPosts: PopularPost[] | null;
   categories: Category[];
   tags: Tag[];

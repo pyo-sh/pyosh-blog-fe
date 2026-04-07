@@ -7,13 +7,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { PostListItem } from "./post-list-item";
 import { PostListItemSkeleton } from "./post-list-item-skeleton";
-import type { Post } from "@entities/post";
+import type { PostListItem as PostListEntry } from "@entities/post";
 import type { PaginatedResponse } from "@shared/api";
 import { fetchPosts } from "@entities/post";
 import { Pagination } from "@shared/ui/libs";
 
 interface PostListProps {
-  initialData: PaginatedResponse<Post>;
+  initialData: PaginatedResponse<PostListEntry>;
   initialPage: number;
   basePath?: string;
 }

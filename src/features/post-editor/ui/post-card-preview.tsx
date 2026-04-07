@@ -1,7 +1,7 @@
 "use client";
 
 import { extractPlainText } from "../lib/extract-plain-text";
-import type { Post } from "@entities/post";
+import type { PostDetail } from "@entities/post";
 
 interface PostCardPreviewProps {
   title: string;
@@ -10,8 +10,8 @@ interface PostCardPreviewProps {
   thumbnailUrl: string;
   summary: string;
   contentMd: string;
-  visibility: Post["visibility"];
-  status: Post["status"];
+  visibility: PostDetail["visibility"];
+  status: PostDetail["status"];
   compact?: boolean;
 }
 

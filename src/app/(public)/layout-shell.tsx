@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Category } from "@entities/category";
-import type { Post } from "@entities/post";
+import type { PostListItem } from "@entities/post";
 import type { PopularPost, TotalViewsStats } from "@entities/stat";
 import type { Tag } from "@entities/tag";
 import { SlideInPanel } from "@shared/ui/libs";
@@ -16,7 +16,7 @@ import {
 const LG_BREAKPOINT = 1080;
 
 interface PublicLayoutShellProps {
-  recentPosts: Post[];
+  recentPosts: PostListItem[];
   popularPosts: PopularPost[] | null;
   categories: Category[];
   tags: Tag[];

@@ -17,7 +17,7 @@ import {
   updatePost,
   type BulkPostErrorDetail,
   type FetchAdminPostsParams,
-  type Post,
+  type PostListItem,
 } from "@entities/post";
 import { getErrorMessage } from "@shared/lib/get-error-message";
 import {
@@ -175,10 +175,10 @@ export default function ManagePostsPage() {
     setSelectedIds(everySelected ? [] : allIds);
   }
 
-  async function handleToggleVisibility(post: Post) {
+  async function handleToggleVisibility(post: PostListItem) {
     setPendingToggleIds((prev) => new Set(prev).add(post.id));
 
-    const nextVisibility: Post["visibility"] =
+    const nextVisibility: PostListItem["visibility"] =
       post.visibility === "public" ? "private" : "public";
 
     queryClient.setQueryData(queryKey, (old: typeof data) => {
@@ -218,7 +218,7 @@ export default function ManagePostsPage() {
     }
   }
 
-  async function handleTogglePin(post: Post) {
+  async function handleTogglePin(post: PostListItem) {
     setPendingToggleIds((prev) => new Set(prev).add(post.id));
 
     try {

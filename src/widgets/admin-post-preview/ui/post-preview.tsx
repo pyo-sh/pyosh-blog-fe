@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import type { Post } from "@entities/post";
+import type { PostDetail } from "@entities/post";
 import {
   deletePost,
   fetchPinnedPostCount,
@@ -24,28 +24,14 @@ const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
   day: "2-digit",
 });
 
-function toDatetimeLocalValue(value: string | null): string {
-  if (!value) return "";
-
-  const date = new Date(value);
-  const offset = date.getTimezoneOffset();
-  const localDate = new Date(date.getTime() - offset * 60 * 1000);
-
-  return localDate.toISOString().slice(0, 16);
-}
-
-function fromDatetimeLocalValue(value: string): string {
-  return new Date(value).toISOString();
-}
-
 interface PostPreviewProps {
-  post: Post;
+  post: PostDetail;
   renderedContent: string;
 }
 
 const statusOptions: Array<{
   label: string;
-  value: Post["status"];
+  value: PostDetail["status"];
 }> = [
   { label: "초안", value: "draft" },
   { label: "발행", value: "published" },
@@ -58,9 +44,6 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
 
   const [currentPost, setCurrentPost] = useState(post);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [modifiedAtInput, setModifiedAtInput] = useState(
-    toDatetimeLocalValue(post.contentModifiedAt),
-  );
   const { data: pinnedCount } = useQuery({
     queryKey: ["admin-posts", "pinned-count"],
     queryFn: fetchPinnedPostCount,
@@ -72,7 +55,6 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
       updatePost(currentPost.id, body),
     onSuccess: (updated) => {
       setCurrentPost(updated);
-      setModifiedAtInput(toDatetimeLocalValue(updated.contentModifiedAt));
       void Promise.all([
         queryClient.invalidateQueries({ queryKey: ["admin-posts"] }),
         queryClient.invalidateQueries({
@@ -109,27 +91,6 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
   });
 
   const isUpdating = updateMutation.isPending;
-
-  function updateModifiedAt(nextValue: string | null) {
-    const previousValue = currentPost.contentModifiedAt;
-    const previousInput = modifiedAtInput;
-
-    setCurrentPost((prev) => ({ ...prev, contentModifiedAt: nextValue }));
-    setModifiedAtInput(toDatetimeLocalValue(nextValue));
-
-    updateMutation.mutate(
-      { contentModifiedAt: nextValue },
-      {
-        onError: () => {
-          setCurrentPost((prev) => ({
-            ...prev,
-            contentModifiedAt: previousValue,
-          }));
-          setModifiedAtInput(previousInput);
-        },
-      },
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -226,7 +187,7 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
             value={currentPost.status}
             disabled={isUpdating}
             onChange={(e) => {
-              const value = e.target.value as Post["status"];
+              const value = e.target.value as PostDetail["status"];
               const prev = currentPost.status;
               setCurrentPost((p) => ({ ...p, status: value }));
               updateMutation.mutate(
@@ -247,35 +208,9 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
           </select>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 text-sm text-text-2">
-          <span>수정일</span>
-          <input
-            type="datetime-local"
-            value={modifiedAtInput}
-            disabled={isUpdating}
-            onChange={(event) => setModifiedAtInput(event.target.value)}
-            className="rounded-[0.75rem] border border-border-3 bg-background-1 px-3 py-2 text-sm text-text-1 outline-none transition-colors focus:border-primary-1 disabled:opacity-50"
-            aria-label="수정일 설정"
-          />
-          <button
-            type="button"
-            disabled={isUpdating || !modifiedAtInput}
-            onClick={() =>
-              updateModifiedAt(fromDatetimeLocalValue(modifiedAtInput))
-            }
-            className="inline-flex items-center rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            적용
-          </button>
-          <button
-            type="button"
-            disabled={isUpdating || currentPost.contentModifiedAt === null}
-            onClick={() => updateModifiedAt(null)}
-            className="inline-flex items-center rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            수정일 제거
-          </button>
-        </div>
+        <p className="text-sm text-text-3">
+          본문 수정일은 본문 저장 시 서버에서 자동으로 갱신됩니다.
+        </p>
       </div>
 
       {/* Preview content */}

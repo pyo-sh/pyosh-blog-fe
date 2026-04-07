@@ -3,10 +3,10 @@ import chatRoundDotsLinear from "@iconify-icons/solar/chat-round-dots-linear";
 import eyeLinear from "@iconify-icons/solar/eye-linear";
 import pinBold from "@iconify-icons/solar/pin-bold";
 import Link from "next/link";
-import type { Post } from "@entities/post";
+import type { PostListItem } from "@entities/post";
 
 interface PostListItemProps {
-  post: Post;
+  post: PostListItem;
 }
 
 const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
