@@ -525,6 +525,9 @@ export function PostForm({
   const [isSummaryManuallyEdited, setIsSummaryManuallyEdited] = useState(
     Boolean(nextInitialValues.summary.trim()),
   );
+  const [previewSummary, setPreviewSummary] = useState(
+    nextInitialValues.summary.trim(),
+  );
   const previewRef = useRef<HTMLDivElement | null>(null);
   const pendingImagesRef = useRef(pendingImages);
   const removedPendingImagesRef = useRef<Map<string, PendingImage>>(new Map());
@@ -544,6 +547,7 @@ export function PostForm({
       setValues(nextInitialValues);
       setIsDirty(false);
       setIsSummaryManuallyEdited(Boolean(nextInitialValues.summary.trim()));
+      setPreviewSummary(nextInitialValues.summary.trim());
       initialStatusRef.current = nextInitialValues.status;
       hydrationRef.current = {
         postId,
@@ -703,6 +707,7 @@ export function PostForm({
       setPendingImages(new Map());
       setIsDirty(false);
       setIsSummaryManuallyEdited(Boolean(persistedValues.summary.trim()));
+      setPreviewSummary(persistedValues.summary.trim());
       initialStatusRef.current = persistedValues.status;
       setPendingIntent(null);
       setShowPublishConfirm(false);
@@ -852,9 +857,6 @@ export function PostForm({
     const nextValues: PostFormValues = {
       ...values,
       status: nextStatus,
-      summary: isSummaryManuallyEdited
-        ? values.summary
-        : extractPlainText(values.contentMd, 200),
     };
 
     if (nextValues.categoryId === null) {
@@ -1201,8 +1203,12 @@ export function PostForm({
                       rows={3}
                       value={values.summary}
                       onChange={(event) => {
-                        setIsSummaryManuallyEdited(true);
-                        handleFieldChange("summary", event.target.value);
+                        const nextSummary = event.target.value;
+                        const hasSummary = Boolean(nextSummary.trim());
+
+                        setIsSummaryManuallyEdited(hasSummary);
+                        setPreviewSummary(nextSummary);
+                        handleFieldChange("summary", nextSummary);
                       }}
                       placeholder="글 목록에 표시될 요약문을 입력하세요"
                       aria-label="Summary"
@@ -1241,8 +1247,7 @@ export function PostForm({
                       categoryName={selectedCategoryName}
                       tags={values.tags}
                       thumbnailUrl={values.thumbnailUrl}
-                      summary={values.summary}
-                      contentMd={values.contentMd}
+                      summary={values.summary.trim() || previewSummary}
                       visibility={values.visibility}
                       status={values.status}
                     />
@@ -1259,8 +1264,7 @@ export function PostForm({
                       categoryName={selectedCategoryName}
                       tags={values.tags}
                       thumbnailUrl={values.thumbnailUrl}
-                      summary={values.summary}
-                      contentMd={values.contentMd}
+                      summary={values.summary.trim() || previewSummary}
                       visibility={values.visibility}
                       status={values.status}
                       compact
@@ -1295,10 +1299,7 @@ export function PostForm({
                     onImageFiles={insertPendingFiles}
                     onBlur={(contentMd) => {
                       if (!isSummaryManuallyEdited) {
-                        handleFieldChange(
-                          "summary",
-                          extractPlainText(contentMd, 200),
-                        );
+                        setPreviewSummary(extractPlainText(contentMd, 200));
                       }
                     }}
                     className="h-full min-h-0 [&_.cm-editor]:h-full [&_.cm-editor]:min-h-0 [&_.cm-scroller]:h-full [&_.cm-scroller]:min-h-0"

@@ -1,18 +1,16 @@
-import { fetchPostBySlug, fetchPosts } from "@entities/post";
+import { fetchPosts } from "@entities/post";
 import {
   buildAbsoluteUrl,
-  extractPlainText,
   getSiteDescription,
   getSiteName,
   getSiteUrl,
 } from "@shared/lib/seo";
 
 const RSS_POST_LIMIT = 20;
-const RSS_DESCRIPTION_LIMIT = 220;
 
 export async function GET() {
   const response = await fetchPosts({ limit: RSS_POST_LIMIT });
-  const xml = await buildRssXml(response.data);
+  const xml = buildRssXml(response.data);
 
   return new Response(xml, {
     headers: {
@@ -22,15 +20,13 @@ export async function GET() {
   });
 }
 
-async function buildRssXml(
-  posts: Awaited<ReturnType<typeof fetchPosts>>["data"],
-) {
+function buildRssXml(posts: Awaited<ReturnType<typeof fetchPosts>>["data"]) {
   const siteUrl = getSiteUrl();
   const siteName = getSiteName();
   const siteDescription = getSiteDescription();
   const now = new Date().toUTCString();
-  const items = await Promise.all(
-    posts.map(async (post) => {
+  const items = posts
+    .map((post) => {
       const link = buildAbsoluteUrl(`/posts/${encodeURIComponent(post.slug)}`);
       const pubDate = new Date(
         post.publishedAt ?? post.createdAt,
@@ -38,19 +34,7 @@ async function buildRssXml(
       const categories = post.tags
         .map((tag) => `<category>${escapeXml(tag.name)}</category>`)
         .join("");
-      const detail =
-        post.description?.trim() || post.summary?.trim()
-          ? null
-          : await fetchPostBySlug(post.slug);
-      const description = escapeXml(
-        post.description?.trim() ||
-          post.summary?.trim() ||
-          extractPlainText(
-            detail?.post.contentMd ?? "",
-            RSS_DESCRIPTION_LIMIT,
-          ) ||
-          post.title,
-      );
+      const description = escapeXml(post.summary?.trim() || "");
 
       return [
         "<item>",
@@ -62,8 +46,8 @@ async function buildRssXml(
         categories,
         "</item>",
       ].join("");
-    }),
-  );
+    })
+    .join("");
 
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
@@ -74,7 +58,7 @@ async function buildRssXml(
     `<description>${escapeXml(siteDescription)}</description>`,
     `<language>ko-kr</language>`,
     `<lastBuildDate>${now}</lastBuildDate>`,
-    items.join(""),
+    items,
     "</channel>",
     "</rss>",
   ].join("");
