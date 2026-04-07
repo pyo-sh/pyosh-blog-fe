@@ -3,10 +3,10 @@ import chatRoundDotsLinear from "@iconify-icons/solar/chat-round-dots-linear";
 import eyeLinear from "@iconify-icons/solar/eye-linear";
 import Link from "next/link";
 import { highlightText } from "../lib/highlight";
-import type { PostListItem } from "@entities/post";
+import type { PublishedPostListItem } from "@entities/post";
 
 interface SearchResultItemProps {
-  post: PostListItem;
+  post: PublishedPostListItem;
   query: string;
 }
 
@@ -71,11 +71,9 @@ export function SearchResultItem({ post, query }: SearchResultItemProps) {
             {highlightText(post.title, query)}
           </h2>
 
-          {post.summary ? (
-            <p className="mt-1 line-clamp-2 break-keep text-body-sm leading-relaxed text-text-3">
-              {highlightText(post.summary, query)}
-            </p>
-          ) : null}
+          <p className="mt-1 line-clamp-2 break-keep text-body-sm leading-relaxed text-text-3">
+            {highlightText(post.summary, query)}
+          </p>
 
           {post.matchedComment ? (
             <div className="mt-1.5 rounded-lg border-l-[3px] border-primary-1 bg-background-2 px-3 py-2 text-body-xs leading-[1.5] text-text-3">

@@ -8,6 +8,7 @@ import type {
   PostDetailResponse,
   PostDetailWithNavigationResponse,
   PostListItem,
+  PublishedPostListItem,
   PublishedPostSlugsResponse,
   UpdatePostBody,
 } from "./model";
@@ -77,11 +78,15 @@ function buildSearchParams(
 export async function fetchPosts(
   params: FetchPostsParams = {},
   cookieHeader?: string,
-): Promise<PaginatedResponse<PostListItem>> {
+): Promise<PaginatedResponse<PublishedPostListItem>> {
   const queryString = buildPostSearchParams(params);
   const path = queryString ? `/api/posts?${queryString}` : "/api/posts";
 
-  return serverFetch<PaginatedResponse<PostListItem>>(path, {}, cookieHeader);
+  return serverFetch<PaginatedResponse<PublishedPostListItem>>(
+    path,
+    {},
+    cookieHeader,
+  );
 }
 
 export async function fetchPostBySlug(

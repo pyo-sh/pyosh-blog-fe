@@ -10,6 +10,7 @@ export type {
   PostTag,
   PostCategory,
   PostListItem,
+  PublishedPostListItem,
   PostNavigation,
   PostDetailResponse,
   PostDetailWithNavigationResponse,

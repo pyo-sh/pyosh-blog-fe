@@ -1,10 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { PostListItem } from "@entities/post";
+import type { PublishedPostListItem } from "@entities/post";
 import { cn } from "@shared/lib/style-utils";
 
 interface PostCardProps {
-  post: PostListItem;
+  post: PublishedPostListItem;
   className?: string;
 }
 
@@ -16,7 +16,7 @@ const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
 });
 
 export function PostCard({ post, className }: PostCardProps) {
-  const summary = post.summary?.trim();
+  const summary = post.summary;
   const publishedDate = formatDate(post.publishedAt ?? post.createdAt);
   const canUseNextImage = supportsNextImage(post.thumbnailUrl);
 
@@ -61,11 +61,9 @@ export function PostCard({ post, className }: PostCardProps) {
           <h2 className="line-clamp-2 text-body-lg font-semibold text-text-1 transition-colors group-hover:text-primary-1">
             {post.title}
           </h2>
-          {summary ? (
-            <p className="line-clamp-3 whitespace-pre-wrap text-body-sm text-text-3">
-              {summary}
-            </p>
-          ) : null}
+          <p className="line-clamp-3 whitespace-pre-wrap text-body-sm text-text-3">
+            {summary}
+          </p>
         </div>
         {post.tags.length > 0 && (
           <ul className="mt-auto flex flex-wrap gap-2">

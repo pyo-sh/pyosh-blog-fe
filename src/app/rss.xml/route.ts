@@ -34,7 +34,7 @@ function buildRssXml(posts: Awaited<ReturnType<typeof fetchPosts>>["data"]) {
       const categories = post.tags
         .map((tag) => `<category>${escapeXml(tag.name)}</category>`)
         .join("");
-      const description = escapeXml(post.summary?.trim() || "");
+      const description = escapeXml(post.summary);
 
       return [
         "<item>",

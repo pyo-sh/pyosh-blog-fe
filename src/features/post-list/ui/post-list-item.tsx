@@ -3,10 +3,10 @@ import chatRoundDotsLinear from "@iconify-icons/solar/chat-round-dots-linear";
 import eyeLinear from "@iconify-icons/solar/eye-linear";
 import pinBold from "@iconify-icons/solar/pin-bold";
 import Link from "next/link";
-import type { PostListItem } from "@entities/post";
+import type { PublishedPostListItem } from "@entities/post";
 
 interface PostListItemProps {
-  post: PostListItem;
+  post: PublishedPostListItem;
 }
 
 const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
@@ -85,11 +85,9 @@ export function PostListItem({ post }: PostListItemProps) {
             {post.title}
           </h2>
 
-          {post.summary ? (
-            <p className="mt-1 hidden line-clamp-2 break-keep text-body-sm leading-relaxed text-text-3 sm:block">
-              {post.summary}
-            </p>
-          ) : null}
+          <p className="mt-1 hidden line-clamp-2 break-keep text-body-sm leading-relaxed text-text-3 sm:block">
+            {post.summary}
+          </p>
 
           <div className="mt-2 flex items-center gap-3 text-ui-xs text-text-4">
             <span

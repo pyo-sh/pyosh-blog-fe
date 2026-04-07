@@ -50,6 +50,14 @@ export interface PostListItem extends PostBase {
   category: PostCategory;
 }
 
+export interface PublishedPostListItem extends PostListItem {
+  status: "published";
+  visibility: "public";
+  publishedAt: string;
+  deletedAt: null;
+  summary: string;
+}
+
 export interface PostDetail extends PostBase {
   contentMd: string;
   category: PostDetailCategory;
