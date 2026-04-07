@@ -7,6 +7,10 @@ import { login } from "@entities/auth";
 import { getErrorMessage } from "@shared/lib/get-error-message";
 import { Spinner } from "@shared/ui/libs";
 
+const USERNAME_MIN_LENGTH = 4;
+const USERNAME_MAX_LENGTH = 20;
+const USERNAME_PATTERN = "^\\S{4,20}$";
+
 export function LoginForm() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -21,7 +25,7 @@ export function LoginForm() {
 
     try {
       await login({
-        username: username.trim(),
+        username,
         password,
       });
 
@@ -58,17 +62,27 @@ export function LoginForm() {
 
       <div className="mt-8 space-y-5">
         <label className="block">
-          <span className="text-body-sm font-medium text-text-1">아이디</span>
+          <span className="text-body-sm font-medium text-text-1">사용자명</span>
           <input
             type="text"
-            autoComplete="username"
+            autoComplete="off"
             value={username}
             onChange={(event) => setUsername(event.target.value)}
-            placeholder="아이디를 입력하세요"
+            placeholder="사용자명을 입력하세요"
             disabled={busy}
             className="mt-2 w-full rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
             required
+            minLength={USERNAME_MIN_LENGTH}
+            maxLength={USERNAME_MAX_LENGTH}
+            pattern={USERNAME_PATTERN}
+            title="사용자명은 공백 없이 4~20자로 입력해 주세요."
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
           />
+          <p className="mt-2 text-body-xs text-text-4">
+            공백 없이 4~20자의 사용자명을 입력해 주세요.
+          </p>
         </label>
 
         <label className="block">
