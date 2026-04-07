@@ -1,7 +1,9 @@
 export interface AdminUser {
-  id: string;
+  id: number;
   username: string;
-  displayName: string;
+  createdAt: string;
+  updatedAt: string;
+  lastLoginAt: string | null;
 }
 
 export interface CurrentAdminUser {

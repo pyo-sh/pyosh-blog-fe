@@ -2,10 +2,15 @@ import type { AdminUser, CurrentUser, LoginCredentials } from "./model";
 import { clientFetch, clientMutate, serverFetch } from "@shared/api";
 
 export async function login(credentials: LoginCredentials): Promise<AdminUser> {
-  return clientFetch<AdminUser>("/api/auth/admin/login", {
-    method: "POST",
-    body: JSON.stringify(credentials),
-  });
+  const response = await clientFetch<{ admin: AdminUser }>(
+    "/api/auth/admin/login",
+    {
+      method: "POST",
+      body: JSON.stringify(credentials),
+    },
+  );
+
+  return response.admin;
 }
 
 export async function logout(): Promise<void> {
