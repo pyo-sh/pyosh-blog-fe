@@ -13,9 +13,6 @@ export type AdminGuestbookFilterStatus = AdminGuestbookStatus | "all";
 export type AdminGuestbookAuthorType = "oauth" | "guest";
 export type AdminGuestbookDeleteAction = "soft_delete" | "hard_delete";
 export type AdminGuestbookPatchAction = "hide" | "restore";
-export type AdminGuestbookAction =
-  | AdminGuestbookDeleteAction
-  | AdminGuestbookPatchAction;
 
 export interface AdminGuestbookItem {
   id: number;
@@ -129,7 +126,7 @@ export async function fetchAdminGuestbook(
 
 export async function adminDeleteGuestbookEntry(
   id: number,
-  action: AdminGuestbookAction,
+  action: AdminGuestbookDeleteAction,
 ): Promise<void> {
   await clientMutate<void>(`/api/admin/guestbook/${id}?action=${action}`, {
     method: "DELETE",
@@ -140,12 +137,14 @@ export async function adminPatchGuestbookEntry(
   id: number,
   action: AdminGuestbookPatchAction,
 ): Promise<void> {
-  await adminDeleteGuestbookEntry(id, action);
+  await clientMutate<void>(`/api/admin/guestbook/${id}?action=${action}`, {
+    method: "PATCH",
+  });
 }
 
 export async function adminBulkDeleteGuestbookEntries(
   ids: number[],
-  action: AdminGuestbookAction,
+  action: AdminGuestbookDeleteAction,
 ): Promise<void> {
   await clientMutate<void>("/api/admin/guestbook/bulk", {
     method: "DELETE",
@@ -157,7 +156,10 @@ export async function adminBulkPatchGuestbookEntries(
   ids: number[],
   action: AdminGuestbookPatchAction,
 ): Promise<void> {
-  await adminBulkDeleteGuestbookEntries(ids, action);
+  await clientMutate<void>("/api/admin/guestbook/bulk", {
+    method: "PATCH",
+    body: JSON.stringify({ ids, action }),
+  });
 }
 
 export async function fetchGuestbookSettings(
