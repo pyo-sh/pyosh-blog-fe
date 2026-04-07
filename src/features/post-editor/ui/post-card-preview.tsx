@@ -1,7 +1,6 @@
 "use client";
 
-import { extractPlainText } from "../lib/extract-plain-text";
-import type { Post } from "@entities/post";
+import type { PostDetail } from "@entities/post";
 
 interface PostCardPreviewProps {
   title: string;
@@ -9,9 +8,8 @@ interface PostCardPreviewProps {
   tags: string[];
   thumbnailUrl: string;
   summary: string;
-  contentMd: string;
-  visibility: Post["visibility"];
-  status: Post["status"];
+  visibility: PostDetail["visibility"];
+  status: PostDetail["status"];
   compact?: boolean;
 }
 
@@ -21,12 +19,11 @@ export function PostCardPreview({
   tags,
   thumbnailUrl,
   summary,
-  contentMd,
   visibility,
   status,
   compact = false,
 }: PostCardPreviewProps) {
-  const effectiveSummary = summary.trim() || extractPlainText(contentMd, 160);
+  const effectiveSummary = summary.trim();
   const statusLabel =
     status === "published" ? "발행" : status === "archived" ? "보관" : "작성중";
 

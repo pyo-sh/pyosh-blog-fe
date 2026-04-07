@@ -1,15 +1,12 @@
 import { fetchPosts } from "@entities/post";
 import {
   buildAbsoluteUrl,
-  extractPlainText,
-  getPostDescription,
   getSiteDescription,
   getSiteName,
   getSiteUrl,
 } from "@shared/lib/seo";
 
 const RSS_POST_LIMIT = 20;
-const RSS_DESCRIPTION_LIMIT = 220;
 
 export async function GET() {
   const response = await fetchPosts({ limit: RSS_POST_LIMIT });
@@ -37,12 +34,7 @@ function buildRssXml(posts: Awaited<ReturnType<typeof fetchPosts>>["data"]) {
       const categories = post.tags
         .map((tag) => `<category>${escapeXml(tag.name)}</category>`)
         .join("");
-      const description = escapeXml(
-        post.description?.trim() ||
-          post.summary?.trim() ||
-          extractPlainText(post.contentMd, RSS_DESCRIPTION_LIMIT) ||
-          getPostDescription(post),
-      );
+      const description = escapeXml(post.summary);
 
       return [
         "<item>",

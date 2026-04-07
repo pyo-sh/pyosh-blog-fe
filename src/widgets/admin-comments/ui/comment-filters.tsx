@@ -14,7 +14,7 @@ import magniferLinear from "@iconify-icons/solar/magnifer-linear";
 import refreshLinear from "@iconify-icons/solar/restart-linear";
 import { format, parseISO } from "date-fns";
 import { ko } from "date-fns/locale";
-import type { Post } from "@entities/post";
+import type { PostListItem } from "@entities/post";
 import { fetchAdminPosts } from "@entities/post";
 import { cn } from "@shared/lib/style-utils";
 
@@ -540,7 +540,7 @@ export function CommentFilters({
   onDateChange,
 }: CommentFiltersProps) {
   const [postSearch, setPostSearch] = useState("");
-  const [postOptions, setPostOptions] = useState<Post[]>([]);
+  const [postOptions, setPostOptions] = useState<PostListItem[]>([]);
   const [postDropdownOpen, setPostDropdownOpen] = useState(false);
   const [selectedPostTitle, setSelectedPostTitle] = useState<
     string | undefined
@@ -605,7 +605,7 @@ export function CommentFilters({
     setPostDropdownOpen(true);
   }
 
-  function handleSelectPost(post: Post) {
+  function handleSelectPost(post: PostListItem) {
     setSelectedPostTitle(post.title);
     setPostSearch(post.title);
     setPostDropdownOpen(false);

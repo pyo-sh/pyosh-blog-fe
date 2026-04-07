@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import type { Post } from "@entities/post";
+import type { PostListItem } from "@entities/post";
 import type { PopularPost } from "@entities/stat";
 import { PopularPostList } from "@features/popular-posts";
 import { cn } from "@shared/lib/style-utils";
 
 interface RecentPopularPostsProps {
-  recentPosts: Post[];
+  recentPosts: PostListItem[];
   popularPosts: PopularPost[] | null;
   onItemClick?: () => void;
 }

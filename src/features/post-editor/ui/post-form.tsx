@@ -23,7 +23,6 @@ import { PreviewModal } from "./preview-modal";
 import { PublishConfirmModal } from "./publish-confirm-modal";
 import { TagChipInput } from "./tag-chip-input";
 import { ThumbnailUploader } from "./thumbnail-uploader";
-import { extractPlainText } from "../lib/extract-plain-text";
 import {
   createPendingImage,
   getPendingImageIds,
@@ -46,7 +45,7 @@ import {
   createPost,
   updatePost,
   type CreatePostBody,
-  type Post,
+  type PostDetail,
 } from "@entities/post";
 import { getErrorMessage } from "@shared/lib/get-error-message";
 import { cn } from "@shared/lib/style-utils";
@@ -64,8 +63,8 @@ export interface PostFormValues {
   title: string;
   categoryId: number | null;
   tags: string[];
-  status: Post["status"];
-  visibility: Post["visibility"];
+  status: PostDetail["status"];
+  visibility: PostDetail["visibility"];
   commentStatus: "open" | "locked" | "disabled";
   thumbnailUrl: string;
   summary: string;
@@ -79,7 +78,7 @@ interface PostFormProps {
   initialValues?: Partial<PostFormValues>;
   cancelLabel?: string;
   onCancel?: () => void;
-  onSuccess?: (post: Post) => void;
+  onSuccess?: (post: PostDetail) => void;
 }
 
 interface InlineSelectOption<T extends string | number> {
@@ -150,7 +149,7 @@ function buildPayload(values: PostFormValues): CreatePostBody {
   };
 }
 
-function mapPostToFormValues(post: Post): PostFormValues {
+function mapPostToFormValues(post: PostDetail): PostFormValues {
   return {
     title: post.title,
     categoryId: post.categoryId,
@@ -522,9 +521,6 @@ export function PostForm({
   const [pendingImages, setPendingImages] = useState<Map<string, PendingImage>>(
     () => new Map(),
   );
-  const [isSummaryManuallyEdited, setIsSummaryManuallyEdited] = useState(
-    Boolean(nextInitialValues.summary.trim()),
-  );
   const previewRef = useRef<HTMLDivElement | null>(null);
   const pendingImagesRef = useRef(pendingImages);
   const removedPendingImagesRef = useRef<Map<string, PendingImage>>(new Map());
@@ -543,7 +539,6 @@ export function PostForm({
     if (recordChanged || (!isDirty && initialChanged)) {
       setValues(nextInitialValues);
       setIsDirty(false);
-      setIsSummaryManuallyEdited(Boolean(nextInitialValues.summary.trim()));
       initialStatusRef.current = nextInitialValues.status;
       hydrationRef.current = {
         postId,
@@ -702,7 +697,6 @@ export function PostForm({
       setValues(persistedValues);
       setPendingImages(new Map());
       setIsDirty(false);
-      setIsSummaryManuallyEdited(Boolean(persistedValues.summary.trim()));
       initialStatusRef.current = persistedValues.status;
       setPendingIntent(null);
       setShowPublishConfirm(false);
@@ -852,9 +846,6 @@ export function PostForm({
     const nextValues: PostFormValues = {
       ...values,
       status: nextStatus,
-      summary: isSummaryManuallyEdited
-        ? values.summary
-        : extractPlainText(values.contentMd, 200),
     };
 
     if (nextValues.categoryId === null) {
@@ -1200,10 +1191,9 @@ export function PostForm({
                       maxLength={200}
                       rows={3}
                       value={values.summary}
-                      onChange={(event) => {
-                        setIsSummaryManuallyEdited(true);
-                        handleFieldChange("summary", event.target.value);
-                      }}
+                      onChange={(event) =>
+                        handleFieldChange("summary", event.target.value)
+                      }
                       placeholder="글 목록에 표시될 요약문을 입력하세요"
                       aria-label="Summary"
                       className="w-full rounded-[0.75rem] border border-border-3 bg-background-1 px-3 py-2.5 text-[13px] text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
@@ -1242,7 +1232,6 @@ export function PostForm({
                       tags={values.tags}
                       thumbnailUrl={values.thumbnailUrl}
                       summary={values.summary}
-                      contentMd={values.contentMd}
                       visibility={values.visibility}
                       status={values.status}
                     />
@@ -1260,7 +1249,6 @@ export function PostForm({
                       tags={values.tags}
                       thumbnailUrl={values.thumbnailUrl}
                       summary={values.summary}
-                      contentMd={values.contentMd}
                       visibility={values.visibility}
                       status={values.status}
                       compact
@@ -1293,14 +1281,6 @@ export function PostForm({
                     onChange={(value) => handleFieldChange("contentMd", value)}
                     onImageButtonClick={() => setShowImageGallery(true)}
                     onImageFiles={insertPendingFiles}
-                    onBlur={(contentMd) => {
-                      if (!isSummaryManuallyEdited) {
-                        handleFieldChange(
-                          "summary",
-                          extractPlainText(contentMd, 200),
-                        );
-                      }
-                    }}
                     className="h-full min-h-0 [&_.cm-editor]:h-full [&_.cm-editor]:min-h-0 [&_.cm-scroller]:h-full [&_.cm-scroller]:min-h-0"
                   />
                 </div>

@@ -8,7 +8,10 @@ export interface PostCategory {
   id: number;
   name: string;
   slug: string;
-  ancestors?: Array<{
+}
+
+export interface PostDetailCategory extends PostCategory {
+  ancestors: Array<{
     name: string;
     slug: string;
   }>;
@@ -19,12 +22,11 @@ export interface MatchedComment {
   authorName: string;
 }
 
-export interface Post {
+interface PostBase {
   id: number;
   categoryId: number;
   title: string;
   slug: string;
-  contentMd: string;
   thumbnailUrl: string | null;
   visibility: "public" | "private";
   status: "draft" | "published" | "archived";
@@ -42,6 +44,23 @@ export interface Post {
   category: PostCategory;
   tags: PostTag[];
   matchedComment?: MatchedComment;
+}
+
+export interface PostListItem extends PostBase {
+  category: PostCategory;
+}
+
+export interface PublishedPostListItem extends PostListItem {
+  status: "published";
+  visibility: "public";
+  publishedAt: string;
+  deletedAt: null;
+  summary: string;
+}
+
+export interface PostDetail extends PostBase {
+  contentMd: string;
+  category: PostDetailCategory;
 }
 
 export type SearchFilter =
@@ -115,11 +134,11 @@ export interface BulkPostErrorDetail {
 }
 
 export interface PostDetailResponse {
-  post: Post;
+  post: PostDetail;
 }
 
 export interface PostDetailWithNavigationResponse {
-  post: Post;
+  post: PostDetail;
   prevPost: PostNavigation | null;
   nextPost: PostNavigation | null;
 }
@@ -138,6 +157,4 @@ export interface CreatePostBody {
   publishedAt?: string;
 }
 
-export type UpdatePostBody = Partial<
-  CreatePostBody & { isPinned: boolean; contentModifiedAt: string | null }
->;
+export type UpdatePostBody = Partial<CreatePostBody & { isPinned: boolean }>;

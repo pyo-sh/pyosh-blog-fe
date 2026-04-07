@@ -13,12 +13,12 @@ import { Icon } from "@iconify/react";
 import altArrowDownLinear from "@iconify-icons/solar/alt-arrow-down-linear";
 import magniferLinear from "@iconify-icons/solar/magnifer-linear";
 import type { Category } from "@entities/category";
-import type { Post } from "@entities/post";
+import type { PostListItem } from "@entities/post";
 import { cn } from "@shared/lib/style-utils";
 
 export type AdminPostTab = "active" | "trash";
-export type AdminPostStatusFilter = Post["status"] | "all";
-export type AdminPostVisibilityFilter = Post["visibility"] | "all";
+export type AdminPostStatusFilter = PostListItem["status"] | "all";
+export type AdminPostVisibilityFilter = PostListItem["visibility"] | "all";
 
 interface PostFiltersProps {
   tab: AdminPostTab;
