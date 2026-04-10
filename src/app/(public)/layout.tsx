@@ -23,7 +23,7 @@ export default async function PublicLayout({
     ]);
 
   return (
-    <>
+    <div className="flex min-h-screen flex-col">
       <SiteViewCounter />
       <PublicLayoutShell
         recentPosts={postsResponse.data}
@@ -35,6 +35,6 @@ export default async function PublicLayout({
         {children}
       </PublicLayoutShell>
       <Footer />
-    </>
+    </div>
   );
 }
