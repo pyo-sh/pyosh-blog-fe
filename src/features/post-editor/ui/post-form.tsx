@@ -140,7 +140,7 @@ function buildPayload(values: PostFormValues): CreatePostBody {
     title: values.title.trim(),
     categoryId: values.categoryId ?? 0,
     contentMd: values.contentMd,
-    thumbnailUrl: values.thumbnailUrl.trim() || null,
+    thumbnailUrl: toCanonicalAssetUrl(values.thumbnailUrl.trim()) || null,
     status: values.status,
     visibility: values.visibility,
     commentStatus: values.commentStatus,
