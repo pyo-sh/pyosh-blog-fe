@@ -14,6 +14,7 @@ import type {
 } from "./model";
 import type { PaginatedResponse } from "@shared/api";
 import { clientFetch, clientMutate, serverFetch } from "@shared/api";
+import { normalizeOptionalAssetUrl } from "@shared/lib/asset-url";
 
 function buildPostSearchParams(params: FetchPostsParams): string {
   return buildSearchParams(params);
@@ -82,22 +83,29 @@ export async function fetchPosts(
   const queryString = buildPostSearchParams(params);
   const path = queryString ? `/api/posts?${queryString}` : "/api/posts";
 
-  return serverFetch<PaginatedResponse<PublishedPostListItem>>(
+  const response = await serverFetch<PaginatedResponse<PublishedPostListItem>>(
     path,
     {},
     cookieHeader,
   );
+
+  return normalizePostListResponse(response);
 }
 
 export async function fetchPostBySlug(
   slug: string,
   cookieHeader?: string,
 ): Promise<PostDetailWithNavigationResponse> {
-  return serverFetch<PostDetailWithNavigationResponse>(
+  const response = await serverFetch<PostDetailWithNavigationResponse>(
     `/api/posts/${encodeURIComponent(slug)}`,
     {},
     cookieHeader,
   );
+
+  return {
+    ...response,
+    post: normalizePost(response.post),
+  };
 }
 
 export async function fetchPublishedPostSlugs(
@@ -122,7 +130,7 @@ export async function fetchAdminPost(
       )
     : await clientFetch<PostDetailResponse>(`/api/admin/posts/${id}`);
 
-  return response.post;
+  return normalizePost(response.post);
 }
 
 export async function fetchAdminPosts(
@@ -134,9 +142,11 @@ export async function fetchAdminPosts(
     ? `/api/admin/posts?${queryString}`
     : "/api/admin/posts";
 
-  return cookieHeader
-    ? serverFetch<PaginatedResponse<PostListItem>>(path, {}, cookieHeader)
-    : clientFetch<PaginatedResponse<PostListItem>>(path);
+  const response = cookieHeader
+    ? await serverFetch<PaginatedResponse<PostListItem>>(path, {}, cookieHeader)
+    : await clientFetch<PaginatedResponse<PostListItem>>(path);
+
+  return normalizePostListResponse(response);
 }
 
 export async function fetchPinnedPostCount(): Promise<number> {
@@ -152,7 +162,7 @@ export async function createPost(body: CreatePostBody): Promise<PostDetail> {
     body: JSON.stringify(body),
   });
 
-  return response.post;
+  return normalizePost(response.post);
 }
 
 export async function deletePost(id: number): Promise<void> {
@@ -169,7 +179,7 @@ export async function restorePost(id: number): Promise<PostDetail> {
     },
   );
 
-  return response.post;
+  return normalizePost(response.post);
 }
 
 export async function hardDeletePost(id: number): Promise<void> {
@@ -190,7 +200,7 @@ export async function updatePost(
     },
   );
 
-  return response.post;
+  return normalizePost(response.post);
 }
 
 export async function bulkUpdatePosts(action: BulkPostAction): Promise<void> {
@@ -198,4 +208,20 @@ export async function bulkUpdatePosts(action: BulkPostAction): Promise<void> {
     method: "PATCH",
     body: JSON.stringify(action),
   });
+}
+
+function normalizePost<T extends PostListItem | PostDetail>(post: T): T {
+  return {
+    ...post,
+    thumbnailUrl: normalizeOptionalAssetUrl(post.thumbnailUrl),
+  };
+}
+
+function normalizePostListResponse<T extends PostListItem>(
+  response: PaginatedResponse<T>,
+): PaginatedResponse<T> {
+  return {
+    ...response,
+    data: response.data.map(normalizePost),
+  };
 }

@@ -3,22 +3,38 @@ import { NextResponse, type NextRequest } from "next/server";
 const MANAGE_LOGIN_PATH = "/manage/login";
 const MANAGE_HOME_PATH = "/manage";
 const API_URL = process.env.API_URL ?? "http://localhost:5500";
+const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL?.trim() ?? "";
+
+function joinSources(...sources: Array<string | false | null | undefined>) {
+  return sources.filter(Boolean).join(" ");
+}
 
 function buildCspDirectives(nonce: string): string {
   const isDev = process.env.NODE_ENV === "development";
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
 
   return [
     "default-src 'self'",
     isDev
       ? "img-src 'self' http: https: data: blob:"
       : "img-src 'self' https: data: blob:",
-    `script-src 'nonce-${nonce}' 'strict-dynamic'`,
+    [
+      "script-src",
+      `'nonce-${nonce}'`,
+      "'strict-dynamic'",
+      ...(isDev ? ["'unsafe-eval'"] : []),
+    ].join(" "),
     "object-src 'none'",
     // Phase 2 prerequisite: replace 'unsafe-inline' with nonce-based styles before enforcement
-    "style-src 'self' 'unsafe-inline'",
+    joinSources(
+      "style-src 'self' 'unsafe-inline'",
+      "https://fonts.googleapis.com",
+    ),
     "font-src 'self' https://fonts.gstatic.com",
-    apiUrl ? `connect-src 'self' ${apiUrl}` : "connect-src 'self'",
+    joinSources(
+      "connect-src 'self'",
+      NEXT_PUBLIC_API_URL,
+      isDev ? "ws: wss:" : "",
+    ),
   ].join("; ");
 }
 

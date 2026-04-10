@@ -7,6 +7,7 @@ import {
   clientMutate,
   getCsrfToken,
 } from "@shared/api";
+import { normalizeAssetUrl } from "@shared/lib/asset-url";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5500";
 
@@ -14,9 +15,14 @@ export async function fetchAssets(
   page = 1,
   limit = 20,
 ): Promise<PaginatedResponse<Asset>> {
-  return clientFetch<PaginatedResponse<Asset>>(
+  const response = await clientFetch<PaginatedResponse<Asset>>(
     `/api/assets?page=${page}&limit=${limit}`,
   );
+
+  return {
+    ...response,
+    data: response.data.map(normalizeAsset),
+  };
 }
 
 export async function uploadAssets(
@@ -86,4 +92,11 @@ export async function deleteAssets(ids: number[]): Promise<void> {
     method: "DELETE",
     body: JSON.stringify({ ids }),
   });
+}
+
+function normalizeAsset<T extends UploadedAsset>(asset: T): T {
+  return {
+    ...asset,
+    url: normalizeAssetUrl(asset.url),
+  };
 }

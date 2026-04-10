@@ -14,6 +14,7 @@ import {
   uploadAssets,
   type Asset,
 } from "@entities/asset";
+import { toCanonicalAssetUrl } from "@shared/lib/asset-url";
 import { getErrorMessage } from "@shared/lib/get-error-message";
 import { Modal, Spinner } from "@shared/ui/libs";
 
@@ -329,7 +330,10 @@ export function AssetUploader() {
   }
 
   async function handleCopy(asset: Asset, type: "url" | "markdown") {
-    const text = type === "url" ? asset.url : buildAssetMarkdown(asset);
+    const text =
+      type === "url"
+        ? toCanonicalAssetUrl(asset.url)
+        : buildAssetMarkdown(asset);
 
     try {
       await navigator.clipboard.writeText(text);

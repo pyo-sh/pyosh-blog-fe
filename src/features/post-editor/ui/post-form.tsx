@@ -47,6 +47,7 @@ import {
   type CreatePostBody,
   type PostDetail,
 } from "@entities/post";
+import { normalizeAssetUrl, toCanonicalAssetUrl } from "@shared/lib/asset-url";
 import { getErrorMessage } from "@shared/lib/get-error-message";
 import { cn } from "@shared/lib/style-utils";
 import { Spinner } from "@shared/ui/libs";
@@ -139,7 +140,7 @@ function buildPayload(values: PostFormValues): CreatePostBody {
     title: values.title.trim(),
     categoryId: values.categoryId ?? 0,
     contentMd: values.contentMd,
-    thumbnailUrl: values.thumbnailUrl.trim() || null,
+    thumbnailUrl: toCanonicalAssetUrl(values.thumbnailUrl.trim()) || null,
     status: values.status,
     visibility: values.visibility,
     commentStatus: values.commentStatus,
@@ -822,12 +823,13 @@ export function PostForm({
       return;
     }
 
+    const canonicalUrl = toCanonicalAssetUrl(asset.url);
     const alt =
-      asset.url
+      canonicalUrl
         .split("/")
         .pop()
         ?.replace(/\.[^./\\]+$/, "") || "이미지";
-    insertMarkdownImage(editorView, alt, asset.url);
+    insertMarkdownImage(editorView, alt, canonicalUrl);
     setShowImageGallery(false);
   }
 
@@ -1032,7 +1034,7 @@ export function PostForm({
                       {values.thumbnailUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element -- arbitrary admin preview URLs are allowed
                         <img
-                          src={values.thumbnailUrl}
+                          src={normalizeAssetUrl(values.thumbnailUrl)}
                           alt="썸네일 미리보기"
                           className="h-9 w-12 object-cover"
                         />
@@ -1407,7 +1409,7 @@ export function PostForm({
         isOpen={showThumbnailPicker}
         onClose={() => setShowThumbnailPicker(false)}
         onSelect={(url) => {
-          handleFieldChange("thumbnailUrl", url);
+          handleFieldChange("thumbnailUrl", toCanonicalAssetUrl(url));
           setShowThumbnailPicker(false);
           toast.success("에셋 갤러리에서 썸네일을 선택했습니다.");
         }}
