@@ -60,7 +60,7 @@ export function PublicLayoutShell({
   const closeSidebar = () => setIsSidebarOpen(false);
 
   return (
-    <>
+    <div className="flex flex-1 flex-col">
       <Header
         hamburgerRef={hamburgerBtnRef}
         onHamburgerClick={() => setIsSidebarOpen((v) => !v)}
@@ -68,7 +68,7 @@ export function PublicLayoutShell({
       />
 
       {/* 2-column layout: sidebar + main */}
-      <div className="mx-auto flex w-full max-w-[67.5rem] gap-6 px-4 md:px-6">
+      <div className="mx-auto flex w-full max-w-[67.5rem] flex-1 gap-6 px-4 md:px-6">
         {/* Desktop sidebar */}
         <aside
           aria-label="사이드바"
@@ -88,7 +88,7 @@ export function PublicLayoutShell({
         </aside>
 
         {/* Page content */}
-        <div className="min-w-0 flex-1">{children}</div>
+        <main className="min-w-0 flex-1 pb-16">{children}</main>
       </div>
 
       {/* Mobile slide-in sidebar */}
@@ -109,6 +109,6 @@ export function PublicLayoutShell({
           onClose={closeSidebar}
         />
       </SlideInPanel>
-    </>
+    </div>
   );
 }
