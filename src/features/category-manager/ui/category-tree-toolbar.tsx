@@ -38,6 +38,7 @@ export function CategoryTreeToolbar({
 }: CategoryTreeToolbarProps) {
   const isSelectMode = mode === "select";
   const isEditMode = mode === "edit";
+  const hasCategories = totalCount > 0;
 
   return (
     <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -91,22 +92,26 @@ export function CategoryTreeToolbar({
 
       {!isSelectMode && !isEditMode ? (
         <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={onEnterSelectMode}
-            className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-4 text-sm font-normal leading-none text-text-2 transition-colors hover:bg-background-3"
-          >
-            <Icon icon={checkSquareLinear} width="18" aria-hidden="true" />
-            일괄 선택
-          </button>
-          <button
-            type="button"
-            onClick={onEnterEditMode}
-            className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-4 text-sm font-normal leading-none text-text-2 transition-colors hover:bg-background-3"
-          >
-            <Icon icon={sortVerticalLinear} width="18" aria-hidden="true" />
-            배치 편집
-          </button>
+          {hasCategories ? (
+            <>
+              <button
+                type="button"
+                onClick={onEnterSelectMode}
+                className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-4 text-sm font-normal leading-none text-text-2 transition-colors hover:bg-background-3"
+              >
+                <Icon icon={checkSquareLinear} width="18" aria-hidden="true" />
+                일괄 선택
+              </button>
+              <button
+                type="button"
+                onClick={onEnterEditMode}
+                className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 px-4 text-sm font-normal leading-none text-text-2 transition-colors hover:bg-background-3"
+              >
+                <Icon icon={sortVerticalLinear} width="18" aria-hidden="true" />
+                배치 편집
+              </button>
+            </>
+          ) : null}
           <button
             type="button"
             onClick={onCreate}

@@ -480,11 +480,7 @@ export function CategoryTree({
     };
   }, [clearHoverExpandTimer]);
 
-  if (categories.length === 0) {
-    return (
-      <EmptyState message="카테고리가 없습니다. 새 카테고리를 생성하세요." />
-    );
-  }
+  const isEmpty = categories.length === 0;
 
   return (
     <>
@@ -503,58 +499,64 @@ export function CategoryTree({
           onEnterEditMode={handleEnterEditMode}
         />
 
-        <DndContext
-          sensors={sensors}
-          collisionDetection={collisionDetection}
-          onDragStart={handleDragStart}
-          onDragMove={handleDragMove}
-          onDragEnd={handleDragEnd}
-          onDragCancel={() => {
-            collapseAutoExpandedNodes();
-            clearHoverExpandTimer();
-            prevDropTargetRef.current = null;
-            setActiveDragId(null);
-            setDropTarget(null);
-          }}
-        >
+        {isEmpty ? (
           <div className="overflow-hidden rounded-xl border border-border-4 bg-background-2">
-            <ul>
-              {visibleRows.map(({ category, depth, hasVisibleChildren }) => (
-                <CategoryTreeRow
-                  key={category.id}
-                  category={category}
-                  depth={depth}
-                  mode={mode}
-                  hasVisibleChildren={hasVisibleChildren}
-                  isExpanded={expandedIds.has(category.id)}
-                  isSelected={selectedIds.has(category.id)}
-                  showSlug={showSlug}
-                  changeMarker={changeMarkerMap.get(category.id)}
-                  dropTarget={dropTarget}
-                  onToggle={handleToggle}
-                  onToggleVisibility={(nextCategory) =>
-                    void onToggleVisibility(nextCategory)
-                  }
-                  onSelectToggle={handleToggleSelect}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
-                />
-              ))}
-            </ul>
+            <EmptyState message="카테고리가 없습니다. 새 카테고리를 생성하세요." />
           </div>
+        ) : (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={collisionDetection}
+            onDragStart={handleDragStart}
+            onDragMove={handleDragMove}
+            onDragEnd={handleDragEnd}
+            onDragCancel={() => {
+              collapseAutoExpandedNodes();
+              clearHoverExpandTimer();
+              prevDropTargetRef.current = null;
+              setActiveDragId(null);
+              setDropTarget(null);
+            }}
+          >
+            <div className="overflow-hidden rounded-xl border border-border-4 bg-background-2">
+              <ul>
+                {visibleRows.map(({ category, depth, hasVisibleChildren }) => (
+                  <CategoryTreeRow
+                    key={category.id}
+                    category={category}
+                    depth={depth}
+                    mode={mode}
+                    hasVisibleChildren={hasVisibleChildren}
+                    isExpanded={expandedIds.has(category.id)}
+                    isSelected={selectedIds.has(category.id)}
+                    showSlug={showSlug}
+                    changeMarker={changeMarkerMap.get(category.id)}
+                    dropTarget={dropTarget}
+                    onToggle={handleToggle}
+                    onToggleVisibility={(nextCategory) =>
+                      void onToggleVisibility(nextCategory)
+                    }
+                    onSelectToggle={handleToggleSelect}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                  />
+                ))}
+              </ul>
+            </div>
 
-          <DragOverlay>
-            {activeRow ? (
-              <CategoryTreeRowPreview
-                category={activeRow.category}
-                depth={activeRow.depth}
-                changeMarker={changeMarkerMap.get(activeRow.category.id)}
-                dropPosition={dropTarget?.position ?? null}
-                invalidDrop={dropTarget?.invalid ?? false}
-              />
-            ) : null}
-          </DragOverlay>
-        </DndContext>
+            <DragOverlay>
+              {activeRow ? (
+                <CategoryTreeRowPreview
+                  category={activeRow.category}
+                  depth={activeRow.depth}
+                  changeMarker={changeMarkerMap.get(activeRow.category.id)}
+                  dropPosition={dropTarget?.position ?? null}
+                  invalidDrop={dropTarget?.invalid ?? false}
+                />
+              ) : null}
+            </DragOverlay>
+          </DndContext>
+        )}
 
         {mode === "select" ? (
           <div className="fixed bottom-0 left-0 right-0 z-20 md:left-[var(--admin-sidebar-offset)]">
