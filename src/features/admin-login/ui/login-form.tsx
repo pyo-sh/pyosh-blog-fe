@@ -44,15 +44,12 @@ export function LoginForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-[2rem] border border-border-3 bg-background-2 p-8 shadow-[0px_24px_80px_0px_rgba(0,0,0,0.08)]"
+      className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-6 py-12"
     >
       <div>
-        <p className="text-body-xs uppercase tracking-[0.24em] text-text-4">
-          Admin access
-        </p>
-        <h2 className="mt-3 text-h2 text-text-1">관리자 로그인</h2>
+        <h1 className="text-h2 text-text-1">관리자 로그인</h1>
         <p className="mt-3 text-body-sm text-text-3">
-          관리자 계정으로 로그인해 대시보드와 글 관리 기능에 접근합니다.
+          관리자 계정으로 로그인해 대시보드로 이동합니다.
         </p>
       </div>
 
