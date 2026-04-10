@@ -10,6 +10,7 @@ import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
 import { unified } from "unified";
 import { visit } from "unist-util-visit";
+import { normalizeAssetUrl } from "./asset-url";
 import type { Element, Root } from "hast";
 
 export interface TocItem {
@@ -28,6 +29,24 @@ function rehypeLazyImages() {
         node.properties.loading = "lazy";
         node.properties.decoding = "async";
       }
+    });
+  };
+}
+
+function rehypeNormalizeAssetImages() {
+  return (tree: Root) => {
+    visit(tree, "element", (node: Element) => {
+      if (node.tagName !== "img") {
+        return;
+      }
+
+      const src = node.properties.src;
+
+      if (typeof src !== "string") {
+        return;
+      }
+
+      node.properties.src = normalizeAssetUrl(src);
     });
   };
 }
@@ -76,6 +95,7 @@ const processor = unified()
     target: "_blank",
     rel: ["noopener", "noreferrer"],
   })
+  .use(rehypeNormalizeAssetImages)
   .use(rehypeLazyImages)
   .use(rehypeSlug, { prefix: HEADING_ID_PREFIX })
   .use(rehypeSanitize, sanitizeSchema)
