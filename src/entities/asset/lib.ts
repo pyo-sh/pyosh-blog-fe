@@ -1,4 +1,5 @@
 import type { Asset } from "./model";
+import { toCanonicalAssetUrl } from "@shared/lib/asset-url";
 
 const assetDateFormatter = new Intl.DateTimeFormat("ko-KR", {
   year: "numeric",
@@ -43,5 +44,7 @@ export function formatAssetDate(createdAt: string): string {
 }
 
 export function buildAssetMarkdown(asset: Pick<Asset, "url">): string {
-  return `![${getAssetFilename(asset.url)}](${asset.url})`;
+  const canonicalUrl = toCanonicalAssetUrl(asset.url);
+
+  return `![${getAssetFilename(canonicalUrl)}](${canonicalUrl})`;
 }
