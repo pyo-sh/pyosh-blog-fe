@@ -7,6 +7,7 @@ import galleryWideLinear from "@iconify-icons/solar/gallery-wide-linear";
 import linkMinimalistic2Linear from "@iconify-icons/solar/link-minimalistic-2-linear";
 import { toast } from "sonner";
 import { AssetPickerModal, uploadAssets } from "@entities/asset";
+import { normalizeAssetUrl, toCanonicalAssetUrl } from "@shared/lib/asset-url";
 import { cn } from "@shared/lib/style-utils";
 import { Spinner } from "@shared/ui/libs";
 
@@ -124,7 +125,7 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
 
     try {
       const [asset] = await uploadAssets([file]);
-      onChange(asset.url);
+      onChange(toCanonicalAssetUrl(asset.url));
       setPendingFile(null);
       toast.success("썸네일을 업로드했습니다.");
     } catch {
@@ -225,7 +226,7 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
         {previewUrl || value ? (
           // eslint-disable-next-line @next/next/no-img-element -- arbitrary remote hosts are allowed for admin preview
           <img
-            src={previewUrl ?? value}
+            src={previewUrl ?? normalizeAssetUrl(value)}
             alt="썸네일 미리보기"
             className="max-h-44 rounded-[0.85rem] object-cover shadow-[0px_18px_40px_0px_rgba(0,0,0,0.08)]"
           />
@@ -292,7 +293,7 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
         isOpen={isPickerOpen}
         onClose={() => setIsPickerOpen(false)}
         onSelect={(url) => {
-          onChange(url);
+          onChange(toCanonicalAssetUrl(url));
           setPendingFile(null);
           setIsAwaitingPaste(false);
           setIsPickerOpen(false);

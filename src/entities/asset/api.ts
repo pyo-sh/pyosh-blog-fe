@@ -50,7 +50,7 @@ export async function uploadAssets(
       if (xhr.status >= 200 && xhr.status < 300) {
         try {
           const data = JSON.parse(xhr.responseText) as UploadAssetsResponse;
-          resolve(data.assets.map(normalizeAsset));
+          resolve(data.assets);
         } catch {
           reject(new Error("응답을 파싱할 수 없습니다."));
         }

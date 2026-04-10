@@ -1,6 +1,7 @@
 "use client";
 
 import type { PostDetail } from "@entities/post";
+import { normalizeAssetUrl } from "@shared/lib/asset-url";
 
 interface PostCardPreviewProps {
   title: string;
@@ -24,6 +25,9 @@ export function PostCardPreview({
   compact = false,
 }: PostCardPreviewProps) {
   const effectiveSummary = summary.trim();
+  const displayThumbnailUrl = thumbnailUrl
+    ? normalizeAssetUrl(thumbnailUrl)
+    : thumbnailUrl;
   const statusLabel =
     status === "published" ? "발행" : status === "archived" ? "보관" : "작성중";
 
@@ -32,10 +36,10 @@ export function PostCardPreview({
       {compact ? (
         <div className="overflow-hidden rounded-[1rem] border border-border-3 bg-background-1">
           <div className="overflow-hidden bg-background-3">
-            {thumbnailUrl ? (
+            {displayThumbnailUrl ? (
               // eslint-disable-next-line @next/next/no-img-element -- arbitrary admin preview URLs are allowed
               <img
-                src={thumbnailUrl}
+                src={displayThumbnailUrl}
                 alt={title || "썸네일 미리보기"}
                 className="aspect-[8/5] w-full object-cover"
               />
@@ -62,10 +66,10 @@ export function PostCardPreview({
         <div className="rounded-[1rem] border border-border-3 bg-background-1 p-4">
           <div className="flex gap-4">
             <div className="w-[11rem] shrink-0 overflow-hidden rounded-[0.9rem] bg-background-3">
-              {thumbnailUrl ? (
+              {displayThumbnailUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element -- arbitrary admin preview URLs are allowed
                 <img
-                  src={thumbnailUrl}
+                  src={displayThumbnailUrl}
                   alt={title || "썸네일 미리보기"}
                   className="aspect-[4/3] w-full object-cover"
                 />
