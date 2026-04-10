@@ -1,7 +1,4 @@
-const FALLBACK_API_URL = "http://localhost:5500";
-const PUBLIC_API_URL = normalizeApiUrl(
-  process.env.NEXT_PUBLIC_API_URL?.trim() || FALLBACK_API_URL,
-);
+const PUBLIC_API_URL = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL?.trim());
 
 export function normalizeAssetUrl(url: string): string {
   const trimmedUrl = url.trim();
@@ -11,6 +8,10 @@ export function normalizeAssetUrl(url: string): string {
   }
 
   if (!trimmedUrl.startsWith("/uploads/")) {
+    return trimmedUrl;
+  }
+
+  if (!PUBLIC_API_URL) {
     return trimmedUrl;
   }
 
@@ -48,6 +49,10 @@ export function toCanonicalAssetUrl(url: string): string {
   return trimmedUrl;
 }
 
-function normalizeApiUrl(url: string): string {
+function normalizeApiUrl(url: string | undefined): string {
+  if (!url) {
+    return "";
+  }
+
   return url.endsWith("/") ? url.slice(0, -1) : url;
 }
