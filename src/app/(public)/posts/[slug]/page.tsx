@@ -23,6 +23,7 @@ import {
   getSiteLocale,
   getSiteName,
 } from "@shared/lib/seo";
+import { buildPostHref } from "@shared/lib/post-url";
 import {
   buildBlogPostingJsonLd,
   buildBreadcrumbJsonLd,
@@ -106,7 +107,7 @@ export async function generateMetadata({
 }: PostDetailPageProps): Promise<Metadata> {
   const { post } = await getPostDetail(params.slug);
   const description = getPostDescription(post);
-  const canonical = `/posts/${post.slug}`;
+  const canonical = buildPostHref(post.slug);
 
   return {
     title: post.title,

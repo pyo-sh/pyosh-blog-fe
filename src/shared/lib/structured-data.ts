@@ -1,4 +1,5 @@
 import { URLS } from "@shared/constant/url";
+import { buildPostHref } from "@shared/lib/post-url";
 import {
   buildAbsoluteUrl,
   getPostDescription,
@@ -132,7 +133,7 @@ export function buildBlogPostingJsonLd(
       url: URLS.github,
     },
     ...(image ? { image } : {}),
-    url: `${normalizedSiteUrl}/posts/${post.slug}`,
+    url: `${normalizedSiteUrl}${buildPostHref(post.slug)}`,
     ...(keywords.length > 0 ? { keywords } : {}),
     ...(post.category.name ? { articleSection: post.category.name } : {}),
   };
