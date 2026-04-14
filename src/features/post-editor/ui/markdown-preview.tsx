@@ -25,7 +25,6 @@ export function MarkdownPreview({
   const workerRef = useRef<Worker | null>(null);
   const requestIdRef = useRef(0);
   const latestValueRef = useRef(value);
-  const skipNextValueEffectRef = useRef(true);
 
   useEffect(() => {
     latestValueRef.current = value;
@@ -69,12 +68,6 @@ export function MarkdownPreview({
 
   useEffect(() => {
     if (workerRef.current === null) {
-      return;
-    }
-
-    if (skipNextValueEffectRef.current) {
-      skipNextValueEffectRef.current = false;
-
       return;
     }
 
