@@ -4,6 +4,24 @@ const PUBLIC_API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5500";
 const INTERNAL_API_URL = process.env.API_URL ?? PUBLIC_API_URL;
 
+function isJsonBody(body: BodyInit | null | undefined): boolean {
+  if (!body) {
+    return false;
+  }
+
+  return typeof body === "string";
+}
+
+function buildHeaders(options: RequestInit): Headers {
+  const headers = new Headers(options.headers);
+
+  if (!headers.has("Content-Type") && isJsonBody(options.body)) {
+    headers.set("Content-Type", "application/json");
+  }
+
+  return headers;
+}
+
 async function handleResponse<T>(
   response: Response,
   context?: { url: string; method: string },
@@ -45,11 +63,11 @@ export async function serverFetch<T>(
   options: RequestInit = {},
   cookieHeader?: string,
 ): Promise<T> {
-  const headers: HeadersInit = {
-    "Content-Type": "application/json",
-    ...options.headers,
-    ...(cookieHeader ? { Cookie: cookieHeader } : {}),
-  };
+  const headers = new Headers(buildHeaders(options));
+
+  if (cookieHeader) {
+    headers.set("Cookie", cookieHeader);
+  }
 
   const response = await fetch(`${INTERNAL_API_URL}${path}`, {
     ...options,
@@ -68,10 +86,7 @@ export async function clientFetch<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const headers: HeadersInit = {
-    "Content-Type": "application/json",
-    ...options.headers,
-  };
+  const headers = buildHeaders(options);
 
   const response = await fetch(`${PUBLIC_API_URL}${path}`, {
     ...options,
