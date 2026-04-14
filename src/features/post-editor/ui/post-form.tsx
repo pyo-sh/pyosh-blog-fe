@@ -136,6 +136,12 @@ function createInitialValues(
 }
 
 function buildPayload(values: PostFormValues): CreatePostBody {
+  const normalizeOptionalText = (value: string) => {
+    const trimmed = value.trim();
+
+    return trimmed ? trimmed : null;
+  };
+
   return {
     title: values.title.trim(),
     categoryId: values.categoryId ?? 0,
@@ -145,8 +151,8 @@ function buildPayload(values: PostFormValues): CreatePostBody {
     visibility: values.visibility,
     commentStatus: values.commentStatus,
     tags: values.tags.length > 0 ? values.tags : undefined,
-    summary: values.summary.trim() || null,
-    description: values.description.trim() || null,
+    summary: normalizeOptionalText(values.summary),
+    description: normalizeOptionalText(values.description),
   };
 }
 
