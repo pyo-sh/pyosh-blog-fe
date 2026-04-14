@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { PublishedPostListItem } from "@entities/post";
+import { buildPostHref, type PublishedPostListItem } from "@entities/post";
 import { cn } from "@shared/lib/style-utils";
 
 interface PostCardProps {
@@ -22,7 +22,7 @@ export function PostCard({ post, className }: PostCardProps) {
 
   return (
     <Link
-      href={`/posts/${post.slug}`}
+      href={buildPostHref(post.slug)}
       className={cn(
         "group flex overflow-hidden rounded-[1.5rem] border border-border-3 bg-background-1 transition-colors hover:border-border-2",
         className,

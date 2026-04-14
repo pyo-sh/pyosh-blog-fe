@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import type { PostListItem } from "@entities/post";
 import type { PopularPost } from "@entities/stat";
+import { buildPostHref, type PostListItem } from "@entities/post";
 import { PopularPostList } from "@features/popular-posts";
 import { cn } from "@shared/lib/style-utils";
 
@@ -112,7 +112,7 @@ export function RecentPopularPosts({
             {recentPosts.map((post) => (
               <li key={post.id}>
                 <Link
-                  href={`/posts/${post.slug}`}
+                  href={buildPostHref(post.slug)}
                   onClick={onItemClick}
                   className="group block min-h-[3rem] rounded-md px-0.5 py-1 transition-colors hover:text-primary-1"
                 >

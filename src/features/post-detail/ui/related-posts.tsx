@@ -2,7 +2,7 @@ import { Icon } from "@iconify/react";
 import documentTextLinear from "@iconify-icons/solar/document-text-linear";
 import Image from "next/image";
 import Link from "next/link";
-import type { PostListItem } from "@entities/post";
+import { buildPostHref, type PostListItem } from "@entities/post";
 
 interface RelatedPostsProps {
   posts: Array<Pick<PostListItem, "id" | "slug" | "title" | "thumbnailUrl">>;
@@ -26,7 +26,7 @@ export function RelatedPosts({ posts }: RelatedPostsProps) {
         {posts.map((post) => (
           <Link
             key={post.id}
-            href={`/posts/${post.slug}`}
+            href={buildPostHref(post.slug)}
             className="group block w-[11.75rem] shrink-0 overflow-hidden rounded-[0.75rem] border border-border-3 bg-background-2 text-decoration-none transition-all duration-[300ms] ease-[cubic-bezier(0.16,1,0.3,1)] [scroll-snap-align:start] hover:-translate-y-[3px] hover:border-primary-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)]"
           >
             <div className="aspect-[16/10] overflow-hidden bg-background-3">

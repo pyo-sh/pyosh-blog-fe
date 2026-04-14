@@ -3,7 +3,7 @@ import chatRoundDotsLinear from "@iconify-icons/solar/chat-round-dots-linear";
 import eyeLinear from "@iconify-icons/solar/eye-linear";
 import pinBold from "@iconify-icons/solar/pin-bold";
 import Link from "next/link";
-import type { PublishedPostListItem } from "@entities/post";
+import { buildPostHref, type PublishedPostListItem } from "@entities/post";
 
 interface PostListItemProps {
   post: PublishedPostListItem;
@@ -28,7 +28,7 @@ export function PostListItem({ post }: PostListItemProps) {
   return (
     <article className="surface-hover-shift group relative rounded-xl px-4 py-5 sm:px-5 hover:bg-background-2">
       <Link
-        href={`/posts/${post.slug}`}
+        href={buildPostHref(post.slug)}
         className="absolute inset-0 z-10 rounded-xl"
         aria-label={post.title}
       />

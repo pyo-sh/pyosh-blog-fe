@@ -18,6 +18,7 @@ import { CommentList } from "@features/comment-section";
 import { PostContent, RelatedPosts, ViewCounter } from "@features/post-detail";
 import { ApiResponseError } from "@shared/api";
 import { extractHeadings, type TocItem } from "@shared/lib/markdown";
+import { buildPostHref } from "@shared/lib/post-url";
 import {
   buildCanonicalMetadata,
   getSiteLocale,
@@ -106,7 +107,7 @@ export async function generateMetadata({
 }: PostDetailPageProps): Promise<Metadata> {
   const { post } = await getPostDetail(params.slug);
   const description = getPostDescription(post);
-  const canonical = `/posts/${post.slug}`;
+  const canonical = buildPostHref(post.slug);
 
   return {
     title: post.title,

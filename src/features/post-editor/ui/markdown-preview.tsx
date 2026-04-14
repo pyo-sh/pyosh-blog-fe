@@ -25,7 +25,7 @@ export function MarkdownPreview({
   const workerRef = useRef<Worker | null>(null);
   const requestIdRef = useRef(0);
   const latestValueRef = useRef(value);
-  const skipNextValueEffectRef = useRef(true);
+  const lastRequestedValueRef = useRef<string | null>(null);
 
   useEffect(() => {
     latestValueRef.current = value;
@@ -56,6 +56,7 @@ export function MarkdownPreview({
     workerRef.current = worker;
     setIsRendering(true);
     requestIdRef.current = 1;
+    lastRequestedValueRef.current = latestValueRef.current;
     worker.postMessage({
       id: requestIdRef.current,
       value: latestValueRef.current,
@@ -72,9 +73,7 @@ export function MarkdownPreview({
       return;
     }
 
-    if (skipNextValueEffectRef.current) {
-      skipNextValueEffectRef.current = false;
-
+    if (lastRequestedValueRef.current === value) {
       return;
     }
 
@@ -83,6 +82,7 @@ export function MarkdownPreview({
     const timeoutId = window.setTimeout(() => {
       const requestId = requestIdRef.current + 1;
       requestIdRef.current = requestId;
+      lastRequestedValueRef.current = value;
       workerRef.current?.postMessage({ id: requestId, value });
     }, 120);
 
