@@ -21,7 +21,7 @@ export type {
   UpdatePostBody,
 } from "./model";
 export { SEARCH_FILTERS } from "./model";
-export { isPinnedPostLimitError, MAX_PINNED_POSTS } from "./lib";
+export { buildPostHref, isPinnedPostLimitError, MAX_PINNED_POSTS } from "./lib";
 export {
   bulkUpdatePosts,
   fetchAdminPost,

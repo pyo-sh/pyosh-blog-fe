@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { buildPostHref } from "@entities/post";
 import { fetchPopularPostsClient, type PopularPost } from "@entities/stat";
 
 type PopularPeriod = 7 | 30;
@@ -147,7 +148,7 @@ export function PopularPostList({
           {posts.map((post) => (
             <li key={post.postId}>
               <Link
-                href={`/posts/${post.slug}`}
+                href={buildPostHref(post.slug)}
                 onClick={onItemClick}
                 className="group block min-h-[3rem] rounded-md px-0.5 py-1 transition-colors hover:text-primary-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-1"
               >

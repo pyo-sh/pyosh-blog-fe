@@ -3,7 +3,7 @@ import chatRoundDotsLinear from "@iconify-icons/solar/chat-round-dots-linear";
 import eyeLinear from "@iconify-icons/solar/eye-linear";
 import Link from "next/link";
 import { highlightText } from "../lib/highlight";
-import type { PublishedPostListItem } from "@entities/post";
+import { buildPostHref, type PublishedPostListItem } from "@entities/post";
 
 interface SearchResultItemProps {
   post: PublishedPostListItem;
@@ -29,7 +29,7 @@ export function SearchResultItem({ post, query }: SearchResultItemProps) {
   return (
     <article className="surface-hover-shift group relative rounded-xl px-4 py-5 hover:bg-background-2 sm:px-5">
       <Link
-        href={`/posts/${post.slug}`}
+        href={buildPostHref(post.slug)}
         className="absolute inset-0 z-10 rounded-xl"
         aria-label={post.title}
       />
