@@ -4,24 +4,6 @@ const PUBLIC_API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5500";
 const INTERNAL_API_URL = process.env.API_URL ?? PUBLIC_API_URL;
 
-function hasContentTypeHeader(headers?: HeadersInit): boolean {
-  if (!headers) {
-    return false;
-  }
-
-  if (headers instanceof Headers) {
-    return headers.has("Content-Type");
-  }
-
-  if (Array.isArray(headers)) {
-    return headers.some(([key]) => key.toLowerCase() === "content-type");
-  }
-
-  return Object.keys(headers).some(
-    (key) => key.toLowerCase() === "content-type",
-  );
-}
-
 function isJsonBody(body: BodyInit | null | undefined): boolean {
   if (!body) {
     return false;
@@ -30,17 +12,14 @@ function isJsonBody(body: BodyInit | null | undefined): boolean {
   return typeof body === "string";
 }
 
-function buildHeaders(options: RequestInit): HeadersInit {
-  const headers = options.headers ?? {};
+function buildHeaders(options: RequestInit): Headers {
+  const headers = new Headers(options.headers);
 
-  if (hasContentTypeHeader(headers) || !isJsonBody(options.body)) {
-    return headers;
+  if (!headers.has("Content-Type") && isJsonBody(options.body)) {
+    headers.set("Content-Type", "application/json");
   }
 
-  return {
-    "Content-Type": "application/json",
-    ...headers,
-  };
+  return headers;
 }
 
 async function handleResponse<T>(
