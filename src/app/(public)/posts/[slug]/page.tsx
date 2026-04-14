@@ -18,12 +18,12 @@ import { CommentList } from "@features/comment-section";
 import { PostContent, RelatedPosts, ViewCounter } from "@features/post-detail";
 import { ApiResponseError } from "@shared/api";
 import { extractHeadings, type TocItem } from "@shared/lib/markdown";
+import { buildPostHref } from "@shared/lib/post-url";
 import {
   buildCanonicalMetadata,
   getSiteLocale,
   getSiteName,
 } from "@shared/lib/seo";
-import { buildPostHref } from "@shared/lib/post-url";
 import {
   buildBlogPostingJsonLd,
   buildBreadcrumbJsonLd,
