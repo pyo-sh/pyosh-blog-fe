@@ -19,7 +19,7 @@ export const Empty: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.get("/api/admin/guestbook", () => {
+        http.get("/admin/guestbook", () => {
           return HttpResponse.json({
             data: [],
             meta: { total: 0, page: 1, limit: 10, totalPages: 0 },
@@ -40,7 +40,7 @@ export const Disabled: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.get("/api/settings/guestbook", () => {
+        http.get("/settings/guestbook", () => {
           return HttpResponse.json({ enabled: false });
         }),
       ],

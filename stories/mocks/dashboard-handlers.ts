@@ -29,7 +29,7 @@ function createDashboardHandlers(options?: {
   const commentsMode = options?.comments ?? "default";
 
   const statsHandlers = [
-    http.get("/api/admin/stats/dashboard", () => {
+    http.get("/admin/stats/dashboard", () => {
       if (statsMode === "error") {
         return new HttpResponse(null, { status: 500 });
       }
@@ -38,7 +38,7 @@ function createDashboardHandlers(options?: {
         statsMode === "empty" ? emptyDashboardStatsPayload : dashboardStatsPayload,
       );
     }),
-    http.get("*/api/admin/stats/dashboard", () => {
+    http.get("*/admin/stats/dashboard", () => {
       if (statsMode === "error") {
         return new HttpResponse(null, { status: 500 });
       }
@@ -50,7 +50,7 @@ function createDashboardHandlers(options?: {
   ];
 
   const commentsHandlers = [
-    http.get("/api/admin/comments", () => {
+    http.get("/admin/comments", () => {
       if (commentsMode === "error") {
         return new HttpResponse(null, { status: 500 });
       }
@@ -69,7 +69,7 @@ function createDashboardHandlers(options?: {
           : mockAdminCommentsResponse,
       );
     }),
-    http.get("*/api/admin/comments", () => {
+    http.get("*/admin/comments", () => {
       if (commentsMode === "error") {
         return new HttpResponse(null, { status: 500 });
       }
@@ -88,21 +88,21 @@ function createDashboardHandlers(options?: {
           : mockAdminCommentsResponse,
       );
     }),
-    http.get("/api/auth/csrf-token", () =>
+    http.get("/auth/csrf-token", () =>
       HttpResponse.json({ token: "storybook-csrf-token" }),
     ),
-    http.get("*/api/auth/csrf-token", () =>
+    http.get("*/auth/csrf-token", () =>
       HttpResponse.json({ token: "storybook-csrf-token" }),
     ),
-    http.delete("/api/admin/comments/:id", () => new HttpResponse(null, { status: 204 })),
-    http.delete("*/api/admin/comments/:id", () =>
+    http.delete("/admin/comments/:id", () => new HttpResponse(null, { status: 204 })),
+    http.delete("*/admin/comments/:id", () =>
       new HttpResponse(null, { status: 204 }),
     ),
-    http.put("/api/admin/comments/:id/restore", () => new HttpResponse(null, { status: 204 })),
-    http.put("*/api/admin/comments/:id/restore", () =>
+    http.put("/admin/comments/:id/restore", () => new HttpResponse(null, { status: 204 })),
+    http.put("*/admin/comments/:id/restore", () =>
       new HttpResponse(null, { status: 204 }),
     ),
-    http.get("/api/admin/comments/:id/thread", ({ params }) => {
+    http.get("/admin/comments/:id/thread", ({ params }) => {
       const id = Number(params.id);
       const payload = mockAdminCommentThreadResponses[id];
 
@@ -112,7 +112,7 @@ function createDashboardHandlers(options?: {
 
       return HttpResponse.json(payload);
     }),
-    http.get("*/api/admin/comments/:id/thread", ({ params }) => {
+    http.get("*/admin/comments/:id/thread", ({ params }) => {
       const id = Number(params.id);
       const payload = mockAdminCommentThreadResponses[id];
 

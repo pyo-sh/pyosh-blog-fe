@@ -16,7 +16,7 @@ export async function fetchAssets(
   limit = 20,
 ): Promise<PaginatedResponse<Asset>> {
   const response = await clientFetch<PaginatedResponse<Asset>>(
-    `/api/assets?page=${page}&limit=${limit}`,
+    `/assets?page=${page}&limit=${limit}`,
   );
 
   return {
@@ -74,7 +74,7 @@ export async function uploadAssets(
       reject(new Error("업로드 중 네트워크 오류가 발생했습니다."));
     };
 
-    xhr.open("POST", `${API_URL}/api/assets/upload`);
+    xhr.open("POST", `${API_URL}/assets/upload`);
     xhr.withCredentials = true;
     xhr.setRequestHeader("x-csrf-token", csrfToken);
     xhr.send(formData);
@@ -82,13 +82,13 @@ export async function uploadAssets(
 }
 
 export async function deleteAsset(id: number): Promise<void> {
-  await clientMutate<void>(`/api/assets/${id}`, {
+  await clientMutate<void>(`/assets/${id}`, {
     method: "DELETE",
   });
 }
 
 export async function deleteAssets(ids: number[]): Promise<void> {
-  await clientMutate<void>("/api/assets/bulk", {
+  await clientMutate<void>("/assets/bulk", {
     method: "DELETE",
     body: JSON.stringify({ ids }),
   });

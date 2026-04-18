@@ -40,7 +40,7 @@ export const Error: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.get("/api/admin/categories", () => {
+        http.get("/categories", () => {
           return new HttpResponse(null, { status: 500 });
         }),
       ],

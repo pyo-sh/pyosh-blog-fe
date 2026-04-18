@@ -101,7 +101,7 @@ export function useViewCount(postId: number): void {
       [postId]: Date.now(),
     });
 
-    void clientMutate("/api/stats/view", {
+    void clientMutate("/stats/view", {
       body: JSON.stringify({ postId }),
       keepalive: true,
     })

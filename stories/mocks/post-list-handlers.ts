@@ -134,21 +134,21 @@ export function createPostListHandlers(options?: {
   }
 
   return [
-    http.get(`${API_BASE_URL}/api/auth/csrf-token`, () =>
+    http.get(`${API_BASE_URL}/auth/csrf-token`, () =>
       HttpResponse.json({ token: "storybook-csrf-token" }),
     ),
 
-    http.get(`${API_BASE_URL}/api/categories`, () =>
+    http.get(`${API_BASE_URL}/categories`, () =>
       HttpResponse.json({ categories: mockCategories }),
     ),
 
-    http.get(`${API_BASE_URL}/api/admin/posts/pinned-count`, () =>
+    http.get(`${API_BASE_URL}/admin/posts/pinned-count`, () =>
       HttpResponse.json({
         pinnedCount: activePosts.filter((post) => post.isPinned).length,
       }),
     ),
 
-    http.get(`${API_BASE_URL}/api/admin/posts`, ({ request }) => {
+    http.get(`${API_BASE_URL}/admin/posts`, ({ request }) => {
       if (mode === "error") {
         return HttpResponse.json(
           { statusCode: 500, message: "스토리북 글 목록 로딩 실패" },
@@ -165,7 +165,7 @@ export function createPostListHandlers(options?: {
       return HttpResponse.json(paginatePosts(sorted, url.searchParams));
     }),
 
-    http.patch(`${API_BASE_URL}/api/admin/posts/bulk`, async ({ request }) => {
+    http.patch(`${API_BASE_URL}/admin/posts/bulk`, async ({ request }) => {
       const body = (await request.json()) as BulkPostAction;
 
       if (body.action === "soft_delete") {
@@ -223,7 +223,7 @@ export function createPostListHandlers(options?: {
     }),
 
     http.patch(
-      `${API_BASE_URL}/api/admin/posts/:id`,
+      `${API_BASE_URL}/admin/posts/:id`,
       async ({ params, request }) => {
         const id = Number(params.id);
         const body = (await request.json()) as UpdatePostBody;
@@ -246,7 +246,7 @@ export function createPostListHandlers(options?: {
       },
     ),
 
-    http.delete(`${API_BASE_URL}/api/admin/posts/:id`, ({ params }) => {
+    http.delete(`${API_BASE_URL}/admin/posts/:id`, ({ params }) => {
       const id = Number(params.id);
       const target = activePosts.find((post) => post.id === id);
 
@@ -265,7 +265,7 @@ export function createPostListHandlers(options?: {
       return new HttpResponse(null, { status: 204 });
     }),
 
-    http.put(`${API_BASE_URL}/api/admin/posts/:id/restore`, ({ params }) => {
+    http.put(`${API_BASE_URL}/admin/posts/:id/restore`, ({ params }) => {
       const id = Number(params.id);
       const target = trashPosts.find((post) => post.id === id);
 
@@ -279,7 +279,7 @@ export function createPostListHandlers(options?: {
       });
     }),
 
-    http.delete(`${API_BASE_URL}/api/admin/posts/:id/hard`, ({ params }) => {
+    http.delete(`${API_BASE_URL}/admin/posts/:id/hard`, ({ params }) => {
       const id = Number(params.id);
       trashPosts = trashPosts.filter((post) => post.id !== id);
 

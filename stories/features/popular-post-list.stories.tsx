@@ -58,13 +58,13 @@ const lastMonthPosts = [
 ] as const;
 
 const popularHandlers = [
-  http.get("/api/stats/popular", ({ request }) => {
+  http.get("/stats/popular", ({ request }) => {
     const days = new URL(request.url).searchParams.get("days");
     return HttpResponse.json({
       data: days === "30" ? lastMonthPosts : defaultPosts,
     });
   }),
-  http.get("http://localhost:5500/api/stats/popular", ({ request }) => {
+  http.get("http://localhost:5500/stats/popular", ({ request }) => {
     const days = new URL(request.url).searchParams.get("days");
     return HttpResponse.json({
       data: days === "30" ? lastMonthPosts : defaultPosts,

@@ -21,7 +21,7 @@ export async function fetchCategories(
   cookieHeader?: string,
 ): Promise<Category[]> {
   const response = await serverFetch<CategoriesResponse>(
-    "/api/categories",
+    "/categories",
     {},
     cookieHeader,
   );
@@ -30,7 +30,7 @@ export async function fetchCategories(
 }
 
 export async function fetchCategoriesClient(): Promise<Category[]> {
-  const response = await clientFetch<CategoriesResponse>("/api/categories");
+  const response = await clientFetch<CategoriesResponse>("/categories");
 
   return response.categories;
 }
@@ -40,13 +40,11 @@ export async function fetchCategoriesAdmin(
 ): Promise<Category[]> {
   const response = cookieHeader
     ? await serverFetch<CategoriesResponse>(
-        "/api/categories?include_hidden=true",
+        "/categories?include_hidden=true",
         {},
         cookieHeader,
       )
-    : await clientFetch<CategoriesResponse>(
-        "/api/categories?include_hidden=true",
-      );
+    : await clientFetch<CategoriesResponse>("/categories?include_hidden=true");
 
   return response.categories;
 }
@@ -54,7 +52,7 @@ export async function fetchCategoriesAdmin(
 export async function createCategory(
   body: CreateCategoryBody,
 ): Promise<Category> {
-  const response = await clientMutate<CategoryResponse>("/api/categories", {
+  const response = await clientMutate<CategoryResponse>("/categories", {
     body: JSON.stringify(body),
   });
 
@@ -65,13 +63,10 @@ export async function updateCategory(
   id: number,
   body: UpdateCategoryBody,
 ): Promise<Category> {
-  const response = await clientMutate<CategoryResponse>(
-    `/api/categories/${id}`,
-    {
-      method: "PATCH",
-      body: JSON.stringify(body),
-    },
-  );
+  const response = await clientMutate<CategoryResponse>(`/categories/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
 
   return response.category;
 }
@@ -79,7 +74,7 @@ export async function updateCategory(
 export async function updateCategoryOrder(
   body: UpdateCategoryOrderBody,
 ): Promise<void> {
-  await clientMutate<void>("/api/categories/order", {
+  await clientMutate<void>("/categories/order", {
     method: "PATCH",
     body: JSON.stringify(body),
   });
@@ -90,7 +85,7 @@ export async function updateCategoryTree(
 ): Promise<void> {
   const body: UpdateCategoryTreeBody = { changes };
 
-  await clientMutate<void>("/api/categories/tree", {
+  await clientMutate<void>("/categories/tree", {
     method: "PATCH",
     body: JSON.stringify(body),
   });
@@ -112,7 +107,7 @@ export async function deleteCategory(
 
   const query = searchParams.toString();
 
-  await clientMutate<void>(`/api/categories/${id}${query ? `?${query}` : ""}`, {
+  await clientMutate<void>(`/categories/${id}${query ? `?${query}` : ""}`, {
     method: "DELETE",
   });
 }

@@ -664,7 +664,7 @@ function StorySurface({
 }
 
 const postDetailHandlers = [
-  http.get("/api/stats/popular", ({ request }) => {
+  http.get("/stats/popular", ({ request }) => {
     const url = new URL(request.url);
     const days = url.searchParams.get("days");
 
@@ -672,7 +672,7 @@ const postDetailHandlers = [
       data: days === "30" ? popularPosts30Days : popularPosts7Days,
     });
   }),
-  http.get("/api/posts/:postId/comments", ({ request, params }) => {
+  http.get("/posts/:postId/comments", ({ request, params }) => {
     if (Number(params.postId) !== postDetailPost.id) {
       return HttpResponse.json({ data: [], meta: commentMeta });
     }
@@ -691,7 +691,7 @@ const postDetailHandlers = [
       },
     });
   }),
-  http.post("/api/posts/:postId/comments", async ({ request, params }) => {
+  http.post("/posts/:postId/comments", async ({ request, params }) => {
     if (Number(params.postId) !== postDetailPost.id) {
       return HttpResponse.json(
         { message: "post not found" },
@@ -730,7 +730,7 @@ const postDetailHandlers = [
       revealToken: body.isSecret ? "storybook-token" : null,
     });
   }),
-  http.post("/api/comments/:commentId/reveal", ({ params }) => {
+  http.post("/comments/:commentId/reveal", ({ params }) => {
     return HttpResponse.json({
       data: {
         id: Number(params.commentId),
@@ -748,7 +748,7 @@ const postDetailHandlers = [
       },
     });
   }),
-  http.delete("/api/comments/:commentId", () => {
+  http.delete("/comments/:commentId", () => {
     return new HttpResponse(null, { status: 204 });
   }),
 ];

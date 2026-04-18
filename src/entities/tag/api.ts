@@ -6,17 +6,13 @@ interface TagsResponse {
 }
 
 export async function fetchTags(cookieHeader?: string): Promise<Tag[]> {
-  const response = await serverFetch<TagsResponse>(
-    "/api/tags",
-    {},
-    cookieHeader,
-  );
+  const response = await serverFetch<TagsResponse>("/tags", {}, cookieHeader);
 
   return response.tags;
 }
 
 export async function fetchTagsClient(): Promise<Tag[]> {
-  const response = await clientFetch<TagsResponse>("/api/tags");
+  const response = await clientFetch<TagsResponse>("/tags");
 
   return response.tags;
 }

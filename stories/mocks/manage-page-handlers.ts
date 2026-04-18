@@ -111,14 +111,14 @@ function jsonMutation(
 
 function sharedAdminHandlers() {
   return [
-    ...jsonGet("/api/auth/csrf-token", () =>
+    ...jsonGet("/auth/csrf-token", () =>
       HttpResponse.json({ token: "storybook-csrf-token" }),
     ),
-    ...jsonGet("/api/auth/me", () => HttpResponse.json(mockCurrentAdminUser)),
-    ...withBaseUrl("/api/auth/admin/logout").map((url) =>
+    ...jsonGet("/auth/me", () => HttpResponse.json(mockCurrentAdminUser)),
+    ...withBaseUrl("/auth/admin/logout").map((url) =>
       http.post(url, () => new HttpResponse(null, { status: 204 })),
     ),
-    ...jsonGet("/api/admin/posts", () =>
+    ...jsonGet("/admin/posts", () =>
       HttpResponse.json({
         data: mockPosts,
         meta: {
@@ -140,14 +140,14 @@ export function createManageCategoriesHandlers(options?: {
 
   return [
     ...sharedAdminHandlers(),
-    ...jsonGet("/api/categories", () => {
+    ...jsonGet("/categories", () => {
       if (mode === "error") {
         return new HttpResponse(null, { status: 500 });
       }
 
       return HttpResponse.json({ categories: categoriesPayload });
     }),
-    ...jsonMutation("post", "/api/categories", async ({ request }) => {
+    ...jsonMutation("post", "/categories", async ({ request }) => {
       const body = (await request.json()) as {
         name?: string;
         parentId?: number | null;
@@ -175,9 +175,9 @@ export function createManageCategoriesHandlers(options?: {
         },
       });
     }),
-    ...emptyMutation("patch", "/api/categories/tree"),
-    ...emptyMutation("patch", "/api/categories/order"),
-    ...withBaseUrl("/api/categories/:id").flatMap((url) => [
+    ...emptyMutation("patch", "/categories/tree"),
+    ...emptyMutation("patch", "/categories/order"),
+    ...withBaseUrl("/categories/:id").flatMap((url) => [
       http.patch(url, () =>
         HttpResponse.json({ category: categoriesPayload[0] }),
       ),
@@ -193,7 +193,7 @@ export function createManageCommentsHandlers(options?: {
 
   return [
     ...sharedAdminHandlers(),
-    ...jsonGet("/api/admin/comments", () => {
+    ...jsonGet("/admin/comments", () => {
       if (mode === "error") {
         return new HttpResponse(null, { status: 500 });
       }
@@ -204,7 +204,7 @@ export function createManageCommentsHandlers(options?: {
           : mockAdminCommentsResponse,
       );
     }),
-    ...withBaseUrl("/api/admin/comments/:id/thread").map((url) =>
+    ...withBaseUrl("/admin/comments/:id/thread").map((url) =>
       http.get(url, ({ params }) => {
         const id = Number(params.id);
         const payload = mockAdminCommentThreadResponses[id];
@@ -219,9 +219,9 @@ export function createManageCommentsHandlers(options?: {
         return HttpResponse.json(payload);
       }),
     ),
-    ...emptyMutation("delete", "/api/admin/comments/bulk"),
-    ...emptyMutation("delete", "/api/admin/comments/:id"),
-    ...emptyMutation("put", "/api/admin/comments/:id/restore"),
+    ...emptyMutation("delete", "/admin/comments/bulk"),
+    ...emptyMutation("delete", "/admin/comments/:id"),
+    ...emptyMutation("put", "/admin/comments/:id/restore"),
   ];
 }
 
@@ -232,14 +232,14 @@ export function createManageGuestbookHandlers(options?: {
 
   return [
     ...sharedAdminHandlers(),
-    ...jsonGet("/api/settings/guestbook", () => {
+    ...jsonGet("/settings/guestbook", () => {
       if (mode === "error") {
         return new HttpResponse(null, { status: 500 });
       }
 
       return HttpResponse.json({ enabled: mode !== "disabled" });
     }),
-    ...jsonGet("/api/admin/guestbook", () => {
+    ...jsonGet("/admin/guestbook", () => {
       if (mode === "error") {
         return new HttpResponse(null, { status: 500 });
       }
@@ -250,15 +250,15 @@ export function createManageGuestbookHandlers(options?: {
     }),
     ...jsonMutation(
       "patch",
-      "/api/admin/settings/guestbook",
+      "/admin/settings/guestbook",
       async ({ request }) => {
         const body = (await request.json()) as { enabled?: boolean };
 
         return HttpResponse.json({ enabled: body.enabled ?? false });
       },
     ),
-    ...emptyMutation("delete", "/api/admin/guestbook/bulk"),
-    ...emptyMutation("delete", "/api/admin/guestbook/:id"),
+    ...emptyMutation("delete", "/admin/guestbook/bulk"),
+    ...emptyMutation("delete", "/admin/guestbook/:id"),
   ];
 }
 
@@ -269,7 +269,7 @@ export function createManageAssetsHandlers(options?: {
 
   return [
     ...sharedAdminHandlers(),
-    ...jsonGet("/api/assets", () => {
+    ...jsonGet("/assets", () => {
       if (mode === "error") {
         return new HttpResponse(null, { status: 500 });
       }
@@ -278,9 +278,9 @@ export function createManageAssetsHandlers(options?: {
         mode === "empty" ? adminAssetsEmptyResponse : adminAssetsResponse,
       );
     }),
-    ...emptyMutation("delete", "/api/assets/bulk"),
-    ...emptyMutation("delete", "/api/assets/:id"),
-    ...withBaseUrl("/api/assets/upload").map((url) =>
+    ...emptyMutation("delete", "/assets/bulk"),
+    ...emptyMutation("delete", "/assets/:id"),
+    ...withBaseUrl("/assets/upload").map((url) =>
       http.post(url, () =>
         HttpResponse.json({ assets: mockAssets.slice(0, 1) }),
       ),
