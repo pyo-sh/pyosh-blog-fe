@@ -27,7 +27,7 @@ export const Default: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.get("*/api/assets", () =>
+        http.get("*/assets", () =>
           HttpResponse.json({
             data: assets,
             meta: { total: 6, page: 1, limit: 18, totalPages: 1 },
@@ -42,7 +42,7 @@ export const Empty: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.get("*/api/assets", () =>
+        http.get("*/assets", () =>
           HttpResponse.json({
             data: [],
             meta: { total: 0, page: 1, limit: 18, totalPages: 0 },
@@ -57,7 +57,7 @@ export const Error: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.get("*/api/assets", () => new HttpResponse(null, { status: 500 })),
+        http.get("*/assets", () => new HttpResponse(null, { status: 500 })),
       ],
     },
   },

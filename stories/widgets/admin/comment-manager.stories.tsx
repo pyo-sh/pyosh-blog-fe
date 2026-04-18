@@ -19,7 +19,7 @@ export const Empty: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.get("/api/admin/comments", () => {
+        http.get("/admin/comments", () => {
           return HttpResponse.json({ data: [], meta: { total: 0, page: 1, limit: 10, totalPages: 0 } });
         }),
       ],
@@ -31,7 +31,7 @@ export const Error: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.get("/api/admin/comments", () => {
+        http.get("/admin/comments", () => {
           return new HttpResponse(null, { status: 500 });
         }),
       ],

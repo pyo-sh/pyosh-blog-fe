@@ -81,7 +81,7 @@ export async function fetchPosts(
   cookieHeader?: string,
 ): Promise<PaginatedResponse<PublishedPostListItem>> {
   const queryString = buildPostSearchParams(params);
-  const path = queryString ? `/api/posts?${queryString}` : "/api/posts";
+  const path = queryString ? `/posts?${queryString}` : "/posts";
 
   const response = await serverFetch<PaginatedResponse<PublishedPostListItem>>(
     path,
@@ -100,7 +100,7 @@ export async function fetchPostBySlug(
   // URLs sourced from Safari / macOS clipboards can arrive as NFD and fail to match.
   const normalizedSlug = slug.normalize("NFKC");
   const response = await serverFetch<PostDetailWithNavigationResponse>(
-    `/api/posts/${encodeURIComponent(normalizedSlug)}`,
+    `/posts/${encodeURIComponent(normalizedSlug)}`,
     {},
     cookieHeader,
   );
@@ -115,7 +115,7 @@ export async function fetchPublishedPostSlugs(
   cookieHeader?: string,
 ): Promise<PublishedPostSlugsResponse> {
   return serverFetch<PublishedPostSlugsResponse>(
-    "/api/posts/slugs",
+    "/posts/slugs",
     {},
     cookieHeader,
   );
@@ -127,11 +127,11 @@ export async function fetchAdminPost(
 ): Promise<PostDetail> {
   const response = cookieHeader
     ? await serverFetch<PostDetailResponse>(
-        `/api/admin/posts/${id}`,
+        `/admin/posts/${id}`,
         {},
         cookieHeader,
       )
-    : await clientFetch<PostDetailResponse>(`/api/admin/posts/${id}`);
+    : await clientFetch<PostDetailResponse>(`/admin/posts/${id}`);
 
   return normalizePost(response.post);
 }
@@ -141,9 +141,7 @@ export async function fetchAdminPosts(
   cookieHeader?: string,
 ): Promise<PaginatedResponse<PostListItem>> {
   const queryString = buildAdminPostSearchParams(params);
-  const path = queryString
-    ? `/api/admin/posts?${queryString}`
-    : "/api/admin/posts";
+  const path = queryString ? `/admin/posts?${queryString}` : "/admin/posts";
 
   const response = cookieHeader
     ? await serverFetch<PaginatedResponse<PostListItem>>(path, {}, cookieHeader)
@@ -154,14 +152,14 @@ export async function fetchAdminPosts(
 
 export async function fetchPinnedPostCount(): Promise<number> {
   const response = await clientFetch<PinnedPostCountResponse>(
-    "/api/admin/posts/pinned-count",
+    "/admin/posts/pinned-count",
   );
 
   return response.pinnedCount;
 }
 
 export async function createPost(body: CreatePostBody): Promise<PostDetail> {
-  const response = await clientMutate<PostDetailResponse>("/api/admin/posts", {
+  const response = await clientMutate<PostDetailResponse>("/admin/posts", {
     body: JSON.stringify(body),
   });
 
@@ -169,14 +167,14 @@ export async function createPost(body: CreatePostBody): Promise<PostDetail> {
 }
 
 export async function deletePost(id: number): Promise<void> {
-  await clientMutate<void>(`/api/admin/posts/${id}`, {
+  await clientMutate<void>(`/admin/posts/${id}`, {
     method: "DELETE",
   });
 }
 
 export async function restorePost(id: number): Promise<PostDetail> {
   const response = await clientMutate<PostDetailResponse>(
-    `/api/admin/posts/${id}/restore`,
+    `/admin/posts/${id}/restore`,
     {
       method: "PUT",
     },
@@ -186,7 +184,7 @@ export async function restorePost(id: number): Promise<PostDetail> {
 }
 
 export async function hardDeletePost(id: number): Promise<void> {
-  await clientMutate<void>(`/api/admin/posts/${id}/hard`, {
+  await clientMutate<void>(`/admin/posts/${id}/hard`, {
     method: "DELETE",
   });
 }
@@ -196,7 +194,7 @@ export async function updatePost(
   body: UpdatePostBody,
 ): Promise<PostDetail> {
   const response = await clientMutate<PostDetailResponse>(
-    `/api/admin/posts/${id}`,
+    `/admin/posts/${id}`,
     {
       method: "PATCH",
       body: JSON.stringify(body),
@@ -207,7 +205,7 @@ export async function updatePost(
 }
 
 export async function bulkUpdatePosts(action: BulkPostAction): Promise<void> {
-  await clientMutate<void>("/api/admin/posts/bulk", {
+  await clientMutate<void>("/admin/posts/bulk", {
     method: "PATCH",
     body: JSON.stringify(action),
   });

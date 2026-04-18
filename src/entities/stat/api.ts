@@ -11,11 +11,11 @@ function buildPopularPostsPath(days: number, limit: number) {
     limit: String(limit),
   });
 
-  return `/api/stats/popular?${searchParams.toString()}`;
+  return `/stats/popular?${searchParams.toString()}`;
 }
 
 export async function fetchDashboardStats(): Promise<DashboardStats> {
-  return clientFetch<DashboardStats>("/api/admin/stats/dashboard");
+  return clientFetch<DashboardStats>("/admin/stats/dashboard");
 }
 
 export async function fetchPopularPosts(
@@ -46,9 +46,5 @@ export async function fetchPopularPostsClient(
 export async function fetchTotalViews(
   cookieHeader?: string,
 ): Promise<TotalViewsStats> {
-  return serverFetch<TotalViewsStats>(
-    "/api/stats/total-views",
-    {},
-    cookieHeader,
-  );
+  return serverFetch<TotalViewsStats>("/stats/total-views", {}, cookieHeader);
 }

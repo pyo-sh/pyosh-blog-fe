@@ -90,7 +90,7 @@ async function isAuthenticated(request: NextRequest): Promise<boolean> {
   }
 
   try {
-    const response = await fetch(`${API_URL}/api/auth/me`, {
+    const response = await fetch(`${API_URL}/auth/me`, {
       headers: {
         Cookie: cookieHeader,
       },

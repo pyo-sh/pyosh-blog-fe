@@ -3,7 +3,7 @@ import { clientFetch, clientMutate, serverFetch } from "@shared/api";
 
 export async function login(credentials: LoginCredentials): Promise<AdminUser> {
   const response = await clientFetch<{ admin: AdminUser }>(
-    "/api/auth/admin/login",
+    "/auth/admin/login",
     {
       method: "POST",
       body: JSON.stringify(credentials),
@@ -14,15 +14,15 @@ export async function login(credentials: LoginCredentials): Promise<AdminUser> {
 }
 
 export async function logout(): Promise<void> {
-  return clientMutate<void>("/api/auth/admin/logout");
+  return clientMutate<void>("/auth/admin/logout");
 }
 
 export async function fetchMe(): Promise<CurrentUser> {
-  return clientFetch<CurrentUser>("/api/auth/me");
+  return clientFetch<CurrentUser>("/auth/me");
 }
 
 export async function fetchMeServer(
   cookieHeader: string,
 ): Promise<CurrentUser> {
-  return serverFetch<CurrentUser>("/api/auth/me", {}, cookieHeader);
+  return serverFetch<CurrentUser>("/auth/me", {}, cookieHeader);
 }

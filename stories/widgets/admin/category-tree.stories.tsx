@@ -19,8 +19,8 @@ export const Empty: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.get("/api/admin/categories", () => {
-          return HttpResponse.json({ data: [] });
+        http.get("/categories", () => {
+          return HttpResponse.json({ categories: [] });
         }),
       ],
     },
@@ -31,7 +31,7 @@ export const Error: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.get("/api/admin/categories", () => {
+        http.get("/categories", () => {
           return new HttpResponse(null, { status: 500 });
         }),
       ],

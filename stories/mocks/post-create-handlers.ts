@@ -46,11 +46,11 @@ function buildPostFromCreateBody(body: CreatePostBody): Post {
 }
 
 export const postCreateHandlers = [
-  http.get(`${API_BASE_URL}/api/auth/csrf-token`, () => {
+  http.get(`${API_BASE_URL}/auth/csrf-token`, () => {
     return HttpResponse.json({ token: "storybook-csrf-token" });
   }),
 
-  http.get(`${API_BASE_URL}/api/categories`, ({ request }) => {
+  http.get(`${API_BASE_URL}/categories`, ({ request }) => {
     const url = new URL(request.url);
     const includeHidden = url.searchParams.get("include_hidden");
 
@@ -61,11 +61,11 @@ export const postCreateHandlers = [
     return HttpResponse.json({ categories: mockCategories });
   }),
 
-  http.get(`${API_BASE_URL}/api/tags`, () => {
+  http.get(`${API_BASE_URL}/tags`, () => {
     return HttpResponse.json({ tags: mockTags });
   }),
 
-  http.get(`${API_BASE_URL}/api/assets`, ({ request }) => {
+  http.get(`${API_BASE_URL}/assets`, ({ request }) => {
     const url = new URL(request.url);
     const page = Number(url.searchParams.get("page") ?? "1");
     const limit = Number(url.searchParams.get("limit") ?? "18");
@@ -81,7 +81,7 @@ export const postCreateHandlers = [
     });
   }),
 
-  http.post(`${API_BASE_URL}/api/assets/upload`, () => {
+  http.post(`${API_BASE_URL}/assets/upload`, () => {
     return HttpResponse.json({
       assets: mockAssets.slice(0, 1).map((asset) => ({
         id: asset.id,
@@ -94,7 +94,7 @@ export const postCreateHandlers = [
     });
   }),
 
-  http.post(`${API_BASE_URL}/api/admin/posts`, async ({ request }) => {
+  http.post(`${API_BASE_URL}/admin/posts`, async ({ request }) => {
     const body = (await request.json()) as CreatePostBody;
 
     return HttpResponse.json({
@@ -102,7 +102,7 @@ export const postCreateHandlers = [
     });
   }),
 
-  http.get(`${API_BASE_URL}/api/admin/posts`, () => {
+  http.get(`${API_BASE_URL}/admin/posts`, () => {
     return HttpResponse.json({
       data: mockPosts,
       meta: {

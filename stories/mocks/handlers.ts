@@ -11,10 +11,10 @@ import { mockDashboardStats, mockPopularPosts } from "./data/stats";
 
 export const handlers = [
   // Posts
-  http.get("/api/posts", () => {
+  http.get("/posts", () => {
     return HttpResponse.json({ data: mockPosts, meta: mockMeta });
   }),
-  http.get("/api/posts/:slug", ({ params }) => {
+  http.get("/posts/:slug", ({ params }) => {
     const post = mockPosts.find((p) => p.slug === params.slug) ?? mockPosts[0];
     return HttpResponse.json({
       post,
@@ -27,28 +27,25 @@ export const handlers = [
   }),
 
   // Admin posts
-  http.get("/api/admin/posts", () => {
+  http.get("/admin/posts", () => {
     return HttpResponse.json({ data: mockPosts, meta: mockMeta });
   }),
-  http.get("/api/admin/posts/:id", ({ params }) => {
+  http.get("/admin/posts/:id", ({ params }) => {
     const post =
       mockPosts.find((p) => p.id === Number(params.id)) ?? mockPosts[0];
     return HttpResponse.json({ post });
   }),
 
   // Categories
-  http.get("/api/categories", () => {
-    return HttpResponse.json({ data: mockCategories });
-  }),
-  http.get("/api/admin/categories", () => {
-    return HttpResponse.json({ data: mockCategories });
+  http.get("/categories", () => {
+    return HttpResponse.json({ categories: mockCategories });
   }),
 
   // Comments
-  http.get("/api/posts/:postId/comments", () => {
+  http.get("/posts/:postId/comments", () => {
     return HttpResponse.json({ data: mockComments, meta: mockCommentMeta });
   }),
-  http.get("/api/admin/comments", () => {
+  http.get("/admin/comments", () => {
     return HttpResponse.json({
       data: mockComments,
       meta: { total: mockComments.length, page: 1, limit: 10, totalPages: 1 },
@@ -56,7 +53,7 @@ export const handlers = [
   }),
 
   // Guestbook
-  http.get("/api/guestbook", () => {
+  http.get("/guestbook", () => {
     return HttpResponse.json({
       data: mockGuestbookEntries,
       meta: {
@@ -67,7 +64,7 @@ export const handlers = [
       },
     });
   }),
-  http.get("/api/admin/guestbook", () => {
+  http.get("/admin/guestbook", () => {
     return HttpResponse.json({
       data: mockAdminGuestbookEntries,
       meta: {
@@ -78,22 +75,22 @@ export const handlers = [
       },
     });
   }),
-  http.delete("/api/admin/guestbook/:id", () => {
+  http.delete("/admin/guestbook/:id", () => {
     return new HttpResponse(null, { status: 204 });
   }),
-  http.delete("/api/admin/guestbook/bulk", () => {
+  http.delete("/admin/guestbook/bulk", () => {
     return new HttpResponse(null, { status: 204 });
   }),
-  http.get("/api/settings/guestbook", () => {
+  http.get("/settings/guestbook", () => {
     return HttpResponse.json({ enabled: true });
   }),
-  http.patch("/api/admin/settings/guestbook", async ({ request }) => {
+  http.patch("/admin/settings/guestbook", async ({ request }) => {
     const body = (await request.json()) as { enabled: boolean };
     return HttpResponse.json({ enabled: body.enabled });
   }),
 
   // Assets
-  http.get("/api/admin/assets", () => {
+  http.get("/assets", () => {
     return HttpResponse.json({
       data: mockAssets,
       meta: { total: mockAssets.length, page: 1, limit: 10, totalPages: 1 },
@@ -101,15 +98,15 @@ export const handlers = [
   }),
 
   // Stats
-  http.get("/api/admin/stats/dashboard", () => {
+  http.get("/admin/stats/dashboard", () => {
     return HttpResponse.json(mockDashboardStats);
   }),
-  http.get("/api/stats/popular", () => {
+  http.get("/stats/popular", () => {
     return HttpResponse.json({ data: mockPopularPosts });
   }),
 
   // Auth
-  http.get("/api/auth/me", () => {
+  http.get("/auth/me", () => {
     return HttpResponse.json({
       type: "admin",
       id: 1,

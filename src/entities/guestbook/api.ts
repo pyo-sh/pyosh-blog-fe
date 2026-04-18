@@ -80,7 +80,7 @@ export async function fetchGuestbook(
   cookieHeader?: string,
 ): Promise<PaginatedResponse<GuestbookEntry>> {
   return serverFetch<PaginatedResponse<GuestbookEntry>>(
-    `/api/guestbook?page=${page}`,
+    `/guestbook?page=${page}`,
     {},
     cookieHeader,
   );
@@ -90,12 +90,9 @@ export async function createGuestbookEntry(
   body: CreateGuestbookBody,
 ): Promise<GuestbookEntry> {
   const { authorType: _authorType, ...payload } = body;
-  const response = await clientMutate<GuestbookEntryResponse>(
-    "/api/guestbook",
-    {
-      body: JSON.stringify(payload),
-    },
-  );
+  const response = await clientMutate<GuestbookEntryResponse>("/guestbook", {
+    body: JSON.stringify(payload),
+  });
 
   return response.data;
 }
@@ -104,7 +101,7 @@ export async function deleteGuestbookEntry(
   id: number,
   body: DeleteGuestbookBody,
 ): Promise<void> {
-  await clientMutate<void>(`/api/guestbook/${id}`, {
+  await clientMutate<void>(`/guestbook/${id}`, {
     method: "DELETE",
     body: JSON.stringify(body),
   });
@@ -116,8 +113,8 @@ export async function fetchAdminGuestbook(
 ): Promise<PaginatedResponse<AdminGuestbookItem>> {
   const queryString = buildAdminGuestbookSearchParams(params);
   const path = queryString
-    ? `/api/admin/guestbook?${queryString}`
-    : "/api/admin/guestbook";
+    ? `/admin/guestbook?${queryString}`
+    : "/admin/guestbook";
 
   return cookieHeader
     ? serverFetch<PaginatedResponse<AdminGuestbookItem>>(path, {}, cookieHeader)
@@ -128,7 +125,7 @@ export async function adminDeleteGuestbookEntry(
   id: number,
   action: AdminGuestbookDeleteAction,
 ): Promise<void> {
-  await clientMutate<void>(`/api/admin/guestbook/${id}?action=${action}`, {
+  await clientMutate<void>(`/admin/guestbook/${id}?action=${action}`, {
     method: "DELETE",
   });
 }
@@ -137,7 +134,7 @@ export async function adminPatchGuestbookEntry(
   id: number,
   action: AdminGuestbookPatchAction,
 ): Promise<void> {
-  await clientMutate<void>(`/api/admin/guestbook/${id}?action=${action}`, {
+  await clientMutate<void>(`/admin/guestbook/${id}?action=${action}`, {
     method: "PATCH",
   });
 }
@@ -146,7 +143,7 @@ export async function adminBulkDeleteGuestbookEntries(
   ids: number[],
   action: AdminGuestbookDeleteAction,
 ): Promise<void> {
-  await clientMutate<void>("/api/admin/guestbook/bulk", {
+  await clientMutate<void>("/admin/guestbook/bulk", {
     method: "DELETE",
     body: JSON.stringify({ ids, action }),
   });
@@ -156,7 +153,7 @@ export async function adminBulkPatchGuestbookEntries(
   ids: number[],
   action: AdminGuestbookPatchAction,
 ): Promise<void> {
-  await clientMutate<void>("/api/admin/guestbook/bulk", {
+  await clientMutate<void>("/admin/guestbook/bulk", {
     method: "PATCH",
     body: JSON.stringify({ ids, action }),
   });
@@ -167,23 +164,20 @@ export async function fetchGuestbookSettings(
 ): Promise<GuestbookSettingsResponse> {
   if (typeof window === "undefined") {
     return serverFetch<GuestbookSettingsResponse>(
-      "/api/settings/guestbook",
+      "/settings/guestbook",
       {},
       cookieHeader,
     );
   }
 
-  return clientFetch<GuestbookSettingsResponse>("/api/settings/guestbook");
+  return clientFetch<GuestbookSettingsResponse>("/settings/guestbook");
 }
 
 export async function updateGuestbookSettings(
   enabled: boolean,
 ): Promise<GuestbookSettingsResponse> {
-  return clientMutate<GuestbookSettingsResponse>(
-    "/api/admin/settings/guestbook",
-    {
-      method: "PATCH",
-      body: JSON.stringify({ enabled }),
-    },
-  );
+  return clientMutate<GuestbookSettingsResponse>("/admin/settings/guestbook", {
+    method: "PATCH",
+    body: JSON.stringify({ enabled }),
+  });
 }

@@ -146,8 +146,8 @@ export async function fetchComments(
     options?.limit,
   );
   const path = queryString
-    ? `/api/posts/${postId}/comments?${queryString}`
-    : `/api/posts/${postId}/comments`;
+    ? `/posts/${postId}/comments?${queryString}`
+    : `/posts/${postId}/comments`;
 
   const response = await serverFetch<CommentsResponse | CommentsResponseLegacy>(
     path,
@@ -170,8 +170,8 @@ export async function fetchCommentsClient(
     options?.limit,
   );
   const path = queryString
-    ? `/api/posts/${postId}/comments?${queryString}`
-    : `/api/posts/${postId}/comments`;
+    ? `/posts/${postId}/comments?${queryString}`
+    : `/posts/${postId}/comments`;
   const response = await clientFetch<CommentsResponse | CommentsResponseLegacy>(
     path,
   );
@@ -185,7 +185,7 @@ export async function createComment(
 ): Promise<{ comment: Comment; revealToken: string | null }> {
   const { authorType: _authorType, ...payload } = body;
   const response = await clientMutate<CreateCommentResponse>(
-    `/api/posts/${postId}/comments`,
+    `/posts/${postId}/comments`,
     {
       body: JSON.stringify(payload),
     },
@@ -202,7 +202,7 @@ export async function revealSecretComment(
   revealToken: string,
 ): Promise<Comment> {
   const response = await clientMutate<CommentResponse>(
-    `/api/comments/${commentId}/reveal`,
+    `/comments/${commentId}/reveal`,
     {
       method: "POST",
       body: JSON.stringify({ revealToken }),
@@ -219,7 +219,7 @@ export async function deleteComment(
   const payload =
     body.authorType === "guest" ? { guestPassword: body.guestPassword } : {};
 
-  await clientMutate<void>(`/api/comments/${commentId}`, {
+  await clientMutate<void>(`/comments/${commentId}`, {
     method: "DELETE",
     body: JSON.stringify(payload),
   });
@@ -231,8 +231,8 @@ export async function fetchAdminComments(
 ): Promise<PaginatedResponse<AdminCommentItem>> {
   const queryString = buildAdminCommentSearchParams(params);
   const path = queryString
-    ? `/api/admin/comments?${queryString}`
-    : "/api/admin/comments";
+    ? `/admin/comments?${queryString}`
+    : "/admin/comments";
 
   return cookieHeader
     ? serverFetch<PaginatedResponse<AdminCommentItem>>(path, {}, cookieHeader)
@@ -243,19 +243,19 @@ export async function adminDeleteComment(
   id: number,
   action: AdminCommentDeleteAction = "soft_delete",
 ): Promise<void> {
-  await clientMutate<void>(`/api/admin/comments/${id}?action=${action}`, {
+  await clientMutate<void>(`/admin/comments/${id}?action=${action}`, {
     method: "DELETE",
   });
 }
 
 export async function adminRestoreComment(id: number): Promise<void> {
-  await clientMutate<void>(`/api/admin/comments/${id}/restore`, {
+  await clientMutate<void>(`/admin/comments/${id}/restore`, {
     method: "PUT",
   });
 }
 
 export async function adminHideComment(id: number): Promise<void> {
-  await clientMutate<void>(`/api/admin/comments/${id}/hide`, {
+  await clientMutate<void>(`/admin/comments/${id}/hide`, {
     method: "PUT",
   });
 }
@@ -264,7 +264,7 @@ export async function adminBulkOperateComments(
   ids: number[],
   action: AdminCommentBulkAction,
 ): Promise<void> {
-  await clientMutate<void>("/api/admin/comments/bulk", {
+  await clientMutate<void>("/admin/comments/bulk", {
     method: "DELETE",
     body: JSON.stringify({ ids, action }),
   });
@@ -276,7 +276,7 @@ export async function fetchAdminCommentThread(
   const response = await clientFetch<{
     parent: AdminCommentItem;
     replies: AdminCommentItem[];
-  }>(`/api/admin/comments/${id}/thread`);
+  }>(`/admin/comments/${id}/thread`);
 
   return [response.parent, ...response.replies];
 }

@@ -58,7 +58,7 @@ export const Empty: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.get("/api/posts", () => {
+        http.get("/posts", () => {
           return HttpResponse.json({ data: [], meta: { total: 0, page: 1, limit: 10, totalPages: 0 } });
         }),
       ],
