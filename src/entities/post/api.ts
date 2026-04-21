@@ -99,8 +99,16 @@ export async function fetchPostBySlug(
   // Server stores slugs after `.normalize("NFKC")` (see server `generateUnicodeSlug`).
   // URLs sourced from Safari / macOS clipboards can arrive as NFD and fail to match.
   const normalizedSlug = slug.normalize("NFKC");
+  const path = `/posts/${encodeURIComponent(normalizedSlug)}`;
+
+  console.log("[diag:fetchPostBySlug]", {
+    input: slug,
+    normalizedSlug,
+    path,
+  });
+
   const response = await serverFetch<PostDetailWithNavigationResponse>(
-    `/posts/${encodeURIComponent(normalizedSlug)}`,
+    path,
     {},
     cookieHeader,
   );

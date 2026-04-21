@@ -45,9 +45,17 @@ interface CurrentViewer {
 }
 
 const getPostDetail = cache(async (slug: string) => {
+  console.log("[diag:post-page:getPostDetail]", { slug });
+
   try {
     return await fetchPostBySlug(slug);
   } catch (error) {
+    console.warn("[diag:post-page:getPostDetail:error]", {
+      slug,
+      status:
+        error instanceof ApiResponseError ? error.statusCode : "unknown_error",
+    });
+
     if (error instanceof ApiResponseError && error.statusCode === 404) {
       notFound();
     }
@@ -105,6 +113,8 @@ async function getCurrentViewer(): Promise<CurrentViewer> {
 export async function generateMetadata({
   params,
 }: PostDetailPageProps): Promise<Metadata> {
+  console.log("[diag:post-page:generateMetadata]", { slug: params.slug });
+
   const { post } = await getPostDetail(params.slug);
   const description = getPostDescription(post);
   const canonical = buildPostHref(post.slug);
@@ -132,6 +142,8 @@ export async function generateMetadata({
 }
 
 export default async function PostDetailPage({ params }: PostDetailPageProps) {
+  console.log("[diag:post-page:render]", { slug: params.slug });
+
   try {
     const { post } = await getPostDetail(params.slug);
     const headings = extractHeadings(post.contentMd);
