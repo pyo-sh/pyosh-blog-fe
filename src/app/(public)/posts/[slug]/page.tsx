@@ -143,21 +143,20 @@ export async function generateMetadata({
 
 export default async function PostDetailPage({ params }: PostDetailPageProps) {
   console.log("[diag:post-page:render]", { slug: params.slug });
-  
-  try {
-    const { post } = await getPostDetail(params.slug);
-    const headings = extractHeadings(post.contentMd);
-    let comments: Comment[] = [];
-    let commentMeta: CommentListMeta = {
-      page: 1,
-      limit: 10,
-      totalCount: 0,
-      totalRootComments: 0,
-      totalPages: 1,
-    };
-    let commentError: string | null = null;
-    const cookieHeader = await toCookieHeader();
-    const siteUrl = getSiteUrl();
+
+  const { post } = await getPostDetail(params.slug);
+  const headings = extractHeadings(post.contentMd);
+  let comments: Comment[] = [];
+  let commentMeta: CommentListMeta = {
+    page: 1,
+    limit: 10,
+    totalCount: 0,
+    totalRootComments: 0,
+    totalPages: 1,
+  };
+  let commentError: string | null = null;
+  const cookieHeader = await toCookieHeader();
+  const siteUrl = getSiteUrl();
 
   const [relatedPostsData, fetchedComments, categoryAncestors] =
     await Promise.all([
