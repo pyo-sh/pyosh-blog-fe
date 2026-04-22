@@ -13,7 +13,12 @@ import type {
   UpdatePostBody,
 } from "./model";
 import type { PaginatedResponse } from "@shared/api";
-import { clientFetch, clientMutate, serverFetch } from "@shared/api";
+import {
+  ApiResponseError,
+  clientFetch,
+  clientMutate,
+  serverFetch,
+} from "@shared/api";
 import { normalizeOptionalAssetUrl } from "@shared/lib/asset-url";
 
 function buildPostSearchParams(params: FetchPostsParams): string {
@@ -96,19 +101,48 @@ export async function fetchPostBySlug(
   slug: string,
   cookieHeader?: string,
 ): Promise<PostDetailWithNavigationResponse> {
-  // Server stores slugs after `.normalize("NFKC")` (see server `generateUnicodeSlug`).
-  // URLs sourced from Safari / macOS clipboards can arrive as NFD and fail to match.
-  const normalizedSlug = slug.normalize("NFKC");
-  const response = await serverFetch<PostDetailWithNavigationResponse>(
-    `/posts/${encodeURIComponent(normalizedSlug)}`,
-    {},
-    cookieHeader,
-  );
+  const buildPath = (value: string) =>
+    `/posts/${encodeURIComponent(value.normalize("NFKC"))}`;
 
-  return {
-    ...response,
-    post: normalizePost(response.post),
-  };
+  try {
+    const response = await serverFetch<PostDetailWithNavigationResponse>(
+      buildPath(slug),
+      {},
+      cookieHeader,
+    );
+
+    return {
+      ...response,
+      post: normalizePost(response.post),
+    };
+  } catch (error) {
+    if (!(error instanceof ApiResponseError) || error.statusCode !== 404) {
+      throw error;
+    }
+
+    let decodedSlug: string;
+
+    try {
+      decodedSlug = decodeURIComponent(slug);
+    } catch {
+      throw error;
+    }
+
+    if (decodedSlug === slug) {
+      throw error;
+    }
+
+    const response = await serverFetch<PostDetailWithNavigationResponse>(
+      buildPath(decodedSlug),
+      {},
+      cookieHeader,
+    );
+
+    return {
+      ...response,
+      post: normalizePost(response.post),
+    };
+  }
 }
 
 export async function fetchPublishedPostSlugs(
