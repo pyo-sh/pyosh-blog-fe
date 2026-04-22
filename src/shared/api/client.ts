@@ -69,23 +69,10 @@ export async function serverFetch<T>(
     headers.set("Cookie", cookieHeader);
   }
 
-  const url = `${INTERNAL_API_URL}${path}`;
-
-  console.log("[diag:serverFetch:request]", {
-    url,
-    method: options.method ?? "GET",
-  });
-
-  const response = await fetch(url, {
+  const response = await fetch(`${INTERNAL_API_URL}${path}`, {
     ...options,
     headers,
     cache: options.cache ?? "no-store",
-  });
-
-  console.log("[diag:serverFetch:response]", {
-    url,
-    method: options.method ?? "GET",
-    status: response.status,
   });
 
   return handleResponse<T>(response);
