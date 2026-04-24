@@ -123,7 +123,7 @@ function matchesRemoteImageHost(url: URL, pattern: string) {
   if (pattern.startsWith("**.")) {
     const baseHost = pattern.slice(3);
 
-    return url.hostname === baseHost || url.hostname.endsWith(`.${baseHost}`);
+    return url.hostname.endsWith(`.${baseHost}`);
   }
 
   return url.hostname === pattern;
