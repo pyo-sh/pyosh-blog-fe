@@ -17,7 +17,7 @@ pnpm dev
 
 The dev server runs at `http://localhost:3000`.
 
-The app fetches images from `localhost:5500` (local API server) and `github.com` by default. Make sure the backend is running locally or point the relevant env vars to a remote instance.
+The app fetches images from `localhost:5500` (local API server), `api.pyosh.com`, GitHub-hosted image domains, Notion-hosted image domains, and Naver image domains by default. Make sure the backend is running locally or point the relevant env vars to a remote instance.
 
 ## Scripts
 
