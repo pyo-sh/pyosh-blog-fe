@@ -5,6 +5,7 @@ const MANAGE_HOME_PATH = "/manage";
 const API_URL = process.env.API_URL ?? "http://localhost:5500";
 const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL?.trim() ?? "";
 const NOINDEX_HEADER_VALUE = "noindex, nofollow";
+const PRODUCTION_HOSTS = new Set(["pyosh.com", "www.pyosh.com"]);
 
 function joinSources(...sources: Array<string | false | null | undefined>) {
   return sources.filter(Boolean).join(" ");
@@ -39,8 +40,18 @@ function buildCspDirectives(nonce: string): string {
   ].join("; ");
 }
 
-function isProductionDeployment() {
-  return process.env.VERCEL_ENV === "production";
+function shouldBlockIndexing(request: NextRequest) {
+  if (process.env.NODE_ENV !== "production") {
+    return true;
+  }
+
+  if (PRODUCTION_HOSTS.has(request.nextUrl.hostname.toLowerCase())) {
+    return false;
+  }
+
+  const vercelEnv = process.env.VERCEL_ENV?.trim();
+
+  return Boolean(vercelEnv && vercelEnv !== "production");
 }
 
 function nextWithCsp(request: NextRequest, nonce: string): NextResponse {
@@ -55,7 +66,7 @@ function nextWithCsp(request: NextRequest, nonce: string): NextResponse {
     buildCspDirectives(nonce),
   );
 
-  if (!isProductionDeployment()) {
+  if (shouldBlockIndexing(request)) {
     response.headers.set("X-Robots-Tag", NOINDEX_HEADER_VALUE);
   }
 
