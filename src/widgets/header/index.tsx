@@ -101,6 +101,12 @@ const Header: React.FC<HeaderProps> = ({
           </Link>
 
           <div className="flex items-center gap-1">
+            <Link
+              href="/guestbook"
+              className="inline-flex h-9 items-center rounded-lg px-3 text-sm font-medium text-text-2 transition-colors hover:bg-background-3 hover:text-text-1"
+            >
+              방명록
+            </Link>
             <SearchBar />
             <ThemeButton />
             {onHamburgerClick && (
