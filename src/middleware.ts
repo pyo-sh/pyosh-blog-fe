@@ -4,6 +4,7 @@ const MANAGE_LOGIN_PATH = "/manage/login";
 const MANAGE_HOME_PATH = "/manage";
 const API_URL = process.env.API_URL ?? "http://localhost:5500";
 const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL?.trim() ?? "";
+const NOINDEX_HEADER_VALUE = "noindex, nofollow";
 
 function joinSources(...sources: Array<string | false | null | undefined>) {
   return sources.filter(Boolean).join(" ");
@@ -38,6 +39,10 @@ function buildCspDirectives(nonce: string): string {
   ].join("; ");
 }
 
+function isProductionDeployment() {
+  return process.env.VERCEL_ENV === "production";
+}
+
 function nextWithCsp(request: NextRequest, nonce: string): NextResponse {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-nonce", nonce);
@@ -49,6 +54,10 @@ function nextWithCsp(request: NextRequest, nonce: string): NextResponse {
     "Content-Security-Policy-Report-Only",
     buildCspDirectives(nonce),
   );
+
+  if (!isProductionDeployment()) {
+    response.headers.set("X-Robots-Tag", NOINDEX_HEADER_VALUE);
+  }
 
   return response;
 }
