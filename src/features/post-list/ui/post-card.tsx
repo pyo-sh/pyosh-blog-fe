@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { buildPostHref, type PublishedPostListItem } from "@entities/post";
+import remoteImageHosts from "@shared/config/remote-image-hosts.json";
 import { cn } from "@shared/lib/style-utils";
 
 interface PostCardProps {
@@ -98,8 +99,32 @@ function supportsNextImage(src: string | null) {
   try {
     const url = new URL(src);
 
-    return url.protocol === "https:" && url.hostname === "github.com";
+    if (
+      url.protocol === "http:" &&
+      url.hostname === "localhost" &&
+      url.port === "5500"
+    ) {
+      return true;
+    }
+
+    if (url.protocol !== "https:") {
+      return false;
+    }
+
+    return remoteImageHosts.some((pattern) =>
+      matchesRemoteImageHost(url, pattern),
+    );
   } catch {
     return false;
   }
+}
+
+function matchesRemoteImageHost(url: URL, pattern: string) {
+  if (pattern.startsWith("**.")) {
+    const baseHost = pattern.slice(3);
+
+    return url.hostname.endsWith(`.${baseHost}`);
+  }
+
+  return url.hostname === pattern;
 }

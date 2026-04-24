@@ -1,6 +1,7 @@
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
+const remoteImageHosts = require("./src/shared/config/remote-image-hosts.json");
 
 // decode-named-character-reference 의 "browser" export 는 index.dom.js 로 해석되는데,
 // 이 파일은 module 최상단에서 `document.createElement` 를 호출한다.
@@ -22,10 +23,10 @@ export default {
         hostname: "localhost",
         port: "5500",
       },
-      {
+      ...remoteImageHosts.map((hostname) => ({
         protocol: "https",
-        hostname: "github.com",
-      },
+        hostname,
+      })),
     ],
   },
   eslint: {
