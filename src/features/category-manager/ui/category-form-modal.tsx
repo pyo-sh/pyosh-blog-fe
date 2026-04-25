@@ -7,6 +7,7 @@ import type {
   CreateCategoryBody,
   UpdateCategoryBody,
 } from "@entities/category";
+import { useImeSafeText } from "@shared/hooks/use-ime-safe-text";
 import { cn } from "@shared/lib/style-utils";
 import { Modal, Spinner } from "@shared/ui/libs";
 import { ToggleSwitch } from "@shared/ui/toggle-switch";
@@ -260,8 +261,20 @@ export function CategoryFormModal({
   const [values, setValues] = useState<CategoryFormValues>(() =>
     getInitialValues(category),
   );
-  const [isNameComposing, setIsNameComposing] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const {
+    handleChange: handleNameChange,
+    handleCompositionStart: handleNameCompositionStart,
+    handleCompositionEnd: handleNameCompositionEnd,
+    resetComposition: resetNameComposition,
+  } = useImeSafeText<HTMLInputElement>({
+    onCommit: (name) =>
+      setValues((current) => ({
+        ...current,
+        name,
+      })),
+    transform: (value) => value.normalize("NFC"),
+  });
 
   useEffect(() => {
     if (!isOpen) {
@@ -269,9 +282,9 @@ export function CategoryFormModal({
     }
 
     setValues(getInitialValues(category));
-    setIsNameComposing(false);
+    resetNameComposition();
     setValidationError(null);
-  }, [category, isOpen]);
+  }, [category, isOpen, resetNameComposition]);
 
   const title = mode === "create" ? "카테고리 추가" : "카테고리 수정";
   const submitLabel = mode === "create" ? "추가" : "저장";
@@ -316,22 +329,9 @@ export function CategoryFormModal({
           <input
             type="text"
             value={values.name}
-            onChange={(event) =>
-              setValues((current) => ({
-                ...current,
-                name: isNameComposing
-                  ? event.target.value
-                  : event.target.value.normalize("NFC"),
-              }))
-            }
-            onCompositionStart={() => setIsNameComposing(true)}
-            onCompositionEnd={(event) => {
-              setIsNameComposing(false);
-              setValues((current) => ({
-                ...current,
-                name: event.currentTarget.value.normalize("NFC"),
-              }));
-            }}
+            onChange={handleNameChange}
+            onCompositionStart={handleNameCompositionStart}
+            onCompositionEnd={handleNameCompositionEnd}
             placeholder="카테고리 이름"
             maxLength={50}
             disabled={isSubmitting}
