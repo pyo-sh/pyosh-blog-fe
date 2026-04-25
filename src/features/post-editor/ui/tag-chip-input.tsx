@@ -4,6 +4,7 @@ import type { KeyboardEvent } from "react";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchTagsClient } from "@entities/tag/api";
+import { useImeSafeText } from "@shared/hooks/use-ime-safe-text";
 import { getErrorMessage } from "@shared/lib/get-error-message";
 
 interface TagChipInputProps {
@@ -29,7 +30,15 @@ export function TagChipInput({
   const [inputValue, setInputValue] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
-  const [isComposing, setIsComposing] = useState(false);
+  const {
+    isComposingRef,
+    handleChange: handleInputChange,
+    handleCompositionStart,
+    handleCompositionEnd,
+  } = useImeSafeText<HTMLInputElement>({
+    onCommit: setInputValue,
+    transform: (value) => value.slice(0, MAX_TAG_LENGTH),
+  });
 
   const tagsQuery = useQuery({
     queryKey: ["tags"],
@@ -116,7 +125,7 @@ export function TagChipInput({
     }
 
     if (event.key === "Enter") {
-      if (isComposing) {
+      if (isComposingRef.current) {
         return;
       }
 
@@ -169,18 +178,13 @@ export function TagChipInput({
             name="tags"
             type="text"
             value={inputValue}
-            onChange={(event) =>
-              setInputValue(event.target.value.slice(0, MAX_TAG_LENGTH))
-            }
-            onCompositionStart={() => setIsComposing(true)}
-            onCompositionEnd={(event) => {
-              setIsComposing(false);
-              setInputValue(event.currentTarget.value.slice(0, MAX_TAG_LENGTH));
-            }}
+            onChange={handleInputChange}
+            onCompositionStart={handleCompositionStart}
+            onCompositionEnd={handleCompositionEnd}
             onFocus={() => setIsFocused(true)}
             onBlur={() => {
               setIsFocused(false);
-              if (!isComposing) {
+              if (!isComposingRef.current) {
                 commitTag(inputValue);
               }
             }}
