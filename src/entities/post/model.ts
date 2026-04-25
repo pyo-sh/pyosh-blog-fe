@@ -24,7 +24,7 @@ export interface MatchedComment {
 
 interface PostBase {
   id: number;
-  categoryId: number;
+  categoryId: number | null;
   title: string;
   slug: string;
   thumbnailUrl: string | null;
@@ -41,16 +41,16 @@ interface PostBase {
   totalPageviews: number;
   commentCount: number;
   contentModifiedAt: string | null;
-  category: PostCategory;
   tags: PostTag[];
   matchedComment?: MatchedComment;
 }
 
 export interface PostListItem extends PostBase {
-  category: PostCategory;
+  category: PostCategory | null;
 }
 
 export interface PublishedPostListItem extends PostListItem {
+  category: PostCategory;
   status: "published";
   visibility: "public";
   publishedAt: string;
@@ -60,7 +60,7 @@ export interface PublishedPostListItem extends PostListItem {
 
 export interface PostDetail extends PostBase {
   contentMd: string;
-  category: PostDetailCategory;
+  category: PostDetailCategory | null;
 }
 
 export type SearchFilter =

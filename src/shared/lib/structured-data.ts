@@ -86,7 +86,7 @@ interface StructuredDataPost {
   contentModifiedAt: string | null;
   thumbnailUrl: string | null;
   tags: StructuredDataTag[];
-  category: StructuredDataCategory;
+  category: StructuredDataCategory | null;
 }
 
 export function buildWebSiteJsonLd(siteUrl: string): WebSiteJsonLd {
@@ -135,7 +135,7 @@ export function buildBlogPostingJsonLd(
     ...(image ? { image } : {}),
     url: `${normalizedSiteUrl}${buildPostHref(post.slug)}`,
     ...(keywords.length > 0 ? { keywords } : {}),
-    ...(post.category.name ? { articleSection: post.category.name } : {}),
+    ...(post.category?.name ? { articleSection: post.category.name } : {}),
   };
 }
 

@@ -133,6 +133,7 @@ export async function generateMetadata({
 
 export default async function PostDetailPage({ params }: PostDetailPageProps) {
   const { post } = await getPostDetail(params.slug);
+  const category = post.category;
   const headings = extractHeadings(post.contentMd);
   let comments: Comment[] = [];
   let commentMeta: CommentListMeta = {
@@ -148,10 +149,8 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
 
   const [relatedPostsData, fetchedComments, categoryAncestors] =
     await Promise.all([
-      post.category
-        ? fetchPosts({ categoryId: post.category.id, limit: 7 }).catch(
-            () => null,
-          )
+      category
+        ? fetchPosts({ categoryId: category.id, limit: 7 }).catch(() => null)
         : Promise.resolve(null),
       post.commentStatus === "disabled"
         ? Promise.resolve(null)
@@ -161,11 +160,11 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
 
             return null;
           }),
-      post.category.ancestors
-        ? Promise.resolve(post.category.ancestors)
+      category?.ancestors
+        ? Promise.resolve(category.ancestors)
         : fetchCategories()
             .then((categories) =>
-              getCategoryAncestors(categories, post.category.id),
+              category ? getCategoryAncestors(categories, category.id) : [],
             )
             .catch(() => []),
     ]);
@@ -181,10 +180,14 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
       name: ancestor.name,
       href: `/categories/${ancestor.slug}`,
     })),
-    {
-      name: post.category.name,
-      href: `/categories/${post.category.slug}`,
-    },
+    ...(category
+      ? [
+          {
+            name: category.name,
+            href: `/categories/${category.slug}`,
+          },
+        ]
+      : []),
     { name: post.title },
   ];
 
@@ -218,12 +221,14 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
         <div className="flex flex-col">
           <header className="mb-8">
             <div className="mb-3 flex flex-wrap items-center gap-3">
-              <Link
-                href={`/categories/${post.category.slug}`}
-                className="inline-flex items-center rounded-md bg-primary-1/12 px-2.5 py-1 text-ui-xs font-semibold text-primary-1 transition-colors hover:bg-primary-1/16"
-              >
-                {post.category.name}
-              </Link>
+              {category ? (
+                <Link
+                  href={`/categories/${category.slug}`}
+                  className="inline-flex items-center rounded-md bg-primary-1/12 px-2.5 py-1 text-ui-xs font-semibold text-primary-1 transition-colors hover:bg-primary-1/16"
+                >
+                  {category.name}
+                </Link>
+              ) : null}
               <time dateTime={publishedAt} className="text-ui-xs text-text-4">
                 {formatDate(post.publishedAt, post.createdAt)}
               </time>

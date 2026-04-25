@@ -195,7 +195,8 @@ export function CategoryDeleteModal({
                     글을 휴지통으로 이동
                   </span>
                   <span className="mt-1 block text-sm leading-6 text-text-3">
-                    현재 글을 휴지통으로 보낸 뒤 카테고리를 삭제합니다.
+                    현재 글을 휴지통으로 보낸 뒤 카테고리를 삭제합니다. 복원할
+                    때는 카테고리를 다시 지정해야 합니다.
                   </span>
                 </span>
               </label>
