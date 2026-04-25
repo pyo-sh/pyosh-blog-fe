@@ -260,6 +260,7 @@ export function CategoryFormModal({
   const [values, setValues] = useState<CategoryFormValues>(() =>
     getInitialValues(category),
   );
+  const [isNameComposing, setIsNameComposing] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -268,13 +269,14 @@ export function CategoryFormModal({
     }
 
     setValues(getInitialValues(category));
+    setIsNameComposing(false);
     setValidationError(null);
   }, [category, isOpen]);
 
   const title = mode === "create" ? "카테고리 추가" : "카테고리 수정";
   const submitLabel = mode === "create" ? "추가" : "저장";
   const submittingLabel = mode === "create" ? "추가 중" : "저장 중";
-  const trimmedName = values.name.trim();
+  const trimmedName = values.name.normalize("NFC").trim();
 
   const handleSubmit = () => {
     if (!trimmedName) {
@@ -315,8 +317,21 @@ export function CategoryFormModal({
             type="text"
             value={values.name}
             onChange={(event) =>
-              setValues((current) => ({ ...current, name: event.target.value }))
+              setValues((current) => ({
+                ...current,
+                name: isNameComposing
+                  ? event.target.value
+                  : event.target.value.normalize("NFC"),
+              }))
             }
+            onCompositionStart={() => setIsNameComposing(true)}
+            onCompositionEnd={(event) => {
+              setIsNameComposing(false);
+              setValues((current) => ({
+                ...current,
+                name: event.currentTarget.value.normalize("NFC"),
+              }));
+            }}
             placeholder="카테고리 이름"
             maxLength={50}
             disabled={isSubmitting}

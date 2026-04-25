@@ -1,15 +1,28 @@
 import type { Category } from "./model";
+import { normalizeRouteSlug, normalizeSlug } from "@shared/lib/slug";
 
 export function findCategoryBySlug(
   categories: Category[],
   slug: string,
 ): Category | undefined {
+  const normalizedSlug = normalizeRouteSlug(slug);
+
+  return findCategoryByNormalizedSlug(categories, normalizedSlug);
+}
+
+function findCategoryByNormalizedSlug(
+  categories: Category[],
+  slug: string,
+): Category | undefined {
   for (const category of categories) {
-    if (category.slug === slug) {
+    if (normalizeSlug(category.slug) === slug) {
       return category;
     }
 
-    const childCategory = findCategoryBySlug(category.children ?? [], slug);
+    const childCategory = findCategoryByNormalizedSlug(
+      category.children ?? [],
+      slug,
+    );
 
     if (childCategory) {
       return childCategory;
