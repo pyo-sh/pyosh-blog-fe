@@ -33,7 +33,7 @@ interface BaseCreateGuestbookBody {
 interface CreateGuestbookGuestBody extends BaseCreateGuestbookBody {
   authorType: "guest";
   guestName: string;
-  guestEmail: string;
+  guestEmail?: string;
   guestPassword: string;
 }
 
