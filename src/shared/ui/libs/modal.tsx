@@ -24,12 +24,21 @@ const Modal: React.FC<ModalProps> = ({
   "aria-labelledby": ariaLabelledby,
 }) => {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+  const previousActiveElementRef = useRef<HTMLElement | null>(null);
+  const wasOpenRef = useRef(false);
 
-  // ESC 키로 닫기
   useEffect(() => {
-    if (!isOpen) return;
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
-    const previousActiveElement = document.activeElement as HTMLElement | null;
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    previousActiveElementRef.current =
+      document.activeElement as HTMLElement | null;
 
     const focusableSelector =
       'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -53,7 +62,7 @@ const Modal: React.FC<ModalProps> = ({
 
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        onClose();
+        onCloseRef.current();
 
         return;
       }
@@ -96,9 +105,17 @@ const Modal: React.FC<ModalProps> = ({
     return () => {
       window.clearTimeout(timer);
       document.removeEventListener("keydown", handleEscape);
-      previousActiveElement?.focus();
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen && wasOpenRef.current) {
+      previousActiveElementRef.current?.focus();
+      previousActiveElementRef.current = null;
+    }
+
+    wasOpenRef.current = isOpen;
+  }, [isOpen]);
 
   // body 스크롤 방지
   useEffect(() => {

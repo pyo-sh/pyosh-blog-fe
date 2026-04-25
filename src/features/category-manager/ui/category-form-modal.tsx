@@ -1,7 +1,7 @@
 "use client";
 
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type {
   Category,
   CreateCategoryBody,
@@ -290,6 +290,11 @@ export function CategoryFormModal({
   const submitLabel = mode === "create" ? "추가" : "저장";
   const submittingLabel = mode === "create" ? "추가 중" : "저장 중";
   const trimmedName = values.name.normalize("NFC").trim();
+  const handleModalClose = useCallback(() => {
+    if (!isSubmitting) {
+      onClose();
+    }
+  }, [isSubmitting, onClose]);
 
   const handleSubmit = () => {
     if (!trimmedName) {
@@ -310,11 +315,7 @@ export function CategoryFormModal({
   return (
     <Modal
       isOpen={isOpen}
-      onClose={() => {
-        if (!isSubmitting) {
-          onClose();
-        }
-      }}
+      onClose={handleModalClose}
       withBackground
       aria-label={title}
       className="w-[min(100%,40rem)] p-0 text-left"
