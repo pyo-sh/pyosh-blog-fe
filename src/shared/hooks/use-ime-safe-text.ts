@@ -13,22 +13,31 @@ export function useImeSafeText<
 >({ onCommit, transform = (value) => value }: UseImeSafeTextOptions) {
   const isComposingRef = useRef(false);
 
-  const commitValue = useCallback(
+  const commitTransformedValue = useCallback(
     (value: string) => {
       onCommit(transform(value));
     },
     [onCommit, transform],
   );
 
+  const commitRawValue = useCallback(
+    (value: string) => {
+      onCommit(value);
+    },
+    [onCommit],
+  );
+
   const handleChange = useCallback(
     (event: ChangeEvent<T>) => {
       if (isComposingRef.current) {
+        commitRawValue(event.target.value);
+
         return;
       }
 
-      commitValue(event.target.value);
+      commitTransformedValue(event.target.value);
     },
-    [commitValue],
+    [commitRawValue, commitTransformedValue],
   );
 
   const handleCompositionStart = useCallback(() => {
@@ -38,9 +47,9 @@ export function useImeSafeText<
   const handleCompositionEnd = useCallback(
     (event: CompositionEvent<T>) => {
       isComposingRef.current = false;
-      commitValue(event.currentTarget.value);
+      commitTransformedValue(event.currentTarget.value);
     },
-    [commitValue],
+    [commitTransformedValue],
   );
 
   const resetComposition = useCallback(() => {
