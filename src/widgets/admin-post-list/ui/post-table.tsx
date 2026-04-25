@@ -405,7 +405,7 @@ export function PostTable({
                         </span>
                       ) : (
                         <span className="whitespace-nowrap text-[14px] leading-4 text-text-4">
-                          -
+                          (카테고리 없음)
                         </span>
                       )}
                     </td>
@@ -631,7 +631,14 @@ export function PostTable({
                               <Badge tone="category" className="shrink-0">
                                 {post.category.name}
                               </Badge>
-                            ) : null}
+                            ) : (
+                              <Badge
+                                tone="archived"
+                                className="shrink-0 text-text-4"
+                              >
+                                (카테고리 없음)
+                              </Badge>
+                            )}
                           </div>
                           {post.summary ? (
                             <p className="mt-0.5 line-clamp-1 whitespace-nowrap text-[12px] leading-4 text-text-4">
