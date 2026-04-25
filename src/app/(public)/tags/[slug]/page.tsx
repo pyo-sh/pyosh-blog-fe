@@ -7,6 +7,7 @@ import { fetchPosts } from "@entities/post";
 import { fetchTags } from "@entities/tag";
 import { PostListItem } from "@features/post-list";
 import { buildCanonicalMetadata } from "@shared/lib/seo";
+import { normalizeRouteSlug, normalizeSlug } from "@shared/lib/slug";
 import { buildBreadcrumbJsonLd, getSiteUrl } from "@shared/lib/structured-data";
 import { JsonLd } from "@shared/ui/json-ld";
 import {
@@ -52,11 +53,14 @@ function isOutOfRangePage(page: number, totalPages: number) {
 }
 
 const getTagPageData = cache(async (slug: string, page: number) => {
+  const normalizedSlug = normalizeRouteSlug(slug);
   const [tags, response] = await Promise.all([
     fetchTags(),
-    fetchPosts({ tagSlug: slug, page }),
+    fetchPosts({ tagSlug: normalizedSlug, page }),
   ]);
-  const activeTag = tags.find((tag) => tag.slug === slug);
+  const activeTag = tags.find(
+    (tag) => normalizeSlug(tag.slug) === normalizedSlug,
+  );
 
   if (!activeTag || isOutOfRangePage(page, response.meta.totalPages)) {
     notFound();

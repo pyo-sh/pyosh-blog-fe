@@ -20,6 +20,7 @@ import {
   serverFetch,
 } from "@shared/api";
 import { normalizeOptionalAssetUrl } from "@shared/lib/asset-url";
+import { decodeSlug, encodeSlugPathSegment } from "@shared/lib/slug";
 
 function buildPostSearchParams(params: FetchPostsParams): string {
   return buildSearchParams(params);
@@ -101,8 +102,7 @@ export async function fetchPostBySlug(
   slug: string,
   cookieHeader?: string,
 ): Promise<PostDetailWithNavigationResponse> {
-  const buildPath = (value: string) =>
-    `/posts/${encodeURIComponent(value.normalize("NFKC"))}`;
+  const buildPath = (value: string) => `/posts/${encodeSlugPathSegment(value)}`;
 
   try {
     const response = await serverFetch<PostDetailWithNavigationResponse>(
@@ -120,13 +120,7 @@ export async function fetchPostBySlug(
       throw error;
     }
 
-    let decodedSlug: string;
-
-    try {
-      decodedSlug = decodeURIComponent(slug);
-    } catch {
-      throw error;
-    }
+    const decodedSlug = decodeSlug(slug);
 
     if (decodedSlug === slug) {
       throw error;
