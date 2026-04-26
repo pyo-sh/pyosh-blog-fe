@@ -1,13 +1,18 @@
 import type { Metadata } from "next";
 import { fetchTags } from "@entities/tag";
 import { buildCanonicalMetadata } from "@shared/lib/seo";
-import { ArchiveTagBadge, EmptyState, ScrollToTop } from "@shared/ui/libs";
+import {
+  ArchiveHeader,
+  ArchiveTagBadge,
+  EmptyState,
+  ScrollToTop,
+} from "@shared/ui/libs";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "태그 목록",
-  description: "모든 태그 목록",
+  title: "Tags",
+  description: "블로그 전체 태그 목록",
   ...buildCanonicalMetadata("/tags"),
 };
 
@@ -19,17 +24,12 @@ export default async function TagsPage() {
 
   return (
     <main className="flex min-h-screen flex-col pt-8 pb-16">
-      <header className="mb-8 motion-reveal">
-        <div className="flex flex-wrap items-baseline justify-between gap-4">
-          <h1 className="break-keep text-body-lg font-bold tracking-tight text-text-1 sm:text-h1">
-            태그
-          </h1>
-          <span className="text-body-sm text-text-4">
-            총 {sortedTags.length.toLocaleString("ko-KR")}개 태그
-          </span>
-        </div>
-        <div className="mt-4 h-px bg-border-4" />
-      </header>
+      <ArchiveHeader
+        variant="tag"
+        eyebrow="Tag Directory"
+        title="Tags"
+        summary={<>총 {sortedTags.length.toLocaleString("ko-KR")}개 태그</>}
+      />
 
       {sortedTags.length > 0 ? (
         <section aria-label="태그 목록">

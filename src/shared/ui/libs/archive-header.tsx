@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Icon } from "@iconify/react";
 import altArrowRightLinear from "@iconify-icons/solar/alt-arrow-right-linear";
 import Link from "next/link";
@@ -12,26 +13,35 @@ interface ArchiveBreadcrumbItem {
 interface ArchiveHeaderProps {
   variant: "category" | "tag";
   title: string;
-  count: number;
+  count?: number;
+  summary?: ReactNode;
   breadcrumbs?: ArchiveBreadcrumbItem[];
   className?: string;
+  eyebrow?: string;
 }
 
 export function ArchiveHeader({
   variant,
   title,
   count,
+  summary,
   breadcrumbs,
   className,
+  eyebrow,
 }: ArchiveHeaderProps) {
   const hasBreadcrumbs = Boolean(breadcrumbs && breadcrumbs.length > 0);
+  const resolvedEyebrow =
+    eyebrow ?? (variant === "category" ? "Category Archive" : "Tag Archive");
+  const resolvedSummary =
+    summary ??
+    (count === undefined ? null : `총 ${formatNumber(count)}개의 글`);
 
   return (
     <header className={cn("mb-8 w-full min-w-0 motion-reveal", className)}>
       {variant === "category" ? (
         <div className="mb-5 flex flex-wrap items-center gap-2">
           <span className="text-body-xs font-bold uppercase tracking-[0.18em] text-text-4">
-            Category Archive
+            {resolvedEyebrow}
           </span>
           {hasBreadcrumbs ? (
             <>
@@ -75,7 +85,7 @@ export function ArchiveHeader({
       ) : (
         <div className="mb-5">
           <span className="text-body-xs font-bold uppercase tracking-[0.18em] text-text-4">
-            Tag Archive
+            {resolvedEyebrow}
           </span>
         </div>
       )}
@@ -85,9 +95,11 @@ export function ArchiveHeader({
           {variant === "tag" ? <span className="text-primary-1">#</span> : null}
           {title}
         </h1>
-        <span className="shrink-0 whitespace-nowrap text-body-sm text-text-4">
-          총 {formatNumber(count)}개의 글
-        </span>
+        {resolvedSummary ? (
+          <span className="shrink-0 whitespace-nowrap text-body-sm text-text-4">
+            {resolvedSummary}
+          </span>
+        ) : null}
       </div>
 
       <div className="mt-6 h-px bg-border-4" />

@@ -72,7 +72,7 @@ export function PublicLayoutShell({
         {/* Desktop sidebar */}
         <aside
           aria-label="사이드바"
-          className="hidden w-[234px] shrink-0 lg:block"
+          className="hidden w-[240px] shrink-0 lg:block"
         >
           <StickySidebarWrapper>
             <div className="border-r border-border-3 pt-8 pb-16 pr-8">

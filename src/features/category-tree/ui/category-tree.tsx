@@ -13,6 +13,7 @@ interface CategoryTreeProps {
   onItemClick?: () => void;
   showOverviewLink?: boolean;
   initialExpandedSlugs?: string[];
+  variant?: "sidebar" | "overview";
 }
 
 function CategoryItem({
@@ -21,21 +22,28 @@ function CategoryItem({
   expandedSlugs,
   onToggle,
   onItemClick,
+  variant,
 }: {
   category: Category;
   depth: number;
   expandedSlugs: Set<string>;
   onToggle: (categorySlug: string) => void;
   onItemClick?: () => void;
+  variant: "sidebar" | "overview";
 }) {
   const hasChildren = category.children && category.children.length > 0;
   const postCount = category.publishedPostCount ?? category.totalPostCount;
   const isOpen = expandedSlugs.has(category.slug);
+  const isOverview = variant === "overview";
 
   return (
-    <li>
+    <li className={cn(isOverview && "mt-3 first:mt-0")}>
       <div
-        className="flex items-center gap-1"
+        className={cn(
+          "flex items-center gap-1",
+          isOverview &&
+            "rounded-[1.4rem] border border-border-3 bg-background-2 px-3 py-2.5 shadow-[0_14px_34px_rgba(15,23,42,0.04)] transition-colors hover:border-border-2",
+        )}
         style={{ paddingLeft: `${depth * 0.75}rem` }}
       >
         {hasChildren ? (
@@ -44,26 +52,41 @@ function CategoryItem({
             onClick={() => onToggle(category.slug)}
             aria-expanded={isOpen}
             aria-label={`${category.name} ${isOpen ? "접기" : "펼치기"}`}
-            className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-text-4 transition-colors hover:text-text-1"
+            className={cn(
+              "flex shrink-0 items-center justify-center rounded text-text-4 transition-colors hover:text-text-1",
+              isOverview ? "h-8 w-8 bg-background-1" : "h-5 w-5",
+            )}
           >
             <ChevronIcon
               className={cn(
-                "h-3.5 w-3.5 transition-transform duration-200",
+                "transition-transform duration-200",
+                isOverview ? "h-4 w-4" : "h-3.5 w-3.5",
                 isOpen && "rotate-90",
               )}
             />
           </button>
         ) : (
-          <span className="w-5 shrink-0" />
+          <span className={cn("shrink-0", isOverview ? "w-8" : "w-5")} />
         )}
         <Link
           href={`/categories/${category.slug}`}
           onClick={onItemClick}
-          className="flex flex-1 items-center justify-between gap-2 rounded px-1 py-1.5 text-body-sm text-text-2 transition-colors hover:text-primary-1"
+          className={cn(
+            "flex flex-1 items-center justify-between gap-2 rounded transition-colors hover:text-primary-1",
+            isOverview
+              ? "px-1 py-0.5 text-[0.95rem] text-text-1"
+              : "px-1 py-1.5 text-body-sm text-text-2",
+          )}
         >
-          <span className="truncate">{category.name}</span>
+          <span className="truncate font-medium">{category.name}</span>
           {postCount !== undefined && (
-            <span className="shrink-0 text-body-xs text-text-4">
+            <span
+              className={cn(
+                "shrink-0 text-body-xs text-text-4",
+                isOverview &&
+                  "rounded-full border border-border-3 bg-background-1 px-2.5 py-1 font-medium text-text-3",
+              )}
+            >
               {postCount}
             </span>
           )}
@@ -71,7 +94,11 @@ function CategoryItem({
       </div>
 
       {hasChildren && isOpen && (
-        <ul>
+        <ul
+          className={cn(
+            isOverview && "ml-4 border-l border-dashed border-border-3 pl-2",
+          )}
+        >
           {category.children!.map((child) => (
             <CategoryItem
               key={child.id}
@@ -80,6 +107,7 @@ function CategoryItem({
               expandedSlugs={expandedSlugs}
               onToggle={onToggle}
               onItemClick={onItemClick}
+              variant={variant}
             />
           ))}
         </ul>
@@ -93,6 +121,7 @@ export function CategoryTree({
   onItemClick,
   showOverviewLink = true,
   initialExpandedSlugs = EMPTY_EXPANDED_SLUGS,
+  variant = "sidebar",
 }: CategoryTreeProps) {
   const visible = categories.filter((c) => c.isVisible);
   const [expandedSlugs, setExpandedSlugs] = useState(
@@ -126,7 +155,11 @@ export function CategoryTree({
         <Link
           href="/categories"
           onClick={onItemClick}
-          className="mb-2 flex items-center justify-between rounded px-1 py-1 text-body-sm font-medium text-text-2 transition-colors hover:text-primary-1"
+          className={cn(
+            "mb-2 flex items-center justify-between rounded px-1 py-1 text-body-sm font-medium text-text-2 transition-colors hover:text-primary-1",
+            variant === "overview" &&
+              "mb-4 rounded-[1.2rem] border border-dashed border-border-3 bg-background-2 px-4 py-3",
+          )}
         >
           <span>분류 전체보기</span>
           <span className="text-body-xs text-text-4">({totalCount})</span>
@@ -141,6 +174,7 @@ export function CategoryTree({
             expandedSlugs={expandedSlugs}
             onToggle={handleToggle}
             onItemClick={onItemClick}
+            variant={variant}
           />
         ))}
       </ul>
