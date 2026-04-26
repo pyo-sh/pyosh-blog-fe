@@ -37,12 +37,12 @@ function CategoryItem({
   const isOverview = variant === "overview";
 
   return (
-    <li className={cn(isOverview && "mt-3 first:mt-0")}>
+    <li className={cn(isOverview && "mt-1 first:mt-0")}>
       <div
         className={cn(
-          "flex items-center gap-1",
+          "flex items-center gap-1.5",
           isOverview &&
-            "rounded-[1.4rem] border border-border-3 bg-background-2 px-3 py-2.5 shadow-[0_14px_34px_rgba(15,23,42,0.04)] transition-colors hover:border-border-2",
+            "rounded-md border border-border-3 border-l-2 border-l-primary-1/40 bg-background-2/70 px-2.5 py-1.5 transition-colors hover:border-border-2 hover:border-l-primary-1 hover:bg-background-3/60",
         )}
         style={{ paddingLeft: `${depth * 0.75}rem` }}
       >
@@ -54,7 +54,7 @@ function CategoryItem({
             aria-label={`${category.name} ${isOpen ? "접기" : "펼치기"}`}
             className={cn(
               "flex shrink-0 items-center justify-center rounded text-text-4 transition-colors hover:text-text-1",
-              isOverview ? "h-8 w-8 bg-background-1" : "h-5 w-5",
+              isOverview ? "h-7 w-7 bg-background-1" : "h-5 w-5",
             )}
           >
             <ChevronIcon
@@ -66,7 +66,20 @@ function CategoryItem({
             />
           </button>
         ) : (
-          <span className={cn("shrink-0", isOverview ? "w-8" : "w-5")} />
+          <span
+            aria-hidden="true"
+            className={cn(
+              "flex shrink-0 items-center justify-center",
+              isOverview ? "h-7 w-7" : "h-5 w-5",
+            )}
+          >
+            <span
+              className={cn(
+                "rounded-full bg-text-4/45",
+                isOverview ? "h-1.5 w-1.5" : "h-1 w-1",
+              )}
+            />
+          </span>
         )}
         <Link
           href={`/categories/${category.slug}`}
@@ -74,17 +87,19 @@ function CategoryItem({
           className={cn(
             "flex flex-1 items-center justify-between gap-2 rounded transition-colors hover:text-primary-1",
             isOverview
-              ? "px-1 py-0.5 text-[0.95rem] text-text-1"
-              : "px-1 py-1.5 text-body-sm text-text-2",
+              ? "px-1 py-0.5 text-body-sm text-text-1"
+              : "px-1 py-1 text-body-sm text-text-2",
           )}
         >
-          <span className="truncate font-medium">{category.name}</span>
+          <span className={cn("truncate", isOverview && "font-medium")}>
+            {category.name}
+          </span>
           {postCount !== undefined && (
             <span
               className={cn(
                 "shrink-0 text-body-xs text-text-4",
                 isOverview &&
-                  "rounded-full border border-border-3 bg-background-1 px-2.5 py-1 font-medium text-text-3",
+                  "rounded-full border border-border-3 bg-background-1 px-2 py-0.5 font-medium text-text-3",
               )}
             >
               {postCount}
@@ -96,7 +111,7 @@ function CategoryItem({
       {hasChildren && isOpen && (
         <ul
           className={cn(
-            isOverview && "ml-4 border-l border-dashed border-border-3 pl-2",
+            isOverview && "mt-1 ml-4 border-l border-border-3 pl-2",
           )}
         >
           {category.children!.map((child) => (
