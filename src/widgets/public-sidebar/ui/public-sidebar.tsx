@@ -37,6 +37,7 @@ interface PublicSidebarPanelProps extends PublicSidebarContentProps {
 }
 
 const POST_TOC_DATA_ID = "post-toc-data";
+const SIDEBAR_CATEGORY_PATH_DATA_ID = "sidebar-category-path-data";
 
 function SidebarSection({
   title,
@@ -80,6 +81,8 @@ export function PublicSidebarContent({
 }: PublicSidebarContentProps) {
   const pathname = usePathname();
   const [pageHeadings, setPageHeadings] = useState<TocItem[]>([]);
+  const [initialExpandedCategorySlugs, setInitialExpandedCategorySlugs] =
+    useState<string[]>([]);
 
   useEffect(() => {
     if (headings) {
@@ -96,6 +99,24 @@ export function PublicSidebarContent({
 
     setPageHeadings(readTocDataFromDocument());
   }, [headings, pathname]);
+
+  useEffect(() => {
+    if (!pathname) {
+      setInitialExpandedCategorySlugs([]);
+
+      return;
+    }
+
+    if (pathname.startsWith("/categories/") || pathname.startsWith("/posts/")) {
+      const categoryPathSlugs = readCategoryPathDataFromDocument();
+
+      setInitialExpandedCategorySlugs(categoryPathSlugs.slice(0, -1));
+
+      return;
+    }
+
+    setInitialExpandedCategorySlugs([]);
+  }, [pathname]);
 
   const tocHeadings = headings ?? pageHeadings;
   const visibleCategoryCount = countVisibleCategories(categories);
@@ -118,13 +139,24 @@ export function PublicSidebarContent({
 
       {categories.some((c) => c.isVisible) && (
         <SidebarSection
-          title={`분류 전체보기 (${visibleCategoryCount})`}
+          title={`카테고리 (${visibleCategoryCount})`}
           icon={<Icon icon={folder2Linear} width="13" aria-hidden="true" />}
+          action={
+            <Link
+              href="/categories"
+              onClick={onItemClick}
+              className="inline-flex items-center gap-0.5 text-ui-xs font-medium text-primary-1 underline-offset-4 hover:underline"
+            >
+              전체보기
+              <Icon icon={altArrowRightLinear} width="10" aria-hidden="true" />
+            </Link>
+          }
         >
           <CategoryTree
             categories={categories}
             onItemClick={onItemClick}
             showOverviewLink={false}
+            initialExpandedSlugs={initialExpandedCategorySlugs}
           />
         </SidebarSection>
       )}
@@ -217,6 +249,26 @@ function readTocDataFromDocument(): TocItem[] {
         typeof item?.text === "string" &&
         (item?.level === 1 || item?.level === 2 || item?.level === 3),
     );
+  } catch {
+    return [];
+  }
+}
+
+function readCategoryPathDataFromDocument(): string[] {
+  const element = document.getElementById(SIDEBAR_CATEGORY_PATH_DATA_ID);
+
+  if (!element?.textContent) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(element.textContent) as string[];
+
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed.filter((item): item is string => typeof item === "string");
   } catch {
     return [];
   }

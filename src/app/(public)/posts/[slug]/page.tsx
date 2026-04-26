@@ -33,6 +33,8 @@ import {
 import { JsonLd } from "@shared/ui/json-ld";
 import { ScrollToTop } from "@shared/ui/libs";
 
+const SIDEBAR_CATEGORY_PATH_DATA_ID = "sidebar-category-path-data";
+
 interface PostDetailPageProps {
   params: {
     slug: string;
@@ -194,6 +196,9 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
   const viewer = await getCurrentViewer();
   const publishedAt = post.publishedAt ?? post.createdAt;
   const formattedViews = (post.totalPageviews ?? 0).toLocaleString("ko-KR");
+  const sidebarCategoryPathSlugs = category
+    ? [...categoryAncestors.map((ancestor) => ancestor.slug), category.slug]
+    : [];
 
   return (
     <main className="w-full pt-8 pb-16">
@@ -279,6 +284,16 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
             />
           )}
 
+          {sidebarCategoryPathSlugs.length > 0 && (
+            <script
+              id={SIDEBAR_CATEGORY_PATH_DATA_ID}
+              type="application/json"
+              dangerouslySetInnerHTML={{
+                __html: serializeCategoryPathSlugs(sidebarCategoryPathSlugs),
+              }}
+            />
+          )}
+
           <PostContent contentMd={post.contentMd} />
 
           {relatedPosts.length > 0 ? (
@@ -306,4 +321,8 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
 
 function serializeTocItems(headings: TocItem[]) {
   return JSON.stringify(headings).replace(/</g, "\\u003c");
+}
+
+function serializeCategoryPathSlugs(categoryPathSlugs: string[]) {
+  return JSON.stringify(categoryPathSlugs).replace(/</g, "\\u003c");
 }

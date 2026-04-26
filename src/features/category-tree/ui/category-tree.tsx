@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { Category } from "@entities/category";
 import { cn } from "@shared/lib/style-utils";
@@ -9,6 +9,7 @@ interface CategoryTreeProps {
   categories: Category[];
   onItemClick?: () => void;
   showOverviewLink?: boolean;
+  initialExpandedSlugs?: string[];
 }
 
 function countTotal(categories: Category[]): number {
@@ -22,15 +23,19 @@ function countTotal(categories: Category[]): number {
 function CategoryItem({
   category,
   depth,
+  expandedSlugs,
+  onToggle,
   onItemClick,
 }: {
   category: Category;
   depth: number;
+  expandedSlugs: Set<string>;
+  onToggle: (categorySlug: string) => void;
   onItemClick?: () => void;
 }) {
-  const [isOpen, setIsOpen] = useState(false);
   const hasChildren = category.children && category.children.length > 0;
   const postCount = category.publishedPostCount ?? category.totalPostCount;
+  const isOpen = expandedSlugs.has(category.slug);
 
   return (
     <li>
@@ -41,7 +46,7 @@ function CategoryItem({
         {hasChildren ? (
           <button
             type="button"
-            onClick={() => setIsOpen((v) => !v)}
+            onClick={() => onToggle(category.slug)}
             aria-expanded={isOpen}
             aria-label={`${category.name} ${isOpen ? "접기" : "펼치기"}`}
             className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-text-4 transition-colors hover:text-text-1"
@@ -77,6 +82,8 @@ function CategoryItem({
               key={child.id}
               category={child}
               depth={depth + 1}
+              expandedSlugs={expandedSlugs}
+              onToggle={onToggle}
               onItemClick={onItemClick}
             />
           ))}
@@ -90,12 +97,33 @@ export function CategoryTree({
   categories,
   onItemClick,
   showOverviewLink = true,
+  initialExpandedSlugs = [],
 }: CategoryTreeProps) {
   const visible = categories.filter((c) => c.isVisible);
+  const [expandedSlugs, setExpandedSlugs] = useState(
+    () => new Set(initialExpandedSlugs),
+  );
+
+  useEffect(() => {
+    setExpandedSlugs(new Set(initialExpandedSlugs));
+  }, [initialExpandedSlugs]);
 
   if (visible.length === 0) return null;
 
   const totalCount = countTotal(visible);
+  const handleToggle = (categorySlug: string) => {
+    setExpandedSlugs((current) => {
+      const next = new Set(current);
+
+      if (next.has(categorySlug)) {
+        next.delete(categorySlug);
+      } else {
+        next.add(categorySlug);
+      }
+
+      return next;
+    });
+  };
 
   return (
     <div>
@@ -115,6 +143,8 @@ export function CategoryTree({
             key={category.id}
             category={category}
             depth={0}
+            expandedSlugs={expandedSlugs}
+            onToggle={handleToggle}
             onItemClick={onItemClick}
           />
         ))}
