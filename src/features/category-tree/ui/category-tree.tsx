@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Icon } from "@iconify/react";
+import recordLinear from "@iconify-icons/solar/record-linear";
 import Link from "next/link";
 import { countVisibleCategories } from "../lib/category-counts";
 import type { Category } from "@entities/category";
@@ -35,6 +37,53 @@ function CategoryItem({
   const postCount = category.publishedPostCount ?? category.totalPostCount;
   const isOpen = expandedSlugs.has(category.slug);
   const isOverview = variant === "overview";
+  const itemHref = `/categories/${category.slug}`;
+  const itemContent = (
+    <>
+      <span className={cn("truncate", isOverview && "font-medium")}>
+        {category.name}
+      </span>
+      {postCount !== undefined && (
+        <span
+          className={cn(
+            "shrink-0 text-body-xs text-text-4",
+            isOverview &&
+              "rounded-full border border-border-3 bg-background-1 px-2 py-0.5 font-medium text-text-3",
+          )}
+        >
+          {postCount}
+        </span>
+      )}
+    </>
+  );
+
+  if (!hasChildren && !isOverview) {
+    return (
+      <li>
+        <Link
+          href={itemHref}
+          onClick={onItemClick}
+          className="flex items-center justify-between gap-2 py-1 text-body-sm text-text-2 transition-colors hover:text-primary-1"
+          style={{ paddingLeft: `${depth * 0.75 + 1}rem` }}
+        >
+          <span className="flex min-w-0 items-center gap-1.5 font-medium">
+            <Icon
+              icon={recordLinear}
+              width="12"
+              aria-hidden="true"
+              className="shrink-0 text-text-4"
+            />
+            <span className="truncate">{category.name}</span>
+          </span>
+          {postCount !== undefined && (
+            <span className="shrink-0 text-body-xs text-text-4">
+              {postCount}
+            </span>
+          )}
+        </Link>
+      </li>
+    );
+  }
 
   return (
     <li className={cn(isOverview && "mt-1 first:mt-0")}>
@@ -82,7 +131,7 @@ function CategoryItem({
           </span>
         )}
         <Link
-          href={`/categories/${category.slug}`}
+          href={itemHref}
           onClick={onItemClick}
           className={cn(
             "flex flex-1 items-center justify-between gap-2 rounded transition-colors hover:text-primary-1",
@@ -91,20 +140,7 @@ function CategoryItem({
               : "px-1 py-1 text-body-sm text-text-2",
           )}
         >
-          <span className={cn("truncate", isOverview && "font-medium")}>
-            {category.name}
-          </span>
-          {postCount !== undefined && (
-            <span
-              className={cn(
-                "shrink-0 text-body-xs text-text-4",
-                isOverview &&
-                  "rounded-full border border-border-3 bg-background-1 px-2 py-0.5 font-medium text-text-3",
-              )}
-            >
-              {postCount}
-            </span>
-          )}
+          {itemContent}
         </Link>
       </div>
 
