@@ -30,7 +30,6 @@ const SECRET_DISPLAY_MASK = "비공개입니다.";
 const SECRET_MASK_ALIASES = new Set([
   "This comment is secret.",
   "비공개 메시지입니다",
-  SECRET_DISPLAY_MASK,
 ]);
 
 interface CommentViewer {
