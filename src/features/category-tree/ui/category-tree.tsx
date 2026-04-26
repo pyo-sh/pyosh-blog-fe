@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { countVisibleCategories } from "../lib/category-counts";
 import type { Category } from "@entities/category";
 import { cn } from "@shared/lib/style-utils";
 
@@ -12,14 +13,6 @@ interface CategoryTreeProps {
   onItemClick?: () => void;
   showOverviewLink?: boolean;
   initialExpandedSlugs?: string[];
-}
-
-function countTotal(categories: Category[]): number {
-  return categories.reduce((sum, cat) => {
-    const childCount = cat.children ? countTotal(cat.children) : 0;
-
-    return sum + (cat.publishedPostCount ?? 0) + childCount;
-  }, 0);
 }
 
 function CategoryItem({
@@ -112,7 +105,7 @@ export function CategoryTree({
 
   if (visible.length === 0) return null;
 
-  const totalCount = countTotal(visible);
+  const totalCount = countVisibleCategories(visible);
   const handleToggle = (categorySlug: string) => {
     setExpandedSlugs((current) => {
       const next = new Set(current);
@@ -153,10 +146,6 @@ export function CategoryTree({
       </ul>
     </div>
   );
-}
-
-export function countVisibleCategories(categories: Category[]) {
-  return countTotal(categories.filter((category) => category.isVisible));
 }
 
 function ChevronIcon({ className }: { className?: string }) {
