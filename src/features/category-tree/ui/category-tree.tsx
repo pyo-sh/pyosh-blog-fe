@@ -74,7 +74,7 @@ function CategoryItem({
   const indentStyle =
     depth > 0 ? { marginLeft: `${depth * 0.75}rem` } : undefined;
   const titleClassName = cn(
-    "min-w-0 truncate text-text-2",
+    "min-w-0 truncate",
     isOverviewRoot
       ? "text-[1.0625rem] font-bold leading-[1.2]"
       : "text-[0.8125rem] font-medium leading-[1.2]",
