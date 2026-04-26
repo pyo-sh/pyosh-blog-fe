@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import { cn } from "@shared/lib/style-utils";
 
 const FOCUSABLE_SELECTOR =
@@ -13,6 +13,7 @@ interface SlideInPanelProps {
   label?: string;
   children: React.ReactNode;
   className?: string;
+  topOffset?: string;
 }
 
 export function SlideInPanel({
@@ -22,8 +23,12 @@ export function SlideInPanel({
   label = "사이드 패널",
   children,
   className,
+  topOffset,
 }: SlideInPanelProps) {
   const panelRef = useRef<HTMLElement>(null);
+  const panelStyle: CSSProperties | undefined = topOffset
+    ? { top: topOffset }
+    : undefined;
 
   // Focus trap
   useEffect(() => {
@@ -87,8 +92,10 @@ export function SlideInPanel({
         role="dialog"
         aria-modal="true"
         aria-label={label}
+        style={panelStyle}
         className={cn(
-          "fixed inset-y-0 right-0 z-50 w-80 max-w-[85vw]",
+          "fixed right-0 z-50 w-80 max-w-[85vw] bottom-0",
+          topOffset ? undefined : "top-0",
           "bg-background-1 border-l border-border-3",
           "overflow-y-auto",
           "animate-[var(--animate-slide-in-right)]",
