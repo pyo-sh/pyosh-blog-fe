@@ -26,7 +26,12 @@ import { ApiResponseError } from "@shared/api";
 import { Modal, Spinner } from "@shared/ui/libs";
 
 const DEFAULT_COMMENTS_PER_PAGE = 10;
-const SECRET_MASK = "비공개 메시지입니다";
+const SECRET_DISPLAY_MASK = "비공개입니다.";
+const SECRET_MASK_ALIASES = new Set([
+  "This comment is secret.",
+  "비공개 메시지입니다",
+  SECRET_DISPLAY_MASK,
+]);
 
 interface CommentViewer {
   type: "guest" | "oauth";
@@ -166,7 +171,9 @@ function getPaginationItems(currentPage: number, totalPages: number) {
 
 function collectSecretComments(comments: Comment[]): Comment[] {
   return comments.flatMap((comment) => [
-    ...(comment.isSecret && comment.body === SECRET_MASK ? [comment] : []),
+    ...(comment.isSecret && SECRET_MASK_ALIASES.has(comment.body)
+      ? [comment]
+      : []),
     ...collectSecretComments(comment.replies),
   ]);
 }
@@ -179,8 +186,8 @@ function getDisplayBody(
     return "삭제된 댓글입니다.";
   }
 
-  if (comment.isSecret && comment.body === SECRET_MASK) {
-    return revealedSecretBodies[comment.id] ?? comment.body;
+  if (comment.isSecret && SECRET_MASK_ALIASES.has(comment.body)) {
+    return revealedSecretBodies[comment.id] ?? SECRET_DISPLAY_MASK;
   }
 
   return comment.body;
