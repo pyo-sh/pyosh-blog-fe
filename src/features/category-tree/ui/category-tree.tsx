@@ -5,6 +5,8 @@ import Link from "next/link";
 import type { Category } from "@entities/category";
 import { cn } from "@shared/lib/style-utils";
 
+const EMPTY_EXPANDED_SLUGS: string[] = [];
+
 interface CategoryTreeProps {
   categories: Category[];
   onItemClick?: () => void;
@@ -97,7 +99,7 @@ export function CategoryTree({
   categories,
   onItemClick,
   showOverviewLink = true,
-  initialExpandedSlugs = [],
+  initialExpandedSlugs = EMPTY_EXPANDED_SLUGS,
 }: CategoryTreeProps) {
   const visible = categories.filter((c) => c.isVisible);
   const [expandedSlugs, setExpandedSlugs] = useState(
