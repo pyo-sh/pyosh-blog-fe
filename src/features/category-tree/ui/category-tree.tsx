@@ -263,18 +263,21 @@ function OverviewGroup({
             "grid overflow-hidden transition-[grid-template-rows] duration-300 ease-[cubic-bezier(.16,1,.3,1)]",
             isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
           )}
+          aria-hidden={!isOpen}
         >
           <div className="overflow-hidden">
-            <div className="px-2 pb-3 pl-10 pt-1">
-              {children.map((child) => (
-                <OverviewLeaf
-                  key={child.id}
-                  category={child}
-                  depth={0}
-                  onItemClick={onItemClick}
-                />
-              ))}
-            </div>
+            {isOpen ? (
+              <div className="px-2 pb-3 pl-10 pt-1">
+                {children.map((child) => (
+                  <OverviewLeaf
+                    key={child.id}
+                    category={child}
+                    depth={0}
+                    onItemClick={onItemClick}
+                  />
+                ))}
+              </div>
+            ) : null}
           </div>
         </div>
       ) : null}
