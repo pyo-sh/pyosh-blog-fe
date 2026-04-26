@@ -25,12 +25,24 @@ function getVisibleChildren(category: Category): Category[] {
   return (category.children ?? []).filter((child) => child.isVisible);
 }
 
+function collectExpandableSlugs(categories: Category[]): string[] {
+  return categories.flatMap((category) => {
+    const children = getVisibleChildren(category);
+
+    if (children.length === 0) {
+      return [];
+    }
+
+    return [category.slug, ...collectExpandableSlugs(children)];
+  });
+}
+
 function getDefaultExpandedSlugs(
   categories: Category[],
   variant: "sidebar" | "overview",
 ): string[] {
   if (variant === "overview") {
-    return categories.slice(0, 3).map((category) => category.slug);
+    return collectExpandableSlugs(categories.slice(0, 3));
   }
 
   return EMPTY_EXPANDED_SLUGS;
@@ -295,9 +307,7 @@ export function CategoryTree({
   if (visible.length === 0) return null;
 
   const totalCount = countVisibleCategories(visible);
-  const expandableSlugs = visible
-    .filter((category) => getVisibleChildren(category).length > 0)
-    .map((category) => category.slug);
+  const expandableSlugs = collectExpandableSlugs(visible);
 
   const handleToggle = (categorySlug: string) => {
     setExpandedSlugs((current) => {
