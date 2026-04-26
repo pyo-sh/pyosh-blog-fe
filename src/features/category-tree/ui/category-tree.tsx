@@ -68,40 +68,48 @@ function CategoryItem({
   const postCount = category.publishedPostCount ?? category.totalPostCount;
   const isOpen = expandedSlugs.has(category.slug);
   const isOverview = variant === "overview";
+  const isOverviewRoot = isOverview && depth === 0;
   const itemHref = `/categories/${category.slug}`;
   const panelId = `category-tree-panel-${variant}-${category.slug}`;
-  const itemContent = (
-    <>
-      <span className="min-w-0 flex-1 truncate text-[0.8125rem] font-medium leading-5">
-        {category.name}
-      </span>
-      {postCount !== undefined ? (
-        <span className="shrink-0 font-['Outfit'] text-[0.6875rem] font-medium tabular-nums text-text-4">
-          {formatNumber(postCount)}
-        </span>
-      ) : null}
-    </>
+  const indentStyle =
+    depth > 0 ? { marginLeft: `${depth * 0.75}rem` } : undefined;
+  const titleClassName = cn(
+    "min-w-0 truncate text-text-2",
+    isOverviewRoot
+      ? "text-[1.0625rem] font-bold leading-[1.2]"
+      : "text-[0.8125rem] font-medium leading-[1.2]",
   );
+  const countColumnClassName = isOverview
+    ? "grid-cols-[minmax(0,1fr)_3.5rem]"
+    : "grid-cols-[minmax(0,1fr)_3rem]";
+  const countContent =
+    postCount !== undefined ? (
+      <span className="w-full shrink-0 text-right font-['Outfit'] text-[0.6875rem] leading-none font-medium tabular-nums text-text-4">
+        {formatNumber(postCount)}
+      </span>
+    ) : null;
 
   if (!hasChildren && !isOverview) {
     return (
       <li>
-        <div
-          className="flex items-center gap-1.5"
-          style={{ paddingLeft: `${depth * 0.75}rem` }}
-        >
+        <div className="flex items-center gap-1.5">
           <span
             aria-hidden="true"
             className="flex h-5 w-5 shrink-0 items-center justify-center"
+            style={indentStyle}
           >
             <span className="h-2 w-2 rounded-full bg-text-4/45" />
           </span>
           <Link
             href={itemHref}
             onClick={onItemClick}
-            className="flex flex-1 items-center justify-between gap-2 rounded px-1 py-1 text-text-2 transition-colors hover:text-primary-1"
+            className={cn(
+              "grid min-w-0 flex-1 items-center gap-2 rounded px-1 py-1 text-text-2 transition-colors hover:text-primary-1",
+              countColumnClassName,
+            )}
           >
-            {itemContent}
+            <span className={titleClassName}>{category.name}</span>
+            {countContent}
           </Link>
         </div>
       </li>
@@ -119,7 +127,6 @@ function CategoryItem({
               depth === 0 ? "px-2.5 py-2.5" : "py-1 pr-1",
             ),
         )}
-        style={isOverview ? undefined : { paddingLeft: `${depth * 0.75}rem` }}
       >
         {hasChildren ? (
           <button
@@ -129,11 +136,13 @@ function CategoryItem({
             aria-controls={isOverview ? panelId : undefined}
             aria-label={`${category.name} ${isOpen ? "접기" : "펼치기"}`}
             className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-text-4 transition-colors hover:text-text-1"
+            style={
+              isOverview ? indentStyle : { marginLeft: `${depth * 0.75}rem` }
+            }
           >
             <ChevronIcon
               className={cn(
-                "transition-transform duration-200",
-                "h-3.5 w-3.5",
+                "h-3.5 w-3.5 transition-transform duration-200",
                 isOpen && "rotate-90",
               )}
             />
@@ -142,6 +151,9 @@ function CategoryItem({
           <span
             aria-hidden="true"
             className="flex h-5 w-5 shrink-0 items-center justify-center"
+            style={
+              isOverview ? indentStyle : { marginLeft: `${depth * 0.75}rem` }
+            }
           >
             {isOverview ? (
               <span className="h-2 w-2 rounded-full bg-text-4/45" />
@@ -150,7 +162,7 @@ function CategoryItem({
                 icon={recordLinear}
                 width="8"
                 aria-hidden="true"
-                className="shrink-0 text-text-4"
+                className="h-2 w-2 shrink-0 text-text-4"
               />
             )}
           </span>
@@ -158,9 +170,13 @@ function CategoryItem({
         <Link
           href={itemHref}
           onClick={onItemClick}
-          className="flex flex-1 items-center justify-between gap-2 rounded px-1 py-1 text-text-2 transition-colors hover:text-primary-1"
+          className={cn(
+            "grid min-w-0 flex-1 items-center gap-2 rounded px-1 py-1 text-text-2 transition-colors hover:text-primary-1",
+            countColumnClassName,
+          )}
         >
-          {itemContent}
+          <span className={titleClassName}>{category.name}</span>
+          {countContent}
         </Link>
       </div>
 
@@ -176,7 +192,7 @@ function CategoryItem({
           >
             <div className="overflow-hidden">
               {isOpen ? (
-                <ul className="mt-0.5 ml-4 border-l border-border-4 pl-2 pb-2">
+                <ul className="mt-0.5 pb-2">
                   {children.map((child) => (
                     <CategoryItem
                       key={child.id}
