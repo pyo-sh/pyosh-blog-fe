@@ -69,10 +69,11 @@ function CategoryItem({
   const isOpen = expandedSlugs.has(category.slug);
   const isOverview = variant === "overview";
   const isOverviewRoot = isOverview && depth === 0;
+  const rowIndentStep = isOverview ? 1.25 : 0.875;
   const itemHref = `/categories/${category.slug}`;
   const panelId = `category-tree-panel-${variant}-${category.slug}`;
   const indentStyle =
-    depth > 0 ? { marginLeft: `${depth * 0.75}rem` } : undefined;
+    depth > 0 ? { marginLeft: `${depth * rowIndentStep}rem` } : undefined;
   const titleClassName = cn(
     "min-w-0 truncate",
     isOverviewRoot
@@ -82,6 +83,22 @@ function CategoryItem({
   const countColumnClassName = isOverview
     ? "grid-cols-[minmax(0,1fr)_3.5rem]"
     : "grid-cols-[minmax(0,1fr)_3rem]";
+  const rowClassName = cn(
+    "flex items-center gap-1.5",
+    isOverview
+      ? cn(
+          "transition-colors hover:bg-background-2/80",
+          isOverviewRoot ? "px-2.5 py-2.5" : "pr-1",
+        )
+      : undefined,
+  );
+  const linkClassName = cn(
+    "grid min-w-0 flex-1 items-center gap-2 rounded text-text-2 transition-colors hover:text-primary-1",
+    countColumnClassName,
+    isOverviewRoot ? "px-1 py-1" : "px-1 py-2",
+  );
+  const controlSlotClassName =
+    "flex h-6 w-6 shrink-0 items-center justify-center";
   const countContent =
     postCount !== undefined ? (
       <span className="w-full shrink-0 text-right font-['Outfit'] text-[0.6875rem] leading-none font-medium tabular-nums text-text-4">
@@ -92,22 +109,15 @@ function CategoryItem({
   if (!hasChildren && !isOverview) {
     return (
       <li>
-        <div className="flex items-center gap-1.5">
+        <div className={rowClassName}>
           <span
             aria-hidden="true"
-            className="flex h-5 w-5 shrink-0 items-center justify-center"
+            className={controlSlotClassName}
             style={indentStyle}
           >
-            <span className="h-2 w-2 rounded-full bg-text-4/45" />
+            <span className="h-2.5 w-2.5 rounded-full bg-text-4/45" />
           </span>
-          <Link
-            href={itemHref}
-            onClick={onItemClick}
-            className={cn(
-              "grid min-w-0 flex-1 items-center gap-2 rounded px-1 py-1 text-text-2 transition-colors hover:text-primary-1",
-              countColumnClassName,
-            )}
-          >
+          <Link href={itemHref} onClick={onItemClick} className={linkClassName}>
             <span className={titleClassName}>{category.name}</span>
             {countContent}
           </Link>
@@ -118,16 +128,7 @@ function CategoryItem({
 
   return (
     <li className={cn(isOverview && depth > 0 && "mt-1 first:mt-0")}>
-      <div
-        className={cn(
-          "flex items-center gap-1.5",
-          isOverview &&
-            cn(
-              "transition-colors hover:bg-background-2/80",
-              depth === 0 ? "px-2.5 py-2.5" : "py-1 pr-1",
-            ),
-        )}
-      >
+      <div className={rowClassName}>
         {hasChildren ? (
           <button
             type="button"
@@ -135,14 +136,15 @@ function CategoryItem({
             aria-expanded={isOpen}
             aria-controls={isOverview ? panelId : undefined}
             aria-label={`${category.name} ${isOpen ? "접기" : "펼치기"}`}
-            className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-text-4 transition-colors hover:text-text-1"
-            style={
-              isOverview ? indentStyle : { marginLeft: `${depth * 0.75}rem` }
-            }
+            className={cn(
+              controlSlotClassName,
+              "rounded text-text-4 transition-colors hover:text-text-1",
+            )}
+            style={indentStyle}
           >
             <ChevronIcon
               className={cn(
-                "h-3.5 w-3.5 transition-transform duration-200",
+                "h-4 w-4 transition-transform duration-200",
                 isOpen && "rotate-90",
               )}
             />
@@ -150,31 +152,22 @@ function CategoryItem({
         ) : (
           <span
             aria-hidden="true"
-            className="flex h-5 w-5 shrink-0 items-center justify-center"
-            style={
-              isOverview ? indentStyle : { marginLeft: `${depth * 0.75}rem` }
-            }
+            className={controlSlotClassName}
+            style={indentStyle}
           >
             {isOverview ? (
-              <span className="h-2 w-2 rounded-full bg-text-4/45" />
+              <span className="h-2.5 w-2.5 rounded-full bg-text-4/45" />
             ) : (
               <Icon
                 icon={recordLinear}
-                width="8"
+                width="10"
                 aria-hidden="true"
-                className="h-2 w-2 shrink-0 text-text-4"
+                className="h-2.5 w-2.5 shrink-0 text-text-4"
               />
             )}
           </span>
         )}
-        <Link
-          href={itemHref}
-          onClick={onItemClick}
-          className={cn(
-            "grid min-w-0 flex-1 items-center gap-2 rounded px-1 py-1 text-text-2 transition-colors hover:text-primary-1",
-            countColumnClassName,
-          )}
-        >
+        <Link href={itemHref} onClick={onItemClick} className={linkClassName}>
           <span className={titleClassName}>{category.name}</span>
           {countContent}
         </Link>
