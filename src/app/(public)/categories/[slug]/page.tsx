@@ -20,6 +20,8 @@ import {
   ScrollToTop,
 } from "@shared/ui/libs";
 
+const SIDEBAR_CATEGORY_PATH_DATA_ID = "sidebar-category-path-data";
+
 interface CategoryPageProps {
   params: {
     slug: string;
@@ -124,6 +126,10 @@ export default async function CategoryPage({
           { label: activeCategory.name },
         ]
       : undefined;
+  const sidebarCategoryPathSlugs = [
+    ...ancestors.map((ancestor) => ancestor.slug),
+    activeCategory.slug,
+  ];
 
   return (
     <main className="flex min-h-screen flex-col pt-8 pb-16">
@@ -135,6 +141,14 @@ export default async function CategoryPage({
         title={activeCategory.name}
         count={meta.total}
         breadcrumbs={breadcrumbLinks}
+      />
+
+      <script
+        id={SIDEBAR_CATEGORY_PATH_DATA_ID}
+        type="application/json"
+        dangerouslySetInnerHTML={{
+          __html: serializeCategoryPathSlugs(sidebarCategoryPathSlugs),
+        }}
       />
 
       {posts.length > 0 ? (
@@ -171,4 +185,8 @@ export default async function CategoryPage({
       <ScrollToTop />
     </main>
   );
+}
+
+function serializeCategoryPathSlugs(categoryPathSlugs: string[]) {
+  return JSON.stringify(categoryPathSlugs).replace(/</g, "\\u003c");
 }
