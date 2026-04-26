@@ -72,10 +72,10 @@ export function PublicLayoutShell({
         {/* Desktop sidebar */}
         <aside
           aria-label="사이드바"
-          className="hidden w-[234px] shrink-0 border-r border-border-3 pr-8 lg:block"
+          className="hidden w-[234px] shrink-0 pr-8 lg:block"
         >
           <StickySidebarWrapper>
-            <div className="pt-8 pb-16">
+            <div className="border-r border-border-3 pt-8 pb-16 pr-8">
               <PublicSidebarContent
                 recentPosts={recentPosts}
                 popularPosts={popularPosts}

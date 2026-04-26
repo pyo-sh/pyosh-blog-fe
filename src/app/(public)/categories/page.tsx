@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { fetchCategories } from "@entities/category";
-import { CategoryTree, countVisibleCategories } from "@features/category-tree";
+import {
+  CategoryTree,
+  countVisibleCategories,
+  countVisibleCategoryNodes,
+} from "@features/category-tree";
 import { buildCanonicalMetadata } from "@shared/lib/seo";
 import { EmptyState, ScrollToTop } from "@shared/ui/libs";
 
@@ -11,18 +15,6 @@ export const metadata: Metadata = {
   description: "모든 카테고리 목록",
   ...buildCanonicalMetadata("/categories"),
 };
-
-function countVisibleCategoryNodes(
-  categories: Awaited<ReturnType<typeof fetchCategories>>,
-): number {
-  return categories.reduce((count, category) => {
-    if (!category.isVisible) {
-      return count;
-    }
-
-    return count + 1 + countVisibleCategoryNodes(category.children ?? []);
-  }, 0);
-}
 
 export default async function CategoriesPage() {
   const categories = await fetchCategories();
