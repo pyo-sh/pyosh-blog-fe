@@ -50,7 +50,12 @@ const Header: React.FC<HeaderProps> = ({
     if (!headerRef.current) return;
 
     const updateHeight = () => {
-      setHeaderHeight(headerRef.current?.clientHeight ?? 0);
+      const nextHeight = headerRef.current?.clientHeight ?? 0;
+      setHeaderHeight(nextHeight);
+      document.documentElement.style.setProperty(
+        "--site-header-height",
+        `${nextHeight}px`,
+      );
     };
 
     updateHeight();
@@ -63,6 +68,7 @@ const Header: React.FC<HeaderProps> = ({
     return () => {
       observer.disconnect();
       window.removeEventListener("resize", updateHeight);
+      document.documentElement.style.removeProperty("--site-header-height");
     };
   }, []);
 

@@ -68,11 +68,11 @@ export function PublicLayoutShell({
       />
 
       {/* 2-column layout: sidebar + main */}
-      <div className="mx-auto flex w-full max-w-[67.5rem] flex-1 gap-6 px-4 md:px-6">
+      <div className="mx-auto flex w-full max-w-[67.5rem] flex-1 px-4 md:px-6">
         {/* Desktop sidebar */}
         <aside
           aria-label="사이드바"
-          className="hidden w-[234px] shrink-0 pr-6 lg:block"
+          className="hidden w-[234px] shrink-0 border-r border-border-3 pr-8 lg:block"
         >
           <StickySidebarWrapper>
             <div className="pt-8 pb-16">
@@ -88,7 +88,7 @@ export function PublicLayoutShell({
         </aside>
 
         {/* Page content */}
-        <div className="min-w-0 flex-1">{children}</div>
+        <div className="min-w-0 flex-1 lg:pl-8">{children}</div>
       </div>
 
       {/* Mobile slide-in sidebar */}
@@ -98,6 +98,7 @@ export function PublicLayoutShell({
         id="public-sidebar-panel"
         label="사이드바 내비게이션"
         className="w-[min(320px,85vw)] border-l-0 shadow-[-4px_0_24px_rgba(0,0,0,0.1)]"
+        topOffset="var(--site-header-height, 3.5rem)"
       >
         <PublicSidebarPanel
           recentPosts={recentPosts}
