@@ -14,7 +14,10 @@ import type { PostListItem } from "@entities/post";
 import type { PopularPost, TotalViewsStats } from "@entities/stat";
 import type { Tag } from "@entities/tag";
 import type { TocItem } from "@shared/lib/markdown";
-import { CategoryTree, countVisibleCategories } from "@features/category-tree";
+import {
+  SidebarCategoryTree,
+  countVisibleCategories,
+} from "@features/category-tree";
 import { RecentPopularPosts } from "@features/recent-popular-posts";
 import { TagCloud } from "@features/tag-cloud";
 import { TocSection } from "@features/toc";
@@ -152,7 +155,7 @@ export function PublicSidebarContent({
             </Link>
           }
         >
-          <CategoryTree
+          <SidebarCategoryTree
             categories={categories}
             onItemClick={onItemClick}
             showOverviewLink={false}

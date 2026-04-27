@@ -2,4 +2,5 @@ export {
   countVisibleCategories,
   countVisibleCategoryNodes,
 } from "./lib/category-counts";
-export { CategoryTree } from "./ui/category-tree";
+export { OverviewCategoryTree } from "./ui/overview-category-tree";
+export { SidebarCategoryTree } from "./ui/sidebar-category-tree";

@@ -1,10 +1,18 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { CategoryTree } from "@features/category-tree";
+import {
+  OverviewCategoryTree,
+  SidebarCategoryTree,
+} from "@features/category-tree";
+import type { Category } from "@entities/category";
 import { mockCategories } from "../mocks/data/categories";
 
-const meta: Meta<typeof CategoryTree> = {
+interface CategoryTreeStoryArgs {
+  categories: Category[];
+  initialExpandedSlugs?: string[];
+}
+
+const meta: Meta<CategoryTreeStoryArgs> = {
   title: "Features/Public/CategoryTree",
-  component: CategoryTree,
   parameters: {
     layout: "fullscreen",
   },
@@ -23,17 +31,15 @@ const meta: Meta<typeof CategoryTree> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof CategoryTree>;
+type Story = StoryObj<CategoryTreeStoryArgs>;
 
 export const Sidebar: Story = {
+  render: (args) => <SidebarCategoryTree {...args} />,
   args: {
     initialExpandedSlugs: ["dev", "frontend"],
   },
 };
 
 export const Overview: Story = {
-  args: {
-    showOverviewLink: false,
-    variant: "overview",
-  },
+  render: (args) => <OverviewCategoryTree categories={args.categories} />,
 };
