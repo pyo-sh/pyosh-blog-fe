@@ -1,24 +1,19 @@
-import type { Metadata } from "next";
-import { fetchCategories } from "@entities/category";
+import type { Meta, StoryObj } from "@storybook/react";
 import {
   OverviewCategoryTree,
   countVisibleCategories,
   countVisibleCategoryNodes,
 } from "@features/category-tree";
+import type { Category } from "@entities/category";
 import { formatNumber } from "@shared/lib/format-number";
-import { buildCanonicalMetadata } from "@shared/lib/seo";
-import { ArchiveHeader, EmptyState, ScrollToTop } from "@shared/ui/libs";
+import { ArchiveHeader, EmptyState } from "@shared/ui/libs";
+import { mockCategories } from "../mocks/data/categories";
 
-export const dynamic = "force-dynamic";
+interface CategoriesPreviewProps {
+  categories: Category[];
+}
 
-export const metadata: Metadata = {
-  title: "Categories",
-  description: "블로그 전체 카테고리 목록",
-  ...buildCanonicalMetadata("/categories"),
-};
-
-export default async function CategoriesPage() {
-  const categories = await fetchCategories();
+function CategoriesPreview({ categories }: CategoriesPreviewProps) {
   const visibleCategoryCount = countVisibleCategoryNodes(categories);
   const visiblePostCount = countVisibleCategories(categories);
   const headerSummary = `총 ${formatNumber(visibleCategoryCount)}개 분류`;
@@ -63,7 +58,47 @@ export default async function CategoriesPage() {
           message="등록된 카테고리가 없습니다."
         />
       )}
-      <ScrollToTop />
     </main>
   );
 }
+
+const meta: Meta<typeof CategoriesPreview> = {
+  title: "App/Categories",
+  component: CategoriesPreview,
+  parameters: {
+    layout: "fullscreen",
+  },
+  decorators: [
+    (Story) => (
+      <div className="mx-auto w-full max-w-[51rem] px-4 py-8 md:px-6">
+        <Story />
+      </div>
+    ),
+  ],
+  args: {
+    categories: mockCategories,
+  },
+};
+
+export default meta;
+type Story = StoryObj<typeof CategoriesPreview>;
+
+export const Default: Story = {};
+
+export const Empty: Story = {
+  args: {
+    categories: [],
+  },
+};
+
+export const Mobile: Story = {
+  parameters: {
+    viewport: { defaultViewport: "mobile" },
+  },
+};
+
+export const DarkMode: Story = {
+  parameters: {
+    themes: { themeOverride: "dark" },
+  },
+};
