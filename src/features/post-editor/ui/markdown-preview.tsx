@@ -110,7 +110,7 @@ export function MarkdownPreview({
       ) : (
         <div ref={containerRef} className="min-h-0 flex-1 overflow-y-auto">
           <div
-            className="markdown-content prose max-w-none px-6 py-5"
+            className="markdown-content post-markdown prose max-w-none break-keep px-6 py-5"
             dangerouslySetInnerHTML={{ __html: html }}
           />
         </div>

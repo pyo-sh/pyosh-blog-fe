@@ -247,7 +247,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
             </div>
 
             <h1
-              className="break-keep text-[1.5rem] leading-[1.95rem] tracking-tight text-text-1 md:text-h1"
+              className="font-serif-content break-keep text-[1.5rem] leading-[1.95rem] text-text-1 md:text-h1"
               style={{ fontWeight: 700 }}
             >
               {post.title}

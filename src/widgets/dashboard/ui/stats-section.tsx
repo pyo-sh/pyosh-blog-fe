@@ -109,8 +109,7 @@ export function StatsSection() {
             <Icon icon={icon} width="22" aria-hidden="true" />
           </div>
           <p
-            className={`mt-5 text-[1.75rem] font-bold leading-none ${valueClassName}`}
-            style={{ fontFamily: "Outfit, 'Gothic A1', sans-serif" }}
+            className={`mt-5 text-[1.75rem] font-bold leading-none tabular-nums ${valueClassName}`}
           >
             {formatNumber(data[key])}
           </p>

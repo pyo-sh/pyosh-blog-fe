@@ -40,7 +40,7 @@ export default async function CategoriesPage() {
                 <dt className="text-[0.6875rem] font-semibold uppercase tracking-[0.04em] text-text-4">
                   분류
                 </dt>
-                <dd className="font-['Outfit'] text-[1.625rem] leading-none font-bold tracking-[-0.02em] text-text-1 tabular-nums">
+                <dd className="text-[1.625rem] leading-none font-bold text-text-1 tabular-nums">
                   {formatNumber(visibleCategoryCount)}
                 </dd>
               </div>
@@ -48,7 +48,7 @@ export default async function CategoriesPage() {
                 <dt className="text-[0.6875rem] font-semibold uppercase tracking-[0.04em] text-text-4">
                   공개 글
                 </dt>
-                <dd className="font-['Outfit'] text-[1.625rem] leading-none font-bold tracking-[-0.02em] text-text-1 tabular-nums">
+                <dd className="text-[1.625rem] leading-none font-bold text-text-1 tabular-nums">
                   {formatNumber(visiblePostCount)}
                 </dd>
               </div>

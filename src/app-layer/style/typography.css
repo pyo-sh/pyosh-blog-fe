@@ -1,6 +1,49 @@
+@font-face {
+  font-family: "NanumSquareNeo";
+  src: url("/fonts/nanum-square-neo/NanumSquareNeo-Variable.woff2") format("woff2");
+  font-weight: 300 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "MaruBuri";
+  src: url("/fonts/maru-buri/MaruBuri-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "MaruBuri";
+  src: url("/fonts/maru-buri/MaruBuri-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "MaruBuri";
+  src: url("/fonts/maru-buri/MaruBuri-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer base {
   :root {
-    font-family: "Gothic A1", ui-sans-serif, system-ui, sans-serif;
+    --font-ui: "NanumSquareNeo", ui-sans-serif, system-ui, sans-serif;
+    --font-serif: "MaruBuri", ui-serif, Georgia, "Times New Roman", serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-family: var(--font-ui);
+  }
+
+  body,
+  button,
+  input,
+  textarea,
+  select {
+    font-family: var(--font-ui);
   }
 
   h1 {
@@ -48,6 +91,18 @@
 }
 
 @layer utilities {
+  .font-ui {
+    font-family: var(--font-ui);
+  }
+
+  .font-serif-content {
+    font-family: var(--font-serif);
+  }
+
+  .font-mono-code {
+    font-family: var(--font-mono);
+  }
+
   .text-h1 {
     font-size: 1.5rem;
     line-height: 2rem;
@@ -266,7 +321,7 @@
   }
 
   .markdown-content :where(pre, code) {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-family: var(--font-mono);
   }
 
   /* Visual fallback for SSR — identical styling to the post-hydration wrapper */
@@ -341,8 +396,16 @@
   }
 
   .post-markdown {
-    font-size: 0.938rem;
-    line-height: 1.8;
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    line-height: 1.9;
+  }
+
+  @media (min-width: 768px) {
+    .post-markdown {
+      font-size: 1.0625rem;
+      line-height: 1.95;
+    }
   }
 
   .post-markdown :where(h1, h2, h3, h4, h5, h6) {
@@ -376,8 +439,8 @@
   .post-markdown p,
   .post-markdown li,
   .post-markdown blockquote {
-    font-size: 0.938rem;
-    line-height: 1.7;
+    font-size: inherit;
+    line-height: inherit;
   }
 
   .post-markdown blockquote {
@@ -403,6 +466,7 @@
   .post-markdown :not(pre) > code {
     background-color: var(--background3);
     color: var(--primary1);
+    font-family: var(--font-mono);
     font-size: 0.813rem;
     font-weight: 500;
     padding: 0.125rem 0.375rem;
