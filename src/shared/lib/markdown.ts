@@ -1,4 +1,3 @@
-import rehypeShiki from "@shikijs/rehype";
 import GithubSlugger from "github-slugger";
 import { toString } from "mdast-util-to-string";
 import rehypeExternalLinks from "rehype-external-links";
@@ -11,6 +10,7 @@ import remarkRehype from "remark-rehype";
 import { unified } from "unified";
 import { visit } from "unist-util-visit";
 import { normalizeAssetUrl } from "./asset-url";
+import type { RehypeShikiOptions } from "@shikijs/rehype";
 import type { Element, Root } from "hast";
 
 export interface TocItem {
@@ -20,6 +20,25 @@ export interface TocItem {
 }
 
 const HEADING_ID_PREFIX = "user-content-";
+const fencedCodeBlockPattern = /^(?: {0,3})(`{3,}|~{3,})/m;
+const indentedCodeBlockPattern = /^(?: {4}|\t)\S/m;
+const shikiLanguages: NonNullable<RehypeShikiOptions["langs"]> = [
+  "bash",
+  "css",
+  "html",
+  "javascript",
+  "json",
+  "jsx",
+  "markdown",
+  "shellscript",
+  "tsx",
+  "typescript",
+];
+const shikiOptions: RehypeShikiOptions = {
+  theme: "github-dark",
+  langs: shikiLanguages,
+  lazy: true,
+};
 
 // <img> 노드에 loading="lazy" decoding="async" 속성 추가
 function rehypeLazyImages() {
@@ -85,12 +104,10 @@ const sanitizeSchema = {
   },
 };
 
-// Create once at module level so rehypeShiki's highlighter is not re-initialized per call
-const processor = unified()
+const plainProcessor = unified()
   .use(remarkParse)
   .use(remarkGfm)
   .use(remarkRehype)
-  .use(rehypeShiki, { theme: "github-dark" })
   .use(rehypeExternalLinks, {
     target: "_blank",
     rel: ["noopener", "noreferrer"],
@@ -102,7 +119,45 @@ const processor = unified()
   .use(rehypeStringify)
   .freeze();
 
+type MarkdownProcessor = typeof plainProcessor;
+
+let highlightedProcessorPromise: Promise<MarkdownProcessor> | null = null;
+
+function hasCodeBlock(markdown: string): boolean {
+  return (
+    fencedCodeBlockPattern.test(markdown) ||
+    indentedCodeBlockPattern.test(markdown)
+  );
+}
+
+async function getHighlightedProcessor(): Promise<MarkdownProcessor> {
+  highlightedProcessorPromise ??= import("@shikijs/rehype").then(
+    ({ default: rehypeShiki }) =>
+      unified()
+        .use(remarkParse)
+        .use(remarkGfm)
+        .use(remarkRehype)
+        .use(rehypeShiki, shikiOptions)
+        .use(rehypeExternalLinks, {
+          target: "_blank",
+          rel: ["noopener", "noreferrer"],
+        })
+        .use(rehypeNormalizeAssetImages)
+        .use(rehypeLazyImages)
+        .use(rehypeSlug, { prefix: HEADING_ID_PREFIX })
+        .use(rehypeSanitize, sanitizeSchema)
+        .use(rehypeStringify)
+        .freeze() as MarkdownProcessor,
+  );
+
+  return highlightedProcessorPromise;
+}
+
 export async function renderMarkdown(md: string): Promise<string> {
+  const processor = hasCodeBlock(md)
+    ? await getHighlightedProcessor()
+    : plainProcessor;
+
   return String(await processor.process(md));
 }
 
