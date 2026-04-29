@@ -36,6 +36,7 @@ const shikiOptions: RehypeShikiOptions = {
   theme: "github-dark",
   langs: shikiLanguages,
   lazy: true,
+  fallbackLanguage: "text",
 };
 
 // <img> 노드에 loading="lazy" decoding="async" 속성 추가
