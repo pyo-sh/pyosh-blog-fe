@@ -2,6 +2,7 @@ import type {
   Category,
   CategoryTreeChange,
   CreateCategoryBody,
+  DeleteCategoriesBody,
   DeleteCategoryOptions,
   UpdateCategoryBody,
   UpdateCategoryOrderBody,
@@ -109,5 +110,20 @@ export async function deleteCategory(
 
   await clientMutate<void>(`/categories/${id}${query ? `?${query}` : ""}`, {
     method: "DELETE",
+  });
+}
+
+export async function deleteCategories(
+  ids: number[],
+  options: DeleteCategoryOptions,
+): Promise<void> {
+  const body: DeleteCategoriesBody = {
+    ids,
+    ...options,
+  };
+
+  await clientMutate<void>("/categories/bulk", {
+    method: "DELETE",
+    body: JSON.stringify(body),
   });
 }

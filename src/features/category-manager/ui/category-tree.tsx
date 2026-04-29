@@ -14,6 +14,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
+import { CategoryBulkDeleteModal } from "./category-bulk-delete-modal";
 import { CategoryTreeRow, CategoryTreeRowPreview } from "./category-tree-row";
 import { CategoryTreeToolbar } from "./category-tree-toolbar";
 import {
@@ -29,7 +30,11 @@ import {
   type CategoryTreeMode,
   type DropTarget,
 } from "../lib/tree-utils";
-import type { Category, CategoryTreeChange } from "@entities/category";
+import type {
+  Category,
+  CategoryTreeChange,
+  DeleteCategoryOptions,
+} from "@entities/category";
 import { ConfirmDialog } from "@shared/ui/confirm-dialog";
 import { EmptyState } from "@shared/ui/libs";
 
@@ -41,8 +46,13 @@ interface CategoryTreeProps {
   onToggleVisibility: (category: Category) => Promise<void>;
   onCreate: () => void;
   onBulkVisibilityChange: (ids: number[], isVisible: boolean) => Promise<void>;
+  onBulkDelete: (
+    ids: number[],
+    options: DeleteCategoryOptions,
+  ) => Promise<void>;
   onSaveTree: (changes: CategoryTreeChange[]) => Promise<void>;
   isBulkUpdating: boolean;
+  isBulkDeleting: boolean;
   isSavingTree: boolean;
 }
 
@@ -54,8 +64,10 @@ export function CategoryTree({
   onToggleVisibility,
   onCreate,
   onBulkVisibilityChange,
+  onBulkDelete,
   onSaveTree,
   isBulkUpdating,
+  isBulkDeleting,
   isSavingTree,
 }: CategoryTreeProps) {
   const collisionDetection: CollisionDetection = useCallback((args) => {
@@ -91,6 +103,7 @@ export function CategoryTree({
   const [activeDragId, setActiveDragId] = useState<number | null>(null);
   const [dropTarget, setDropTarget] = useState<DropTarget | null>(null);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
   const hoverExpandTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
@@ -130,6 +143,17 @@ export function CategoryTree({
     ? visibleRows.find(({ category }) => category.id === activeDragId)
     : null;
   const selectedCount = selectedIds.size;
+  const selectedCategories = useMemo(
+    () =>
+      flattenCategoryTree(
+        workingCategories,
+        collectExpandableIds(workingCategories, true),
+        true,
+      )
+        .map(({ category }) => category)
+        .filter((category) => selectedIds.has(category.id)),
+    [selectedIds, workingCategories],
+  );
   const rowMetaMap = useMemo(
     () =>
       new Map(
@@ -288,6 +312,22 @@ export function CategoryTree({
 
     await onBulkVisibilityChange(ids, isVisible);
     setSelectedIds(new Set());
+  };
+
+  const handleBulkDeleteConfirm = async (options: DeleteCategoryOptions) => {
+    const ids = Array.from(selectedIds);
+
+    if (ids.length === 0) {
+      return;
+    }
+
+    try {
+      await onBulkDelete(ids, options);
+      setSelectedIds(new Set());
+      setIsBulkDeleteModalOpen(false);
+    } catch {
+      // The caller owns toast messaging for API failures.
+    }
   };
 
   const handleSaveEditMode = async () => {
@@ -598,6 +638,16 @@ export function CategoryTree({
                 </button>
                 <button
                   type="button"
+                  onClick={() => setIsBulkDeleteModalOpen(true)}
+                  disabled={
+                    selectedCount === 0 || isBulkDeleting || isBulkUpdating
+                  }
+                  className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] bg-negative-1 px-3 text-sm text-text-1 transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  삭제
+                </button>
+                <button
+                  type="button"
                   onClick={handleExitSelectMode}
                   className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] bg-primary-1 px-3 text-sm text-white transition-opacity hover:opacity-90"
                 >
@@ -647,6 +697,15 @@ export function CategoryTree({
       >
         저장하지 않은 배치 편집 변경사항이 사라집니다.
       </ConfirmDialog>
+
+      <CategoryBulkDeleteModal
+        isOpen={isBulkDeleteModalOpen}
+        selectedCategories={selectedCategories}
+        categories={workingCategories}
+        isDeleting={isBulkDeleting}
+        onCancel={() => setIsBulkDeleteModalOpen(false)}
+        onConfirm={(options) => void handleBulkDeleteConfirm(options)}
+      />
     </>
   );
 }

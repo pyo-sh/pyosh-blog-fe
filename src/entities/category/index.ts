@@ -2,6 +2,7 @@ export type {
   Category,
   CategoryTreeChange,
   CreateCategoryBody,
+  DeleteCategoriesBody,
   DeleteCategoryAction,
   DeleteCategoryOptions,
   UpdateCategoryBody,
@@ -10,6 +11,7 @@ export type {
 } from "./model";
 export { findCategoryBySlug, getCategoryAncestors } from "./lib";
 export {
+  deleteCategories,
   createCategory,
   deleteCategory,
   fetchCategories,
