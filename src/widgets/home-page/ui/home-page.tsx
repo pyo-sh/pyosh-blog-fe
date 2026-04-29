@@ -43,12 +43,12 @@ export async function HomePage({ searchParams }: HomePageProps) {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-[67.5rem] flex-col gap-6 px-4 pb-16 pt-8 md:px-6">
+    <main className="mx-auto flex w-full max-w-270 flex-col gap-3 pb-16 pt-8">
       <header
-        className="motion-reveal mb-4"
+        className="motion-reveal pb-1"
         style={{ animationDelay: "100ms" }}
       >
-        <h1 className="break-keep text-[1.5rem] leading-[1.938rem] font-bold tracking-tight text-text-1 md:text-[1.875rem] md:leading-[2.375rem]">
+        <h1 className="break-keep text-[1.5rem] leading-[1.938rem] font-bold tracking-tight text-text-1 md:text-[1.875rem] md:leading-9.5">
           최근 글
         </h1>
       </header>
