@@ -325,9 +325,7 @@ function removeCategory(
   targetId: number,
   parentId: number | null = null,
 ): {
-  tree: Category[];
   removedCategory: Category;
-  parentId: number | null;
 } | null {
   const index = categories.findIndex((category) => category.id === targetId);
 
@@ -336,9 +334,7 @@ function removeCategory(
     normalizeSiblingOrder(categories, parentId);
 
     return {
-      tree: categories,
       removedCategory,
-      parentId,
     };
   }
 
@@ -350,8 +346,6 @@ function removeCategory(
     );
 
     if (result) {
-      category.children = result.tree;
-
       return result;
     }
   }
