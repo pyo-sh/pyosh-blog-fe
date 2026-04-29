@@ -20,8 +20,6 @@ export interface TocItem {
 }
 
 const HEADING_ID_PREFIX = "user-content-";
-const fencedCodeBlockPattern = /^(?: {0,3})(`{3,}|~{3,})/m;
-const indentedCodeBlockPattern = /^(?: {4}|\t)\S/m;
 const shikiLanguages: NonNullable<RehypeShikiOptions["langs"]> = [
   "bash",
   "css",
@@ -124,10 +122,14 @@ type MarkdownProcessor = typeof plainProcessor;
 let highlightedProcessorPromise: Promise<MarkdownProcessor> | null = null;
 
 function hasCodeBlock(markdown: string): boolean {
-  return (
-    fencedCodeBlockPattern.test(markdown) ||
-    indentedCodeBlockPattern.test(markdown)
-  );
+  const tree = unified().use(remarkParse).use(remarkGfm).parse(markdown);
+  let hasCode = false;
+
+  visit(tree, "code", () => {
+    hasCode = true;
+  });
+
+  return hasCode;
 }
 
 async function getHighlightedProcessor(): Promise<MarkdownProcessor> {
