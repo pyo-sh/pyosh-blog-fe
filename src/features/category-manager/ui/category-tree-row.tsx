@@ -1,7 +1,7 @@
 "use client";
 
 import { useDraggable, useDroppable } from "@dnd-kit/core";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import altArrowRightLinear from "@iconify-icons/solar/alt-arrow-right-linear";
 import menuDotsLinear from "@iconify-icons/solar/menu-dots-linear";
 import penNewRoundLinear from "@iconify-icons/solar/pen-new-round-linear";

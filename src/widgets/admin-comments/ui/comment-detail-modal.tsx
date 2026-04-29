@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import closeCircleLinear from "@iconify-icons/solar/close-circle-linear";
 import lockKeyholeLinear from "@iconify-icons/solar/lock-keyhole-linear";
 import trashBinMinimalisticLinear from "@iconify-icons/solar/trash-bin-minimalistic-linear";

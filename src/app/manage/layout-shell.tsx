@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import hamburgerMenuLinear from "@iconify-icons/solar/hamburger-menu-linear";
 import { usePathname } from "next/navigation";
 import {
@@ -107,7 +107,12 @@ export function ManageLayoutShell({ children }: { children: React.ReactNode }) {
             aria-controls={sidebarOpen ? "admin-nav-overlay" : undefined}
             className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-text-2 transition-colors hover:bg-background-3 hover:text-text-1 md:hidden"
           >
-            <Icon icon={hamburgerMenuLinear} width="22" aria-hidden="true" />
+            <Icon
+              icon={hamburgerMenuLinear}
+              width="22"
+              height="22"
+              aria-hidden="true"
+            />
           </button>
 
           <p className="text-lg font-bold text-text-1">

@@ -1,6 +1,6 @@
 "use client";
 
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import lockKeyholeLinear from "@iconify-icons/solar/lock-keyhole-linear";
 import restartLinear from "@iconify-icons/solar/restart-linear";
 import trashBinMinimalisticLinear from "@iconify-icons/solar/trash-bin-minimalistic-linear";

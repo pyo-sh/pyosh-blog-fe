@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import magniferLinear from "@iconify-icons/solar/magnifer-linear";
 import { useRouter } from "next/navigation";
 import type { SearchFilter } from "@entities/post";

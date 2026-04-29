@@ -1,6 +1,6 @@
 import { cache } from "react";
 import type { Metadata } from "next";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import eyeLinear from "@iconify-icons/solar/eye-linear";
 import { cookies } from "next/headers";
 import Image from "next/image";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import altArrowDownLinear from "@iconify-icons/solar/alt-arrow-down-linear";
 import restartLinear from "@iconify-icons/solar/restart-linear";
 import type { AdminPostTab } from "./post-filters";

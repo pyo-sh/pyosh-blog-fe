@@ -1,5 +1,5 @@
 import { type ReactNode } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import dangerTriangleLinear from "@iconify-icons/solar/danger-triangle-linear";
 import linkMinimalistic2Linear from "@iconify-icons/solar/link-minimalistic-2-linear";
 import refreshLinear from "@iconify-icons/solar/refresh-linear";

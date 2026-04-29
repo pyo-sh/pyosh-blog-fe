@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import altArrowRightLinear from "@iconify-icons/solar/alt-arrow-right-linear";
 import Link from "next/link";
 import { formatNumber } from "@shared/lib/format-number";

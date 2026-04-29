@@ -7,7 +7,7 @@ import {
   type FormEvent,
   type KeyboardEvent,
 } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import chatRoundDotsLinear from "@iconify-icons/solar/chat-round-dots-linear";
 import closeCircleLinear from "@iconify-icons/solar/close-circle-linear";
 import lockKeyholeLinear from "@iconify-icons/solar/lock-keyhole-linear";

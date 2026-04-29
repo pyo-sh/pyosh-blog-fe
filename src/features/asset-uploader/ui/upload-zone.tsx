@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import cloudUploadLinear from "@iconify-icons/solar/cloud-upload-linear";
 import galleryWideLinear from "@iconify-icons/solar/gallery-wide-linear";
 import linkMinimalistic2Linear from "@iconify-icons/solar/link-minimalistic-2-linear";

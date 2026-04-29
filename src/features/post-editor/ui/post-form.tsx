@@ -6,7 +6,7 @@ import type {
   ReactNode,
 } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import archiveLinear from "@iconify-icons/solar/archive-linear";
 import checkCircleLinear from "@iconify-icons/solar/check-circle-linear";
 import disketteLinear from "@iconify-icons/solar/diskette-linear";

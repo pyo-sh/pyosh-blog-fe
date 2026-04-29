@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import documentTextLinear from "@iconify-icons/solar/document-text-linear";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";

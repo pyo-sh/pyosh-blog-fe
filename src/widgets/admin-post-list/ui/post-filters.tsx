@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import altArrowDownLinear from "@iconify-icons/solar/alt-arrow-down-linear";
 import magniferLinear from "@iconify-icons/solar/magnifer-linear";
 import type { Category } from "@entities/category";

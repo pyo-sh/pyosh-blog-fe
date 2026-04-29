@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useTransition } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import arrowLeftLinear from "@iconify-icons/solar/arrow-left-linear";
 import chart2Linear from "@iconify-icons/solar/chart-2-linear";
 import chatRoundDotsLinear from "@iconify-icons/solar/chat-round-dots-linear";
@@ -122,7 +122,7 @@ function AdminLogoutButton({
         className,
       )}
     >
-      <Icon icon={logout2Linear} width="18" aria-hidden="true" />
+      <Icon icon={logout2Linear} width="18" height="18" aria-hidden="true" />
       {iconOnly ? null : <span>로그아웃</span>}
     </button>
   );
@@ -155,6 +155,7 @@ function SidebarNav({ collapsed = false, onItemClick }: SidebarNavProps) {
                 <Icon
                   icon={item.icon}
                   width="20"
+                  height="20"
                   aria-hidden="true"
                   className="shrink-0"
                 />
@@ -335,6 +336,7 @@ export function AdminSidebar({
             <Icon
               icon={sidebarMinimalisticLinear}
               width="18"
+              height="18"
               aria-hidden="true"
             />
           </button>
@@ -351,7 +353,13 @@ export function AdminSidebar({
             )}
             title="블로그로 돌아가기"
           >
-            <Icon icon={arrowLeftLinear} width="16" aria-hidden="true" />
+            <Icon
+              icon={arrowLeftLinear}
+              width="16"
+              height="16"
+              aria-hidden="true"
+              className="shrink-0"
+            />
             <span
               className={cn(
                 "truncate transition-[margin,width,opacity] duration-200",
@@ -409,6 +417,7 @@ export function AdminSidebar({
                 <Icon
                   icon={hamburgerMenuLinear}
                   width="18"
+                  height="18"
                   aria-hidden="true"
                 />
               </button>
@@ -422,7 +431,13 @@ export function AdminSidebar({
                 onClick={onClose}
                 className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-text-3 transition-colors hover:bg-background-3 hover:text-text-1"
               >
-                <Icon icon={arrowLeftLinear} width="16" aria-hidden="true" />
+                <Icon
+                  icon={arrowLeftLinear}
+                  width="16"
+                  height="16"
+                  aria-hidden="true"
+                  className="shrink-0"
+                />
                 <span>블로그로 돌아가기</span>
               </Link>
             </div>

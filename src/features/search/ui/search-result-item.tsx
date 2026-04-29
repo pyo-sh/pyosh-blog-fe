@@ -1,4 +1,4 @@
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import chatRoundDotsLinear from "@iconify-icons/solar/chat-round-dots-linear";
 import eyeLinear from "@iconify-icons/solar/eye-linear";
 import Link from "next/link";

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import magniferLinear from "@iconify-icons/solar/magnifer-linear";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@shared/lib/style-utils";

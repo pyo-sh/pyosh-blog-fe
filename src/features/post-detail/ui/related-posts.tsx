@@ -1,4 +1,4 @@
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import documentTextLinear from "@iconify-icons/solar/document-text-linear";
 import Image from "next/image";
 import Link from "next/link";

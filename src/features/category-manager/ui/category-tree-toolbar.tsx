@@ -1,6 +1,6 @@
 "use client";
 
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import addFolderLinear from "@iconify-icons/solar/add-folder-linear";
 import altArrowDownLinear from "@iconify-icons/solar/alt-arrow-down-linear";
 import altArrowUpLinear from "@iconify-icons/solar/alt-arrow-up-linear";

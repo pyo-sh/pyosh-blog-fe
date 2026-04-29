@@ -2,7 +2,7 @@
 
 import type { ComponentProps, ReactNode } from "react";
 import { useState } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import altArrowDownLinear from "@iconify-icons/solar/alt-arrow-down-linear";
 import altArrowUpLinear from "@iconify-icons/solar/alt-arrow-up-linear";
 import chatRoundDotsLinear from "@iconify-icons/solar/chat-round-dots-linear";

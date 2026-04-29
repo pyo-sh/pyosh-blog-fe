@@ -1,7 +1,7 @@
 "use client";
 
 import { type MouseEvent, useEffect, useState } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import listLinear from "@iconify-icons/solar/list-linear";
 import type { TocItem } from "@shared/lib/markdown";
 import { cn } from "@shared/lib/style-utils";
