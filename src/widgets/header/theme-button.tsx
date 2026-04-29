@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import moonLinear from "@iconify-icons/solar/moon-linear";
 import sun2Linear from "@iconify-icons/solar/sun-2-linear";
 import { useTheme } from "@app-layer/theme";

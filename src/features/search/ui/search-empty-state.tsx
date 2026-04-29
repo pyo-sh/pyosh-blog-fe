@@ -1,4 +1,4 @@
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import magniferLinear from "@iconify-icons/solar/magnifer-linear";
 import magniferZoomInLinear from "@iconify-icons/solar/magnifer-zoom-in-linear";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import checkCircleLinear from "@iconify-icons/solar/check-circle-linear";
 import checkSquareLinear from "@iconify-icons/solar/check-square-linear";
 import linkMinimalistic2Linear from "@iconify-icons/solar/link-minimalistic-2-linear";

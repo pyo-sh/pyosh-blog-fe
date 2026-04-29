@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import altArrowRightLinear from "@iconify-icons/solar/alt-arrow-right-linear";
 import closeCircleLinear from "@iconify-icons/solar/close-circle-linear";
 import eyeLinear from "@iconify-icons/solar/eye-linear";
@@ -143,7 +143,15 @@ export function PublicSidebarContent({
       {categories.some((c) => c.isVisible) && (
         <SidebarSection
           title={`카테고리 (${visibleCategoryCount})`}
-          icon={<Icon icon={folder2Linear} width="13" aria-hidden="true" />}
+          icon={
+            <Icon
+              icon={folder2Linear}
+              width="13"
+              height="13"
+              aria-hidden="true"
+              className="shrink-0"
+            />
+          }
           action={
             <Link
               href="/categories"
@@ -151,7 +159,13 @@ export function PublicSidebarContent({
               className="inline-flex items-center gap-0.5 text-ui-xs font-medium text-primary-1 underline-offset-4 hover:underline"
             >
               전체보기
-              <Icon icon={altArrowRightLinear} width="10" aria-hidden="true" />
+              <Icon
+                icon={altArrowRightLinear}
+                width="10"
+                height="10"
+                aria-hidden="true"
+                className="shrink-0"
+              />
             </Link>
           }
         >
@@ -167,14 +181,28 @@ export function PublicSidebarContent({
       {tags.length > 0 && (
         <SidebarSection
           title="태그"
-          icon={<Icon icon={tagLinear} width="13" aria-hidden="true" />}
+          icon={
+            <Icon
+              icon={tagLinear}
+              width="13"
+              height="13"
+              aria-hidden="true"
+              className="shrink-0"
+            />
+          }
           action={
             <Link
               href="/tags"
               className="inline-flex items-center gap-0.5 text-ui-xs font-medium text-primary-1 underline-offset-4 hover:underline"
             >
               전체보기
-              <Icon icon={altArrowRightLinear} width="10" aria-hidden="true" />
+              <Icon
+                icon={altArrowRightLinear}
+                width="10"
+                height="10"
+                aria-hidden="true"
+                className="shrink-0"
+              />
             </Link>
           }
         >
@@ -185,7 +213,15 @@ export function PublicSidebarContent({
       {totalViews !== null && (
         <SidebarSection
           title="블로그 조회수"
-          icon={<Icon icon={eyeLinear} width="13" aria-hidden="true" />}
+          icon={
+            <Icon
+              icon={eyeLinear}
+              width="13"
+              height="13"
+              aria-hidden="true"
+              className="shrink-0"
+            />
+          }
         >
           <TotalViewCount totalPageviews={totalViews.totalPageviews} />
         </SidebarSection>
@@ -215,7 +251,12 @@ export function PublicSidebarPanel({
           aria-label="메뉴 닫기"
           className="flex h-9 w-9 items-center justify-center rounded-lg text-text-3 transition-colors hover:bg-background-3"
         >
-          <Icon icon={closeCircleLinear} width="20" aria-hidden="true" />
+          <Icon
+            icon={closeCircleLinear}
+            width="20"
+            height="20"
+            aria-hidden="true"
+          />
         </button>
       </div>
 

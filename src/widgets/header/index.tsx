@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import hamburgerMenuLinear from "@iconify-icons/solar/hamburger-menu-linear";
 import Link from "next/link";
 import { cn } from "@shared/lib/style-utils";

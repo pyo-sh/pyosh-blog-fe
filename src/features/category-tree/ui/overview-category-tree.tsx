@@ -1,6 +1,6 @@
 "use client";
 
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import squareDoubleAltArrowDownLinear from "@iconify-icons/solar/square-double-alt-arrow-down-linear";
 import squareDoubleAltArrowUpLinear from "@iconify-icons/solar/square-double-alt-arrow-up-linear";
 import Link from "next/link";

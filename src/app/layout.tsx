@@ -10,6 +10,11 @@ import {
 } from "@shared/lib/seo";
 import { ErrorBoundaryWithReset } from "@shared/ui/error-boundary";
 
+const CRITICAL_FONT_PRELOADS = [
+  "/fonts/nanum-square-neo/NanumSquareNeoTTF-bRg.woff2",
+  "/fonts/nanum-square-neo/NanumSquareNeoTTF-cBd.woff2",
+] as const;
+
 export const metadata: Metadata = {
   metadataBase: getMetadataBase(),
   title: {
@@ -77,6 +82,18 @@ export default async function RootLayout({
 
   return (
     <html lang="ko" data-theme={themeType || undefined}>
+      <head>
+        {CRITICAL_FONT_PRELOADS.map((href) => (
+          <link
+            key={href}
+            rel="preload"
+            href={href}
+            as="font"
+            type="font/woff2"
+            crossOrigin="anonymous"
+          />
+        ))}
+      </head>
       <body>
         <div className="w-full h-full">
           <ErrorBoundaryWithReset>

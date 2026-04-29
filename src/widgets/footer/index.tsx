@@ -1,5 +1,5 @@
 import React from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import letterLinear from "@iconify-icons/solar/letter-linear";
 import linkMinimalistic2Linear from "@iconify-icons/solar/link-minimalistic-2-linear";
 import Link from "next/link";

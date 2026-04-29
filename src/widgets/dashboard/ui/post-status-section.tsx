@@ -1,6 +1,6 @@
 "use client";
 
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import archiveLinear from "@iconify-icons/solar/archive-linear";
 import checkCircleLinear from "@iconify-icons/solar/check-circle-linear";
 import documentTextLinear from "@iconify-icons/solar/document-text-linear";

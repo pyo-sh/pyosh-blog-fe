@@ -1,6 +1,6 @@
 "use client";
 
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import chart2Linear from "@iconify-icons/solar/chart-2-linear";
 import eyeLinear from "@iconify-icons/solar/eye-linear";
 import graphUpLinear from "@iconify-icons/solar/graph-up-linear";

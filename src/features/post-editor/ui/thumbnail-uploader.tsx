@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import clipboardLinear from "@iconify-icons/solar/clipboard-linear";
 import galleryWideLinear from "@iconify-icons/solar/gallery-wide-linear";
 import linkMinimalistic2Linear from "@iconify-icons/solar/link-minimalistic-2-linear";

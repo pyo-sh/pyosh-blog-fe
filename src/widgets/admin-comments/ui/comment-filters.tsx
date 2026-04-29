@@ -7,7 +7,7 @@ import {
   type DateRange,
   type MonthCaptionProps,
 } from "react-day-picker";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import calendarLinear from "@iconify-icons/solar/calendar-linear";
 import closeCircleLinear from "@iconify-icons/solar/close-circle-linear";
 import magniferLinear from "@iconify-icons/solar/magnifer-linear";

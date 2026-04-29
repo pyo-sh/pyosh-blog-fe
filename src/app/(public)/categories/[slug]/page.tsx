@@ -1,6 +1,6 @@
 import { cache } from "react";
 import type { Metadata } from "next";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import documentTextLinear from "@iconify-icons/solar/document-text-linear";
 import { notFound } from "next/navigation";
 import {
