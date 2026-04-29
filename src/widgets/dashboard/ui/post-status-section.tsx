@@ -139,8 +139,7 @@ export function PostStatusSection() {
               <span className={badgeClassName}>{label}</span>
             </div>
             <p
-              className={`mt-5 text-[1.75rem] font-bold leading-none ${valueClassName}`}
-              style={{ fontFamily: "Outfit, 'Gothic A1', sans-serif" }}
+              className={`mt-5 text-[1.75rem] font-bold leading-none tabular-nums ${valueClassName}`}
             >
               {formatNumber(value)}
             </p>

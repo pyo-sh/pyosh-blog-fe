@@ -236,12 +236,12 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
           <span>댓글 {currentPost.commentCount}</span>
         </div>
 
-        <h1 className="mb-6 text-2xl font-bold text-text-1">
+        <h1 className="font-serif-content mb-6 text-2xl font-bold text-text-1">
           {currentPost.title}
         </h1>
 
         <div
-          className="markdown-content prose max-w-none"
+          className="markdown-content post-markdown prose max-w-none break-keep"
           dangerouslySetInnerHTML={{ __html: renderedContent }}
         />
 

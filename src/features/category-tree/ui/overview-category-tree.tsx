@@ -47,7 +47,7 @@ function OverviewCategoryItem({
   );
   const countContent =
     postCount !== undefined ? (
-      <span className="w-full shrink-0 text-right font-['Outfit'] text-[0.6875rem] leading-none font-medium tabular-nums text-text-4">
+      <span className="w-full shrink-0 text-right text-[0.6875rem] leading-none font-medium tabular-nums text-text-4">
         {formatNumber(postCount)}
       </span>
     ) : null;
