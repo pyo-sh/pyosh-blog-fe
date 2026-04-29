@@ -13,6 +13,7 @@ import {
 import { CategoryTree } from "./category-tree";
 import {
   createCategory,
+  deleteCategories,
   deleteCategory,
   fetchCategoriesAdmin,
   updateCategoryTree,
@@ -92,6 +93,25 @@ export function CategoryManager() {
     },
     onError: (error) => {
       toast.error(getErrorMessage(error, "카테고리 삭제에 실패했습니다."));
+    },
+  });
+
+  const bulkDeleteMutation = useMutation({
+    mutationFn: ({
+      ids,
+      options,
+    }: {
+      ids: number[];
+      options: DeleteCategoryOptions;
+    }) => deleteCategories(ids, options),
+    onSuccess: async (_data, variables) => {
+      await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      toast.success(
+        `선택한 카테고리 ${variables.ids.length}개를 삭제했습니다.`,
+      );
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error, "카테고리 일괄 삭제에 실패했습니다."));
     },
   });
 
@@ -226,10 +246,14 @@ export function CategoryManager() {
               onBulkVisibilityChange={async (ids, isVisible) => {
                 await bulkVisibilityMutation.mutateAsync({ ids, isVisible });
               }}
+              onBulkDelete={async (ids, options) => {
+                await bulkDeleteMutation.mutateAsync({ ids, options });
+              }}
               onSaveTree={async (changes) => {
                 await treeUpdateMutation.mutateAsync(changes);
               }}
               isBulkUpdating={bulkVisibilityMutation.isPending}
+              isBulkDeleting={bulkDeleteMutation.isPending}
               isSavingTree={treeUpdateMutation.isPending}
             />
           ) : null}

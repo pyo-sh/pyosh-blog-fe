@@ -47,3 +47,7 @@ export interface DeleteCategoryOptions {
   action: DeleteCategoryAction;
   moveTo?: number;
 }
+
+export interface DeleteCategoriesBody extends DeleteCategoryOptions {
+  ids: number[];
+}
