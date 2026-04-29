@@ -27,11 +27,8 @@ function buildCspDirectives(nonce: string): string {
     ].join(" "),
     "object-src 'none'",
     // Phase 2 prerequisite: replace 'unsafe-inline' with nonce-based styles before enforcement
-    joinSources(
-      "style-src 'self' 'unsafe-inline'",
-      "https://fonts.googleapis.com",
-    ),
-    "font-src 'self' https://fonts.gstatic.com",
+    "style-src 'self' 'unsafe-inline'",
+    "font-src 'self'",
     joinSources(
       "connect-src 'self'",
       NEXT_PUBLIC_API_URL,
