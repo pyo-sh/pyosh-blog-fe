@@ -16,6 +16,22 @@
 
 @font-face {
   font-family: "NanumSquareNeo";
+  src: url("/fonts/nanum-square-neo/NanumSquareNeoTTF-bRg.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "NanumSquareNeo";
+  src: url("/fonts/nanum-square-neo/NanumSquareNeoTTF-cBd.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "NanumSquareNeo";
   src: url("/fonts/nanum-square-neo/NanumSquareNeoTTF-cBd.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
