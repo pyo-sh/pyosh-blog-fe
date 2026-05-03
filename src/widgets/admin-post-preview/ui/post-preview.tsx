@@ -98,6 +98,7 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
       <div className="flex flex-wrap items-center gap-3 rounded-[1.75rem] border border-border-3 bg-background-2 p-4 shadow-[0px_18px_60px_0px_rgba(0,0,0,0.06)]">
         <Link
           href="/manage/posts"
+          prefetch={false}
           className="inline-flex items-center gap-1.5 rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
         >
           ← 목록
@@ -105,6 +106,7 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
 
         <Link
           href={`/manage/posts/${currentPost.id}/edit`}
+          prefetch={false}
           className="inline-flex items-center rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
         >
           수정

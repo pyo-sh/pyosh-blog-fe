@@ -127,6 +127,7 @@ export function PostStatusSection() {
           <Link
             key={label}
             href={href}
+            prefetch={false}
             className="rounded-xl border border-border-4 bg-background-2 p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary-1/40"
           >
             <div className="flex items-center gap-2">

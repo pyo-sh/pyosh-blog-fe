@@ -540,6 +540,7 @@ export default function ManagePostsPage() {
           action={
             <Link
               href="/manage/posts/new"
+              prefetch={false}
               className="inline-flex items-center justify-center rounded-lg bg-primary-1 px-4 py-2.5 text-body-sm font-semibold text-white transition-opacity hover:opacity-90"
             >
               새 글 작성
