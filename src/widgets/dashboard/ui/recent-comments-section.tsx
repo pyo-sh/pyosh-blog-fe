@@ -334,6 +334,7 @@ export function RecentCommentsSection() {
         </span>
         <Link
           href="/manage/comments"
+          prefetch={false}
           className="ml-auto text-sm text-primary-1 transition-colors hover:text-primary-2"
         >
           전체보기

@@ -141,6 +141,7 @@ function SidebarNav({ collapsed = false, onItemClick }: SidebarNavProps) {
             <li key={item.path}>
               <Link
                 href={item.path}
+                prefetch={false}
                 onClick={onItemClick}
                 className={cn(
                   "flex items-center rounded-lg px-3 py-2 text-sm transition-all",
@@ -296,6 +297,7 @@ export function AdminSidebar({
         >
           <Link
             href="/manage"
+            prefetch={false}
             className={cn(
               "flex min-w-0 items-center text-primary-1 transition-[width] duration-200",
               isCollapsed ? "w-0 overflow-hidden" : "w-auto",
@@ -347,6 +349,7 @@ export function AdminSidebar({
         <div className="mt-auto px-3 pb-4">
           <Link
             href="/"
+            prefetch={false}
             className={cn(
               "flex items-center rounded-lg px-3 py-2 text-sm text-text-3 transition-colors hover:bg-background-3 hover:text-text-1",
               isCollapsed ? "justify-center px-0" : "",
@@ -399,6 +402,7 @@ export function AdminSidebar({
             >
               <Link
                 href="/manage"
+                prefetch={false}
                 onClick={onClose}
                 className="flex items-center gap-2 text-primary-1"
               >
@@ -428,6 +432,7 @@ export function AdminSidebar({
             <div className="mt-auto px-3 pb-4">
               <Link
                 href="/"
+                prefetch={false}
                 onClick={onClose}
                 className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-text-3 transition-colors hover:bg-background-3 hover:text-text-1"
               >

@@ -316,6 +316,7 @@ function DetailView({
             {comment.post ? (
               <Link
                 href={`/manage/posts/${comment.postId}/preview`}
+                prefetch={false}
                 className="inline-flex min-h-6 items-end gap-1 cursor-pointer text-primary-1 transition-colors hover:text-primary-2 hover:underline"
                 target="_blank"
               >
@@ -572,6 +573,7 @@ function ThreadView({
               <span className="text-sm text-text-3">글:</span>
               <Link
                 href={`/manage/posts/${postId}/preview`}
+                prefetch={false}
                 className="inline-flex min-h-6 items-end gap-1 cursor-pointer text-sm text-primary-1 transition-colors hover:text-primary-2 hover:underline"
                 target="_blank"
               >

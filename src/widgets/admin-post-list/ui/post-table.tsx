@@ -211,6 +211,7 @@ function TableActionButton({
     return (
       <Link
         href={href}
+        prefetch={false}
         aria-label={ariaLabel}
         className={className}
         onClick={(event) => event.stopPropagation()}

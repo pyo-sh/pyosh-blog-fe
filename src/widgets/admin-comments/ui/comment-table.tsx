@@ -170,6 +170,7 @@ export function CommentTable({
                     {item.post ? (
                       <Link
                         href={`/manage/posts/${item.postId}/preview`}
+                        prefetch={false}
                         onClick={(event) => event.stopPropagation()}
                         className="block max-w-[12rem] truncate text-sm leading-none text-primary-1 transition-colors hover:underline"
                       >
