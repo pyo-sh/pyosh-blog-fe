@@ -132,7 +132,7 @@ export default function ManagePostsPage() {
         q: searchQuery || undefined,
         sort,
         order,
-        includeDeleted: tab === "trash",
+        deletedState: tab === "trash" ? "deleted" : undefined,
       }),
   });
 

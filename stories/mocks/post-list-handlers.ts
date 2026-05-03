@@ -1,9 +1,29 @@
 import { http, HttpResponse } from "msw";
-import type { BulkPostAction, Post, UpdatePostBody } from "@entities/post";
+import type {
+  BulkPostAction,
+  FetchAdminPostsParams,
+  Post,
+  UpdatePostBody,
+} from "@entities/post";
 import { mockCategories } from "./data/categories";
 import { mockMeta, mockPosts } from "./data/posts";
 
 const API_BASE_URL = "http://localhost:5500";
+type DeletedState = NonNullable<FetchAdminPostsParams["deletedState"]>;
+
+function getDeletedState(searchParams: URLSearchParams): DeletedState {
+  const deletedState = searchParams.get("deletedState");
+
+  if (
+    deletedState === "active" ||
+    deletedState === "deleted" ||
+    deletedState === "all"
+  ) {
+    return deletedState;
+  }
+
+  return searchParams.get("includeDeleted") === "true" ? "all" : "active";
+}
 
 function createSeedPosts() {
   return mockPosts.map((post, index): Post => ({
@@ -16,7 +36,7 @@ function createSeedPosts() {
 function filterPosts(
   posts: Post[],
   searchParams: URLSearchParams,
-  includeDeleted: boolean,
+  deletedState: DeletedState,
 ) {
   const status = searchParams.get("status");
   const visibility = searchParams.get("visibility");
@@ -24,7 +44,11 @@ function filterPosts(
   const query = searchParams.get("q")?.trim().toLowerCase();
 
   return posts.filter((post) => {
-    if (Boolean(post.deletedAt) !== includeDeleted) {
+    if (deletedState === "active" && post.deletedAt) {
+      return false;
+    }
+
+    if (deletedState === "deleted" && !post.deletedAt) {
       return false;
     }
 
@@ -157,9 +181,12 @@ export function createPostListHandlers(options?: {
       }
 
       const url = new URL(request.url);
-      const includeDeleted = url.searchParams.get("includeDeleted") === "true";
-      const source = includeDeleted ? trashPosts : activePosts;
-      const filtered = filterPosts(source, url.searchParams, includeDeleted);
+      const deletedState = getDeletedState(url.searchParams);
+      const filtered = filterPosts(
+        [...activePosts, ...trashPosts],
+        url.searchParams,
+        deletedState,
+      );
       const sorted = sortPosts(filtered, url.searchParams);
 
       return HttpResponse.json(paginatePosts(sorted, url.searchParams));

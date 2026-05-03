@@ -79,6 +79,10 @@ function buildSearchParams(
     searchParams.set("includeDeleted", String(params.includeDeleted));
   }
 
+  if ("deletedState" in params && params.deletedState !== undefined) {
+    searchParams.set("deletedState", params.deletedState);
+  }
+
   return searchParams.toString();
 }
 
