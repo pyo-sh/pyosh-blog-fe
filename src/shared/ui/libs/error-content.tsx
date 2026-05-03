@@ -103,6 +103,7 @@ export function ErrorContent({
             {action.type === "link" ? (
               <Link
                 href={action.href}
+                prefetch={context === "admin" ? false : undefined}
                 className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary-1 px-5 py-2.5 text-ui-sm font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-1/35"
               >
                 <Icon
