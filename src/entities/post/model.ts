@@ -118,6 +118,7 @@ export interface FetchAdminPostsParams {
   sort?: "published_at" | "created_at" | "totalPageviews" | "commentCount";
   order?: "asc" | "desc";
   includeDeleted?: boolean;
+  deletedState?: "active" | "deleted" | "all";
 }
 
 export interface BulkPostAction {
