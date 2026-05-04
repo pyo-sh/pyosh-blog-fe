@@ -1,3 +1,4 @@
+import { handleManageAuthBoundaryFailure } from "./session-cleanup";
 import { ApiResponseError, type ApiError } from "./types";
 
 const PUBLIC_API_URL =
@@ -80,7 +81,7 @@ export async function serverFetch<T>(
 
 /**
  * Client Components 용 fetch. 브라우저 쿠키를 자동으로 포함.
- * /manage 경로에서 403 응답 시 /manage/login?reason=forbidden 으로 리다이렉트.
+ * /manage 경로에서 인증 경계 응답 시 /manage/login 으로 리다이렉트.
  */
 export async function clientFetch<T>(
   path: string,
@@ -94,14 +95,13 @@ export async function clientFetch<T>(
     credentials: "include",
   });
 
-  if (
-    response.status === 403 &&
-    window.location.pathname.startsWith("/manage")
-  ) {
-    window.location.href = "/manage/login?reason=forbidden";
+  if (handleManageAuthBoundaryFailure(response.status)) {
     throw new ApiResponseError({
-      statusCode: 403,
-      message: "접근 권한이 없습니다",
+      statusCode: response.status,
+      message:
+        response.status === 403
+          ? "접근 권한이 없습니다"
+          : "로그인이 필요합니다",
     });
   }
 

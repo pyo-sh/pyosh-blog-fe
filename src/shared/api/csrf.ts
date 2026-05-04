@@ -1,4 +1,5 @@
 import { clientFetch } from "./client";
+import { registerClientSessionCleanup } from "./session-cleanup";
 
 let tokenPromise: Promise<string> | null = null;
 
@@ -18,3 +19,5 @@ export async function getCsrfToken(): Promise<string> {
 export function clearCsrfToken(): void {
   tokenPromise = null;
 }
+
+registerClientSessionCleanup(clearCsrfToken);
