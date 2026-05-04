@@ -35,11 +35,13 @@ export function runClientSessionCleanup(): void {
 }
 
 export function handleManageAuthBoundaryFailure(status: number): boolean {
-  if (
-    typeof window === "undefined" ||
-    !window.location.pathname.startsWith("/manage") ||
-    (status !== 401 && status !== 403)
-  ) {
+  if (typeof window === "undefined" || (status !== 401 && status !== 403)) {
+    return false;
+  }
+
+  const pathname = window.location.pathname;
+
+  if (!pathname.startsWith("/manage") || pathname === "/manage/login") {
     return false;
   }
 
