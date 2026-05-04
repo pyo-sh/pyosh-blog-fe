@@ -13,6 +13,7 @@ import logout2Linear from "@iconify-icons/solar/logout-2-linear";
 import notebookLinear from "@iconify-icons/solar/notebook-linear";
 import penNewRoundLinear from "@iconify-icons/solar/pen-new-round-linear";
 import sidebarMinimalisticLinear from "@iconify-icons/solar/sidebar-minimalistic-linear";
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -21,6 +22,7 @@ import {
   ADMIN_CHROME_STYLE,
 } from "@app/manage/ui/admin-shell-constants";
 import { logout } from "@entities/auth";
+import { clearCsrfToken } from "@shared/api";
 import { cn } from "@shared/lib/style-utils";
 import { ThemeButton } from "@widgets/header/theme-button";
 import { LogoIcon } from "@widgets/logo/ui/logo-icon";
@@ -96,11 +98,14 @@ function AdminLogoutButton({
   className?: string;
 }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
 
   async function handleLogout() {
     try {
       await logout();
+      queryClient.clear();
+      clearCsrfToken();
       startTransition(() => {
         router.push("/manage/login");
         router.refresh();
