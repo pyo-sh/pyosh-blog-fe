@@ -1,3 +1,4 @@
+import { handleManageAuthBoundaryFailure } from "./session-cleanup";
 import { ApiResponseError, type ApiError } from "./types";
 
 const PUBLIC_API_URL =
@@ -96,9 +97,8 @@ export async function clientFetch<T>(
 
   if (
     response.status === 403 &&
-    window.location.pathname.startsWith("/manage")
+    handleManageAuthBoundaryFailure(response.status)
   ) {
-    window.location.href = "/manage/login?reason=forbidden";
     throw new ApiResponseError({
       statusCode: 403,
       message: "접근 권한이 없습니다",

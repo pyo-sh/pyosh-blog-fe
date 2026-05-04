@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { login } from "@entities/auth";
+import { runClientSessionCleanup } from "@shared/api";
 import { getErrorMessage } from "@shared/lib/get-error-message";
 import { Spinner } from "@shared/ui/libs";
 
@@ -14,6 +15,10 @@ export function LoginForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const busy = isLoading || isPending;
+
+  useEffect(() => {
+    runClientSessionCleanup();
+  }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();

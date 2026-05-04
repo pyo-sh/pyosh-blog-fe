@@ -1,7 +1,8 @@
 "use client";
 
-import { PropsWithChildren, useState } from "react";
+import { PropsWithChildren, useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { registerClientSessionCleanup } from "@shared/api";
 
 function makeQueryClient() {
   return new QueryClient({
@@ -29,6 +30,12 @@ function getQueryClient() {
 
 export function QueryProvider({ children }: PropsWithChildren) {
   const [queryClient] = useState(() => getQueryClient());
+
+  useEffect(() => {
+    return registerClientSessionCleanup(() => {
+      queryClient.clear();
+    });
+  }, [queryClient]);
 
   return (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>

@@ -6,6 +6,7 @@ import {
   clientFetch,
   clientMutate,
   getCsrfToken,
+  handleManageAuthBoundaryFailure,
 } from "@shared/api";
 import { normalizeAssetUrl } from "@shared/lib/asset-url";
 
@@ -62,6 +63,8 @@ export async function uploadAssets(
         statusCode: xhr.status,
         message: xhr.statusText,
       };
+      handleManageAuthBoundaryFailure(xhr.status);
+
       try {
         const error: ApiError = JSON.parse(xhr.responseText) as ApiError;
         reject(new ApiResponseError(error));
