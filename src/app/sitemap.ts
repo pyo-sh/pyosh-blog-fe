@@ -9,6 +9,8 @@ const STATIC_ROUTES = [
   { path: "/tags", changeFrequency: "weekly", priority: 0.5 },
 ] as const;
 
+export const dynamic = "force-dynamic";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [slugsResponse, categories] = await Promise.all([
     fetchPublishedPostSlugs(),

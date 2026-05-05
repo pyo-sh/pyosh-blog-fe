@@ -1,4 +1,6 @@
-export { serverFetch, clientFetch } from "./client";
+export { serverFetch, publicServerFetch, clientFetch } from "./client";
+export type { ServerFetchOptions } from "./client";
+export { PUBLIC_CACHE_REVALIDATE_SECONDS } from "./cache-policy";
 export { ApiResponseError } from "./types";
 export type { PaginatedResponse, ApiError } from "./types";
 export { getCsrfToken, clearCsrfToken } from "./csrf";

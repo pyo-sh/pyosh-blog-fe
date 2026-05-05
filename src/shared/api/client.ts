@@ -5,6 +5,23 @@ const PUBLIC_API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5500";
 const INTERNAL_API_URL = process.env.API_URL ?? PUBLIC_API_URL;
 
+interface NextFetchConfig {
+  revalidate?: number | false;
+  tags?: string[];
+}
+
+export interface ServerFetchOptions extends RequestInit {
+  next?: NextFetchConfig;
+}
+
+interface PublicServerFetchOptions extends Omit<
+  ServerFetchOptions,
+  "cache" | "next"
+> {
+  revalidate: number;
+  tags?: string[];
+}
+
 function isJsonBody(body: BodyInit | null | undefined): boolean {
   if (!body) {
     return false;
@@ -55,16 +72,21 @@ async function handleResponse<T>(
   return response.json() as Promise<T>;
 }
 
+function shouldUseDefaultNoStore(options: ServerFetchOptions): boolean {
+  return options.cache === undefined && options.next?.revalidate === undefined;
+}
+
 /**
  * Server Components (RSC) 용 fetch. 쿠키를 headers에서 직접 전달.
  * context는 전달하지 않음 — 서버 사이드 에러 로깅은 이 이슈 범위 밖 (클라이언트 전용).
  */
 export async function serverFetch<T>(
   path: string,
-  options: RequestInit = {},
+  options: ServerFetchOptions = {},
   cookieHeader?: string,
 ): Promise<T> {
   const headers = new Headers(buildHeaders(options));
+  const cache = shouldUseDefaultNoStore(options) ? "no-store" : options.cache;
 
   if (cookieHeader) {
     headers.set("Cookie", cookieHeader);
@@ -73,10 +95,28 @@ export async function serverFetch<T>(
   const response = await fetch(`${INTERNAL_API_URL}${path}`, {
     ...options,
     headers,
-    cache: options.cache ?? "no-store",
+    ...(cache === undefined ? {} : { cache }),
   });
 
   return handleResponse<T>(response);
+}
+
+/**
+ * Public Server Components 용 fetch. 공개 데이터에만 시간 기반 revalidate를 명시한다.
+ */
+export async function publicServerFetch<T>(
+  path: string,
+  options: PublicServerFetchOptions,
+): Promise<T> {
+  const { revalidate, tags, ...requestOptions } = options;
+
+  return serverFetch<T>(path, {
+    ...requestOptions,
+    next: {
+      revalidate,
+      ...(tags ? { tags } : {}),
+    },
+  });
 }
 
 /**

@@ -8,7 +8,13 @@ import type {
   UpdateCategoryOrderBody,
   UpdateCategoryTreeBody,
 } from "./model";
-import { clientFetch, clientMutate, serverFetch } from "@shared/api";
+import {
+  clientFetch,
+  clientMutate,
+  publicServerFetch,
+  serverFetch,
+  PUBLIC_CACHE_REVALIDATE_SECONDS,
+} from "@shared/api";
 
 interface CategoriesResponse {
   categories: Category[];
@@ -18,14 +24,10 @@ interface CategoryResponse {
   category: Category;
 }
 
-export async function fetchCategories(
-  cookieHeader?: string,
-): Promise<Category[]> {
-  const response = await serverFetch<CategoriesResponse>(
-    "/categories",
-    {},
-    cookieHeader,
-  );
+export async function fetchCategories(): Promise<Category[]> {
+  const response = await publicServerFetch<CategoriesResponse>("/categories", {
+    revalidate: PUBLIC_CACHE_REVALIDATE_SECONDS.taxonomy,
+  });
 
   return response.categories;
 }

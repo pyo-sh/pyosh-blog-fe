@@ -8,6 +8,8 @@ import {
 
 const RSS_POST_LIMIT = 20;
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const response = await fetchPosts({ limit: RSS_POST_LIMIT });
   const xml = buildRssXml(response.data);

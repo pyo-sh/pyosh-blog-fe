@@ -1,5 +1,9 @@
 import type { DashboardStats, PopularPost, TotalViewsStats } from "./model";
-import { clientFetch, serverFetch } from "@shared/api";
+import {
+  clientFetch,
+  publicServerFetch,
+  PUBLIC_CACHE_REVALIDATE_SECONDS,
+} from "@shared/api";
 
 interface PopularPostsResponse {
   data: PopularPost[];
@@ -20,13 +24,11 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
 
 export async function fetchPopularPosts(
   days: number,
-  cookieHeader?: string,
   limit = 10,
 ): Promise<PopularPost[]> {
-  const response = await serverFetch<PopularPostsResponse>(
+  const response = await publicServerFetch<PopularPostsResponse>(
     buildPopularPostsPath(days, limit),
-    {},
-    cookieHeader,
+    { revalidate: PUBLIC_CACHE_REVALIDATE_SECONDS.stats },
   );
 
   return response.data;
@@ -43,8 +45,8 @@ export async function fetchPopularPostsClient(
   return response.data;
 }
 
-export async function fetchTotalViews(
-  cookieHeader?: string,
-): Promise<TotalViewsStats> {
-  return serverFetch<TotalViewsStats>("/stats/total-views", {}, cookieHeader);
+export async function fetchTotalViews(): Promise<TotalViewsStats> {
+  return publicServerFetch<TotalViewsStats>("/stats/total-views", {
+    revalidate: PUBLIC_CACHE_REVALIDATE_SECONDS.stats,
+  });
 }
