@@ -94,6 +94,7 @@ export interface PostNavigation {
 export interface PublishedPostSlug {
   slug: string;
   updatedAt: string;
+  searchIndexable?: boolean;
 }
 
 export interface PublishedPostSlugsResponse {

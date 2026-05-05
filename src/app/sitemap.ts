@@ -25,12 +25,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: route.changeFrequency,
       priority: route.priority,
     })),
-    ...slugsResponse.slugs.map((post) => ({
-      url: buildAbsoluteUrl(`/posts/${encodeURIComponent(post.slug)}`),
-      lastModified: post.updatedAt,
-      changeFrequency: "monthly" as const,
-      priority: 0.8,
-    })),
+    ...slugsResponse.slugs
+      .filter((post) => post.searchIndexable !== false)
+      .map((post) => ({
+        url: buildAbsoluteUrl(`/posts/${encodeURIComponent(post.slug)}`),
+        lastModified: post.updatedAt,
+        changeFrequency: "monthly" as const,
+        priority: 0.8,
+      })),
     ...visibleCategories.map((category) => ({
       url: buildAbsoluteUrl(`/categories/${encodeURIComponent(category.slug)}`),
       changeFrequency: "weekly" as const,
