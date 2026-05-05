@@ -197,6 +197,15 @@ function AdminPostListStory({
             ),
           );
         }}
+        onToggleSearchIndexable={(post) => {
+          setActivePosts((current) =>
+            current.map((item) =>
+              item.id === post.id
+                ? { ...item, searchIndexable: !item.searchIndexable }
+                : item,
+            ),
+          );
+        }}
         onTogglePin={(post) => {
           setActivePosts((current) =>
             current.map((item) =>

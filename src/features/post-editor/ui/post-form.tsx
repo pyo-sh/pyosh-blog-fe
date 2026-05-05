@@ -91,6 +91,7 @@ const DEFAULT_VALUES: PostFormValues = {
   tags: [],
   status: "draft",
   visibility: "public",
+  searchIndexable: true,
   commentStatus: "open",
   thumbnailUrl: "",
   summary: "",
@@ -146,6 +147,7 @@ function buildPayload(values: PostFormValues): CreatePostBody {
     thumbnailUrl: toCanonicalAssetUrl(values.thumbnailUrl.trim()) || null,
     status: values.status,
     visibility: values.visibility,
+    searchIndexable: values.searchIndexable,
     commentStatus: values.commentStatus,
     tags: values.tags.length > 0 ? values.tags : undefined,
     summary: normalizeOptionalText(values.summary),
@@ -232,6 +234,39 @@ function VisibilityToggle({
         className={cn(
           "absolute left-[2px] top-[2px] h-5 w-5 rounded-full bg-white transition-transform",
           isPublic ? "translate-x-5" : "translate-x-0",
+        )}
+      />
+    </button>
+  );
+}
+
+function SearchIndexableToggle({
+  checked,
+  disabled,
+  onToggle,
+}: {
+  checked: boolean;
+  disabled: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label="검색엔진 노출"
+      disabled={disabled}
+      onClick={onToggle}
+      className={cn(
+        "relative h-6 w-11 rounded-full transition-colors",
+        checked ? "bg-primary-1" : "bg-border-3",
+        "disabled:cursor-not-allowed disabled:opacity-50",
+      )}
+    >
+      <span
+        className={cn(
+          "absolute left-[2px] top-[2px] h-5 w-5 rounded-full bg-white transition-transform",
+          checked ? "translate-x-5" : "translate-x-0",
         )}
       />
     </button>
@@ -895,6 +930,12 @@ export function PostForm({
   const shouldRenderInlinePreview =
     shouldRenderEditor && activeTab !== "editor-only" && isDesktopPreview;
   const shouldRenderTitleField = activeTab === "all" || activeTab === "info";
+  const isPrivate = values.visibility === "private";
+  const searchIndexLabel = isPrivate
+    ? "비공개 글은 검색 제외"
+    : values.searchIndexable
+      ? "검색 노출"
+      : "검색 차단";
 
   return (
     <>
@@ -1080,6 +1121,24 @@ export function PostForm({
                   />
                 </CompactMetaLabel>
 
+                <CompactMetaLabel label="검색">
+                  <div className="flex items-center gap-2">
+                    <SearchIndexableToggle
+                      checked={!isPrivate && values.searchIndexable}
+                      disabled={isPrivate}
+                      onToggle={() =>
+                        handleFieldChange(
+                          "searchIndexable",
+                          !values.searchIndexable,
+                        )
+                      }
+                    />
+                    <span className="whitespace-nowrap text-xs font-medium text-text-3">
+                      {searchIndexLabel}
+                    </span>
+                  </div>
+                </CompactMetaLabel>
+
                 <CompactMetaLabel label="댓글 상태">
                   <div className="min-w-[7rem]">
                     <InlineCustomSelect
@@ -1142,6 +1201,27 @@ export function PostForm({
                       />
                       <span className="text-[13px] font-medium text-text-2">
                         공개
+                      </span>
+                    </div>
+                  </MetaFormRow>
+
+                  <MetaFormRow
+                    label="검색엔진 노출"
+                    labelSuffix={searchIndexLabel}
+                  >
+                    <div className="flex items-center gap-3">
+                      <SearchIndexableToggle
+                        checked={!isPrivate && values.searchIndexable}
+                        disabled={isPrivate}
+                        onToggle={() =>
+                          handleFieldChange(
+                            "searchIndexable",
+                            !values.searchIndexable,
+                          )
+                        }
+                      />
+                      <span className="text-[13px] font-medium text-text-2">
+                        {searchIndexLabel}
                       </span>
                     </div>
                   </MetaFormRow>
@@ -1226,6 +1306,7 @@ export function PostForm({
                       thumbnailUrl={values.thumbnailUrl}
                       summary={values.summary}
                       visibility={values.visibility}
+                      searchIndexable={values.searchIndexable}
                       status={values.status}
                     />
                   </div>
@@ -1243,6 +1324,7 @@ export function PostForm({
                       thumbnailUrl={values.thumbnailUrl}
                       summary={values.summary}
                       visibility={values.visibility}
+                      searchIndexable={values.searchIndexable}
                       status={values.status}
                       compact
                     />

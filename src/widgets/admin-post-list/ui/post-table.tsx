@@ -37,6 +37,7 @@ interface PostTableProps {
   onToggleSelectAll: () => void;
   onSortChange: (field: SortField) => void;
   onToggleVisibility: (post: PostListItem) => void;
+  onToggleSearchIndexable: (post: PostListItem) => void;
   onTogglePin: (post: PostListItem) => void;
   onDelete: (id: number) => Promise<void>;
   onRestore: (id: number) => void;
@@ -251,6 +252,7 @@ export function PostTable({
   onToggleSelectAll,
   onSortChange,
   onToggleVisibility,
+  onToggleSearchIndexable,
   onTogglePin,
   onDelete,
   onRestore,
@@ -536,6 +538,9 @@ export function PostTable({
                 <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left align-middle text-ui-xs font-semibold uppercase leading-none tracking-[0.14em] text-text-4">
                   공개
                 </th>
+                <th className="whitespace-nowrap border-b border-border-4 px-4 py-4 text-left align-middle text-ui-xs font-semibold uppercase leading-none tracking-[0.14em] text-text-4">
+                  검색
+                </th>
                 <th className="w-12 whitespace-nowrap border-b border-border-4 px-2 py-4 align-middle leading-none" />
                 <th className="w-12 whitespace-nowrap border-b border-border-4 px-2 py-4 align-middle leading-none" />
               </tr>
@@ -545,6 +550,12 @@ export function PostTable({
                 const isSelected = selectedIds.includes(post.id);
                 const isTogglePending = pendingToggleIds.has(post.id);
                 const isActionPending = deleteId === post.id;
+                const isPrivate = post.visibility === "private";
+                const searchIndexLabel = isPrivate
+                  ? "비공개"
+                  : post.searchIndexable
+                    ? "노출"
+                    : "차단";
                 const commentTone =
                   post.commentStatus === "open"
                     ? "comment-open"
@@ -719,6 +730,29 @@ export function PostTable({
                           )}
                         >
                           {visibilityLabelMap[post.visibility]}
+                        </span>
+                      </div>
+                    </td>
+                    <td
+                      className="min-w-[112px] border-b border-border-4 px-3 py-3 align-middle"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      <div className="flex items-center gap-2">
+                        <InlineVisibilitySwitch
+                          checked={!isPrivate && post.searchIndexable}
+                          disabled={isTogglePending || isPrivate}
+                          onClick={() => onToggleSearchIndexable(post)}
+                          ariaLabel={`${post.title} 검색엔진 노출 여부`}
+                        />
+                        <span
+                          className={cn(
+                            "whitespace-nowrap text-[12px] font-medium leading-4",
+                            !isPrivate && post.searchIndexable
+                              ? "text-primary-1"
+                              : "text-text-4",
+                          )}
+                        >
+                          {searchIndexLabel}
                         </span>
                       </div>
                     </td>

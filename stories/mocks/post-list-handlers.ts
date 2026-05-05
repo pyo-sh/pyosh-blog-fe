@@ -263,6 +263,7 @@ export function createPostListHandlers(options?: {
           return {
             ...post,
             visibility: body.visibility ?? post.visibility,
+            searchIndexable: body.searchIndexable ?? post.searchIndexable,
             isPinned: body.isPinned ?? post.isPinned,
           };
         });

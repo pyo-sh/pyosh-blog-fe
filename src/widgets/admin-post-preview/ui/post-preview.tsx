@@ -92,6 +92,12 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
   });
 
   const isUpdating = updateMutation.isPending;
+  const isPrivate = currentPost.visibility === "private";
+  const searchIndexLabel = isPrivate
+    ? "비공개 글은 검색 제외"
+    : currentPost.searchIndexable
+      ? "검색 노출"
+      : "검색 차단";
 
   return (
     <div className="space-y-6">
@@ -143,6 +149,37 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
             }}
             aria-label={currentPost.visibility === "public" ? "공개" : "비공개"}
           />
+        </div>
+
+        <div className="flex items-center gap-2 text-sm text-text-2">
+          <span>검색 노출</span>
+          <ToggleSwitch
+            checked={!isPrivate && currentPost.searchIndexable}
+            disabled={isUpdating || isPrivate}
+            onChange={(checked) => {
+              if (isPrivate) {
+                return;
+              }
+
+              const prev = currentPost.searchIndexable;
+              setCurrentPost((p) => ({
+                ...p,
+                searchIndexable: checked,
+              }));
+              updateMutation.mutate(
+                { searchIndexable: checked },
+                {
+                  onError: () =>
+                    setCurrentPost((p) => ({
+                      ...p,
+                      searchIndexable: prev,
+                    })),
+                },
+              );
+            }}
+            aria-label={searchIndexLabel}
+          />
+          <span className="text-xs text-text-4">{searchIndexLabel}</span>
         </div>
 
         <button

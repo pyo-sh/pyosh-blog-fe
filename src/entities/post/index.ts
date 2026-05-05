@@ -5,6 +5,7 @@ export type {
   FetchPostsParams,
   MatchedComment,
   PinnedPostCountResponse,
+  Post,
   PostDetail,
   PostDetailCategory,
   PostTag,

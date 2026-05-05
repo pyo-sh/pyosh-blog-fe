@@ -115,6 +115,14 @@ export async function generateMetadata({
     title: post.title,
     ...(description ? { description } : {}),
     ...buildCanonicalMetadata(canonical),
+    ...(post.searchIndexable
+      ? {}
+      : {
+          robots: {
+            index: false,
+            follow: true,
+          },
+        }),
     openGraph: {
       url: canonical,
       type: "article",
@@ -202,7 +210,9 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
 
   return (
     <main className="w-full pt-8 pb-16">
-      {siteUrl ? <JsonLd data={buildBlogPostingJsonLd(post, siteUrl)} /> : null}
+      {siteUrl && post.searchIndexable ? (
+        <JsonLd data={buildBlogPostingJsonLd(post, siteUrl)} />
+      ) : null}
       {siteUrl ? (
         <JsonLd data={buildBreadcrumbJsonLd(breadcrumbItems, siteUrl)} />
       ) : null}

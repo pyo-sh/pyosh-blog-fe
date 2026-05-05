@@ -20,6 +20,7 @@ function buildPostFromCreateBody(body: CreatePostBody): Post {
     contentMd: body.contentMd,
     thumbnailUrl: body.thumbnailUrl ?? null,
     visibility: body.visibility ?? "public",
+    searchIndexable: body.searchIndexable ?? true,
     status: body.status ?? "draft",
     commentStatus: body.commentStatus ?? "open",
     publishedAt: body.status === "published" ? now : null,

@@ -241,6 +241,54 @@ export default function ManagePostsPage() {
     }
   }
 
+  async function handleToggleSearchIndexable(post: PostListItem) {
+    if (post.visibility === "private") {
+      return;
+    }
+
+    setPendingToggleIds((prev) => new Set(prev).add(post.id));
+
+    const nextSearchIndexable = !post.searchIndexable;
+
+    queryClient.setQueryData(queryKey, (old: typeof data) => {
+      if (!old) return old;
+
+      return {
+        ...old,
+        data: old.data.map((item) =>
+          item.id === post.id
+            ? { ...item, searchIndexable: nextSearchIndexable }
+            : item,
+        ),
+      };
+    });
+
+    try {
+      await updatePost(post.id, { searchIndexable: nextSearchIndexable });
+    } catch (err) {
+      queryClient.setQueryData(queryKey, (old: typeof data) => {
+        if (!old) return old;
+
+        return {
+          ...old,
+          data: old.data.map((item) =>
+            item.id === post.id
+              ? { ...item, searchIndexable: post.searchIndexable }
+              : item,
+          ),
+        };
+      });
+      toast.error(getErrorMessage(err, "검색엔진 노출 변경에 실패했습니다."));
+    } finally {
+      setPendingToggleIds((prev) => {
+        const next = new Set(prev);
+        next.delete(post.id);
+
+        return next;
+      });
+    }
+  }
+
   async function handleTogglePin(post: PostListItem) {
     setPendingToggleIds((prev) => new Set(prev).add(post.id));
 
@@ -575,6 +623,7 @@ export default function ManagePostsPage() {
           onToggleSelectAll={handleToggleSelectAll}
           onSortChange={handleSortChange}
           onToggleVisibility={handleToggleVisibility}
+          onToggleSearchIndexable={handleToggleSearchIndexable}
           onTogglePin={handleTogglePin}
           onDelete={(id) => deleteMutation.mutateAsync(id)}
           onRestore={(id) => {
