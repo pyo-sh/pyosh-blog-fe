@@ -4,9 +4,14 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { toast } from "sonner";
-import { fetchCategoriesAdmin, type Category } from "@entities/category";
+import {
+  adminCategoryKeys,
+  fetchCategoriesAdmin,
+  type Category,
+} from "@entities/category";
 import {
   MAX_PINNED_POSTS,
+  adminPostKeys,
   bulkUpdatePosts,
   deletePost,
   fetchAdminPosts,
@@ -51,7 +56,7 @@ function hasBulkDetails(
   );
 }
 
-function getQueryKey(
+function getQueryParams(
   tab: AdminPostTab,
   page: number,
   status: AdminPostStatusFilter,
@@ -61,17 +66,17 @@ function getQueryKey(
   sort: FetchAdminPostsParams["sort"],
   order: SortOrder,
 ) {
-  return [
-    "admin-posts",
-    tab,
+  return {
     page,
-    status,
-    visibility,
+    limit: PAGE_SIZE,
+    status: status === "all" ? undefined : status,
+    visibility: visibility === "all" ? undefined : visibility,
     categoryId,
-    q,
+    q: q || undefined,
     sort,
     order,
-  ] as const;
+    deletedState: tab === "trash" ? "deleted" : undefined,
+  } satisfies FetchAdminPostsParams;
 }
 
 function flattenCategories(
@@ -109,7 +114,7 @@ export default function ManagePostsPage() {
   const [isRestoreCategoryPending, setIsRestoreCategoryPending] =
     useState(false);
 
-  const queryKey = getQueryKey(
+  const queryParams = getQueryParams(
     tab,
     page,
     status,
@@ -119,30 +124,20 @@ export default function ManagePostsPage() {
     sort,
     order,
   );
+  const queryKey = adminPostKeys.list(queryParams);
 
   const { data, isPending, isError, error, refetch, isFetching } = useQuery({
     queryKey,
-    queryFn: () =>
-      fetchAdminPosts({
-        page,
-        limit: PAGE_SIZE,
-        status: status === "all" ? undefined : status,
-        visibility: visibility === "all" ? undefined : visibility,
-        categoryId,
-        q: searchQuery || undefined,
-        sort,
-        order,
-        deletedState: tab === "trash" ? "deleted" : undefined,
-      }),
+    queryFn: () => fetchAdminPosts(queryParams),
   });
 
   const { data: categories = [] } = useQuery({
-    queryKey: ["categories-admin"],
+    queryKey: adminCategoryKeys.tree(),
     queryFn: (): Promise<Category[]> => fetchCategoriesAdmin(),
     staleTime: 5 * 60 * 1000,
   });
   const { data: pinnedCount } = useQuery({
-    queryKey: ["admin-posts", "pinned-count"],
+    queryKey: adminPostKeys.pinnedCount(),
     queryFn: fetchPinnedPostCount,
     staleTime: 30 * 1000,
   });
@@ -277,9 +272,9 @@ export default function ManagePostsPage() {
 
       await updatePost(post.id, { isPinned: nextPinned });
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["admin-posts"] }),
+        queryClient.invalidateQueries({ queryKey: adminPostKeys.all() }),
         queryClient.invalidateQueries({
-          queryKey: ["admin-posts", "pinned-count"],
+          queryKey: adminPostKeys.pinnedCount(),
         }),
       ]);
     } catch (err) {
@@ -313,9 +308,9 @@ export default function ManagePostsPage() {
 
   async function invalidatePostQueries() {
     await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ["admin-posts"] }),
+      queryClient.invalidateQueries({ queryKey: adminPostKeys.all() }),
       queryClient.invalidateQueries({
-        queryKey: ["admin-posts", "pinned-count"],
+        queryKey: adminPostKeys.pinnedCount(),
       }),
     ]);
   }

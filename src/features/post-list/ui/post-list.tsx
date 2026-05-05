@@ -7,9 +7,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { PostListItem } from "./post-list-item";
 import { PostListItemSkeleton } from "./post-list-item-skeleton";
-import type { PublishedPostListItem as PostListEntry } from "@entities/post";
 import type { PaginatedResponse } from "@shared/api";
-import { fetchPosts } from "@entities/post";
+import {
+  fetchPosts,
+  publicPostKeys,
+  type PublishedPostListItem as PostListEntry,
+} from "@entities/post";
 import { Pagination } from "@shared/ui/libs";
 
 interface PostListProps {
@@ -78,7 +81,7 @@ function PostListInner({
   const page = Math.max(1, Number(pageParam) || 1);
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["posts", basePath, page],
+    queryKey: publicPostKeys.list({ basePath, page }),
     queryFn: () => fetchPosts({ page }),
     initialData: page === initialPage ? initialData : undefined,
     staleTime: 30_000,

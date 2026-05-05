@@ -5,7 +5,7 @@ import chart2Linear from "@iconify-icons/solar/chart-2-linear";
 import eyeLinear from "@iconify-icons/solar/eye-linear";
 import graphUpLinear from "@iconify-icons/solar/graph-up-linear";
 import { useQuery } from "@tanstack/react-query";
-import { fetchDashboardStats } from "@entities/stat";
+import { adminDashboardKeys, fetchDashboardStats } from "@entities/stat";
 import { formatNumber } from "@shared/lib/format-number";
 import { Skeleton } from "@shared/ui/libs";
 
@@ -77,7 +77,7 @@ const STAT_CARDS = [
 
 export function StatsSection() {
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ["dashboard", "stats"],
+    queryKey: adminDashboardKeys.stats(),
     queryFn: fetchDashboardStats,
   });
 

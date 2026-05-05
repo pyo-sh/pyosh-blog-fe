@@ -15,12 +15,14 @@ import {
 import { GuestbookDetailModal } from "./guestbook-detail-modal";
 import { GuestbookTable, type GuestbookPeriodFilter } from "./guestbook-table";
 import {
+  adminGuestbookKeys,
   adminBulkDeleteGuestbookEntries,
   adminBulkPatchGuestbookEntries,
   adminDeleteGuestbookEntry,
   adminPatchGuestbookEntry,
   fetchAdminGuestbook,
   fetchGuestbookSettings,
+  publicGuestbookKeys,
   type AdminGuestbookAuthorType,
   type AdminGuestbookFilterStatus,
   type AdminGuestbookItem,
@@ -32,9 +34,6 @@ import { Skeleton, Spinner } from "@shared/ui/libs";
 import { ToggleSwitch } from "@shared/ui/toggle-switch";
 
 const PAGE_SIZE = 10;
-const QUERY_KEY = ["admin-guestbook"] as const;
-const SETTINGS_QUERY_KEY = ["guestbook-settings"] as const;
-
 type ActionContext =
   | {
       type: "single";
@@ -204,15 +203,15 @@ export function GuestbookManager() {
   const period = detectPeriodFilter(startDate, endDate);
 
   const guestbookQuery = useQuery({
-    queryKey: [
-      ...QUERY_KEY,
+    queryKey: adminGuestbookKeys.list({
       page,
+      limit: PAGE_SIZE,
       status,
       authorType,
-      startDate,
-      endDate,
-      searchQuery,
-    ],
+      startDate: startDate || undefined,
+      endDate: endDate || undefined,
+      q: searchQuery || undefined,
+    }),
     queryFn: () =>
       fetchAdminGuestbook({
         page,
@@ -227,14 +226,15 @@ export function GuestbookManager() {
   });
 
   const settingsQuery = useQuery({
-    queryKey: SETTINGS_QUERY_KEY,
+    queryKey: adminGuestbookKeys.settings(),
     queryFn: () => fetchGuestbookSettings(),
   });
 
   const settingMutation = useMutation({
     mutationFn: updateGuestbookSettings,
     onSuccess: async (response) => {
-      queryClient.setQueryData(SETTINGS_QUERY_KEY, response);
+      queryClient.setQueryData(adminGuestbookKeys.settings(), response);
+      queryClient.setQueryData(publicGuestbookKeys.settings(), response);
       toast.success(
         response.enabled
           ? "방명록 기능을 활성화했습니다."
@@ -282,8 +282,8 @@ export function GuestbookManager() {
     },
     onSuccess: async (_data, variables) => {
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: QUERY_KEY }),
-        queryClient.invalidateQueries({ queryKey: ["guestbook"] }),
+        queryClient.invalidateQueries({ queryKey: adminGuestbookKeys.all() }),
+        queryClient.invalidateQueries({ queryKey: publicGuestbookKeys.all() }),
       ]);
       setSelectedItems((current) => {
         const next = { ...current };

@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { PostEditorScreen } from "../../post-editor-screen";
 import type { PostFormValues } from "@features/post-editor";
-import { fetchAdminPost } from "@entities/post";
+import { adminPostKeys, fetchAdminPost } from "@entities/post";
 import { ApiResponseError } from "@shared/api";
 
 function getErrorMessage(error: unknown, fallback: string): string {
@@ -26,7 +26,7 @@ export default function DashboardPostEditPage() {
   const postId = Number(params.id);
 
   const postQuery = useQuery({
-    queryKey: ["admin-post", postId],
+    queryKey: adminPostKeys.detail(postId),
     queryFn: () => fetchAdminPost(postId),
     enabled: Number.isInteger(postId) && postId > 0,
   });

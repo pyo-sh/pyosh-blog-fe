@@ -1,2 +1,3 @@
 export type { Tag } from "./model";
-export { fetchTags } from "./api";
+export { publicTagKeys } from "./query-keys";
+export { fetchTags, fetchTagsClient } from "./api";

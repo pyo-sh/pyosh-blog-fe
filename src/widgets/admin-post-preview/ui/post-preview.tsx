@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type { PostDetail } from "@entities/post";
 import {
+  adminPostKeys,
   deletePost,
   fetchPinnedPostCount,
   isPinnedPostLimitError,
@@ -45,7 +46,7 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
   const [currentPost, setCurrentPost] = useState(post);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { data: pinnedCount } = useQuery({
-    queryKey: ["admin-posts", "pinned-count"],
+    queryKey: adminPostKeys.pinnedCount(),
     queryFn: fetchPinnedPostCount,
     staleTime: 30 * 1000,
   });
@@ -56,9 +57,9 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
     onSuccess: (updated) => {
       setCurrentPost(updated);
       void Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["admin-posts"] }),
+        queryClient.invalidateQueries({ queryKey: adminPostKeys.all() }),
         queryClient.invalidateQueries({
-          queryKey: ["admin-posts", "pinned-count"],
+          queryKey: adminPostKeys.pinnedCount(),
         }),
       ]);
     },
@@ -78,9 +79,9 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
     onSuccess: () => {
       toast.success("글이 삭제되었습니다.");
       void Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["admin-posts"] }),
+        queryClient.invalidateQueries({ queryKey: adminPostKeys.all() }),
         queryClient.invalidateQueries({
-          queryKey: ["admin-posts", "pinned-count"],
+          queryKey: adminPostKeys.pinnedCount(),
         }),
       ]);
       router.push("/manage/posts");

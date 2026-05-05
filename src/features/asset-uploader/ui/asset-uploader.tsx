@@ -7,6 +7,7 @@ import { AssetDetailModal } from "./asset-detail-modal";
 import { AssetGrid } from "./asset-grid";
 import { type PendingUploadFile, UploadZone } from "./upload-zone";
 import {
+  adminAssetKeys,
   buildAssetMarkdown,
   deleteAsset,
   deleteAssets,
@@ -28,7 +29,6 @@ const ACCEPTED_TYPES = new Set([
   "image/webp",
   "image/svg+xml",
 ]);
-const QUERY_KEY = ["admin-assets"] as const;
 const EMPTY_ASSETS: Asset[] = [];
 
 function generatePageNumbers(
@@ -73,7 +73,7 @@ export function AssetUploader() {
   } | null>(null);
 
   const assetsQuery = useQuery({
-    queryKey: [...QUERY_KEY, page],
+    queryKey: adminAssetKeys.list({ page, limit: PAGE_SIZE }),
     queryFn: () => fetchAssets(page, PAGE_SIZE),
   });
 
@@ -90,7 +90,7 @@ export function AssetUploader() {
       setUploadProgress(null);
       setPage(1);
       clearPendingFiles();
-      await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      await queryClient.invalidateQueries({ queryKey: adminAssetKeys.all() });
     },
     onError: (error) => {
       setUploadProgress(null);
@@ -139,7 +139,7 @@ export function AssetUploader() {
       setDetailDeleteIndex(null);
       setSelectedIds((current) => current.filter((id) => !deletedSet.has(id)));
 
-      await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      await queryClient.invalidateQueries({ queryKey: adminAssetKeys.all() });
     },
     onError: (error) => {
       toast.error(getErrorMessage(error, "에셋 삭제에 실패했습니다."));

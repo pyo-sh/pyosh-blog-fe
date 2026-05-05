@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { fetchAssets, type Asset } from "@entities/asset";
+import { adminAssetKeys, fetchAssets, type Asset } from "@entities/asset";
 import { getErrorMessage } from "@shared/lib/get-error-message";
 import { Modal } from "@shared/ui/libs";
 
@@ -19,7 +19,7 @@ export function ImageGalleryModal({
   onSelectLocalFiles,
 }: ImageGalleryModalProps) {
   const assetsQuery = useQuery({
-    queryKey: ["post-editor-assets"],
+    queryKey: adminAssetKeys.list({ page: 1, limit: 12 }),
     queryFn: () => fetchAssets(1, 12),
     enabled: isOpen,
   });

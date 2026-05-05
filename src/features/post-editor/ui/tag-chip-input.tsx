@@ -3,7 +3,7 @@
 import type { KeyboardEvent } from "react";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchTagsClient } from "@entities/tag/api";
+import { fetchTagsClient, publicTagKeys } from "@entities/tag";
 import { useImeSafeText } from "@shared/hooks/use-ime-safe-text";
 import { getErrorMessage } from "@shared/lib/get-error-message";
 
@@ -41,8 +41,9 @@ export function TagChipInput({
   });
 
   const tagsQuery = useQuery({
-    queryKey: ["tags"],
+    queryKey: publicTagKeys.list(),
     queryFn: fetchTagsClient,
+    enabled: isFocused || inputValue.trim().length > 0,
   });
 
   const existingNames = useMemo(

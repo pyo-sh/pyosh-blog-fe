@@ -10,6 +10,7 @@ export type {
   UpdateCategoryTreeBody,
 } from "./model";
 export { findCategoryBySlug, getCategoryAncestors } from "./lib";
+export { adminCategoryKeys, publicCategoryKeys } from "./query-keys";
 export {
   deleteCategories,
   createCategory,
