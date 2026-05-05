@@ -1,4 +1,5 @@
 export type { Asset, UploadedAsset } from "./model";
+export { adminAssetKeys } from "./query-keys";
 export { fetchAssets, uploadAssets, deleteAsset, deleteAssets } from "./api";
 export { AssetPickerModal } from "./ui/asset-picker-modal";
 export {

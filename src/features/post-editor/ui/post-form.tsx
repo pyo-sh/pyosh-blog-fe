@@ -40,8 +40,14 @@ import { attachScrollSync } from "../lib/scroll-sync";
 import type { EditorView } from "@codemirror/view";
 import { AssetPickerModal } from "@entities/asset";
 import { type Asset } from "@entities/asset";
-import { fetchCategoriesAdmin, type Category } from "@entities/category";
 import {
+  adminCategoryKeys,
+  fetchCategoriesAdmin,
+  publicCategoryKeys,
+  type Category,
+} from "@entities/category";
+import {
+  adminPostKeys,
   createPost,
   updatePost,
   type CreatePostBody,
@@ -664,7 +670,7 @@ export function PostForm({
   }, [activeTab, editorView, isDesktopPreview]);
 
   const categoriesQuery = useQuery({
-    queryKey: ["categories", "admin"],
+    queryKey: adminCategoryKeys.tree(),
     queryFn: () => fetchCategoriesAdmin(),
   });
 
@@ -712,9 +718,12 @@ export function PostForm({
         signature: JSON.stringify(persistedValues),
       };
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["admin-posts"] }),
-        queryClient.invalidateQueries({ queryKey: ["admin-post", post.id] }),
-        queryClient.invalidateQueries({ queryKey: ["categories"] }),
+        queryClient.invalidateQueries({ queryKey: adminPostKeys.all() }),
+        queryClient.invalidateQueries({
+          queryKey: adminPostKeys.detail(post.id),
+        }),
+        queryClient.invalidateQueries({ queryKey: adminCategoryKeys.all() }),
+        queryClient.invalidateQueries({ queryKey: publicCategoryKeys.all() }),
       ]);
       onSuccess?.(post);
     },

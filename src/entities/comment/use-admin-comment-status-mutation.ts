@@ -9,13 +9,8 @@ import {
   adminRestoreComment,
   type AdminCommentItem,
 } from "./api";
+import { adminCommentKeys } from "./query-keys";
 import { getErrorMessage } from "@shared/lib/get-error-message";
-
-const ADMIN_COMMENTS_QUERY_KEY = ["admin-comments"] as const;
-const DASHBOARD_RECENT_COMMENTS_QUERY_KEY = [
-  "dashboard",
-  "recentComments",
-] as const;
 
 type AdminCommentStatusTransitionAction = "hide" | "restore" | "soft_delete";
 
@@ -126,9 +121,9 @@ export function useAdminCommentStatusMutation(
       options?.onSuccess?.(updatedComment);
 
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ADMIN_COMMENTS_QUERY_KEY }),
+        queryClient.invalidateQueries({ queryKey: adminCommentKeys.all() }),
         queryClient.invalidateQueries({
-          queryKey: DASHBOARD_RECENT_COMMENTS_QUERY_KEY,
+          queryKey: adminCommentKeys.recentDashboard(),
         }),
       ]);
 

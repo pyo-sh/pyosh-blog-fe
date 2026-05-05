@@ -7,7 +7,7 @@ import documentTextLinear from "@iconify-icons/solar/document-text-linear";
 import penNewRoundLinear from "@iconify-icons/solar/pen-new-round-linear";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { fetchDashboardStats } from "@entities/stat";
+import { adminDashboardKeys, fetchDashboardStats } from "@entities/stat";
 import { formatNumber } from "@shared/lib/format-number";
 import { Skeleton } from "@shared/ui/libs";
 
@@ -51,7 +51,7 @@ function PostStatusError({ onRetry }: { onRetry: () => void }) {
 
 export function PostStatusSection() {
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ["dashboard", "stats"],
+    queryKey: adminDashboardKeys.stats(),
     queryFn: fetchDashboardStats,
   });
 

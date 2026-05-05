@@ -16,6 +16,7 @@ import type {
 } from "./comment-filters";
 import {
   adminBulkOperateComments,
+  adminCommentKeys,
   adminDeleteComment,
   adminRestoreComment,
   fetchAdminCommentThread,
@@ -28,7 +29,6 @@ import { cn } from "@shared/lib/style-utils";
 import { EmptyState, Skeleton } from "@shared/ui/libs";
 
 const PAGE_SIZE = 10;
-const QUERY_KEY = ["admin-comments"] as const;
 const EMPTY_COMMENT_ROWS: AdminCommentItem[] = [];
 
 interface FilterState {
@@ -139,7 +139,7 @@ export function AdminCommentsPage() {
   );
 
   const queryKey = useMemo(
-    () => [...QUERY_KEY, queryParams] as const,
+    () => adminCommentKeys.list(queryParams),
     [queryParams],
   );
 
@@ -234,7 +234,7 @@ export function AdminCommentsPage() {
       }
       setActionContext(null);
       setCascadeCount(undefined);
-      await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      await queryClient.invalidateQueries({ queryKey: adminCommentKeys.all() });
       const actionLabel =
         variables.action === "restore"
           ? "복원"

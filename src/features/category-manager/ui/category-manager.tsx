@@ -12,6 +12,7 @@ import {
 } from "./category-form-modal";
 import { CategoryTree } from "./category-tree";
 import {
+  adminCategoryKeys,
   createCategory,
   deleteCategories,
   deleteCategory,
@@ -21,11 +22,10 @@ import {
   type Category,
   type CategoryTreeChange,
   type DeleteCategoryOptions,
+  publicCategoryKeys,
 } from "@entities/category";
 import { getErrorMessage } from "@shared/lib/get-error-message";
 import { Skeleton } from "@shared/ui/libs";
-
-const QUERY_KEY = ["admin-categories"] as const;
 
 type FormMode = "create" | "edit";
 
@@ -45,7 +45,7 @@ export function CategoryManager() {
   );
 
   const categoriesQuery = useQuery({
-    queryKey: QUERY_KEY,
+    queryKey: adminCategoryKeys.tree(),
     queryFn: () => fetchCategoriesAdmin(),
   });
 
@@ -55,12 +55,19 @@ export function CategoryManager() {
     [categories, formState.category],
   );
 
+  async function invalidateCategoryQueries() {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: adminCategoryKeys.tree() }),
+      queryClient.invalidateQueries({ queryKey: publicCategoryKeys.tree() }),
+    ]);
+  }
+
   const createMutation = useMutation({
     mutationFn: (values: CategoryFormValues) =>
       createCategory(toCreateCategoryBody(values)),
     onSuccess: async () => {
       setFormState({ open: false, mode: "create", category: null });
-      await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      await invalidateCategoryQueries();
     },
     onError: (error) => {
       toast.error(getErrorMessage(error, "카테고리 추가에 실패했습니다."));
@@ -72,7 +79,7 @@ export function CategoryManager() {
       updateCategory(id, toUpdateCategoryBody(values)),
     onSuccess: async () => {
       setFormState({ open: false, mode: "create", category: null });
-      await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      await invalidateCategoryQueries();
     },
     onError: (error) => {
       toast.error(getErrorMessage(error, "카테고리 수정에 실패했습니다."));
@@ -89,7 +96,7 @@ export function CategoryManager() {
     }) => deleteCategory(id, options),
     onSuccess: async () => {
       setCategoryToDelete(null);
-      await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      await invalidateCategoryQueries();
     },
     onError: (error) => {
       toast.error(getErrorMessage(error, "카테고리 삭제에 실패했습니다."));
@@ -105,7 +112,7 @@ export function CategoryManager() {
       options: DeleteCategoryOptions;
     }) => deleteCategories(ids, options),
     onSuccess: async (_data, variables) => {
-      await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      await invalidateCategoryQueries();
       toast.success(
         `선택한 카테고리 ${variables.ids.length}개를 삭제했습니다.`,
       );
@@ -126,7 +133,7 @@ export function CategoryManager() {
       await Promise.all(ids.map((id) => updateCategory(id, { isVisible })));
     },
     onSuccess: async (_data, variables) => {
-      await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      await invalidateCategoryQueries();
       toast.success(
         variables.isVisible
           ? "선택한 카테고리를 표시했습니다."
@@ -144,7 +151,7 @@ export function CategoryManager() {
     mutationFn: (category: Category) =>
       updateCategory(category.id, { isVisible: !category.isVisible }),
     onSuccess: async (_data, category) => {
-      await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      await invalidateCategoryQueries();
       toast.success(
         category.isVisible
           ? "카테고리를 숨겼습니다."
@@ -161,7 +168,7 @@ export function CategoryManager() {
   const treeUpdateMutation = useMutation({
     mutationFn: (changes: CategoryTreeChange[]) => updateCategoryTree(changes),
     onSuccess: async (_data, changes) => {
-      await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      await invalidateCategoryQueries();
       toast.success(`배치 편집 변경사항 ${changes.length}건을 저장했습니다.`);
     },
     onError: (error) => {

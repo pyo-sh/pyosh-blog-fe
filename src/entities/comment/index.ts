@@ -17,6 +17,7 @@ export type {
   AdminCommentStatus,
   FetchAdminCommentsParams,
 } from "./api";
+export { adminCommentKeys, publicCommentKeys } from "./query-keys";
 export {
   adminBulkOperateComments,
   adminDeleteComment,

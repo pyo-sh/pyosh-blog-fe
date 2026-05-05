@@ -23,6 +23,7 @@ export type {
 export { SEARCH_FILTERS } from "./model";
 export { buildPostHref } from "@shared/lib/post-url";
 export { isPinnedPostLimitError, MAX_PINNED_POSTS } from "./lib";
+export { adminPostKeys, publicPostKeys } from "./query-keys";
 export {
   bulkUpdatePosts,
   fetchAdminPost,

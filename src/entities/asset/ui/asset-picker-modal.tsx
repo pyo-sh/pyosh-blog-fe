@@ -8,6 +8,7 @@ import {
   formatAssetResolution,
   getAssetFilename,
 } from "../lib";
+import { adminAssetKeys } from "../query-keys";
 import type { Asset } from "../model";
 import { getErrorMessage } from "@shared/lib/get-error-message";
 import { cn } from "@shared/lib/style-utils";
@@ -30,7 +31,7 @@ export function AssetPickerModal({
   const [selectedAssetId, setSelectedAssetId] = useState<number | null>(null);
 
   const assetsQuery = useQuery({
-    queryKey: ["asset-picker-assets", page],
+    queryKey: adminAssetKeys.list({ page, limit: PAGE_SIZE }),
     queryFn: () => fetchAssets(page, PAGE_SIZE),
     enabled: isOpen,
   });

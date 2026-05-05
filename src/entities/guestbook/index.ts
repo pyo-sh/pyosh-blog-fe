@@ -14,6 +14,7 @@ export type {
   FetchAdminGuestbookParams,
   GuestbookSettingsResponse,
 } from "./api";
+export { adminGuestbookKeys, publicGuestbookKeys } from "./query-keys";
 export {
   adminBulkDeleteGuestbookEntries,
   adminBulkPatchGuestbookEntries,

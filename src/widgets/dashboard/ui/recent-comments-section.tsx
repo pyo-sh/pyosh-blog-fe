@@ -8,6 +8,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import {
   adminDeleteComment,
+  adminCommentKeys,
   adminRestoreComment,
   fetchAdminComments,
   fetchAdminCommentThread,
@@ -169,9 +170,6 @@ function CommentRow({
   );
 }
 
-const QUERY_KEY = ["dashboard", "recentComments"] as const;
-const ADMIN_COMMENTS_QUERY_KEY = ["admin-comments"] as const;
-
 function getAllowedActionsForStatus(status: AdminCommentItem["status"]) {
   if (status === "deleted") {
     return ["restore", "hard_delete"] as const;
@@ -200,7 +198,7 @@ export function RecentCommentsSection() {
   const cascadeRequestSeqRef = useRef(0);
 
   const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: QUERY_KEY,
+    queryKey: adminCommentKeys.recentDashboard(),
     queryFn: () => fetchAdminComments({ limit: 5 }),
   });
   const statusMutation = useAdminCommentStatusMutation({
@@ -237,9 +235,11 @@ export function RecentCommentsSection() {
 
       setActionContext(null);
       setCascadeCount(undefined);
-      await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
       await queryClient.invalidateQueries({
-        queryKey: ADMIN_COMMENTS_QUERY_KEY,
+        queryKey: adminCommentKeys.recentDashboard(),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: adminCommentKeys.all(),
       });
     },
     onError: (err) => {
