@@ -44,6 +44,7 @@ const basePost: Post = {
   contentMd: "# React Server Components",
   thumbnailUrl: "https://picsum.photos/seed/react-rsc/256/192",
   visibility: "public",
+  searchIndexable: true,
   status: "published",
   commentStatus: "open",
   publishedAt: "2026-03-18T09:00:00.000Z",

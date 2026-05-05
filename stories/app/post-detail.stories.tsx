@@ -94,6 +94,7 @@ const postDetailPost: Post = {
   contentMd: storyMarkdown,
   thumbnailUrl: "https://picsum.photos/seed/react-rsc-detail/960/540",
   visibility: "public",
+  searchIndexable: true,
   status: "published",
   commentStatus: "open",
   publishedAt: "2026-03-18T09:00:00.000Z",

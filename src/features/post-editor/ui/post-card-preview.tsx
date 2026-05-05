@@ -10,6 +10,7 @@ interface PostCardPreviewProps {
   thumbnailUrl: string;
   summary: string;
   visibility: PostDetail["visibility"];
+  searchIndexable: boolean;
   status: PostDetail["status"];
   compact?: boolean;
 }
@@ -21,6 +22,7 @@ export function PostCardPreview({
   thumbnailUrl,
   summary,
   visibility,
+  searchIndexable,
   status,
   compact = false,
 }: PostCardPreviewProps) {
@@ -30,6 +32,12 @@ export function PostCardPreview({
     : thumbnailUrl;
   const statusLabel =
     status === "published" ? "발행" : status === "archived" ? "보관" : "작성중";
+  const searchLabel =
+    visibility === "private"
+      ? "검색 제외"
+      : searchIndexable
+        ? "검색 노출"
+        : "검색 차단";
 
   return (
     <>
@@ -58,7 +66,8 @@ export function PostCardPreview({
               {title || "글 제목이 여기에 표시됩니다."}
             </div>
             <div className="text-xs text-text-4">
-              {visibility === "public" ? "공개" : "비공개"} · {statusLabel}
+              {visibility === "public" ? "공개" : "비공개"} · {statusLabel} ·{" "}
+              {searchLabel}
             </div>
           </div>
         </div>
@@ -99,6 +108,7 @@ export function PostCardPreview({
 
               <div className="flex flex-wrap items-center gap-3 text-xs text-text-4">
                 <span>{visibility === "public" ? "공개" : "비공개"}</span>
+                <span>{searchLabel}</span>
                 <span>{statusLabel}</span>
                 <span>조회수 1,234</span>
                 <span>댓글 8</span>

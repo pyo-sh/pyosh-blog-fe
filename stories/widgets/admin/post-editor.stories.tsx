@@ -28,6 +28,7 @@ export const Edit: Story = {
       contentMd: "# Next.js App Router\n\nApp Router는 React Server Components를 기반으로 합니다.",
       categoryId: 1,
       visibility: "public",
+      searchIndexable: true,
       status: "published",
     },
   },

@@ -241,6 +241,7 @@ function normalizePost<T extends PostListItem | PostDetail>(post: T): T {
   return {
     ...post,
     thumbnailUrl: normalizeOptionalAssetUrl(post.thumbnailUrl),
+    searchIndexable: post.searchIndexable ?? true,
   };
 }
 

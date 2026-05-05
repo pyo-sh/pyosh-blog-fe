@@ -29,6 +29,7 @@ interface PostBase {
   slug: string;
   thumbnailUrl: string | null;
   visibility: "public" | "private";
+  searchIndexable: boolean;
   status: "draft" | "published" | "archived";
   commentStatus?: "open" | "locked" | "disabled";
   publishedAt: string | null;
@@ -46,6 +47,11 @@ interface PostBase {
 }
 
 export interface PostListItem extends PostBase {
+  category: PostCategory | null;
+}
+
+export interface Post extends PostBase {
+  contentMd: string;
   category: PostCategory | null;
 }
 
@@ -88,6 +94,7 @@ export interface PostNavigation {
 export interface PublishedPostSlug {
   slug: string;
   updatedAt: string;
+  searchIndexable: boolean;
 }
 
 export interface PublishedPostSlugsResponse {
@@ -150,6 +157,7 @@ export interface CreatePostBody {
   categoryId: number;
   thumbnailUrl?: string | null;
   visibility?: "public" | "private";
+  searchIndexable?: boolean;
   status?: "draft" | "published" | "archived";
   commentStatus?: "open" | "locked" | "disabled";
   tags?: string[];
