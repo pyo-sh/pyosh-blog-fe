@@ -17,7 +17,9 @@ import {
   ApiResponseError,
   clientFetch,
   clientMutate,
+  publicServerFetch,
   serverFetch,
+  PUBLIC_CACHE_REVALIDATE_SECONDS,
 } from "@shared/api";
 import { normalizeOptionalAssetUrl } from "@shared/lib/asset-url";
 import { decodeSlug, encodeSlugPathSegment } from "@shared/lib/slug";
@@ -88,31 +90,28 @@ function buildSearchParams(
 
 export async function fetchPosts(
   params: FetchPostsParams = {},
-  cookieHeader?: string,
 ): Promise<PaginatedResponse<PublishedPostListItem>> {
   const queryString = buildPostSearchParams(params);
   const path = queryString ? `/posts?${queryString}` : "/posts";
 
-  const response = await serverFetch<PaginatedResponse<PublishedPostListItem>>(
-    path,
-    {},
-    cookieHeader,
-  );
+  const response = await publicServerFetch<
+    PaginatedResponse<PublishedPostListItem>
+  >(path, {
+    revalidate: PUBLIC_CACHE_REVALIDATE_SECONDS.postList,
+  });
 
   return normalizePostListResponse(response);
 }
 
 export async function fetchPostBySlug(
   slug: string,
-  cookieHeader?: string,
 ): Promise<PostDetailWithNavigationResponse> {
   const buildPath = (value: string) => `/posts/${encodeSlugPathSegment(value)}`;
 
   try {
-    const response = await serverFetch<PostDetailWithNavigationResponse>(
+    const response = await publicServerFetch<PostDetailWithNavigationResponse>(
       buildPath(slug),
-      {},
-      cookieHeader,
+      { revalidate: PUBLIC_CACHE_REVALIDATE_SECONDS.postDetail },
     );
 
     return {
@@ -130,10 +129,9 @@ export async function fetchPostBySlug(
       throw error;
     }
 
-    const response = await serverFetch<PostDetailWithNavigationResponse>(
+    const response = await publicServerFetch<PostDetailWithNavigationResponse>(
       buildPath(decodedSlug),
-      {},
-      cookieHeader,
+      { revalidate: PUBLIC_CACHE_REVALIDATE_SECONDS.postDetail },
     );
 
     return {
@@ -143,14 +141,10 @@ export async function fetchPostBySlug(
   }
 }
 
-export async function fetchPublishedPostSlugs(
-  cookieHeader?: string,
-): Promise<PublishedPostSlugsResponse> {
-  return serverFetch<PublishedPostSlugsResponse>(
-    "/posts/slugs",
-    {},
-    cookieHeader,
-  );
+export async function fetchPublishedPostSlugs(): Promise<PublishedPostSlugsResponse> {
+  return publicServerFetch<PublishedPostSlugsResponse>("/posts/slugs", {
+    revalidate: PUBLIC_CACHE_REVALIDATE_SECONDS.sitemap,
+  });
 }
 
 export async function fetchAdminPost(
