@@ -26,7 +26,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: route.priority,
     })),
     ...slugsResponse.slugs
-      .filter((post) => post.searchIndexable !== false)
+      .filter((post) => post.searchIndexable)
       .map((post) => ({
         url: buildAbsoluteUrl(`/posts/${encodeURIComponent(post.slug)}`),
         lastModified: post.updatedAt,
