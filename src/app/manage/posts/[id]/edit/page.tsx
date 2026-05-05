@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { PostEditorScreen } from "../../post-editor-screen";
 import { toAdminPostCookieHeader } from "../admin-post-cookie";
 import { fetchAdminPost } from "@entities/post";
-import { mapPostToFormValues } from "@features/post-editor/lib/post-form-values";
+import { mapPostToFormValues } from "@features/post-editor";
 import { ApiResponseError } from "@shared/api";
 
 export const dynamic = "force-dynamic";
