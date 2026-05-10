@@ -1,4 +1,12 @@
-import type { Asset, UploadedAsset, UploadAssetsResponse } from "./model";
+import type {
+  Asset,
+  AssetCategory,
+  AssetListParams,
+  AssetUploadMetadata,
+  UploadedAsset,
+  UpdateAssetBody,
+  UploadAssetsResponse,
+} from "./model";
 import type { PaginatedResponse } from "@shared/api";
 import {
   ApiResponseError,
@@ -13,11 +21,25 @@ import { normalizeAssetUrl } from "@shared/lib/asset-url";
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5500";
 
 export async function fetchAssets(
-  page = 1,
+  pageOrParams: number | AssetListParams = 1,
   limit = 20,
 ): Promise<PaginatedResponse<Asset>> {
+  const params =
+    typeof pageOrParams === "number"
+      ? { page: pageOrParams, limit }
+      : pageOrParams;
+  const searchParams = new URLSearchParams();
+  searchParams.set("page", String(params.page ?? 1));
+  searchParams.set("limit", String(params.limit ?? 20));
+  if (params.categoryId) {
+    searchParams.set("categoryId", String(params.categoryId));
+  }
+  if (params.q?.trim()) {
+    searchParams.set("q", params.q.trim());
+  }
+
   const response = await clientFetch<PaginatedResponse<Asset>>(
-    `/assets?page=${page}&limit=${limit}`,
+    `/assets?${searchParams.toString()}`,
   );
 
   return {
@@ -29,12 +51,16 @@ export async function fetchAssets(
 export async function uploadAssets(
   files: File[],
   onProgress?: (percent: number) => void,
+  metadata: AssetUploadMetadata[] = [],
 ): Promise<UploadedAsset[]> {
   const formData = new FormData();
 
   files.forEach((file) => {
     formData.append("files", file);
   });
+  if (metadata.length > 0) {
+    formData.append("metadata", JSON.stringify(metadata));
+  }
 
   const csrfToken = await getCsrfToken();
 
@@ -81,6 +107,61 @@ export async function uploadAssets(
     xhr.withCredentials = true;
     xhr.setRequestHeader("x-csrf-token", csrfToken);
     xhr.send(formData);
+  });
+}
+
+export async function fetchAssetCategories(): Promise<AssetCategory[]> {
+  const response = await clientFetch<{ data: AssetCategory[] }>(
+    "/assets/categories",
+  );
+
+  return response.data;
+}
+
+export async function createAssetCategory(
+  name: string,
+): Promise<AssetCategory> {
+  return clientMutate<AssetCategory>("/assets/categories", {
+    method: "POST",
+    body: JSON.stringify({ name }),
+  });
+}
+
+export async function updateAssetCategory(
+  id: number,
+  body: { name?: string; sortOrder?: number },
+): Promise<AssetCategory> {
+  return clientMutate<AssetCategory>(`/assets/categories/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function deleteAssetCategory(id: number): Promise<void> {
+  await clientMutate<void>(`/assets/categories/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export async function updateAsset(
+  id: number,
+  body: UpdateAssetBody,
+): Promise<Asset> {
+  const asset = await clientMutate<Asset>(`/assets/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
+
+  return normalizeAsset(asset);
+}
+
+export async function updateAssetsCategory(
+  ids: number[],
+  categoryId: number,
+): Promise<void> {
+  await clientMutate<void>("/assets/bulk/category", {
+    method: "PATCH",
+    body: JSON.stringify({ ids, categoryId }),
   });
 }
 

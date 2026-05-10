@@ -6,12 +6,14 @@ import closeCircleLinear from "@iconify-icons/solar/close-circle-linear";
 import codeSquareLinear from "@iconify-icons/solar/code-square-linear";
 import linkMinimalistic2Linear from "@iconify-icons/solar/link-minimalistic-2-linear";
 import trashBinMinimalisticLinear from "@iconify-icons/solar/trash-bin-minimalistic-linear";
-import type { Asset } from "@entities/asset";
+import type { Asset, AssetCategory } from "@entities/asset";
 import {
   buildAssetMarkdown,
   formatAssetDate,
   formatAssetFileSize,
   formatAssetResolution,
+  getAssetCategoryTone,
+  getAssetDisplayName,
   getAssetFilename,
 } from "@entities/asset";
 import { cn } from "@shared/lib/style-utils";
@@ -19,23 +21,34 @@ import { Modal } from "@shared/ui/libs";
 
 interface AssetDetailModalProps {
   assets: Asset[];
+  categories: AssetCategory[];
   assetId: number | null;
   copiedType: "url" | "markdown" | null;
+  isSavingMetadata: boolean;
   onClose: () => void;
   onCopy: (asset: Asset, type: "url" | "markdown") => void;
+  onUpdateMetadata: (
+    asset: Asset,
+    metadata: { displayName: string | null; categoryId: number },
+  ) => void;
   onRequestDelete: (asset: Asset) => void;
   onSelectAsset: (assetId: number) => void;
 }
 
 export function AssetDetailModal({
   assets,
+  categories,
   assetId,
   copiedType,
+  isSavingMetadata,
   onClose,
   onCopy,
+  onUpdateMetadata,
   onRequestDelete,
   onSelectAsset,
 }: AssetDetailModalProps) {
+  const [displayNameDraft, setDisplayNameDraft] = useState("");
+  const [categoryIdDraft, setCategoryIdDraft] = useState<number | null>(null);
   const currentIndex = useMemo(
     () => assets.findIndex((asset) => asset.id === assetId),
     [assetId, assets],
@@ -46,6 +59,10 @@ export function AssetDetailModal({
     currentIndex >= 0 && currentIndex < assets.length - 1
       ? assets[currentIndex + 1]
       : null;
+  const isMetadataChanged =
+    asset !== null &&
+    (displayNameDraft.trim() !== (asset.displayName ?? "") ||
+      categoryIdDraft !== asset.category.id);
 
   useEffect(() => {
     if (!asset) {
@@ -71,6 +88,11 @@ export function AssetDetailModal({
     };
   }, [asset, nextAsset, onSelectAsset, prevAsset]);
 
+  useEffect(() => {
+    setDisplayNameDraft(asset?.displayName ?? "");
+    setCategoryIdDraft(asset?.category.id ?? null);
+  }, [asset]);
+
   if (!asset) {
     return null;
   }
@@ -86,7 +108,7 @@ export function AssetDetailModal({
       <div className="flex max-h-[90vh] flex-col overflow-hidden rounded-[1.5rem] bg-background-1">
         <div className="flex items-center justify-between gap-4 border-b border-border-3 px-6 py-4">
           <h3 className="truncate text-lg font-bold text-text-1">
-            {getAssetFilename(asset.url)}
+            {getAssetDisplayName(asset)}
           </h3>
           <button
             type="button"
@@ -141,6 +163,8 @@ export function AssetDetailModal({
           </div>
 
           <dl className="mb-6 grid grid-cols-2 gap-x-6 gap-y-3">
+            <InfoRow label="별명" value={asset.displayName ?? "-"} />
+            <InfoRow label="카테고리" value={asset.category.name} />
             <InfoRow label="파일명" value={getAssetFilename(asset.url)} />
             <InfoRow label="형식" value={asset.mimeType} />
             <InfoRow
@@ -156,6 +180,83 @@ export function AssetDetailModal({
               value={formatAssetDate(asset.createdAt)}
             />
           </dl>
+
+          <div className="mb-6 rounded-[1rem] border border-border-3 bg-background-2 p-4">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-text-4">
+                  Metadata
+                </p>
+                <p className="mt-1 text-sm text-text-3">
+                  별명과 카테고리는 검색과 필터에만 사용됩니다.
+                </p>
+              </div>
+              <span
+                className={cn(
+                  "rounded-full border px-2 py-1 text-[11px] font-semibold",
+                  getAssetCategoryTone(asset.category),
+                )}
+              >
+                {asset.category.name}
+              </span>
+            </div>
+            <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_12rem]">
+              <label className="grid gap-1.5">
+                <span className="text-[12px] text-text-3">별명</span>
+                <input
+                  type="text"
+                  value={displayNameDraft}
+                  maxLength={200}
+                  onChange={(event) => setDisplayNameDraft(event.target.value)}
+                  disabled={isSavingMetadata}
+                  className="h-10 rounded-[0.75rem] border border-border-3 bg-background-1 px-3 text-sm text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+                  placeholder={getAssetFilename(asset.url)}
+                />
+              </label>
+              <label className="grid gap-1.5">
+                <span className="text-[12px] text-text-3">카테고리</span>
+                <select
+                  value={categoryIdDraft ?? ""}
+                  onChange={(event) =>
+                    setCategoryIdDraft(
+                      event.target.value ? Number(event.target.value) : null,
+                    )
+                  }
+                  disabled={isSavingMetadata}
+                  className="h-10 rounded-[0.75rem] border border-border-3 bg-background-1 px-3 text-sm text-text-2 outline-none transition-colors focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <div className="mt-4 flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  if (categoryIdDraft === null) {
+                    return;
+                  }
+
+                  onUpdateMetadata(asset, {
+                    displayName: displayNameDraft.trim() || null,
+                    categoryId: categoryIdDraft,
+                  });
+                }}
+                disabled={
+                  isSavingMetadata ||
+                  !isMetadataChanged ||
+                  categoryIdDraft === null
+                }
+                className="inline-flex h-9 items-center justify-center rounded-[0.75rem] bg-primary-1 px-4 text-sm font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSavingMetadata ? "저장 중" : "저장"}
+              </button>
+            </div>
+          </div>
 
           <div className="space-y-4">
             <CodeInfoBlock
@@ -257,7 +358,7 @@ function AssetPreview({ asset }: { asset: Asset }) {
     // eslint-disable-next-line @next/next/no-img-element -- arbitrary admin asset hosts are allowed
     <img
       src={asset.url}
-      alt={getAssetFilename(asset.url)}
+      alt={getAssetDisplayName(asset)}
       className="w-full object-contain"
       style={{ maxHeight: "60vh" }}
       onError={() => setHasError(true)}

@@ -3,17 +3,27 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { AssetCategoryManagerModal } from "./asset-category-manager-modal";
 import { AssetDetailModal } from "./asset-detail-modal";
 import { AssetGrid } from "./asset-grid";
 import { type PendingUploadFile, UploadZone } from "./upload-zone";
 import {
   adminAssetKeys,
   buildAssetMarkdown,
+  createAssetCategory,
   deleteAsset,
+  deleteAssetCategory,
   deleteAssets,
+  fetchAssetCategories,
   fetchAssets,
+  findAssetCategoryByKey,
+  getInitialAssetDisplayName,
+  updateAsset,
+  updateAssetCategory,
+  updateAssetsCategory,
   uploadAssets,
   type Asset,
+  type AssetCategory,
 } from "@entities/asset";
 import { toCanonicalAssetUrl } from "@shared/lib/asset-url";
 import { getErrorMessage } from "@shared/lib/get-error-message";
@@ -55,6 +65,16 @@ function generatePageNumbers(
 export function AssetUploader() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
+  const [categoryFilterId, setCategoryFilterId] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
+  const [defaultUploadCategoryId, setDefaultUploadCategoryId] = useState<
+    number | null
+  >(null);
+  const [bulkCategoryId, setBulkCategoryId] = useState<number | null>(null);
+  const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
+  const [pendingCategoryId, setPendingCategoryId] = useState<number | null>(
+    null,
+  );
   const [pendingFiles, setPendingFiles] = useState<PendingUploadFile[]>([]);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [selectionMode, setSelectionMode] = useState(false);
@@ -71,17 +91,41 @@ export function AssetUploader() {
     id: number;
     type: "url" | "markdown";
   } | null>(null);
+  const trimmedSearch = search.trim();
+
+  const categoriesQuery = useQuery({
+    queryKey: adminAssetKeys.categories(),
+    queryFn: fetchAssetCategories,
+  });
 
   const assetsQuery = useQuery({
-    queryKey: adminAssetKeys.list({ page, limit: PAGE_SIZE }),
-    queryFn: () => fetchAssets(page, PAGE_SIZE),
+    queryKey: adminAssetKeys.list({
+      page,
+      limit: PAGE_SIZE,
+      categoryId: categoryFilterId,
+      q: trimmedSearch,
+    }),
+    queryFn: () =>
+      fetchAssets({
+        page,
+        limit: PAGE_SIZE,
+        categoryId: categoryFilterId,
+        q: trimmedSearch || undefined,
+      }),
   });
 
   const uploadMutation = useMutation({
-    mutationFn: (files: File[]) => {
+    mutationFn: (files: PendingUploadFile[]) => {
       setUploadProgress(0);
 
-      return uploadAssets(files, setUploadProgress);
+      return uploadAssets(
+        files.map((item) => item.file),
+        setUploadProgress,
+        files.map((item) => ({
+          displayName: item.displayName.trim() || null,
+          categoryId: item.categoryId ?? undefined,
+        })),
+      );
     },
     onSuccess: async () => {
       toast.success(
@@ -100,6 +144,11 @@ export function AssetUploader() {
 
   const assets = assetsQuery.data?.data ?? EMPTY_ASSETS;
   const meta = assetsQuery.data?.meta;
+  const categories = categoriesQuery.data ?? [];
+  const fallbackDefaultCategory =
+    findAssetCategoryByKey(categories, "default") ?? categories[0] ?? null;
+  const selectedUploadCategoryId =
+    defaultUploadCategoryId ?? fallbackDefaultCategory?.id ?? null;
 
   const deleteMutation = useMutation({
     mutationFn: async (ids: number[]) => {
@@ -146,11 +195,127 @@ export function AssetUploader() {
     },
   });
 
+  const updateAssetMutation = useMutation({
+    mutationFn: ({
+      assetId,
+      displayName,
+      categoryId,
+    }: {
+      assetId: number;
+      displayName: string | null;
+      categoryId: number;
+    }) => updateAsset(assetId, { displayName, categoryId }),
+    onSuccess: async () => {
+      toast.success("에셋 정보를 저장했습니다.");
+      await queryClient.invalidateQueries({ queryKey: adminAssetKeys.all() });
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error, "에셋 정보 저장에 실패했습니다."));
+    },
+  });
+
+  const bulkCategoryMutation = useMutation({
+    mutationFn: ({ ids, categoryId }: { ids: number[]; categoryId: number }) =>
+      updateAssetsCategory(ids, categoryId),
+    onSuccess: async (_, variables) => {
+      toast.success(
+        `${variables.ids.length}개의 에셋 카테고리를 변경했습니다.`,
+      );
+      setSelectedIds([]);
+      setLastSelectedIndex(null);
+      setBulkCategoryId(null);
+      await queryClient.invalidateQueries({ queryKey: adminAssetKeys.all() });
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error, "카테고리 일괄 변경에 실패했습니다."));
+    },
+  });
+
+  const createCategoryMutation = useMutation({
+    mutationFn: createAssetCategory,
+    onSuccess: async () => {
+      toast.success("에셋 카테고리를 추가했습니다.");
+      await queryClient.invalidateQueries({
+        queryKey: adminAssetKeys.categories(),
+      });
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error, "카테고리 추가에 실패했습니다."));
+    },
+  });
+
+  const updateCategoryMutation = useMutation({
+    mutationFn: ({ id, name }: { id: number; name: string }) =>
+      updateAssetCategory(id, { name }),
+    onMutate: (variables) => {
+      setPendingCategoryId(variables.id);
+    },
+    onSuccess: async () => {
+      toast.success("에셋 카테고리를 저장했습니다.");
+      await queryClient.invalidateQueries({
+        queryKey: adminAssetKeys.categories(),
+      });
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error, "카테고리 저장에 실패했습니다."));
+    },
+    onSettled: () => {
+      setPendingCategoryId(null);
+    },
+  });
+
+  const deleteCategoryMutation = useMutation({
+    mutationFn: deleteAssetCategory,
+    onMutate: (id) => {
+      setPendingCategoryId(id);
+    },
+    onSuccess: async () => {
+      toast.success(
+        "에셋 카테고리를 삭제했습니다. 연결된 에셋은 미분류로 이동했습니다.",
+      );
+      setCategoryFilterId(null);
+      await queryClient.invalidateQueries({ queryKey: adminAssetKeys.all() });
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error, "카테고리 삭제에 실패했습니다."));
+    },
+    onSettled: () => {
+      setPendingCategoryId(null);
+    },
+  });
+
   useEffect(() => {
     if (meta && meta.totalPages > 0 && page > meta.totalPages) {
       setPage(meta.totalPages);
     }
   }, [meta, page]);
+
+  useEffect(() => {
+    setPage(1);
+    setSelectedIds([]);
+    setLastSelectedIndex(null);
+    setSelectionMode(false);
+  }, [categoryFilterId, trimmedSearch]);
+
+  useEffect(() => {
+    if (defaultUploadCategoryId !== null) {
+      return;
+    }
+
+    const defaultCategory = findAssetCategoryByKey(categories, "default");
+    if (defaultCategory) {
+      setDefaultUploadCategoryId(defaultCategory.id);
+    }
+  }, [categories, defaultUploadCategoryId]);
+
+  useEffect(() => {
+    if (
+      bulkCategoryId !== null &&
+      !categories.some((category) => category.id === bulkCategoryId)
+    ) {
+      setBulkCategoryId(null);
+    }
+  }, [bulkCategoryId, categories]);
 
   useEffect(() => {
     setSelectedIds((current) => {
@@ -260,6 +425,8 @@ export function AssetUploader() {
         next.push({
           id: `${file.name}-${file.lastModified}-${file.size}`,
           file,
+          displayName: getInitialAssetDisplayName(file.name),
+          categoryId: selectedUploadCategoryId,
           previewUrl:
             file.type === "image/svg+xml"
               ? undefined
@@ -269,6 +436,26 @@ export function AssetUploader() {
 
       return next;
     });
+  }
+
+  function updatePendingFileMetadata(
+    id: string,
+    metadata: { displayName?: string; categoryId?: number | null },
+  ) {
+    setPendingFiles((current) =>
+      current.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              displayName: metadata.displayName ?? item.displayName,
+              categoryId:
+                metadata.categoryId !== undefined
+                  ? metadata.categoryId
+                  : item.categoryId,
+            }
+          : item,
+      ),
+    );
   }
 
   function removePendingFile(id: string) {
@@ -366,14 +553,72 @@ export function AssetUploader() {
     setSelectionMode(false);
   }
 
+  function handleRenameCategory(category: AssetCategory, name: string) {
+    const trimmed = name.trim();
+    if (!trimmed || trimmed === category.name) {
+      return;
+    }
+
+    updateCategoryMutation.mutate({ id: category.id, name: trimmed });
+  }
+
+  function handleDeleteCategory(category: AssetCategory) {
+    if (category.isProtected) {
+      return;
+    }
+
+    deleteCategoryMutation.mutate(category.id);
+  }
+
   return (
     <div className="space-y-6">
+      <section className="rounded-[1rem] border border-border-4 bg-background-2 p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-text-1">업로드 기본값</p>
+            <p className="mt-1 text-xs text-text-4">
+              에셋 관리에서 직접 추가하는 파일은 선택한 카테고리로 대기열에
+              들어갑니다.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={selectedUploadCategoryId ?? ""}
+              onChange={(event) =>
+                setDefaultUploadCategoryId(
+                  event.target.value ? Number(event.target.value) : null,
+                )
+              }
+              disabled={categoriesQuery.isPending || uploadMutation.isPending}
+              className="h-10 min-w-[12rem] rounded-[0.75rem] border border-border-3 bg-background-1 px-3 text-sm text-text-2 outline-none transition-colors focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+              aria-label="업로드 기본 카테고리"
+            >
+              {categories.length === 0 ? <option value="">기본</option> : null}
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={() => setIsCategoryManagerOpen(true)}
+              className="inline-flex h-10 items-center justify-center rounded-[0.75rem] border border-border-3 px-3 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+            >
+              카테고리 관리
+            </button>
+          </div>
+        </div>
+      </section>
+
       <UploadZone
         files={pendingFiles}
         isUploading={uploadMutation.isPending}
         uploadProgress={uploadProgress}
         errorMessage={null}
+        categories={categories}
         onFilesAdded={addFiles}
+        onUpdateFileMetadata={updatePendingFileMetadata}
         onRemoveFile={removePendingFile}
         onClear={clearPendingFiles}
         onUpload={() => {
@@ -383,7 +628,7 @@ export function AssetUploader() {
             return;
           }
 
-          uploadMutation.mutate(pendingFiles.map((item) => item.file));
+          uploadMutation.mutate(pendingFiles);
         }}
       />
 
@@ -409,6 +654,45 @@ export function AssetUploader() {
 
       {!assetsQuery.isPending && !assetsQuery.isError ? (
         <>
+          <section className="rounded-[1rem] border border-border-4 bg-background-2 p-4">
+            <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_14rem_auto]">
+              <input
+                type="search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="별명 또는 파일명 검색"
+                className="h-10 rounded-[0.75rem] border border-border-3 bg-background-1 px-3 text-sm text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
+              />
+              <select
+                value={categoryFilterId ?? ""}
+                onChange={(event) =>
+                  setCategoryFilterId(
+                    event.target.value ? Number(event.target.value) : null,
+                  )
+                }
+                className="h-10 rounded-[0.75rem] border border-border-3 bg-background-1 px-3 text-sm text-text-2 outline-none transition-colors focus:border-primary-1"
+                aria-label="카테고리 필터"
+              >
+                <option value="">전체 카테고리</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => {
+                  setSearch("");
+                  setCategoryFilterId(null);
+                }}
+                className="inline-flex h-10 items-center justify-center rounded-[0.75rem] border border-border-3 px-3 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+              >
+                필터 초기화
+              </button>
+            </div>
+          </section>
+
           <AssetGrid
             assets={assets}
             totalCount={meta?.total ?? assets.length}
@@ -432,6 +716,54 @@ export function AssetUploader() {
                     선택됨 {selectedIds.length}개
                   </span>
                   <div className="ml-auto flex flex-wrap items-center gap-2">
+                    <select
+                      value={bulkCategoryId ?? ""}
+                      onChange={(event) =>
+                        setBulkCategoryId(
+                          event.target.value
+                            ? Number(event.target.value)
+                            : null,
+                        )
+                      }
+                      disabled={
+                        selectedIds.length === 0 ||
+                        bulkCategoryMutation.isPending
+                      }
+                      className="h-9 rounded-[0.7rem] border border-border-3 bg-background-1 px-2 text-sm text-text-2 outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                      aria-label="선택 에셋 카테고리"
+                    >
+                      <option value="">카테고리 변경</option>
+                      {categories.map((category) => (
+                        <option key={category.id} value={category.id}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (bulkCategoryId === null) {
+                          toast.error("변경할 카테고리를 선택하세요.");
+
+                          return;
+                        }
+
+                        bulkCategoryMutation.mutate({
+                          ids: selectedIds,
+                          categoryId: bulkCategoryId,
+                        });
+                      }}
+                      disabled={
+                        selectedIds.length === 0 ||
+                        bulkCategoryId === null ||
+                        bulkCategoryMutation.isPending
+                      }
+                      className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] border border-border-3 px-3 text-sm text-text-2 transition-colors hover:bg-background-1 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      {bulkCategoryMutation.isPending
+                        ? "변경 중"
+                        : "카테고리 적용"}
+                    </button>
                     <button
                       type="button"
                       onClick={() =>
@@ -566,12 +898,36 @@ export function AssetUploader() {
 
       <AssetDetailModal
         assets={assets}
+        categories={categories}
         assetId={deleteTargetIds.length > 0 ? null : detailAssetId}
         copiedType={copiedState?.id === detailAssetId ? copiedState.type : null}
+        isSavingMetadata={updateAssetMutation.isPending}
         onClose={() => setDetailAssetId(null)}
         onCopy={(asset, type) => void handleCopy(asset, type)}
+        onUpdateMetadata={(asset, metadata) =>
+          updateAssetMutation.mutate({
+            assetId: asset.id,
+            displayName: metadata.displayName,
+            categoryId: metadata.categoryId,
+          })
+        }
         onRequestDelete={requestDeleteFromDetail}
         onSelectAsset={setDetailAssetId}
+      />
+
+      <AssetCategoryManagerModal
+        isOpen={isCategoryManagerOpen}
+        categories={categories}
+        pendingCategoryId={pendingCategoryId}
+        isMutating={
+          createCategoryMutation.isPending ||
+          updateCategoryMutation.isPending ||
+          deleteCategoryMutation.isPending
+        }
+        onClose={() => setIsCategoryManagerOpen(false)}
+        onCreate={(name) => createCategoryMutation.mutate(name)}
+        onRename={handleRenameCategory}
+        onDelete={handleDeleteCategory}
       />
     </div>
   );
