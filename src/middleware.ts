@@ -7,6 +7,8 @@ const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL?.trim() ?? "";
 const NOINDEX_HEADER_VALUE = "noindex, nofollow";
 const PRODUCTION_HOSTS = new Set(["pyosh.com", "www.pyosh.com"]);
 
+type ManageAuthState = "admin" | "anonymous" | "non_admin" | "unavailable";
+
 function joinSources(...sources: Array<string | false | null | undefined>) {
   return sources.filter(Boolean).join(" ");
 }
@@ -78,7 +80,10 @@ function redirectToManage(request: NextRequest): NextResponse {
   return NextResponse.redirect(manageUrl);
 }
 
-function redirectToLogin(request: NextRequest): NextResponse {
+function redirectToLogin(
+  request: NextRequest,
+  reason?: "admin_required" | "auth_unavailable",
+): NextResponse {
   const loginUrl = request.nextUrl.clone();
   loginUrl.pathname = MANAGE_LOGIN_PATH;
   loginUrl.search = "";
@@ -87,10 +92,16 @@ function redirectToLogin(request: NextRequest): NextResponse {
     `${request.nextUrl.pathname}${request.nextUrl.search}`,
   );
 
+  if (reason) {
+    loginUrl.searchParams.set("reason", reason);
+  }
+
   return NextResponse.redirect(loginUrl);
 }
 
-async function isAuthenticated(request: NextRequest): Promise<boolean> {
+async function getManageAuthState(
+  request: NextRequest,
+): Promise<ManageAuthState> {
   const cookieHeader = request.headers.get("cookie");
 
   if (
@@ -99,11 +110,11 @@ async function isAuthenticated(request: NextRequest): Promise<boolean> {
   ) {
     console.error("[middleware] API_URL is not set; denying manage access");
 
-    return false;
+    return "unavailable";
   }
 
   if (!cookieHeader) {
-    return false;
+    return "anonymous";
   }
 
   try {
@@ -115,9 +126,32 @@ async function isAuthenticated(request: NextRequest): Promise<boolean> {
       signal: AbortSignal.timeout(3000),
     });
 
-    return response.ok;
+    if (response.status === 401) {
+      return "anonymous";
+    }
+
+    if (response.status === 403) {
+      return "non_admin";
+    }
+
+    if (!response.ok) {
+      return "unavailable";
+    }
+
+    const user: unknown = await response.json();
+
+    if (
+      user &&
+      typeof user === "object" &&
+      "type" in user &&
+      user.type === "admin"
+    ) {
+      return "admin";
+    }
+
+    return "non_admin";
   } catch {
-    return false;
+    return "unavailable";
   }
 }
 
@@ -128,18 +162,26 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     request.nextUrl.pathname === MANAGE_HOME_PATH ||
     request.nextUrl.pathname.startsWith(`${MANAGE_HOME_PATH}/`)
   ) {
-    const authenticated = await isAuthenticated(request);
+    const authState = await getManageAuthState(request);
 
     if (request.nextUrl.pathname === MANAGE_LOGIN_PATH) {
-      if (authenticated) {
+      if (authState === "admin") {
         return redirectToManage(request);
       }
 
       return nextWithCsp(request, nonce);
     }
 
-    if (!authenticated) {
+    if (authState === "anonymous") {
       return redirectToLogin(request);
+    }
+
+    if (authState === "non_admin") {
+      return redirectToLogin(request, "admin_required");
+    }
+
+    if (authState === "unavailable") {
+      return redirectToLogin(request, "auth_unavailable");
     }
   }
 
