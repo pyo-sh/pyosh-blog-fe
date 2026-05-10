@@ -7,6 +7,7 @@ import galleryWideLinear from "@iconify-icons/solar/gallery-wide-linear";
 import linkMinimalistic2Linear from "@iconify-icons/solar/link-minimalistic-2-linear";
 import trashBinMinimalisticLinear from "@iconify-icons/solar/trash-bin-minimalistic-linear";
 import uploadMinimalisticLinear from "@iconify-icons/solar/upload-minimalistic-linear";
+import type { AssetCategory } from "@entities/asset";
 import { cn } from "@shared/lib/style-utils";
 import { Spinner } from "@shared/ui/libs";
 
@@ -14,6 +15,8 @@ export interface PendingUploadFile {
   id: string;
   file: File;
   previewUrl?: string;
+  displayName: string;
+  categoryId: number | null;
 }
 
 interface UploadZoneProps {
@@ -21,7 +24,12 @@ interface UploadZoneProps {
   isUploading: boolean;
   uploadProgress: number | null;
   errorMessage: string | null;
+  categories: AssetCategory[];
   onFilesAdded: (files: FileList | File[]) => void;
+  onUpdateFileMetadata: (
+    id: string,
+    metadata: { displayName?: string; categoryId?: number | null },
+  ) => void;
   onRemoveFile: (id: string) => void;
   onClear: () => void;
   onUpload: () => void;
@@ -32,7 +40,9 @@ export function UploadZone({
   isUploading,
   uploadProgress,
   errorMessage,
+  categories,
   onFilesAdded,
+  onUpdateFileMetadata,
   onRemoveFile,
   onClear,
   onUpload,
@@ -132,12 +142,12 @@ export function UploadZone({
           </div>
         ) : null}
 
-        <div className="flex flex-row flex-wrap gap-3">
+        <div className="grid gap-3">
           {hasFiles ? (
             files.map((item) => (
               <div
                 key={item.id}
-                className="flex items-center gap-3 rounded-lg border border-border-4 bg-background-1 px-3 py-2"
+                className="grid gap-3 rounded-lg border border-border-4 bg-background-1 px-3 py-3 md:grid-cols-[auto_minmax(0,1fr)_9rem_auto] md:items-center"
               >
                 <div className="flex h-12 w-16 shrink-0 items-center justify-center overflow-hidden rounded bg-background-3">
                   {item.previewUrl ? (
@@ -169,6 +179,39 @@ export function UploadZone({
                     </div>
                   ) : null}
                 </div>
+                <input
+                  type="text"
+                  value={item.displayName}
+                  onChange={(event) =>
+                    onUpdateFileMetadata(item.id, {
+                      displayName: event.target.value,
+                    })
+                  }
+                  disabled={isUploading}
+                  aria-label={`${item.file.name} 별명`}
+                  placeholder="별명"
+                  className="h-9 min-w-0 rounded-lg border border-border-3 bg-background-1 px-3 text-[13px] text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+                />
+                <select
+                  value={item.categoryId ?? ""}
+                  onChange={(event) =>
+                    onUpdateFileMetadata(item.id, {
+                      categoryId: event.target.value
+                        ? Number(event.target.value)
+                        : null,
+                    })
+                  }
+                  disabled={isUploading}
+                  aria-label={`${item.file.name} 카테고리`}
+                  className="h-9 min-w-0 rounded-lg border border-border-3 bg-background-1 px-3 text-[13px] text-text-2 outline-none transition-colors focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <option value="">기본</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
                 {isUploading ? (
                   <Spinner size="sm" className="shrink-0 text-primary-1" />
                 ) : (

@@ -1,8 +1,16 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { adminAssetKeys, fetchAssets, type Asset } from "@entities/asset";
+import {
+  adminAssetKeys,
+  fetchAssets,
+  getAssetCategoryTone,
+  getAssetDisplayName,
+  getAssetFilename,
+  type Asset,
+} from "@entities/asset";
 import { getErrorMessage } from "@shared/lib/get-error-message";
+import { cn } from "@shared/lib/style-utils";
 import { Modal } from "@shared/ui/libs";
 
 interface ImageGalleryModalProps {
@@ -104,6 +112,7 @@ export function ImageGalleryModal({
                   className="overflow-hidden rounded-[1.25rem] border border-border-3 bg-background-2 text-left transition-colors hover:border-primary-1"
                 >
                   <div className="aspect-[4/3] bg-background-3">
+                    {/* eslint-disable-next-line @next/next/no-img-element -- arbitrary admin asset hosts are allowed */}
                     <img
                       src={asset.url}
                       alt=""
@@ -111,9 +120,24 @@ export function ImageGalleryModal({
                     />
                   </div>
                   <div className="space-y-1 px-4 py-3">
-                    <p className="truncate text-sm font-medium text-text-1">
-                      {getAssetLabel(asset)}
-                    </p>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-text-1">
+                          {getAssetDisplayName(asset)}
+                        </p>
+                        <p className="truncate text-xs text-text-4">
+                          {getAssetFilename(asset.url)}
+                        </p>
+                      </div>
+                      <span
+                        className={cn(
+                          "shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold",
+                          getAssetCategoryTone(asset.category),
+                        )}
+                      >
+                        {asset.category.name}
+                      </span>
+                    </div>
                     <p className="text-xs text-text-4">{asset.mimeType}</p>
                   </div>
                 </button>
@@ -124,10 +148,4 @@ export function ImageGalleryModal({
       </div>
     </Modal>
   );
-}
-
-function getAssetLabel(asset: Asset): string {
-  const segment = asset.url.split("/").pop()?.trim();
-
-  return segment || `asset-${asset.id}`;
 }

@@ -5,8 +5,16 @@ import { Icon } from "@iconify/react/offline";
 import clipboardLinear from "@iconify-icons/solar/clipboard-linear";
 import galleryWideLinear from "@iconify-icons/solar/gallery-wide-linear";
 import linkMinimalistic2Linear from "@iconify-icons/solar/link-minimalistic-2-linear";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { AssetPickerModal, uploadAssets } from "@entities/asset";
+import {
+  adminAssetKeys,
+  AssetPickerModal,
+  fetchAssetCategories,
+  findAssetCategoryByKey,
+  getInitialAssetDisplayName,
+  uploadAssets,
+} from "@entities/asset";
 import { normalizeAssetUrl, toCanonicalAssetUrl } from "@shared/lib/asset-url";
 import { cn } from "@shared/lib/style-utils";
 import { Spinner } from "@shared/ui/libs";
@@ -40,6 +48,14 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const categoriesQuery = useQuery({
+    queryKey: adminAssetKeys.categories(),
+    queryFn: fetchAssetCategories,
+  });
+  const thumbnailCategoryId = findAssetCategoryByKey(
+    categoriesQuery.data ?? [],
+    "thumbnail",
+  )?.id;
 
   useEffect(() => {
     setUrlDraft(value);
@@ -124,7 +140,12 @@ export function ThumbnailUploader({ value, onChange }: ThumbnailUploaderProps) {
     setIsUploading(true);
 
     try {
-      const [asset] = await uploadAssets([file]);
+      const [asset] = await uploadAssets([file], undefined, [
+        {
+          displayName: getInitialAssetDisplayName(file.name),
+          categoryId: thumbnailCategoryId,
+        },
+      ]);
       onChange(toCanonicalAssetUrl(asset.url));
       setPendingFile(null);
       toast.success("썸네일을 업로드했습니다.");

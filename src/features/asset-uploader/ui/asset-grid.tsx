@@ -11,6 +11,8 @@ import {
   formatAssetDate,
   formatAssetFileSize,
   formatAssetResolution,
+  getAssetCategoryTone,
+  getAssetDisplayName,
   getAssetFilename,
 } from "@entities/asset";
 import { cn } from "@shared/lib/style-utils";
@@ -226,9 +228,24 @@ function AssetGridCard({
 
         <div className="p-3">
           <div className="space-y-1">
-            <p className="truncate text-[13px] font-medium leading-none text-text-1">
-              {getAssetFilename(asset.url)}
-            </p>
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="truncate text-[13px] font-medium leading-none text-text-1">
+                  {getAssetDisplayName(asset)}
+                </p>
+                <p className="mt-1 truncate text-[12px] leading-none text-text-4">
+                  {getAssetFilename(asset.url)}
+                </p>
+              </div>
+              <span
+                className={cn(
+                  "shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold leading-none",
+                  getAssetCategoryTone(asset.category),
+                )}
+              >
+                {asset.category.name}
+              </span>
+            </div>
             <p className="truncate text-[12px] leading-none text-text-4">
               {formatAssetFileSize(asset.sizeBytes)} /{" "}
               {formatAssetResolution(asset.width, asset.height)} /{" "}
@@ -264,7 +281,7 @@ function AssetCardMedia({ asset }: { asset: Asset }) {
         // eslint-disable-next-line @next/next/no-img-element -- arbitrary admin asset hosts are allowed
         <img
           src={asset.url}
-          alt={getAssetFilename(asset.url)}
+          alt={getAssetDisplayName(asset)}
           className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
           onError={() => setHasError(true)}
         />

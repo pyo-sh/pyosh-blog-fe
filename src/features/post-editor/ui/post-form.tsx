@@ -155,6 +155,22 @@ function buildPayload(values: PostFormValues): CreatePostBody {
   };
 }
 
+function extractMarkdownImageUrls(contentMd: string): string[] {
+  const urls: string[] = [];
+  const imagePattern = /!\[[^\]]*]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
+
+  contentMd.replace(imagePattern, (_match, url: string) => {
+    const normalized = toCanonicalAssetUrl(url);
+    if (normalized && !normalized.startsWith("pending-upload:")) {
+      urls.push(normalized);
+    }
+
+    return "";
+  });
+
+  return [...new Set(urls)];
+}
+
 function sortCategories(categories: Category[]): Category[] {
   return [...categories]
     .sort((left, right) => left.sortOrder - right.sortOrder)
@@ -781,6 +797,10 @@ export function PostForm({
   const previewContent = useMemo(
     () => resolvePreviewContent(values.contentMd, pendingImages),
     [pendingImages, values.contentMd],
+  );
+  const currentPostAssetUrls = useMemo(
+    () => extractMarkdownImageUrls(values.contentMd),
+    [values.contentMd],
   );
   const pendingImageCount = useMemo(
     () =>
@@ -1481,6 +1501,7 @@ export function PostForm({
       <AssetPickerModal
         isOpen={showThumbnailPicker}
         onClose={() => setShowThumbnailPicker(false)}
+        priorityUrls={currentPostAssetUrls}
         onSelect={(url) => {
           handleFieldChange("thumbnailUrl", toCanonicalAssetUrl(url));
           setShowThumbnailPicker(false);
