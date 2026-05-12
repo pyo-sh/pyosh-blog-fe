@@ -43,7 +43,7 @@ export async function HomePage({ searchParams }: HomePageProps) {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-270 flex-col gap-3 pb-16 pt-8">
+    <div className="flex w-full flex-col gap-3">
       <header
         className="motion-reveal pb-1"
         style={{ animationDelay: "100ms" }}
@@ -54,6 +54,6 @@ export async function HomePage({ searchParams }: HomePageProps) {
       </header>
 
       <PostList initialData={initialData} initialPage={page} />
-    </main>
+    </div>
   );
 }

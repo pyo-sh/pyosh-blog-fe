@@ -48,7 +48,7 @@ function GuestbookPageStatus({
   description: string;
 }) {
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col px-4 py-12 md:px-6">
+    <div className="flex w-full flex-col">
       <header>
         <div className="flex flex-wrap items-baseline justify-between gap-4">
           <h1 className="text-body-lg font-bold tracking-tight text-text-1 sm:text-h1">
@@ -62,7 +62,7 @@ function GuestbookPageStatus({
       <section className="mt-8">
         <EmptyState variant="page" title={title} description={description} />
       </section>
-    </main>
+    </div>
   );
 }
 

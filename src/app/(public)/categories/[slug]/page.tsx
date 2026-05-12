@@ -132,7 +132,7 @@ export default async function CategoryPage({
   ];
 
   return (
-    <main className="flex min-h-screen flex-col pt-8 pb-16">
+    <div className="flex flex-col">
       {siteUrl ? (
         <JsonLd data={buildBreadcrumbJsonLd(breadcrumbItems, siteUrl)} />
       ) : null}
@@ -184,7 +184,7 @@ export default async function CategoryPage({
         />
       </div>
       <ScrollToTop />
-    </main>
+    </div>
   );
 }
 

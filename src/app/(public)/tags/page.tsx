@@ -23,7 +23,7 @@ export default async function TagsPage() {
   );
 
   return (
-    <main className="flex min-h-screen flex-col pt-8 pb-16">
+    <div className="flex flex-col">
       <ArchiveHeader
         variant="tag"
         eyebrow="Tag Directory"
@@ -52,6 +52,6 @@ export default async function TagsPage() {
         />
       )}
       <ScrollToTop />
-    </main>
+    </div>
   );
 }

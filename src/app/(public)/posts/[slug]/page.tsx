@@ -209,7 +209,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
     : [];
 
   return (
-    <main className="w-full pt-8 pb-16">
+    <div className="w-full">
       {siteUrl && post.searchIndexable ? (
         <JsonLd data={buildBlogPostingJsonLd(post, siteUrl)} />
       ) : null}
@@ -325,7 +325,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
         />
       ) : null}
       <ScrollToTop />
-    </main>
+    </div>
   );
 }
 

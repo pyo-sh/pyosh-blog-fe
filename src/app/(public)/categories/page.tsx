@@ -24,7 +24,7 @@ export default async function CategoriesPage() {
   const headerSummary = `총 ${formatNumber(visibleCategoryCount)}개 분류`;
 
   return (
-    <main className="flex min-h-screen flex-col pt-8 pb-16">
+    <div className="flex flex-col">
       <ArchiveHeader
         variant="category"
         eyebrow="Category Directory"
@@ -64,6 +64,6 @@ export default async function CategoriesPage() {
         />
       )}
       <ScrollToTop />
-    </main>
+    </div>
   );
 }
