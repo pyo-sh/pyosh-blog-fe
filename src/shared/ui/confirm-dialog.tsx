@@ -39,7 +39,7 @@ export function ConfirmDialog({
             type="button"
             onClick={onClose}
             disabled={isPending}
-            className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center justify-center rounded-xl border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
           >
             취소
           </button>
@@ -48,7 +48,7 @@ export function ConfirmDialog({
             onClick={onConfirm}
             disabled={isPending}
             className={cn(
-              "inline-flex items-center justify-center rounded-[0.75rem] px-4 py-2.5 text-sm font-semibold transition-colors",
+              "inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors",
               "disabled:cursor-not-allowed disabled:opacity-50",
               confirmTone === "danger"
                 ? "bg-negative-1 text-white hover:opacity-90"

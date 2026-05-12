@@ -43,7 +43,7 @@ function OverviewCategoryItem({
     depth > 0 ? { marginLeft: `${depth * 1.25}rem` } : undefined;
   const titleClassName = cn(
     "flex h-full min-w-0 items-center truncate leading-none",
-    isRoot ? "text-[1.125rem] font-bold" : "text-[0.875rem] font-medium",
+    isRoot ? "text-[1.125rem] font-bold" : "text-sm font-medium",
   );
   const countContent =
     postCount !== undefined ? (

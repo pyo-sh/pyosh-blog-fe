@@ -181,7 +181,7 @@ export function GuestbookTable({
           />
         </div>
 
-        <form onSubmit={handleSubmit} className="flex min-w-[18rem] flex-1">
+        <form onSubmit={handleSubmit} className="flex min-w-72 flex-1">
           <div className="relative w-full">
             <Icon
               icon={magniferLinear}
@@ -219,7 +219,7 @@ export function GuestbookTable({
       ) : null}
 
       {items.length > 0 ? (
-        <div className="overflow-hidden rounded-[1rem] border border-border-4 bg-background-1">
+        <div className="overflow-hidden rounded-2xl border border-border-4 bg-background-1">
           <div className="overflow-x-auto">
             <table className="min-w-full">
               <thead className="bg-background-2 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-text-4">
@@ -295,7 +295,7 @@ export function GuestbookTable({
                       </td>
                       <td className="whitespace-nowrap px-3 py-3.5 align-middle leading-none">
                         <span
-                          className="block max-w-[28rem] truncate text-sm leading-none text-text-2"
+                          className="block max-w-md truncate text-sm leading-none text-text-2"
                           title={getBodyPreview(item)}
                         >
                           {getBodyPreview(item)}

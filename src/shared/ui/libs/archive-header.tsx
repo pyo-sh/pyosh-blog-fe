@@ -47,7 +47,7 @@ export function ArchiveHeader({
             <>
               <span
                 aria-hidden="true"
-                className="text-[0.75rem] leading-none text-border-3"
+                className="text-xs leading-none text-border-3"
               >
                 ·
               </span>
@@ -91,7 +91,7 @@ export function ArchiveHeader({
       )}
 
       <div className="flex flex-wrap items-baseline justify-between gap-4">
-        <h1 className="min-w-0 flex-1 break-keep text-[2.25rem] leading-[1.1] font-bold tracking-[-0.025em] text-text-1 sm:text-[2.875rem]">
+        <h1 className="min-w-0 flex-1 break-keep text-4xl leading-[1.1] font-bold tracking-tight text-text-1 sm:text-[2.875rem]">
           {variant === "tag" ? <span className="text-primary-1">#</span> : null}
           {title}
         </h1>

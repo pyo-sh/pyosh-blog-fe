@@ -170,12 +170,12 @@ export function CategoryTreeRow({
               {category.name}
             </span>
             {!category.isVisible ? (
-              <span className="shrink-0 whitespace-nowrap text-[12px] leading-none text-text-4">
+              <span className="shrink-0 whitespace-nowrap text-xs leading-none text-text-4">
                 (숨김)
               </span>
             ) : null}
             {showSlug ? (
-              <span className="shrink-0 whitespace-nowrap rounded-[4px] bg-background-3 px-1.5 py-px text-[11px] leading-none text-text-4">
+              <span className="shrink-0 whitespace-nowrap rounded bg-background-3 px-1.5 py-px text-[11px] leading-none text-text-4">
                 {category.slug}
               </span>
             ) : null}
@@ -190,7 +190,7 @@ export function CategoryTreeRow({
             className="flex shrink-0 items-center gap-3"
             style={{ opacity: rowOpacity }}
           >
-            <span className="whitespace-nowrap rounded-[4px] bg-[rgba(219,221,224,0.30)] px-1.5 py-px text-[12px] leading-4 text-text-3">
+            <span className="whitespace-nowrap rounded bg-[rgba(219,221,224,0.30)] px-1.5 py-px text-xs leading-4 text-text-3">
               발행 {category.publishedPostCount ?? 0} / 전체{" "}
               {category.totalPostCount ?? 0}
             </span>
@@ -214,7 +214,7 @@ export function CategoryTreeRow({
                   >
                     <span
                       className={cn(
-                        "inline-block h-4 w-4 rounded-[8px] bg-white shadow-sm transition-transform duration-200",
+                        "inline-block h-4 w-4 rounded-lg bg-white shadow-sm transition-transform duration-200",
                         category.isVisible ? "translate-x-4" : "translate-x-0",
                       )}
                     />
@@ -280,7 +280,7 @@ export function CategoryTreeRowPreview({
   invalidDrop: boolean;
 }) {
   return (
-    <div className="flex min-w-[18rem] items-center justify-between gap-2 rounded-xl border border-border-3 bg-background-2 px-4 py-3 shadow-[0px_18px_40px_0px_rgba(0,0,0,0.14)]">
+    <div className="flex min-w-72 items-center justify-between gap-2 rounded-xl border border-border-3 bg-background-2 px-4 py-3 shadow-[0px_18px_40px_0px_rgba(0,0,0,0.14)]">
       <div
         className="flex min-w-0 flex-1 items-center gap-2"
         style={{ paddingLeft: `${depth * 24}px` }}
@@ -292,7 +292,7 @@ export function CategoryTreeRowPreview({
         <span className="truncate whitespace-nowrap text-sm font-medium leading-none text-text-1">
           {category.name}
         </span>
-        <span className="shrink-0 whitespace-nowrap rounded-[4px] bg-background-3 px-1.5 py-px text-[11px] leading-none text-text-4">
+        <span className="shrink-0 whitespace-nowrap rounded bg-background-3 px-1.5 py-px text-[11px] leading-none text-text-4">
           {category.slug}
         </span>
         {changeMarker ? (
@@ -301,7 +301,7 @@ export function CategoryTreeRowPreview({
           </span>
         ) : null}
       </div>
-      <span className="whitespace-nowrap rounded-[4px] bg-[rgba(219,221,224,0.30)] px-1.5 py-px text-[12px] leading-4 text-text-3">
+      <span className="whitespace-nowrap rounded bg-[rgba(219,221,224,0.30)] px-1.5 py-px text-xs leading-4 text-text-3">
         발행 {category.publishedPostCount ?? 0} / 전체{" "}
         {category.totalPostCount ?? 0}
       </span>

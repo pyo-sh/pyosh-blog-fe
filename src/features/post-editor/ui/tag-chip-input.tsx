@@ -148,7 +148,7 @@ export function TagChipInput({
   return (
     <div className="space-y-1.5" ref={containerRef}>
       <div
-        className="relative rounded-[0.75rem] border border-border-3 bg-background-1 px-[10px] py-[6px] transition-colors focus-within:border-primary-1"
+        className="relative rounded-xl border border-border-3 bg-background-1 px-2.5 py-1.5 transition-colors focus-within:border-primary-1"
         onClick={() => inputRef.current?.focus()}
       >
         <div className="flex flex-wrap items-center gap-1.5">
@@ -156,7 +156,7 @@ export function TagChipInput({
             return (
               <span
                 key={tag}
-                className="inline-flex items-center gap-1 leading-none rounded-full bg-primary-1/10 px-2 py-[2px] text-[12px] text-primary-1"
+                className="inline-flex items-center gap-1 leading-none rounded-full bg-primary-1/10 px-2 py-0.5 text-xs text-primary-1"
               >
                 {tag}
                 <button
@@ -196,7 +196,7 @@ export function TagChipInput({
             aria-label="태그"
             aria-expanded={suggestions.length > 0}
             aria-controls={suggestions.length > 0 ? listboxId : undefined}
-            className="min-w-[80px] h-[26px] flex-1 bg-transparent px-0 py-0 text-[12px] leading-none text-text-2 outline-none placeholder:text-text-4"
+            className="min-w-20 h-[26px] flex-1 bg-transparent px-0 py-0 text-xs leading-none text-text-2 outline-none placeholder:text-text-4"
           />
         </div>
 

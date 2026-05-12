@@ -688,7 +688,7 @@ export default function ManagePostsPage() {
         withBackground
         aria-label="복원 카테고리 선택"
       >
-        <div className="w-full max-w-xl rounded-[1.5rem] bg-background-1 p-6 text-left">
+        <div className="w-full max-w-xl rounded-3xl bg-background-1 p-6 text-left">
           <div className="space-y-2">
             <p className="text-xs uppercase tracking-[0.24em] text-text-4">
               Restore

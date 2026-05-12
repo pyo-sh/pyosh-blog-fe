@@ -148,7 +148,7 @@ const Modal: React.FC<ModalProps> = ({
       <div
         ref={dialogRef}
         className={cn(
-          "min-w-[21.875rem] min-h-[5rem] max-h-[85%]",
+          "min-w-[21.875rem] min-h-20 max-h-[85%]",
           "bg-background-2 text-text-1",
           "rounded-[10px]",
           "shadow-[0_10px_20px_rgba(0,0,0,0.19),0_0px_6px_rgba(0,0,0,0.22)]",

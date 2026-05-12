@@ -35,7 +35,7 @@ export function AssetToolbar({
           }
           ariaLabel="카테고리 필터"
           className="w-full"
-          triggerClassName="h-10 rounded-[0.75rem] text-sm text-text-2"
+          triggerClassName="h-10 rounded-xl text-sm text-text-2"
           options={[
             { label: "전체 카테고리", value: "" },
             ...categories.map((category) => ({

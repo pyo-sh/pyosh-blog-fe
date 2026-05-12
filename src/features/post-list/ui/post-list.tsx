@@ -36,7 +36,7 @@ function PostListSkeleton() {
 function PostListEmptyState() {
   return (
     <section
-      className="motion-reveal rounded-[2rem] border-2 border-dashed border-border-3 bg-background-2 px-8 py-16 text-center"
+      className="motion-reveal rounded-4xl border-2 border-dashed border-border-3 bg-background-2 px-8 py-16 text-center"
       style={{ animationDelay: "160ms" }}
     >
       <div className="mb-4 flex justify-center">
@@ -55,7 +55,7 @@ function PostListEmptyState() {
 function PostListErrorState() {
   return (
     <section
-      className="motion-reveal rounded-[2rem] border-2 border-dashed border-border-3 bg-background-2 px-8 py-16 text-center"
+      className="motion-reveal rounded-4xl border-2 border-dashed border-border-3 bg-background-2 px-8 py-16 text-center"
       style={{ animationDelay: "160ms" }}
     >
       <div className="mb-4 flex justify-center">

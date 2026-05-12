@@ -126,7 +126,7 @@ function Pagination({
               tabIndex={page === currentPage ? -1 : undefined}
               className={cn(
                 navBtnBase,
-                "min-w-[2rem]",
+                "min-w-8",
                 page === currentPage
                   ? "bg-primary-1 text-white font-semibold pointer-events-none"
                   : "text-text-1 hover:bg-background-2",
@@ -156,7 +156,7 @@ function Pagination({
               tabIndex={page === currentPage ? -1 : undefined}
               className={cn(
                 navBtnBase,
-                "min-w-[2rem]",
+                "min-w-8",
                 page === currentPage
                   ? "bg-primary-1 text-white font-semibold pointer-events-none"
                   : "text-text-1 hover:bg-background-2",

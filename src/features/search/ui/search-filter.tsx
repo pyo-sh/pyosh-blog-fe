@@ -40,7 +40,7 @@ export function SearchFilterDropdown({
       value={currentFilter}
       onChange={handleChange}
       ariaLabel="검색 필터"
-      triggerClassName="h-[2.625rem] rounded-[0.625rem] border-border-3 bg-background-2 py-0 pl-[0.875rem] pr-9 text-ui-sm text-text-1"
+      triggerClassName="h-[2.625rem] rounded-[0.625rem] border-border-3 bg-background-2 py-0 pl-3.5 pr-9 text-ui-sm text-text-1"
       iconClassName="text-text-3"
       options={FILTER_OPTIONS}
     />

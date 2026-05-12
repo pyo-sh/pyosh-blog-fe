@@ -16,8 +16,8 @@ const variantClasses: Record<
   string
 > = {
   default:
-    "rounded-[1.5rem] border border-dashed border-border-3 bg-background-1 px-6 py-12 text-center text-sm",
-  page: "rounded-[2rem] border border-border-3 bg-background-2/90 px-8 py-14 text-center shadow-[0_16px_48px_rgba(0,0,0,0.06)]",
+    "rounded-3xl border border-dashed border-border-3 bg-background-1 px-6 py-12 text-center text-sm",
+  page: "rounded-4xl border border-border-3 bg-background-2/90 px-8 py-14 text-center shadow-[0_16px_48px_rgba(0,0,0,0.06)]",
   "admin-page":
     "rounded-[1.75rem] border border-border-3 bg-background-2/90 px-8 py-14 text-center shadow-[0_16px_48px_rgba(0,0,0,0.06)]",
 };
@@ -45,12 +45,12 @@ export function EmptyState({
         </p>
       ) : null}
       {description ? (
-        <p className="mx-auto max-w-[32rem] break-keep text-body-sm leading-relaxed text-text-3">
+        <p className="mx-auto max-w-lg break-keep text-body-sm leading-relaxed text-text-3">
           {description}
         </p>
       ) : null}
       {!title && message ? (
-        <p className="mx-auto max-w-[28rem] break-keep text-body-sm leading-relaxed text-text-3">
+        <p className="mx-auto max-w-md break-keep text-body-sm leading-relaxed text-text-3">
           {message}
         </p>
       ) : null}

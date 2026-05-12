@@ -431,7 +431,7 @@ export function GuestbookManager() {
             <button
               type="button"
               onClick={() => void settingsQuery.refetch()}
-              className="rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+              className="rounded-xl border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
             >
               다시 시도
             </button>
@@ -448,7 +448,7 @@ export function GuestbookManager() {
       </div>
 
       {settingsQuery.isError ? (
-        <div className="rounded-[1rem] border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-sm text-negative-1">
+        <div className="rounded-2xl border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-sm text-negative-1">
           {getErrorMessage(
             settingsQuery.error,
             "방명록 설정을 불러오지 못했습니다. 상태를 확인한 뒤 다시 시도해 주세요.",
@@ -471,7 +471,7 @@ export function GuestbookManager() {
                   key={index}
                   variant="rect"
                   height="2.5rem"
-                  className="w-[8rem] rounded-[0.8rem]"
+                  className="w-32 rounded-[0.8rem]"
                 />
               ))}
             </div>
@@ -489,7 +489,7 @@ export function GuestbookManager() {
         ) : null}
 
         {!guestbookQuery.isLoading && guestbookQuery.isError ? (
-          <div className="rounded-[1.5rem] border border-negative-1/20 bg-negative-1/10 px-6 py-8 text-center">
+          <div className="rounded-3xl border border-negative-1/20 bg-negative-1/10 px-6 py-8 text-center">
             <p className="text-sm text-negative-1">
               {getErrorMessage(
                 guestbookQuery.error,
@@ -499,7 +499,7 @@ export function GuestbookManager() {
             <button
               type="button"
               onClick={() => void guestbookQuery.refetch()}
-              className="mt-4 inline-flex rounded-[0.75rem] border border-negative-1/20 px-4 py-2 text-sm font-medium text-negative-1 transition-colors hover:bg-negative-1/10"
+              className="mt-4 inline-flex rounded-xl border border-negative-1/20 px-4 py-2 text-sm font-medium text-negative-1 transition-colors hover:bg-negative-1/10"
             >
               다시 시도
             </button>
@@ -627,8 +627,8 @@ export function GuestbookManager() {
                         disabled={pageNumber === page}
                         className={
                           pageNumber === page
-                            ? "pointer-events-none inline-flex min-w-[2rem] items-center justify-center rounded bg-primary-1 px-2.5 py-1.5 text-sm font-semibold text-white"
-                            : "inline-flex min-w-[2rem] items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2"
+                            ? "pointer-events-none inline-flex min-w-8 items-center justify-center rounded bg-primary-1 px-2.5 py-1.5 text-sm font-semibold text-white"
+                            : "inline-flex min-w-8 items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2"
                         }
                         aria-current={pageNumber === page ? "page" : undefined}
                         aria-label={`Page ${pageNumber}`}
@@ -668,7 +668,7 @@ export function GuestbookManager() {
 
       {selectedIds.length > 0 ? (
         <div className="fixed bottom-0 left-0 right-0 z-20 md:left-[var(--admin-sidebar-offset)]">
-          <div className="flex flex-wrap items-center gap-3 border-t border-border-3 bg-[rgba(241,242,243,0.95)] px-4 py-3 backdrop-blur-[12px] md:px-6 dark:bg-[rgba(19,20,21,0.94)]">
+          <div className="flex flex-wrap items-center gap-3 border-t border-border-3 bg-[rgba(241,242,243,0.95)] px-4 py-3 backdrop-blur-md md:px-6 dark:bg-[rgba(19,20,21,0.94)]">
             <span className="text-sm font-medium text-text-1">
               선택됨 {selectedIds.length}개
               {offPageCount > 0 ? (

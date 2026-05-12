@@ -37,7 +37,7 @@ export function DeleteAssetsModal({
           삭제된 에셋은 복구되지 않으며, 에디터에서 이미 사용 중인 경우 깨진
           이미지가 생길 수 있습니다.
         </p>
-        <p className="rounded-[1rem] border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-negative-1">
+        <p className="rounded-2xl border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-negative-1">
           선택된 항목: {ids.join(", ")}
         </p>
       </div>
@@ -47,7 +47,7 @@ export function DeleteAssetsModal({
           type="button"
           onClick={onCancel}
           disabled={isDeleting}
-          className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-4 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center justify-center rounded-xl border border-border-3 px-4 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
         >
           취소
         </button>
@@ -55,7 +55,7 @@ export function DeleteAssetsModal({
           type="button"
           onClick={onConfirm}
           disabled={isDeleting}
-          className="inline-flex items-center justify-center rounded-[0.75rem] bg-negative-1 px-4 py-2 text-sm font-medium text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center justify-center rounded-xl bg-negative-1 px-4 py-2 text-sm font-medium text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isDeleting ? (
             <>

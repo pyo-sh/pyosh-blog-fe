@@ -56,7 +56,7 @@ export function AssetCategoryManagerModal({
       aria-label="에셋 카테고리 관리"
       className="w-[min(100%,38rem)] p-0 text-left"
     >
-      <div className="flex max-h-[86vh] flex-col overflow-hidden rounded-[1.5rem] bg-background-1">
+      <div className="flex max-h-[86vh] flex-col overflow-hidden rounded-3xl bg-background-1">
         <div className="flex items-start justify-between gap-4 border-b border-border-3 px-6 py-5">
           <div>
             <p className="text-body-xs uppercase tracking-[0.2em] text-text-4">
@@ -95,12 +95,12 @@ export function AssetCategoryManagerModal({
               onChange={(event) => setNewName(event.target.value)}
               disabled={isMutating}
               placeholder="새 카테고리 이름"
-              className="h-10 min-w-0 flex-1 rounded-[0.75rem] border border-border-3 bg-background-1 px-3 text-sm text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+              className="h-10 min-w-0 flex-1 rounded-xl border border-border-3 bg-background-1 px-3 text-sm text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
             />
             <button
               type="submit"
               disabled={isMutating || newName.trim().length === 0}
-              className="inline-flex h-10 items-center justify-center rounded-[0.75rem] bg-primary-1 px-4 text-sm font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex h-10 items-center justify-center rounded-xl bg-primary-1 px-4 text-sm font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
             >
               추가
             </button>
@@ -115,7 +115,7 @@ export function AssetCategoryManagerModal({
               return (
                 <div
                   key={category.id}
-                  className="rounded-[1rem] border border-border-4 bg-background-2 p-3"
+                  className="rounded-2xl border border-border-4 bg-background-2 p-3"
                 >
                   <div className="mb-3 flex flex-wrap items-center gap-2">
                     <span
@@ -143,14 +143,14 @@ export function AssetCategoryManagerModal({
                         }))
                       }
                       disabled={isMutating}
-                      className="h-10 rounded-[0.75rem] border border-border-3 bg-background-1 px-3 text-sm text-text-2 outline-none transition-colors focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="h-10 rounded-xl border border-border-3 bg-background-1 px-3 text-sm text-text-2 outline-none transition-colors focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
                       aria-label={`${category.name} 이름`}
                     />
                     <button
                       type="button"
                       onClick={() => onRename(category, draft.trim())}
                       disabled={isMutating || !isChanged || !draft.trim()}
-                      className="inline-flex h-10 items-center justify-center rounded-[0.75rem] border border-border-3 px-3 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="inline-flex h-10 items-center justify-center rounded-xl border border-border-3 px-3 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {isPending ? <Spinner size="sm" /> : null}
                       저장
@@ -160,7 +160,7 @@ export function AssetCategoryManagerModal({
                         type="button"
                         onClick={() => onDelete(category)}
                         disabled={isMutating}
-                        className="inline-flex h-10 items-center justify-center gap-1.5 rounded-[0.75rem] border border-negative-1/25 px-3 text-sm font-medium text-negative-1 transition-colors hover:bg-negative-1/10 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-negative-1/25 px-3 text-sm font-medium text-negative-1 transition-colors hover:bg-negative-1/10 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <Icon icon={trashBinMinimalisticLinear} width="15" />
                         삭제

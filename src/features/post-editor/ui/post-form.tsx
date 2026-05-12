@@ -108,11 +108,11 @@ const TABS: Array<{ id: EditorTab; label: string }> = [
 const REMOVED_PENDING_IMAGE_TTL_MS = 30_000;
 const EDITOR_INLINE_PREVIEW_MEDIA_QUERY = "(min-width: 67.5rem)";
 const PAGE_TAB_CLASS =
-  "inline-flex h-8 items-center justify-center rounded-[0.375rem] px-[0.875rem] border-none bg-transparent text-[13px] font-medium leading-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-1/20";
+  "inline-flex h-8 items-center justify-center rounded-md px-3.5 border-none bg-transparent text-[13px] font-medium leading-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-1/20";
 const SECONDARY_BUTTON_CLASS =
-  "inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-[0.5rem] border border-border-3 bg-transparent px-4 text-sm font-medium text-text-2 transition-[background-color,transform] hover:bg-background-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-1/20 disabled:opacity-60";
+  "inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 bg-transparent px-4 text-sm font-medium text-text-2 transition-[background-color,transform] hover:bg-background-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-1/20 disabled:opacity-60";
 const PRIMARY_BUTTON_CLASS =
-  "inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-[0.5rem] bg-primary-1 px-4 text-sm font-medium text-white transition-[opacity,transform] hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-1/20 disabled:opacity-60";
+  "inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-primary-1 px-4 text-sm font-medium text-white transition-[opacity,transform] hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-1/20 disabled:opacity-60";
 
 function createInitialValues(
   initialValues?: Partial<PostFormValues>,
@@ -793,13 +793,13 @@ export function PostForm({
         ) : null}
 
         {submitError ? (
-          <div className="mx-5 mt-5 rounded-[1rem] border border-negative-1/20 bg-negative-1/5 px-4 py-3 text-sm text-negative-1 md:mx-6">
+          <div className="mx-5 mt-5 rounded-2xl border border-negative-1/20 bg-negative-1/5 px-4 py-3 text-sm text-negative-1 md:mx-6">
             {submitError}
           </div>
         ) : null}
 
         {categoriesQuery.isError ? (
-          <div className="mx-5 mt-5 rounded-[1rem] border border-negative-1/20 bg-negative-1/5 px-4 py-3 text-sm text-negative-1 md:mx-6">
+          <div className="mx-5 mt-5 rounded-2xl border border-negative-1/20 bg-negative-1/5 px-4 py-3 text-sm text-negative-1 md:mx-6">
             {getErrorMessage(
               categoriesQuery.error,
               "카테고리 목록을 불러오지 못했습니다.",
@@ -808,7 +808,7 @@ export function PostForm({
         ) : null}
 
         {!categoriesQuery.isPending && categories.length === 0 ? (
-          <div className="mx-5 mt-5 rounded-[1rem] border border-warning-1/20 bg-warning-2 px-4 py-3 text-sm text-warning-1 md:mx-6">
+          <div className="mx-5 mt-5 rounded-2xl border border-warning-1/20 bg-warning-2 px-4 py-3 text-sm text-warning-1 md:mx-6">
             카테고리를 먼저 생성하세요.
           </div>
         ) : null}
@@ -825,7 +825,7 @@ export function PostForm({
             <section className="border-b border-border-4 px-6 py-3">
               <div className="flex flex-wrap items-center gap-4">
                 <CompactMetaLabel label="카테고리">
-                  <div className="min-w-[10rem]">
+                  <div className="min-w-40">
                     <DropSelect
                       value={values.categoryId}
                       options={categoryOptions}
@@ -837,7 +837,7 @@ export function PostForm({
                           : "카테고리 선택"
                       }
                       className="w-full"
-                      triggerClassName="rounded-[0.5rem] text-[13px] text-text-2 focus-visible:border-primary-1"
+                      triggerClassName="rounded-lg text-[13px] text-text-2 focus-visible:border-primary-1"
                       optionClassName="text-[13px] text-text-2"
                       onChange={(value) =>
                         handleFieldChange("categoryId", value)
@@ -847,7 +847,7 @@ export function PostForm({
                 </CompactMetaLabel>
 
                 <CompactMetaLabel label="태그">
-                  <div className="min-w-[16rem] flex-1">
+                  <div className="min-w-64 flex-1">
                     <TagChipInput
                       value={values.tags}
                       showHelperText={false}
@@ -950,13 +950,13 @@ export function PostForm({
                 </CompactMetaLabel>
 
                 <CompactMetaLabel label="댓글 상태">
-                  <div className="min-w-[7rem]">
+                  <div className="min-w-28">
                     <DropSelect
                       value={values.commentStatus}
                       options={commentStatusOptions}
                       ariaLabel="댓글 상태"
                       className="w-full"
-                      triggerClassName="rounded-[0.5rem] text-[13px] text-text-2 focus-visible:border-primary-1"
+                      triggerClassName="rounded-lg text-[13px] text-text-2 focus-visible:border-primary-1"
                       optionClassName="text-[13px] text-text-2"
                       onChange={(value) =>
                         handleFieldChange(
@@ -987,7 +987,7 @@ export function PostForm({
                           : "카테고리 선택"
                       }
                       className="w-full"
-                      triggerClassName="rounded-[0.5rem] text-[13px] text-text-2 focus-visible:border-primary-1"
+                      triggerClassName="rounded-lg text-[13px] text-text-2 focus-visible:border-primary-1"
                       optionClassName="text-[13px] text-text-2"
                       onChange={(value) =>
                         handleFieldChange("categoryId", value)
@@ -1058,7 +1058,7 @@ export function PostForm({
                         options={commentStatusOptions}
                         ariaLabel="댓글 상태"
                         className="w-full"
-                        triggerClassName="rounded-[0.5rem] text-[13px] text-text-2 focus-visible:border-primary-1"
+                        triggerClassName="rounded-lg text-[13px] text-text-2 focus-visible:border-primary-1"
                         optionClassName="text-[13px] text-text-2"
                         onChange={(value) =>
                           handleFieldChange(
@@ -1091,7 +1091,7 @@ export function PostForm({
                       }
                       placeholder="글 목록에 표시될 요약문을 입력하세요"
                       aria-label="Summary"
-                      className="w-full rounded-[0.75rem] border border-border-3 bg-background-1 px-3 py-2.5 text-[13px] text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
+                      className="w-full rounded-xl border border-border-3 bg-background-1 px-3 py-2.5 text-[13px] text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
                     />
                     <div className="mt-1.5 text-right text-[11px] text-text-4">
                       {values.summary.length} / 200자
@@ -1110,7 +1110,7 @@ export function PostForm({
                       }
                       placeholder="검색엔진에 표시될 설명을 입력하세요"
                       aria-label="Description"
-                      className="w-full rounded-[0.75rem] border border-border-3 bg-background-1 px-3 py-2.5 text-[13px] text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
+                      className="w-full rounded-xl border border-border-3 bg-background-1 px-3 py-2.5 text-[13px] text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
                     />
                     <div className="mt-1.5 text-right text-[11px] text-text-4">
                       {values.description.length} / 300자

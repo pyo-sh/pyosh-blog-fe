@@ -251,7 +251,7 @@ function GuestbookEntryItem({
             <div className="flex flex-wrap items-center gap-2">
               <span
                 className={cn(
-                  "text-[0.875rem] font-semibold leading-[1.1875rem]",
+                  "text-sm font-semibold leading-[1.1875rem]",
                   isDeleted ? "text-text-4" : "text-text-1",
                 )}
               >
@@ -274,7 +274,7 @@ function GuestbookEntryItem({
 
               <time
                 dateTime={entry.createdAt}
-                className="text-[0.75rem] leading-4 text-text-4"
+                className="text-xs leading-4 text-text-4"
               >
                 {formatRelativeTime(entry.createdAt)}
               </time>
@@ -284,7 +284,7 @@ function GuestbookEntryItem({
               <button
                 type="button"
                 onClick={() => onDelete(entry)}
-                className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[0.75rem] font-medium leading-4 text-text-4 transition-colors hover:bg-negative-1/8 hover:text-negative-1"
+                className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium leading-4 text-text-4 transition-colors hover:bg-negative-1/8 hover:text-negative-1"
               >
                 <TrashIcon className="h-[0.8125rem] w-[0.8125rem]" />
                 삭제
@@ -295,20 +295,18 @@ function GuestbookEntryItem({
           {body.masked ? (
             <div
               className={cn(
-                "inline-flex max-w-full items-center gap-2 rounded-xl bg-background-2 px-4 py-3 text-[0.875rem] italic leading-[0.875rem] text-text-4",
+                "inline-flex max-w-full items-center gap-2 rounded-xl bg-background-2 px-4 py-3 text-sm italic leading-3.5 text-text-4",
               )}
             >
               {entry.isSecret && !isDeleted ? (
-                <LockIcon className="h-[0.875rem] w-[0.875rem] shrink-0" />
+                <LockIcon className="h-3.5 w-3.5 shrink-0" />
               ) : (
-                <TrashIcon className="h-[0.875rem] w-[0.875rem] shrink-0" />
+                <TrashIcon className="h-3.5 w-3.5 shrink-0" />
               )}
-              <span className="break-words leading-[0.875rem]">
-                {body.text}
-              </span>
+              <span className="break-words leading-3.5">{body.text}</span>
             </div>
           ) : (
-            <p className="whitespace-pre-wrap break-words text-[0.875rem] leading-relaxed text-text-2">
+            <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-text-2">
               {body.text}
             </p>
           )}
@@ -447,10 +445,10 @@ export function GuestbookPageContent({
     <main className="mx-auto flex min-h-screen w-full max-w-[67.5rem] flex-col px-4 py-12 md:px-6">
       <header className="motion-reveal">
         <div className="flex flex-wrap items-baseline justify-between gap-4">
-          <h1 className="text-[1.5rem] font-bold leading-[1.9375rem] tracking-tight text-text-1 sm:text-[1.875rem] sm:leading-[2.375rem]">
+          <h1 className="text-2xl font-bold leading-[1.9375rem] tracking-tight text-text-1 sm:text-3xl sm:leading-9.5">
             방명록
           </h1>
-          <span className="text-[0.875rem] leading-[1.1875rem] text-text-4">
+          <span className="text-sm leading-[1.1875rem] text-text-4">
             총 {meta.total.toLocaleString("ko-KR")}개 방명록
           </span>
         </div>
@@ -460,7 +458,7 @@ export function GuestbookPageContent({
       {viewer.authErrorMessage ? (
         <div
           role="status"
-          className="mt-6 flex items-start gap-3 rounded-2xl border border-warning-1/25 bg-warning-2 px-4 py-4 text-[0.875rem] leading-[1.1875rem] text-text-3 motion-reveal"
+          className="mt-6 flex items-start gap-3 rounded-2xl border border-warning-1/25 bg-warning-2 px-4 py-4 text-sm leading-[1.1875rem] text-text-3 motion-reveal"
         >
           <span className="mt-0.5 shrink-0 text-warning-1">
             <AlertIcon />
@@ -574,7 +572,7 @@ export function GuestbookPageContent({
           {deleteError ? (
             <div
               role="alert"
-              className="mt-4 rounded-[1rem] border border-negative-1/25 bg-negative-1/5 px-4 py-3 text-body-sm text-negative-1"
+              className="mt-4 rounded-2xl border border-negative-1/25 bg-negative-1/5 px-4 py-3 text-body-sm text-negative-1"
             >
               {deleteError}
             </div>

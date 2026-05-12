@@ -117,7 +117,7 @@ export function PostFilters({
             type="button"
             onClick={() => onTabChange("active")}
             className={cn(
-              "whitespace-nowrap rounded-lg px-4 py-2 text-[14px] font-medium leading-5 transition-colors",
+              "whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium leading-5 transition-colors",
               tab === "active"
                 ? "bg-primary-1/10 text-primary-1"
                 : "text-text-3 hover:text-text-2",
@@ -129,7 +129,7 @@ export function PostFilters({
             type="button"
             onClick={() => onTabChange("trash")}
             className={cn(
-              "whitespace-nowrap rounded-lg px-4 py-2 text-[14px] font-medium leading-5 transition-colors",
+              "whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium leading-5 transition-colors",
               tab === "trash"
                 ? "bg-primary-1/10 text-primary-1"
                 : "text-text-3 hover:text-text-2",
@@ -176,12 +176,12 @@ export function PostFilters({
             onChange={(value) =>
               onCategoryChange(value ? Number(value) : undefined)
             }
-            className="min-w-[10rem]"
+            className="min-w-40"
             ariaLabel="카테고리 필터"
             options={categoryOptions}
           />
 
-          <div className="relative flex h-10 w-full max-w-xs min-w-[15rem] items-center">
+          <div className="relative flex h-10 w-full max-w-xs min-w-60 items-center">
             <Icon
               icon={magniferLinear}
               width="16"
@@ -194,7 +194,7 @@ export function PostFilters({
               value={inputValue}
               onChange={(event) => setInputValue(event.target.value)}
               placeholder="제목으로 검색..."
-              className="h-10 w-full rounded-lg border border-border-3 bg-background-1 px-9 py-2 text-[14px] leading-5 text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 focus:ring-3 focus:ring-primary-1/10"
+              className="h-10 w-full rounded-lg border border-border-3 bg-background-1 px-9 py-2 text-sm leading-5 text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 focus:ring-3 focus:ring-primary-1/10"
             />
             {inputValue ? (
               <button

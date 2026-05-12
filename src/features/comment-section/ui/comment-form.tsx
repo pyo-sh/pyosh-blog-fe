@@ -245,7 +245,7 @@ export function CommentForm<TPayload extends CommentFormPayload>({
       <form
         onSubmit={handleSubmit}
         className={cn(
-          "rounded-[1.5rem] border border-border-3 bg-background-2 p-5 sm:p-6",
+          "rounded-3xl border border-border-3 bg-background-2 p-5 sm:p-6",
           className,
         )}
       >
@@ -257,7 +257,7 @@ export function CommentForm<TPayload extends CommentFormPayload>({
             )}
           >
             <label className="block">
-              <span className="text-[0.75rem] font-semibold leading-4 tracking-[0.02em] text-text-3">
+              <span className="text-xs font-semibold leading-4 tracking-[0.02em] text-text-3">
                 이름 <span className="text-negative-1">*</span>
               </span>
               <input
@@ -267,7 +267,7 @@ export function CommentForm<TPayload extends CommentFormPayload>({
                   onProfileChange("guestName", event.target.value)
                 }
                 disabled={isSubmitting}
-                className="mt-1.5 w-full rounded-[0.875rem] border border-border-3 bg-background-1 px-3 py-[0.5625rem] text-[0.875rem] leading-[1.1875rem] text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-1.5 w-full rounded-[0.875rem] border border-border-3 bg-background-1 px-3 py-[0.5625rem] text-sm leading-[1.1875rem] text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
                 placeholder="이름을 입력하세요"
                 autoComplete="name"
                 required
@@ -276,7 +276,7 @@ export function CommentForm<TPayload extends CommentFormPayload>({
 
             {showGuestEmailField ? (
               <label className="block">
-                <span className="text-[0.75rem] font-semibold leading-4 tracking-[0.02em] text-text-3">
+                <span className="text-xs font-semibold leading-4 tracking-[0.02em] text-text-3">
                   이메일
                 </span>
                 <input
@@ -286,7 +286,7 @@ export function CommentForm<TPayload extends CommentFormPayload>({
                     onProfileChange("guestEmail", event.target.value)
                   }
                   disabled={isSubmitting}
-                  className="mt-1.5 w-full rounded-[0.875rem] border border-border-3 bg-background-1 px-3 py-[0.5625rem] text-[0.875rem] leading-[1.1875rem] text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="mt-1.5 w-full rounded-[0.875rem] border border-border-3 bg-background-1 px-3 py-[0.5625rem] text-sm leading-[1.1875rem] text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
                   placeholder="이메일 (선택)"
                   autoComplete="email"
                 />
@@ -294,7 +294,7 @@ export function CommentForm<TPayload extends CommentFormPayload>({
             ) : null}
 
             <label className="block">
-              <span className="text-[0.75rem] font-semibold leading-4 tracking-[0.02em] text-text-3">
+              <span className="text-xs font-semibold leading-4 tracking-[0.02em] text-text-3">
                 비밀번호 <span className="text-negative-1">*</span>
               </span>
               <input
@@ -304,7 +304,7 @@ export function CommentForm<TPayload extends CommentFormPayload>({
                   onProfileChange("guestPassword", event.target.value)
                 }
                 disabled={isSubmitting}
-                className="mt-1.5 w-full rounded-[0.875rem] border border-border-3 bg-background-1 px-3 py-[0.5625rem] text-[0.875rem] leading-[1.1875rem] text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-1.5 w-full rounded-[0.875rem] border border-border-3 bg-background-1 px-3 py-[0.5625rem] text-sm leading-[1.1875rem] text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
                 placeholder="삭제 시 필요합니다"
                 minLength={4}
                 required
@@ -317,25 +317,23 @@ export function CommentForm<TPayload extends CommentFormPayload>({
               <UserIcon />
             </div>
             <div>
-              <p className="text-[0.875rem] font-semibold leading-[1.1875rem] text-text-1">
+              <p className="text-sm font-semibold leading-[1.1875rem] text-text-1">
                 로그인 사용자
               </p>
-              <p className="text-[0.75rem] leading-4 text-text-4">
-                로그인 중 · OAuth
-              </p>
+              <p className="text-xs leading-4 text-text-4">로그인 중 · OAuth</p>
             </div>
           </div>
         )}
 
         <label className="mt-3 block">
-          <span className="text-[0.75rem] font-semibold leading-4 tracking-[0.02em] text-text-3">
+          <span className="text-xs font-semibold leading-4 tracking-[0.02em] text-text-3">
             내용 <span className="text-negative-1">*</span>
           </span>
           <textarea
             value={body}
             onChange={(event) => setBody(event.target.value)}
             disabled={isSubmitting}
-            className="mt-1.5 min-h-24 w-full rounded-[0.875rem] border border-border-3 bg-background-1 px-3 py-[0.5625rem] text-[0.875rem] leading-[1.6] text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-1.5 min-h-24 w-full rounded-[0.875rem] border border-border-3 bg-background-1 px-3 py-[0.5625rem] text-sm leading-[1.6] text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
             placeholder="방명록을 남겨주세요 (최대 2,000자)"
             maxLength={2000}
             required
@@ -345,7 +343,7 @@ export function CommentForm<TPayload extends CommentFormPayload>({
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
           <label
             className={cn(
-              "inline-flex cursor-pointer items-center gap-2 text-[0.8125rem] leading-[1.125rem] transition-colors",
+              "inline-flex cursor-pointer items-center gap-2 text-[0.8125rem] leading-4.5 transition-colors",
               isSecret ? "text-primary-1" : "text-text-3",
             )}
           >
@@ -366,7 +364,7 @@ export function CommentForm<TPayload extends CommentFormPayload>({
           <div className="flex items-center gap-3">
             <span
               className={cn(
-                "text-[0.75rem] leading-4 text-text-4",
+                "text-xs leading-4 text-text-4",
                 bodyLength >= 2000
                   ? "text-negative-1"
                   : bodyLength >= 1500
@@ -380,7 +378,7 @@ export function CommentForm<TPayload extends CommentFormPayload>({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex items-center justify-center gap-2 rounded-[0.625rem] bg-primary-1 px-5 py-[0.5625rem] text-[0.875rem] font-semibold leading-[1.1875rem] text-white transition-all hover:-translate-y-0.5 hover:bg-secondary-1 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 rounded-[0.625rem] bg-primary-1 px-5 py-[0.5625rem] text-sm font-semibold leading-[1.1875rem] text-white transition-all hover:-translate-y-0.5 hover:bg-secondary-1 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSubmitting ? (
                 <>
@@ -399,7 +397,7 @@ export function CommentForm<TPayload extends CommentFormPayload>({
         {errorMessage ? (
           <div
             role="alert"
-            className="mt-4 rounded-[1rem] border border-negative-1/30 bg-negative-1/5 px-4 py-3 text-body-sm text-negative-1"
+            className="mt-4 rounded-2xl border border-negative-1/30 bg-negative-1/5 px-4 py-3 text-body-sm text-negative-1"
           >
             {errorMessage}
           </div>
@@ -412,7 +410,7 @@ export function CommentForm<TPayload extends CommentFormPayload>({
     <form
       onSubmit={handleSubmit}
       className={cn(
-        "rounded-[1rem] border border-border-3 bg-background-2 p-5",
+        "rounded-2xl border border-border-3 bg-background-2 p-5",
         className,
       )}
     >
@@ -440,7 +438,7 @@ export function CommentForm<TPayload extends CommentFormPayload>({
                 onProfileChange("guestName", event.target.value)
               }
               disabled={isSubmitting}
-              className="w-full rounded-[0.75rem] border border-border-3 bg-background-1 px-3.5 py-2.5 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-xl border border-border-3 bg-background-1 px-3.5 py-2.5 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
               placeholder="이름"
               required
             />
@@ -456,7 +454,7 @@ export function CommentForm<TPayload extends CommentFormPayload>({
                   onProfileChange("guestEmail", event.target.value)
                 }
                 disabled={isSubmitting}
-                className="w-full rounded-[0.75rem] border border-border-3 bg-background-1 px-3.5 py-2.5 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+                className="w-full rounded-xl border border-border-3 bg-background-1 px-3.5 py-2.5 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
                 placeholder="이메일"
               />
             </label>
@@ -471,7 +469,7 @@ export function CommentForm<TPayload extends CommentFormPayload>({
                 onProfileChange("guestPassword", event.target.value)
               }
               disabled={isSubmitting}
-              className="w-full rounded-[0.75rem] border border-border-3 bg-background-1 px-3.5 py-2.5 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-xl border border-border-3 bg-background-1 px-3.5 py-2.5 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
               placeholder="삭제 시 필요합니다"
               minLength={4}
               required
@@ -491,7 +489,7 @@ export function CommentForm<TPayload extends CommentFormPayload>({
           onChange={(event) => setBody(event.target.value)}
           disabled={isSubmitting}
           className={cn(
-            "w-full rounded-[0.75rem] border border-border-3 bg-background-1 px-3.5 py-2.5 text-body-sm leading-[1.6] text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60",
+            "w-full rounded-xl border border-border-3 bg-background-1 px-3.5 py-2.5 text-body-sm leading-[1.6] text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60",
             replyToName ? "min-h-24" : "min-h-[6.25rem]",
           )}
           placeholder={getBodyPlaceholder(variant, replyToName)}
@@ -515,7 +513,7 @@ export function CommentForm<TPayload extends CommentFormPayload>({
       {errorMessage ? (
         <div
           role="alert"
-          className="mt-3 rounded-[0.75rem] border border-negative-1/30 bg-negative-1/5 px-4 py-3 text-body-sm text-negative-1"
+          className="mt-3 rounded-xl border border-negative-1/30 bg-negative-1/5 px-4 py-3 text-body-sm text-negative-1"
         >
           {errorMessage}
         </div>

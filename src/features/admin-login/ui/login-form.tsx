@@ -68,7 +68,7 @@ export function LoginForm() {
             onChange={(event) => setUsername(event.target.value)}
             placeholder="사용자명을 입력하세요"
             disabled={busy}
-            className="mt-2 w-full rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-2 w-full rounded-2xl border border-border-3 bg-background-1 px-4 py-3 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
             required
             autoCapitalize="none"
             autoCorrect="off"
@@ -88,7 +88,7 @@ export function LoginForm() {
             onChange={(event) => setPassword(event.target.value)}
             placeholder="비밀번호를 입력하세요"
             disabled={busy}
-            className="mt-2 w-full rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-2 w-full rounded-2xl border border-border-3 bg-background-1 px-4 py-3 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
             required
           />
         </label>
@@ -97,7 +97,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={busy}
-        className="mt-8 inline-flex w-full items-center justify-center rounded-[1rem] bg-primary-1 px-4 py-3 text-body-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-8 inline-flex w-full items-center justify-center rounded-2xl bg-primary-1 px-4 py-3 text-body-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {busy ? (
           <>

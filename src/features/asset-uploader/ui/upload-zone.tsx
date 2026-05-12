@@ -209,7 +209,7 @@ export function UploadZone({
                   <span className="max-w-48 truncate text-[13px] font-medium leading-none text-text-1">
                     {item.file.name}
                   </span>
-                  <span className="text-[12px] leading-none text-text-4">
+                  <span className="text-xs leading-none text-text-4">
                     {formatFileSize(item.file.size)}
                   </span>
                   {isUploading && uploadProgress !== null ? (
@@ -262,7 +262,7 @@ export function UploadZone({
                     type="button"
                     onClick={() => onRemoveFile(item.id)}
                     disabled={isUploading}
-                    className="inline-flex h-8 cursor-pointer items-center justify-center rounded-lg border border-border-3 px-3 text-[12px] font-normal leading-none text-text-2 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex h-8 cursor-pointer items-center justify-center rounded-lg border border-border-3 px-3 text-xs font-normal leading-none text-text-2 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     제거
                   </button>
@@ -343,15 +343,15 @@ function DropArea({
       <div className="flex flex-col items-center gap-2">
         <Icon icon={cloudUploadLinear} width="48" className="text-primary-1" />
         {isDragging ? (
-          <p className="text-[14px] font-medium leading-none text-primary-1">
+          <p className="text-sm font-medium leading-none text-primary-1">
             놓으면 대기열에 추가됩니다
           </p>
         ) : (
-          <p className="text-[14px] font-medium leading-none text-text-2">
+          <p className="text-sm font-medium leading-none text-text-2">
             이미지를 드래그하거나 클릭하여 업로드
           </p>
         )}
-        <p className="text-[12px] leading-none text-text-4">
+        <p className="text-xs leading-none text-text-4">
           JPEG, PNG, GIF, WebP, SVG / 최대 10MB / 5개까지 동시 업로드
         </p>
       </div>

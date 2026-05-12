@@ -233,7 +233,7 @@ export function DropSelect<T extends string | number>({
         }
         onKeyDown={handleTriggerKeyDown}
         className={cn(
-          "flex h-10 w-full items-center rounded-lg border border-border-3 bg-background-1 px-3 py-2 pr-8 text-left text-[14px] leading-5 text-text-1 outline-none transition-colors disabled:cursor-not-allowed disabled:opacity-60",
+          "flex h-10 w-full items-center rounded-lg border border-border-3 bg-background-1 px-3 py-2 pr-8 text-left text-sm leading-5 text-text-1 outline-none transition-colors disabled:cursor-not-allowed disabled:opacity-60",
           isOpen && "border-primary-1 ring-3 ring-primary-1/10",
           triggerClassName,
         )}
@@ -282,7 +282,7 @@ export function DropSelect<T extends string | number>({
                   onFocus={() => setActiveIndex(index)}
                   onKeyDown={(event) => handleOptionKeyDown(event, index)}
                   className={cn(
-                    "flex w-full items-center whitespace-nowrap px-3 py-2 text-left text-[14px] leading-5 text-text-1 transition-colors hover:bg-background-2",
+                    "flex w-full items-center whitespace-nowrap px-3 py-2 text-left text-sm leading-5 text-text-1 transition-colors hover:bg-background-2",
                     showSelectedIndicator && "justify-between gap-3",
                     isSelected && "font-medium text-primary-1",
                     optionClassName,

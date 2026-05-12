@@ -296,19 +296,19 @@ function DateRangePicker({
               week: "grid grid-cols-7",
               day: "h-10 w-10 p-0 text-sm leading-none",
               day_button:
-                "h-10 w-10 cursor-pointer rounded-[0.75rem] text-sm leading-none text-text-2 transition-colors hover:bg-background-2 hover:text-text-1",
+                "h-10 w-10 cursor-pointer rounded-xl text-sm leading-none text-text-2 transition-colors hover:bg-background-2 hover:text-text-1",
               selected:
                 "[&>button]:bg-primary-1 [&>button]:text-white [&>button]:hover:bg-primary-1",
               range_start: cn(
                 "[&>button]:bg-primary-1 [&>button]:text-white [&>button]:hover:bg-primary-1",
                 isSingleDaySelection
-                  ? "[&>button]:rounded-[0.75rem]"
+                  ? "[&>button]:rounded-xl"
                   : "[&>button]:rounded-r-none",
               ),
               range_end: cn(
                 "[&>button]:bg-primary-1 [&>button]:text-white [&>button]:hover:bg-primary-1",
                 isSingleDaySelection
-                  ? "[&>button]:rounded-[0.75rem]"
+                  ? "[&>button]:rounded-xl"
                   : "[&>button]:rounded-l-none",
               ),
               range_middle:
@@ -445,7 +445,7 @@ export function CommentFilters({
           type="button"
           onClick={handlePostInputFocus}
           className={cn(
-            "inline-flex h-10 min-w-[12rem] items-center gap-2 rounded-[0.8rem] border px-3 text-sm leading-none text-text-2 transition-colors",
+            "inline-flex h-10 min-w-48 items-center gap-2 rounded-[0.8rem] border px-3 text-sm leading-none text-text-2 transition-colors",
             selectedPostTitle
               ? "border-primary-1/30 bg-primary-1/8 text-text-1"
               : "border-border-3 bg-background-1 hover:border-border-2",
@@ -457,7 +457,7 @@ export function CommentFilters({
         </button>
 
         {postDropdownOpen ? (
-          <div className="absolute left-0 top-full z-20 mt-2 w-[20rem] overflow-hidden rounded-[1rem] border border-border-3 bg-background-1 shadow-[0px_16px_40px_0px_rgba(0,0,0,0.12)]">
+          <div className="absolute left-0 top-full z-20 mt-2 w-80 overflow-hidden rounded-2xl border border-border-3 bg-background-1 shadow-[0px_16px_40px_0px_rgba(0,0,0,0.12)]">
             <div className="border-b border-border-3 p-3">
               <div className="relative">
                 <Icon

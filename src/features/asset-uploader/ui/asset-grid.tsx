@@ -233,7 +233,7 @@ function AssetGridCard({
                 <p className="truncate text-[13px] font-medium leading-none text-text-1">
                   {getAssetDisplayName(asset)}
                 </p>
-                <p className="mt-1 truncate text-[12px] leading-none text-text-4">
+                <p className="mt-1 truncate text-xs leading-none text-text-4">
                   {getAssetFilename(asset.url)}
                 </p>
               </div>
@@ -246,7 +246,7 @@ function AssetGridCard({
                 {asset.category.name}
               </span>
             </div>
-            <p className="truncate text-[12px] leading-none text-text-4">
+            <p className="truncate text-xs leading-none text-text-4">
               {formatAssetFileSize(asset.sizeBytes)} /{" "}
               {formatAssetResolution(asset.width, asset.height)} /{" "}
               {formatAssetDate(asset.createdAt)}
@@ -272,7 +272,7 @@ function AssetCardMedia({ asset }: { asset: Asset }) {
   const [hasError, setHasError] = useState(false);
 
   return (
-    <div className="relative aspect-[4/3] overflow-hidden bg-background-3">
+    <div className="relative aspect-4/3 overflow-hidden bg-background-3">
       {hasError ? (
         <div className="flex h-full items-center justify-center px-6 text-sm text-text-4">
           미리보기를 불러오지 못했습니다.

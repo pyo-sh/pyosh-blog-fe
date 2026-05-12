@@ -9,7 +9,7 @@ export default function DashboardLoading() {
           <Skeleton
             height="2.25rem"
             width="12rem"
-            className="rounded-[1rem]"
+            className="rounded-2xl"
             tone="strong"
           />
           <Skeleton width="18rem" tone="soft" />
@@ -20,7 +20,7 @@ export default function DashboardLoading() {
         {Array.from({ length: 5 }).map((_, index) => (
           <div
             key={index}
-            className="rounded-[1.5rem] border border-border-3 bg-background-2/90 p-6 shadow-[0_12px_32px_rgba(0,0,0,0.04)]"
+            className="rounded-3xl border border-border-3 bg-background-2/90 p-6 shadow-[0_12px_32px_rgba(0,0,0,0.04)]"
           >
             <div className="mb-4">
               <Skeleton height="1rem" width="5rem" tone="soft" />
@@ -37,7 +37,7 @@ export default function DashboardLoading() {
         {Array.from({ length: 2 }).map((_, index) => (
           <div
             key={index}
-            className="rounded-[1.5rem] border border-border-3 bg-background-2/90 p-6 shadow-[0_12px_32px_rgba(0,0,0,0.04)]"
+            className="rounded-3xl border border-border-3 bg-background-2/90 p-6 shadow-[0_12px_32px_rgba(0,0,0,0.04)]"
           >
             <Skeleton height="1rem" width="7rem" tone="soft" />
             <div className="mt-4">
@@ -49,7 +49,7 @@ export default function DashboardLoading() {
                   key={innerIndex}
                   variant="rect"
                   height="4.5rem"
-                  className="rounded-[1rem]"
+                  className="rounded-2xl"
                   tone="soft"
                 />
               ))}

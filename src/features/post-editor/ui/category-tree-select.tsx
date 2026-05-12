@@ -55,7 +55,7 @@ export function CategoryTreeSelect({
       disabled={disabled}
       ariaLabel="카테고리"
       className="w-full"
-      triggerClassName="h-10 rounded-[0.75rem] text-[13px] text-text-2"
+      triggerClassName="h-10 rounded-xl text-[13px] text-text-2"
       options={[
         {
           label: disabled ? "카테고리 불러오는 중..." : "카테고리 선택",

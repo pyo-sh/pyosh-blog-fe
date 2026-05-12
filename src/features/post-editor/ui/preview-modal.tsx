@@ -23,7 +23,7 @@ export function PreviewModal({
       withBackground
       aria-label="마크다운 미리보기"
     >
-      <div className="flex h-[min(88vh,60rem)] w-[min(94vw,76rem)] flex-col overflow-hidden rounded-[1.5rem] border border-border-3 bg-background-1 text-left shadow-[0px_28px_90px_0px_rgba(15,23,42,0.18)]">
+      <div className="flex h-[min(88vh,60rem)] w-[min(94vw,76rem)] flex-col overflow-hidden rounded-3xl border border-border-3 bg-background-1 text-left shadow-[0px_28px_90px_0px_rgba(15,23,42,0.18)]">
         <div className="flex items-center justify-between border-b border-border-3 bg-background-2 px-6 py-4">
           <div className="min-w-0">
             <p className="text-xs font-medium text-text-4">실제 글 미리보기</p>

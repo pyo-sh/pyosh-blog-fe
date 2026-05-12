@@ -40,7 +40,7 @@ export function ToggleSwitch({
         className={cn(
           "pointer-events-none inline-block bg-white shadow-sm",
           "transform transition duration-200 ease-in-out",
-          size === "sm" ? "h-4 w-4 rounded-[8px]" : "h-5 w-5 rounded-full",
+          size === "sm" ? "h-4 w-4 rounded-lg" : "h-5 w-5 rounded-full",
           checked
             ? size === "sm"
               ? "translate-x-4"

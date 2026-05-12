@@ -150,7 +150,7 @@ export function PopularPostList({
               <Link
                 href={buildPostHref(post.slug)}
                 onClick={onItemClick}
-                className="group block min-h-[3rem] rounded-md px-0.5 py-1 transition-colors hover:text-primary-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-1"
+                className="group block min-h-12 rounded-md px-0.5 py-1 transition-colors hover:text-primary-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-1"
               >
                 <span className="line-clamp-2 block text-ui-sm font-medium leading-[1.4] text-text-2 transition-colors group-hover:text-primary-1">
                   {post.title}

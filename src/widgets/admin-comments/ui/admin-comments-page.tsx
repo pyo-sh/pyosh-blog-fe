@@ -488,13 +488,13 @@ export function AdminCommentsPage() {
         </div>
 
         {actionError ? (
-          <div className="mt-4 rounded-[1rem] border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-sm text-negative-1">
+          <div className="mt-4 rounded-2xl border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-sm text-negative-1">
             {actionError}
           </div>
         ) : null}
 
         {isPending ? (
-          <div className="mt-4 overflow-hidden rounded-[1rem] border border-border-4 bg-background-1">
+          <div className="mt-4 overflow-hidden rounded-2xl border border-border-4 bg-background-1">
             <div className="grid grid-cols-8 gap-3 border-b border-border-4 bg-background-2 px-4 py-3.5">
               {Array.from({ length: 8 }).map((_, i) => (
                 <Skeleton key={i} />
@@ -521,7 +521,7 @@ export function AdminCommentsPage() {
             <button
               type="button"
               onClick={() => void queryClient.invalidateQueries({ queryKey })}
-              className="mt-4 inline-flex rounded-[0.75rem] border border-negative-1/20 px-4 py-2 text-sm font-medium text-negative-1 transition-colors hover:bg-negative-1/10"
+              className="mt-4 inline-flex rounded-xl border border-negative-1/20 px-4 py-2 text-sm font-medium text-negative-1 transition-colors hover:bg-negative-1/10"
             >
               다시 시도
             </button>
@@ -598,7 +598,7 @@ export function AdminCommentsPage() {
                     onClick={() => setPage(pageNumber)}
                     disabled={pageNumber === page}
                     className={cn(
-                      "inline-flex min-w-[2rem] items-center justify-center rounded px-2.5 py-1.5 text-sm transition-colors",
+                      "inline-flex min-w-8 items-center justify-center rounded px-2.5 py-1.5 text-sm transition-colors",
                       pageNumber === page
                         ? "pointer-events-none bg-primary-1 font-semibold text-white"
                         : "text-text-1 hover:bg-background-2",
@@ -647,7 +647,7 @@ export function AdminCommentsPage() {
 
       {selectedIds.length > 0 ? (
         <div className="fixed bottom-0 left-0 right-0 z-20 md:left-[var(--admin-sidebar-offset)]">
-          <div className="flex flex-wrap items-center gap-3 border-t border-border-3 bg-[rgba(241,242,243,0.95)] px-4 py-3 backdrop-blur-[12px] md:px-6 dark:bg-[rgba(19,20,21,0.94)]">
+          <div className="flex flex-wrap items-center gap-3 border-t border-border-3 bg-[rgba(241,242,243,0.95)] px-4 py-3 backdrop-blur-md md:px-6 dark:bg-[rgba(19,20,21,0.94)]">
             <span className="text-sm font-medium text-text-1">
               선택됨 {selectedIds.length}개
               {selectedOnOtherPages > 0 ? (

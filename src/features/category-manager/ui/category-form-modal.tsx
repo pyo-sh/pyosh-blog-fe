@@ -153,7 +153,7 @@ export function CategoryFormModal({
             disabled={isSubmitting}
             ariaLabel="부모 카테고리"
             className="w-full"
-            triggerClassName="h-10 rounded-[0.75rem] text-[13px] text-text-2"
+            triggerClassName="h-10 rounded-xl text-[13px] text-text-2"
           />
         </label>
 
@@ -193,7 +193,7 @@ export function CategoryFormModal({
         </div>
 
         {validationError ? (
-          <div className="rounded-[1rem] border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-sm text-negative-1">
+          <div className="rounded-2xl border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-sm text-negative-1">
             {validationError}
           </div>
         ) : null}
@@ -204,7 +204,7 @@ export function CategoryFormModal({
           type="button"
           onClick={onClose}
           disabled={isSubmitting}
-          className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-4 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center justify-center rounded-xl border border-border-3 px-4 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
         >
           취소
         </button>
@@ -212,7 +212,7 @@ export function CategoryFormModal({
           type="button"
           onClick={handleSubmit}
           disabled={isSubmitting || !trimmedName}
-          className="inline-flex items-center justify-center rounded-[0.75rem] bg-primary-1 px-4 py-2 text-sm font-medium text-text-1 transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center justify-center rounded-xl bg-primary-1 px-4 py-2 text-sm font-medium text-text-1 transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSubmitting ? (
             <>

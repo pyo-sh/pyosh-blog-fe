@@ -84,7 +84,7 @@ const Header: React.FC<HeaderProps> = ({
           "fixed top-0 z-[1000]",
           "flex justify-center",
           "border-b text-text-1",
-          "bg-[rgba(249,249,250,0.8)] border-[rgba(219,221,224,0.5)] shadow-[0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-[16px] backdrop-saturate-[1.4]",
+          "bg-[rgba(249,249,250,0.8)] border-[rgba(219,221,224,0.5)] shadow-[0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-lg backdrop-saturate-[1.4]",
           "dark:bg-[rgba(19,20,21,0.85)] dark:border-[rgba(62,66,69,0.5)] dark:shadow-[0_1px_0_rgba(0,0,0,0.15)]",
           "transition-all duration-300",
           isShown ? "translate-y-0" : "-translate-y-full",
@@ -101,7 +101,7 @@ const Header: React.FC<HeaderProps> = ({
               height="1.75rem"
               className="text-primary-1"
             />
-            <span className="text-[0.875rem] leading-[1.188rem] font-bold tracking-tight text-text-1">
+            <span className="text-sm leading-[1.188rem] font-bold tracking-tight text-text-1">
               pyosh blog
             </span>
           </Link>

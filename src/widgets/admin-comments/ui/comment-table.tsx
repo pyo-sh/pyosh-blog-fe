@@ -54,7 +54,7 @@ export function CommentTable({
     !allPageSelected && pageIds.some((id) => selectedIds.has(id));
 
   return (
-    <div className="overflow-hidden rounded-[1rem] border border-border-4 bg-background-1">
+    <div className="overflow-hidden rounded-2xl border border-border-4 bg-background-1">
       <div className="overflow-x-auto">
         <table className="min-w-full">
           <thead className="bg-background-2 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-text-4">

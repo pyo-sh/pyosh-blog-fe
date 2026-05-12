@@ -600,7 +600,7 @@ export function CategoryTree({
 
         {mode === "select" ? (
           <div className="fixed bottom-0 left-0 right-0 z-20 md:left-[var(--admin-sidebar-offset)]">
-            <div className="flex flex-wrap items-center gap-3 border-t border-border-3 bg-[rgba(241,242,243,0.95)] px-4 py-3 backdrop-blur-[12px] md:px-6 dark:bg-[rgba(19,20,21,0.94)]">
+            <div className="flex flex-wrap items-center gap-3 border-t border-border-3 bg-[rgba(241,242,243,0.95)] px-4 py-3 backdrop-blur-md md:px-6 dark:bg-[rgba(19,20,21,0.94)]">
               <span className="text-sm font-medium text-text-1">
                 선택됨 {selectedCount}개
               </span>
@@ -660,7 +660,7 @@ export function CategoryTree({
 
         {mode === "edit" ? (
           <div className="fixed bottom-0 left-0 right-0 z-20 md:left-[var(--admin-sidebar-offset)]">
-            <div className="flex flex-wrap items-center gap-3 border-t border-border-3 bg-[rgba(241,242,243,0.95)] px-4 py-3 backdrop-blur-[12px] md:px-6 dark:bg-[rgba(19,20,21,0.94)]">
+            <div className="flex flex-wrap items-center gap-3 border-t border-border-3 bg-[rgba(241,242,243,0.95)] px-4 py-3 backdrop-blur-md md:px-6 dark:bg-[rgba(19,20,21,0.94)]">
               <span className="text-sm font-medium text-text-1">
                 변경사항 {pendingChanges.length}건
               </span>

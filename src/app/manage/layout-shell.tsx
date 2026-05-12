@@ -102,7 +102,7 @@ export function ManageLayoutShell({ children }: { children: React.ReactNode }) {
       >
         <header
           className={cn(
-            "sticky top-0 z-10 box-border flex items-center gap-4 border-b border-border-4 bg-[rgba(249,249,250,0.8)] px-4 backdrop-blur-[16px] backdrop-saturate-[1.4] dark:bg-[rgba(19,20,21,0.85)] md:px-6",
+            "sticky top-0 z-10 box-border flex items-center gap-4 border-b border-border-4 bg-[rgba(249,249,250,0.8)] px-4 backdrop-blur-lg backdrop-saturate-[1.4] dark:bg-[rgba(19,20,21,0.85)] md:px-6",
             ADMIN_CHROME_HEIGHT_CLASS,
           )}
           style={ADMIN_CHROME_STYLE}

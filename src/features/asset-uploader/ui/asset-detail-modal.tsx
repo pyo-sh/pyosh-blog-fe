@@ -105,7 +105,7 @@ export function AssetDetailModal({
       aria-label="에셋 상세 보기"
       className="w-[min(94vw,42rem)] p-0 text-left"
     >
-      <div className="flex max-h-[90vh] flex-col overflow-hidden rounded-[1.5rem] bg-background-1">
+      <div className="flex max-h-[90vh] flex-col overflow-hidden rounded-3xl bg-background-1">
         <div className="flex items-center justify-between gap-4 border-b border-border-3 px-6 py-4">
           <h3 className="truncate text-lg font-bold text-text-1">
             {getAssetDisplayName(asset)}
@@ -181,7 +181,7 @@ export function AssetDetailModal({
             />
           </dl>
 
-          <div className="mb-6 rounded-[1rem] border border-border-3 bg-background-2 p-4">
+          <div className="mb-6 rounded-2xl border border-border-3 bg-background-2 p-4">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-text-4">
@@ -209,7 +209,7 @@ export function AssetDetailModal({
                   maxLength={200}
                   onChange={(event) => setDisplayNameDraft(event.target.value)}
                   disabled={isSavingMetadata}
-                  className="h-10 rounded-[0.75rem] border border-border-3 bg-background-1 px-3 text-sm text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="h-10 rounded-xl border border-border-3 bg-background-1 px-3 text-sm text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
                   placeholder={getAssetFilename(asset.url)}
                 />
               </label>
@@ -225,7 +225,7 @@ export function AssetDetailModal({
                   disabled={isSavingMetadata}
                   ariaLabel="카테고리"
                   className="w-full"
-                  triggerClassName="h-10 rounded-[0.75rem] text-sm text-text-2"
+                  triggerClassName="h-10 rounded-xl text-sm text-text-2"
                   placeholder="카테고리 선택"
                   options={categories.map((category) => ({
                     label: category.name,
@@ -252,7 +252,7 @@ export function AssetDetailModal({
                   !isMetadataChanged ||
                   categoryIdDraft === null
                 }
-                className="inline-flex h-9 items-center justify-center rounded-[0.75rem] bg-primary-1 px-4 text-sm font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex h-9 items-center justify-center rounded-xl bg-primary-1 px-4 text-sm font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSavingMetadata ? "저장 중" : "저장"}
               </button>
@@ -308,9 +308,7 @@ function CodeInfoBlock({
   return (
     <div>
       <div className="mb-2 flex items-center justify-between gap-3">
-        <p className="text-[12px] font-normal leading-none text-text-3">
-          {label}
-        </p>
+        <p className="text-xs font-normal leading-none text-text-3">{label}</p>
         <button
           type="button"
           onClick={onCopy}
@@ -330,10 +328,10 @@ function CodeInfoBlock({
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="mb-1.5 text-[12px] font-normal leading-none text-text-3">
+      <dt className="mb-1.5 text-xs font-normal leading-none text-text-3">
         {label}
       </dt>
-      <dd className="pl-2 text-[14px] font-normal leading-[1.25rem] text-text-1">
+      <dd className="pl-2 text-sm font-normal leading-5 text-text-1">
         {value}
       </dd>
     </div>
@@ -349,7 +347,7 @@ function AssetPreview({ asset }: { asset: Asset }) {
 
   if (hasError) {
     return (
-      <div className="flex min-h-[18rem] items-center justify-center px-6 py-10 text-sm text-text-4">
+      <div className="flex min-h-72 items-center justify-center px-6 py-10 text-sm text-text-4">
         이미지를 불러오지 못했습니다.
       </div>
     );

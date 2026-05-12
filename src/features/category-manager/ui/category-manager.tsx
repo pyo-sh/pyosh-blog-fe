@@ -223,7 +223,7 @@ export function CategoryManager() {
           ) : null}
 
           {!categoriesQuery.isPending && categoriesQuery.isError ? (
-            <div className="rounded-[1.5rem] border border-negative-1/20 bg-negative-1/10 px-6 py-8 text-center">
+            <div className="rounded-3xl border border-negative-1/20 bg-negative-1/10 px-6 py-8 text-center">
               <p className="text-sm text-negative-1">
                 {getErrorMessage(
                   categoriesQuery.error,
@@ -233,7 +233,7 @@ export function CategoryManager() {
               <button
                 type="button"
                 onClick={() => void categoriesQuery.refetch()}
-                className="mt-4 inline-flex rounded-[0.75rem] border border-negative-1/20 px-4 py-2 text-sm font-medium text-negative-1 transition-colors hover:bg-negative-1/10"
+                className="mt-4 inline-flex rounded-xl border border-negative-1/20 px-4 py-2 text-sm font-medium text-negative-1 transition-colors hover:bg-negative-1/10"
               >
                 다시 시도
               </button>

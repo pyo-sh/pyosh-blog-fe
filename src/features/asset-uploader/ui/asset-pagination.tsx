@@ -75,8 +75,8 @@ export function AssetPagination({
               disabled={pageNumber === page}
               className={
                 pageNumber === page
-                  ? "pointer-events-none inline-flex min-w-[2rem] items-center justify-center rounded bg-primary-1 px-2.5 py-1.5 text-sm font-semibold text-white"
-                  : "inline-flex min-w-[2rem] items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2"
+                  ? "pointer-events-none inline-flex min-w-8 items-center justify-center rounded bg-primary-1 px-2.5 py-1.5 text-sm font-semibold text-white"
+                  : "inline-flex min-w-8 items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2"
               }
               aria-current={pageNumber === page ? "page" : undefined}
               aria-label={`Page ${pageNumber}`}

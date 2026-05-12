@@ -186,9 +186,9 @@ export function BulkActions({
               }
               options={categoryOptions}
               ariaLabel="일괄 카테고리 변경"
-              className="min-w-[8rem]"
-              triggerClassName="h-8 rounded-md px-2.5 py-[5px] pr-7 text-[12px] font-normal leading-none"
-              optionClassName="text-[12px] leading-none"
+              className="min-w-32"
+              triggerClassName="h-8 rounded-md px-2.5 py-[5px] pr-7 text-xs font-normal leading-none"
+              optionClassName="text-xs leading-none"
               iconClassName="right-2"
               iconWidth="12"
             />
@@ -202,9 +202,9 @@ export function BulkActions({
               }
               options={commentStatusOptions}
               ariaLabel="일괄 댓글 상태 변경"
-              className="min-w-[8rem]"
-              triggerClassName="h-8 rounded-md px-2.5 py-[5px] pr-7 text-[12px] font-normal leading-none"
-              optionClassName="text-[12px] leading-none"
+              className="min-w-32"
+              triggerClassName="h-8 rounded-md px-2.5 py-[5px] pr-7 text-xs font-normal leading-none"
+              optionClassName="text-xs leading-none"
               iconClassName="right-2"
               iconWidth="12"
             />
@@ -227,7 +227,7 @@ export function BulkActions({
               onClick={() => setShowApplyDialog(true)}
               disabled={!hasUpdate || isPending}
               className={cn(
-                "inline-flex h-8 items-center justify-center rounded-md border px-3 text-[12px] font-medium leading-none transition-colors",
+                "inline-flex h-8 items-center justify-center rounded-md border px-3 text-xs font-medium leading-none transition-colors",
                 hasUpdate
                   ? "border-primary-1 bg-primary-1 text-white hover:opacity-90"
                   : "border border-border-3 text-text-3",
@@ -241,7 +241,7 @@ export function BulkActions({
               type="button"
               onClick={() => setShowDeleteDialog(true)}
               disabled={isPending}
-              className="inline-flex h-8 items-center justify-center rounded-md border border-negative-1 bg-negative-1 px-3 text-[12px] font-medium leading-none text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-8 items-center justify-center rounded-md border border-negative-1 bg-negative-1 px-3 text-xs font-medium leading-none text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               삭제
             </button>
@@ -252,7 +252,7 @@ export function BulkActions({
               type="button"
               onClick={() => setShowRestoreDialog(true)}
               disabled={isPending}
-              className="inline-flex h-8 items-center justify-center rounded-md border border-border-3 px-3 text-[12px] font-medium leading-none text-text-2 transition-colors hover:bg-background-3 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-8 items-center justify-center rounded-md border border-border-3 px-3 text-xs font-medium leading-none text-text-2 transition-colors hover:bg-background-3 disabled:cursor-not-allowed disabled:opacity-50"
             >
               복원
             </button>
@@ -260,7 +260,7 @@ export function BulkActions({
               type="button"
               onClick={() => setShowHardDeleteDialog(true)}
               disabled={isPending}
-              className="inline-flex h-8 items-center justify-center rounded-md border border-negative-1 bg-negative-1 px-3 text-[12px] font-medium leading-none text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-8 items-center justify-center rounded-md border border-negative-1 bg-negative-1 px-3 text-xs font-medium leading-none text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               삭제
             </button>

@@ -124,7 +124,7 @@ const SearchBar: React.FC = () => {
       className={cn(
         "relative flex items-center overflow-hidden rounded-[0.625rem] transition-[width,min-width,border-color,background-color,box-shadow] duration-300",
         isExpanded
-          ? "h-[2.125rem] min-w-[10rem] border border-border-3 bg-background-2 focus-within:border-primary-1 focus-within:shadow-[0_0_0_3px_rgba(138,111,224,0.12)] md:min-w-[12.5rem]"
+          ? "h-[2.125rem] min-w-40 border border-border-3 bg-background-2 focus-within:border-primary-1 focus-within:shadow-[0_0_0_3px_rgba(138,111,224,0.12)] md:min-w-[12.5rem]"
           : "h-[2.125rem] w-[2.125rem] min-w-[2.125rem] cursor-pointer border border-transparent bg-transparent px-0 hover:bg-background-3",
       )}
       onSubmit={handleSubmit}
@@ -156,7 +156,7 @@ const SearchBar: React.FC = () => {
         maxLength={200}
         aria-label="검색어 입력"
         className={cn(
-          "min-w-0 bg-transparent pl-3 pr-2 text-[0.813rem] leading-[1.125rem] font-normal text-text-1 outline-none placeholder:text-text-4 transition-[max-width,opacity] duration-300",
+          "min-w-0 bg-transparent pl-3 pr-2 text-[0.813rem] leading-4.5 font-normal text-text-1 outline-none placeholder:text-text-4 transition-[max-width,opacity] duration-300",
           isExpanded
             ? "max-w-[12rem] opacity-100 md:max-w-[14rem]"
             : "max-w-0 opacity-0 pointer-events-none",
@@ -193,7 +193,7 @@ const SearchBar: React.FC = () => {
           <button
             type="submit"
             aria-label="검색 실행"
-            className="flex h-[2.125rem] w-[2.125rem] items-center justify-center rounded-[0.5rem] text-text-3 transition-colors hover:bg-background-3"
+            className="flex h-[2.125rem] w-[2.125rem] items-center justify-center rounded-lg text-text-3 transition-colors hover:bg-background-3"
           >
             <Icon icon={magniferLinear} width="16" aria-hidden="true" />
           </button>

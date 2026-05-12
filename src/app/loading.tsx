@@ -8,17 +8,17 @@ export default function Loading() {
       aria-busy="true"
       className="mx-auto flex min-h-[100dvh] w-full max-w-[67.5rem] flex-col gap-8 px-4 pb-16 pt-8 md:px-6"
     >
-      <div className="motion-reveal rounded-[2rem] border border-border-3 bg-background-2/90 p-6 shadow-[0_16px_48px_rgba(0,0,0,0.06)] md:p-8">
+      <div className="motion-reveal rounded-4xl border border-border-3 bg-background-2/90 p-6 shadow-[0_16px_48px_rgba(0,0,0,0.06)] md:p-8">
         <div className="space-y-3">
           <Skeleton height="1rem" width="7rem" tone="soft" />
           <Skeleton
             height="2.5rem"
-            className="max-w-[20rem] rounded-[1rem]"
+            className="max-w-xs rounded-2xl"
             tone="strong"
           />
           <Skeleton
             height="1rem"
-            className="max-w-[32rem] rounded-full"
+            className="max-w-lg rounded-full"
             repeat={2}
             tone="soft"
           />
@@ -29,7 +29,7 @@ export default function Loading() {
         {placeholderItems.map((item) => (
           <li
             key={item}
-            className="rounded-[1.5rem] border border-border-3 bg-background-2/90 p-5 shadow-[0_12px_32px_rgba(0,0,0,0.04)] sm:p-6"
+            className="rounded-3xl border border-border-3 bg-background-2/90 p-5 shadow-[0_12px_32px_rgba(0,0,0,0.04)] sm:p-6"
           >
             <div className="mb-4 flex items-center gap-3">
               <Skeleton

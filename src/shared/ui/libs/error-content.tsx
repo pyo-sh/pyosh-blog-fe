@@ -45,8 +45,8 @@ export function ErrorContent({
 
   const surfaceClasses =
     context === "admin"
-      ? "max-w-[36rem] rounded-[1.75rem] border border-border-3 bg-background-2/90 p-7 text-left shadow-[0_18px_48px_rgba(0,0,0,0.08)] md:p-8"
-      : "max-w-[38rem] rounded-[2rem] border border-border-3 bg-background-2/90 p-8 text-left shadow-[0_22px_60px_rgba(0,0,0,0.08)] md:p-10";
+      ? "max-w-xl rounded-[1.75rem] border border-border-3 bg-background-2/90 p-7 text-left shadow-[0_18px_48px_rgba(0,0,0,0.08)] md:p-8"
+      : "max-w-[38rem] rounded-4xl border border-border-3 bg-background-2/90 p-8 text-left shadow-[0_22px_60px_rgba(0,0,0,0.08)] md:p-10";
 
   return (
     <div
@@ -91,7 +91,7 @@ export function ErrorContent({
             </p>
           ) : null}
 
-          <h1 className="break-keep text-[1.5rem] leading-[1.95rem] font-bold tracking-tight text-text-1 md:text-[1.875rem] md:leading-[2.375rem]">
+          <h1 className="break-keep text-2xl leading-[1.95rem] font-bold tracking-tight text-text-1 md:text-3xl md:leading-9.5">
             {title}
           </h1>
 

@@ -107,7 +107,7 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
         <Link
           href="/manage/posts"
           prefetch={false}
-          className="inline-flex items-center gap-1.5 rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+          className="inline-flex items-center gap-1.5 rounded-xl border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
         >
           ← 목록
         </Link>
@@ -115,7 +115,7 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
         <Link
           href={`/manage/posts/${currentPost.id}/edit`}
           prefetch={false}
-          className="inline-flex items-center rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+          className="inline-flex items-center rounded-xl border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
         >
           수정
         </Link>
@@ -124,7 +124,7 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
           type="button"
           onClick={() => setShowDeleteDialog(true)}
           disabled={deleteMutation.isPending}
-          className="inline-flex items-center rounded-[0.75rem] border border-negative-1/30 px-3 py-2 text-sm font-medium text-negative-1 transition-colors hover:bg-negative-1/10 disabled:opacity-50"
+          className="inline-flex items-center rounded-xl border border-negative-1/30 px-3 py-2 text-sm font-medium text-negative-1 transition-colors hover:bg-negative-1/10 disabled:opacity-50"
         >
           삭제
         </button>
@@ -211,7 +211,7 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
             );
           }}
           className={cn(
-            "inline-flex items-center gap-1.5 rounded-[0.75rem] border px-3 py-2 text-sm font-medium transition-colors",
+            "inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium transition-colors",
             "disabled:cursor-not-allowed disabled:opacity-50",
             currentPost.isPinned
               ? "border-primary-1/30 text-primary-1 hover:bg-primary-1/10"
@@ -239,7 +239,7 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
               );
             }}
             ariaLabel="글 상태"
-            triggerClassName="h-auto rounded-[0.75rem] px-3 py-2 text-sm text-text-1 disabled:opacity-50"
+            triggerClassName="h-auto rounded-xl px-3 py-2 text-sm text-text-1 disabled:opacity-50"
             options={statusOptions}
           />
         </div>
