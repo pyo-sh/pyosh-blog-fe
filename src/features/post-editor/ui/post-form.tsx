@@ -56,11 +56,7 @@ import {
 import { normalizeAssetUrl, toCanonicalAssetUrl } from "@shared/lib/asset-url";
 import { getErrorMessage } from "@shared/lib/get-error-message";
 import { cn } from "@shared/lib/style-utils";
-import {
-  CustomSelect,
-  Spinner,
-  type CustomSelectOption,
-} from "@shared/ui/libs";
+import { DropSelect, Spinner, type DropSelectOption } from "@shared/ui/libs";
 
 type EditorTab = "all" | "info" | "editor-split" | "editor-only";
 type SubmitIntent =
@@ -177,7 +173,7 @@ function sortCategories(categories: Category[]): Category[] {
 function flattenCategoryOptions(
   categories: Category[],
   depth = 0,
-): Array<CustomSelectOption<number>> {
+): Array<DropSelectOption<number>> {
   return categories.flatMap((category) => {
     const prefix = depth === 0 ? "" : `\u3000`.repeat(depth);
 
@@ -829,7 +825,7 @@ export function PostForm({
               <div className="flex flex-wrap items-center gap-4">
                 <CompactMetaLabel label="카테고리">
                   <div className="min-w-[10rem]">
-                    <CustomSelect
+                    <DropSelect
                       value={values.categoryId}
                       options={categoryOptions}
                       disabled={categoriesQuery.isPending}
@@ -954,7 +950,7 @@ export function PostForm({
 
                 <CompactMetaLabel label="댓글 상태">
                   <div className="min-w-[7rem]">
-                    <CustomSelect
+                    <DropSelect
                       value={values.commentStatus}
                       options={commentStatusOptions}
                       ariaLabel="댓글 상태"
@@ -979,7 +975,7 @@ export function PostForm({
               <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_20rem]">
                 <div className="space-y-5">
                   <MetaFormRow label="카테고리">
-                    <CustomSelect
+                    <DropSelect
                       value={values.categoryId}
                       options={categoryOptions}
                       disabled={categoriesQuery.isPending}
@@ -1056,7 +1052,7 @@ export function PostForm({
                     }: ${getCommentStatusDescription(values.commentStatus)}`}
                   >
                     <div className="max-w-[14rem]">
-                      <CustomSelect
+                      <DropSelect
                         value={values.commentStatus}
                         options={commentStatusOptions}
                         ariaLabel="댓글 상태"

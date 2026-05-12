@@ -7,7 +7,7 @@ import type { AdminPostTab } from "./post-filters";
 import type { Category } from "@entities/category";
 import { cn } from "@shared/lib/style-utils";
 import { ConfirmDialog } from "@shared/ui/confirm-dialog";
-import { CustomSelect } from "@shared/ui/libs";
+import { DropSelect } from "@shared/ui/libs";
 
 interface BulkActionsProps {
   tab: AdminPostTab;
@@ -179,7 +179,7 @@ export function BulkActions({
 
         {tab === "active" ? (
           <div className="flex flex-1 flex-wrap items-center gap-2">
-            <CustomSelect
+            <DropSelect
               value={categoryId ? String(categoryId) : ""}
               onChange={(value) =>
                 setCategoryId(value ? Number(value) : undefined)
@@ -193,7 +193,7 @@ export function BulkActions({
               iconWidth="12"
             />
 
-            <CustomSelect
+            <DropSelect
               value={commentStatus ?? ""}
               onChange={(value) =>
                 setCommentStatus(

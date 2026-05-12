@@ -7,7 +7,7 @@ import magniferLinear from "@iconify-icons/solar/magnifer-linear";
 import type { Category } from "@entities/category";
 import type { PostListItem } from "@entities/post";
 import { cn } from "@shared/lib/style-utils";
-import { CustomSelect } from "@shared/ui/libs";
+import { DropSelect } from "@shared/ui/libs";
 
 export type AdminPostTab = "active" | "trash";
 export type AdminPostStatusFilter = PostListItem["status"] | "all";
@@ -153,7 +153,7 @@ export function PostFilters({
           onSubmit={handleSearch}
           className="flex flex-wrap items-center gap-3"
         >
-          <CustomSelect
+          <DropSelect
             value={status}
             onChange={(value) => onStatusChange(value as AdminPostStatusFilter)}
             className="min-w-[8.5rem]"
@@ -161,7 +161,7 @@ export function PostFilters({
             options={STATUS_OPTIONS}
           />
 
-          <CustomSelect
+          <DropSelect
             value={visibility}
             onChange={(value) =>
               onVisibilityChange(value as AdminPostVisibilityFilter)
@@ -171,7 +171,7 @@ export function PostFilters({
             options={VISIBILITY_OPTIONS}
           />
 
-          <CustomSelect
+          <DropSelect
             value={categoryId ? String(categoryId) : ""}
             onChange={(value) =>
               onCategoryChange(value ? Number(value) : undefined)

@@ -11,16 +11,16 @@ import { Icon } from "@iconify/react/offline";
 import altArrowDownLinear from "@iconify-icons/solar/alt-arrow-down-linear";
 import { cn } from "@shared/lib/style-utils";
 
-export interface CustomSelectOption<T extends string | number> {
+export interface DropSelectOption<T extends string | number> {
   label: string;
   triggerLabel?: string;
   value: T;
   depth?: number;
 }
 
-interface CustomSelectProps<T extends string | number> {
+interface DropSelectProps<T extends string | number> {
   value: T | null;
-  options: Array<CustomSelectOption<T>>;
+  options: Array<DropSelectOption<T>>;
   onChange: (value: T) => void;
   ariaLabel: string;
   placeholder?: string;
@@ -33,7 +33,7 @@ interface CustomSelectProps<T extends string | number> {
   iconWidth?: string;
 }
 
-export function CustomSelect<T extends string | number>({
+export function DropSelect<T extends string | number>({
   value,
   options,
   onChange,
@@ -46,7 +46,7 @@ export function CustomSelect<T extends string | number>({
   listboxClassName,
   iconClassName,
   iconWidth = "14",
-}: CustomSelectProps<T>) {
+}: DropSelectProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const rootRef = useRef<HTMLDivElement | null>(null);
