@@ -10,9 +10,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { Icon } from "@iconify/react/offline";
-import altArrowDownLinear from "@iconify-icons/solar/alt-arrow-down-linear";
 import { cn } from "@shared/lib/style-utils";
+import { ChevronIcon } from "@shared/ui/icons";
 
 export interface DropSelectOption<T extends string | number> {
   label: string;
@@ -306,10 +305,9 @@ export function DropSelect<T extends string | number>({
         style={triggerStyle}
       >
         <span className="truncate whitespace-nowrap">{visibleLabel}</span>
-        <Icon
-          icon={altArrowDownLinear}
-          width={iconWidth}
-          aria-hidden="true"
+        <ChevronIcon
+          direction="down"
+          size={iconWidth}
           className={cn(
             "pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-text-4 transition-transform",
             isOpen && "rotate-180",

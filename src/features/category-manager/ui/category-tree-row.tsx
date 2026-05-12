@@ -2,7 +2,6 @@
 
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { Icon } from "@iconify/react/offline";
-import altArrowRightLinear from "@iconify-icons/solar/alt-arrow-right-linear";
 import menuDotsLinear from "@iconify-icons/solar/menu-dots-linear";
 import penNewRoundLinear from "@iconify-icons/solar/pen-new-round-linear";
 import trashBinMinimalisticLinear from "@iconify-icons/solar/trash-bin-minimalistic-linear";
@@ -15,6 +14,7 @@ import type {
 } from "../lib/tree-utils";
 import type { Category } from "@entities/category";
 import { cn } from "@shared/lib/style-utils";
+import { ChevronIcon } from "@shared/ui/icons";
 
 interface CategoryTreeRowProps {
   category: Category;
@@ -152,10 +152,9 @@ export function CategoryTreeRow({
                   isExpanded && "text-text-2",
                 )}
               >
-                <Icon
-                  icon={altArrowRightLinear}
-                  width="16"
-                  aria-hidden="true"
+                <ChevronIcon
+                  direction="right"
+                  size="16"
                   className={cn(
                     "transition-transform duration-200",
                     isExpanded && "rotate-90",

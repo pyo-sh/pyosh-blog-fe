@@ -58,6 +58,7 @@ export function AssetUploader() {
   const [pendingCategoryId, setPendingCategoryId] = useState<number | null>(
     null,
   );
+  const [isUploadPanelOpen, setIsUploadPanelOpen] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<PendingUploadFile[]>([]);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [selectionMode, setSelectionMode] = useState(false);
@@ -132,6 +133,39 @@ export function AssetUploader() {
     findAssetCategoryByKey(categories, "default") ?? categories[0] ?? null;
   const selectedUploadCategoryId =
     defaultUploadCategoryId ?? fallbackDefaultCategory?.id ?? null;
+  const shouldShowUploadPanel =
+    isUploadPanelOpen || pendingFiles.length > 0 || uploadMutation.isPending;
+  const isUploadPanelPinned =
+    pendingFiles.length > 0 || uploadMutation.isPending;
+
+  const uploadZone = (
+    <UploadZone
+      files={pendingFiles}
+      isUploading={uploadMutation.isPending}
+      uploadProgress={uploadProgress}
+      errorMessage={null}
+      categories={categories}
+      defaultCategoryId={selectedUploadCategoryId}
+      isDefaultCategoryDisabled={
+        categoriesQuery.isPending || uploadMutation.isPending
+      }
+      onFilesAdded={addFiles}
+      onDefaultCategoryChange={setDefaultUploadCategoryId}
+      onOpenCategoryManager={() => setIsCategoryManagerOpen(true)}
+      onUpdateFileMetadata={updatePendingFileMetadata}
+      onRemoveFile={removePendingFile}
+      onClear={clearPendingFiles}
+      onUpload={() => {
+        if (pendingFiles.length === 0) {
+          toast.error("업로드할 파일을 먼저 선택하세요.");
+
+          return;
+        }
+
+        uploadMutation.mutate(pendingFiles);
+      }}
+    />
+  );
 
   const deleteMutation = useMutation({
     mutationFn: async (ids: number[]) => {
@@ -553,33 +587,6 @@ export function AssetUploader() {
 
   return (
     <div className="space-y-6">
-      <UploadZone
-        files={pendingFiles}
-        isUploading={uploadMutation.isPending}
-        uploadProgress={uploadProgress}
-        errorMessage={null}
-        categories={categories}
-        defaultCategoryId={selectedUploadCategoryId}
-        isDefaultCategoryDisabled={
-          categoriesQuery.isPending || uploadMutation.isPending
-        }
-        onFilesAdded={addFiles}
-        onDefaultCategoryChange={setDefaultUploadCategoryId}
-        onOpenCategoryManager={() => setIsCategoryManagerOpen(true)}
-        onUpdateFileMetadata={updatePendingFileMetadata}
-        onRemoveFile={removePendingFile}
-        onClear={clearPendingFiles}
-        onUpload={() => {
-          if (pendingFiles.length === 0) {
-            toast.error("업로드할 파일을 먼저 선택하세요.");
-
-            return;
-          }
-
-          uploadMutation.mutate(pendingFiles);
-        }}
-      />
-
       {assetsQuery.isPending ? <AssetGridSkeleton /> : null}
 
       {!assetsQuery.isPending && assetsQuery.isError ? (
@@ -606,6 +613,12 @@ export function AssetUploader() {
             search={search}
             categoryFilterId={categoryFilterId}
             categories={categories}
+            isUploadPanelOpen={shouldShowUploadPanel}
+            uploadQueueCount={pendingFiles.length}
+            isUploadPanelPinned={isUploadPanelPinned}
+            onToggleUploadPanel={() =>
+              setIsUploadPanelOpen((current) => !current)
+            }
             onSearchChange={setSearch}
             onCategoryFilterChange={setCategoryFilterId}
             onResetFilters={() => {
@@ -613,6 +626,10 @@ export function AssetUploader() {
               setCategoryFilterId(null);
             }}
           />
+
+          {shouldShowUploadPanel ? (
+            <div id="asset-upload-panel">{uploadZone}</div>
+          ) : null}
 
           <AssetGrid
             assets={assets}

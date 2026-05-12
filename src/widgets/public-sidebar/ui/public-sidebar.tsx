@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Icon } from "@iconify/react/offline";
-import altArrowRightLinear from "@iconify-icons/solar/alt-arrow-right-linear";
 import closeCircleLinear from "@iconify-icons/solar/close-circle-linear";
 import eyeLinear from "@iconify-icons/solar/eye-linear";
 import folder2Linear from "@iconify-icons/solar/folder-2-linear";
@@ -23,6 +22,7 @@ import { TagCloud } from "@features/tag-cloud";
 import { TocSection } from "@features/toc";
 import { TotalViewCount } from "@features/total-view-count";
 import { cn } from "@shared/lib/style-utils";
+import { ChevronIcon } from "@shared/ui/icons";
 
 interface PublicSidebarContentProps {
   recentPosts: PostListItem[];
@@ -159,13 +159,7 @@ export function PublicSidebarContent({
               className="inline-flex items-center gap-0.5 text-ui-xs font-medium text-primary-1 underline-offset-4 hover:underline"
             >
               전체보기
-              <Icon
-                icon={altArrowRightLinear}
-                width="10"
-                height="10"
-                aria-hidden="true"
-                className="shrink-0"
-              />
+              <ChevronIcon direction="right" size="10" className="shrink-0" />
             </Link>
           }
         >
@@ -196,13 +190,7 @@ export function PublicSidebarContent({
               className="inline-flex items-center gap-0.5 text-ui-xs font-medium text-primary-1 underline-offset-4 hover:underline"
             >
               전체보기
-              <Icon
-                icon={altArrowRightLinear}
-                width="10"
-                height="10"
-                aria-hidden="true"
-                className="shrink-0"
-              />
+              <ChevronIcon direction="right" size="10" className="shrink-0" />
             </Link>
           }
         >

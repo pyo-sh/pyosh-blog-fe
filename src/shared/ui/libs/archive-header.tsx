@@ -1,9 +1,8 @@
 import type { ReactNode } from "react";
-import { Icon } from "@iconify/react/offline";
-import altArrowRightLinear from "@iconify-icons/solar/alt-arrow-right-linear";
 import Link from "next/link";
 import { formatNumber } from "@shared/lib/format-number";
 import { cn } from "@shared/lib/style-utils";
+import { ChevronIcon } from "@shared/ui/icons";
 
 interface ArchiveBreadcrumbItem {
   label: string;
@@ -113,7 +112,7 @@ function BreadcrumbChevron() {
       aria-hidden="true"
       className="mx-px inline-flex h-2.5 w-2.5 shrink-0 items-center justify-center text-text-4"
     >
-      <Icon icon={altArrowRightLinear} width="10" aria-hidden="true" />
+      <ChevronIcon direction="right" size="10" />
     </span>
   );
 }
