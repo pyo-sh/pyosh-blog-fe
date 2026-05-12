@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ADMIN_CHROME_HEIGHT } from "../ui/admin-shell-constants";
 import { PostForm, type PostFormValues } from "@features/post-editor";
 
 interface PostEditorScreenProps {
@@ -11,17 +10,6 @@ interface PostEditorScreenProps {
   isPending?: boolean;
   errorMessage?: string | null;
   onRetry?: () => void;
-}
-
-function FullBleedFrame({ children }: { children: React.ReactNode }) {
-  return (
-    <div
-      className="-mx-4 -my-6 h-full w-full md:-mx-6"
-      style={{ height: `calc(100dvh - ${ADMIN_CHROME_HEIGHT})` }}
-    >
-      <div className="h-full w-full">{children}</div>
-    </div>
-  );
 }
 
 function EditorSkeleton() {
@@ -95,7 +83,7 @@ export function PostEditorScreen({
   const router = useRouter();
 
   return (
-    <FullBleedFrame>
+    <div className="h-full min-h-0 w-full">
       {isPending ? (
         <EditorSkeleton />
       ) : errorMessage ? (
@@ -110,6 +98,6 @@ export function PostEditorScreen({
           onSuccess={() => router.push("/manage/posts")}
         />
       )}
-    </FullBleedFrame>
+    </div>
   );
 }

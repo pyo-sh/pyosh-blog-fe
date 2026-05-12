@@ -106,6 +106,7 @@ const TABS: Array<{ id: EditorTab; label: string }> = [
 ];
 
 const REMOVED_PENDING_IMAGE_TTL_MS = 30_000;
+const EDITOR_INLINE_PREVIEW_MEDIA_QUERY = "(min-width: 67.5rem)";
 const PAGE_TAB_CLASS =
   "inline-flex h-8 items-center justify-center rounded-[0.375rem] px-[0.875rem] border-none bg-transparent text-[13px] font-medium leading-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-1/20";
 const SECONDARY_BUTTON_CLASS =
@@ -394,7 +395,7 @@ export function PostForm({
       return;
     }
 
-    const mediaQuery = window.matchMedia("(min-width: 1024px)");
+    const mediaQuery = window.matchMedia(EDITOR_INLINE_PREVIEW_MEDIA_QUERY);
     const updateViewport = () => {
       setIsDesktopPreview(mediaQuery.matches);
     };
