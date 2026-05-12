@@ -3,8 +3,10 @@
 import {
   type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
+  useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -39,6 +41,16 @@ interface DropSelectProps<T extends string | number> {
   selectedIndicatorLabel?: string;
 }
 
+type DropSelectPlacement = "bottom" | "top";
+
+interface ListboxLayout {
+  placement: DropSelectPlacement;
+  maxHeight?: number;
+}
+
+const LISTBOX_GAP_PX = 4;
+const LISTBOX_VIEWPORT_MARGIN_PX = 8;
+
 export function DropSelect<T extends string | number>({
   value,
   options,
@@ -60,8 +72,12 @@ export function DropSelect<T extends string | number>({
 }: DropSelectProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [listboxLayout, setListboxLayout] = useState<ListboxLayout>({
+    placement: "bottom",
+  });
   const rootRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const listboxRef = useRef<HTMLDivElement | null>(null);
   const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const listboxId = useId();
   const selected = options.find((option) => option.value === value);
@@ -72,6 +88,34 @@ export function DropSelect<T extends string | number>({
   useEffect(() => {
     optionRefs.current = [];
   }, [options]);
+
+  const updateListboxLayout = useCallback(() => {
+    const trigger = triggerRef.current;
+    const listbox = listboxRef.current;
+
+    if (!trigger || !listbox) {
+      return;
+    }
+
+    const triggerRect = trigger.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const spaceBelow =
+      viewportHeight -
+      triggerRect.bottom -
+      LISTBOX_GAP_PX -
+      LISTBOX_VIEWPORT_MARGIN_PX;
+    const spaceAbove =
+      triggerRect.top - LISTBOX_GAP_PX - LISTBOX_VIEWPORT_MARGIN_PX;
+    const preferredHeight = listbox.scrollHeight;
+    const shouldOpenAbove =
+      spaceBelow < preferredHeight && spaceAbove > spaceBelow;
+    const availableSpace = shouldOpenAbove ? spaceAbove : spaceBelow;
+
+    setListboxLayout({
+      placement: shouldOpenAbove ? "top" : "bottom",
+      maxHeight: Math.max(0, availableSpace),
+    });
+  }, []);
 
   useEffect(() => {
     if (!isOpen) {
@@ -90,6 +134,28 @@ export function DropSelect<T extends string | number>({
       document.removeEventListener("mousedown", handlePointerDown);
     };
   }, [isOpen]);
+
+  useLayoutEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    updateListboxLayout();
+  }, [isOpen, options, updateListboxLayout]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    window.addEventListener("resize", updateListboxLayout);
+    window.addEventListener("scroll", updateListboxLayout, true);
+
+    return () => {
+      window.removeEventListener("resize", updateListboxLayout);
+      window.removeEventListener("scroll", updateListboxLayout, true);
+    };
+  }, [isOpen, updateListboxLayout]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -254,10 +320,20 @@ export function DropSelect<T extends string | number>({
 
       {isOpen ? (
         <div
+          ref={listboxRef}
           className={cn(
-            "absolute left-0 top-[calc(100%+4px)] z-[200] min-w-full overflow-hidden rounded-lg border border-border-3 bg-background-1 shadow-[0_4px_16px_rgba(0,0,0,0.1)]",
+            "absolute left-0 z-[200] min-w-full overflow-y-auto rounded-lg border border-border-3 bg-background-1 shadow-[0_4px_16px_rgba(0,0,0,0.1)]",
+            listboxLayout.placement === "top"
+              ? "bottom-[calc(100%+4px)]"
+              : "top-[calc(100%+4px)]",
             listboxClassName,
           )}
+          style={{
+            maxHeight:
+              listboxLayout.maxHeight === undefined
+                ? undefined
+                : `${listboxLayout.maxHeight}px`,
+          }}
         >
           <div
             id={listboxId}
