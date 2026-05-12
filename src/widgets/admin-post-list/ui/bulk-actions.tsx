@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { Icon } from "@iconify/react/offline";
-import altArrowDownLinear from "@iconify-icons/solar/alt-arrow-down-linear";
 import restartLinear from "@iconify-icons/solar/restart-linear";
 import type { AdminPostTab } from "./post-filters";
 import type { Category } from "@entities/category";
 import { cn } from "@shared/lib/style-utils";
 import { ConfirmDialog } from "@shared/ui/confirm-dialog";
+import { CustomSelect } from "@shared/ui/libs";
 
 interface BulkActionsProps {
   tab: AdminPostTab;
@@ -40,183 +40,6 @@ const COMMENT_STATUS_DESC: Record<"open" | "locked" | "disabled", string> = {
   locked: "기존 댓글은 유지되며 새 댓글 작성이 차단됩니다.",
   disabled: "댓글 영역이 완전히 숨겨집니다.",
 };
-
-function BulkSelect({
-  value,
-  onChange,
-  options,
-  ariaLabel,
-  className,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  options: Array<{ label: string; value: string; depth?: number }>;
-  ariaLabel: string;
-  className?: string;
-}) {
-  const [open, setOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const rootRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const listboxId = useId();
-  const selectedOption =
-    options.find((option) => option.value === value) ?? options[0];
-  const selectedIndex = Math.max(
-    options.findIndex((option) => option.value === value),
-    0,
-  );
-
-  useEffect(() => {
-    function handlePointerDown(event: MouseEvent) {
-      if (rootRef.current && !rootRef.current.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handlePointerDown);
-
-    return () => document.removeEventListener("mousedown", handlePointerDown);
-  }, []);
-
-  useEffect(() => {
-    if (!open) return;
-
-    const next = optionRefs.current[activeIndex];
-    if (!next) return;
-
-    const frame = requestAnimationFrame(() => next.focus());
-
-    return () => cancelAnimationFrame(frame);
-  }, [activeIndex, open]);
-
-  function openList(index = selectedIndex) {
-    setActiveIndex(index);
-    setOpen(true);
-  }
-
-  function closeList() {
-    setOpen(false);
-    triggerRef.current?.focus();
-  }
-
-  function selectValue(nextValue: string) {
-    onChange(nextValue);
-    closeList();
-  }
-
-  function moveActive(nextIndex: number) {
-    const maxIndex = options.length - 1;
-    setActiveIndex(Math.min(Math.max(nextIndex, 0), maxIndex));
-  }
-
-  return (
-    <div ref={rootRef} className={cn("relative inline-flex", className)}>
-      <button
-        ref={triggerRef}
-        type="button"
-        aria-label={ariaLabel}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        aria-controls={listboxId}
-        onClick={() => (open ? setOpen(false) : openList(selectedIndex))}
-        onKeyDown={(event) => {
-          if (event.key === "ArrowDown") {
-            event.preventDefault();
-            openList(selectedIndex);
-          } else if (event.key === "ArrowUp") {
-            event.preventDefault();
-            openList(selectedIndex);
-          } else if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            openList(selectedIndex);
-          }
-        }}
-        className={cn(
-          "flex h-8 w-full items-center rounded-md border border-border-3 bg-background-1 px-2.5 py-[5px] pr-7 text-left text-[12px] font-normal leading-none text-text-1 outline-none transition-colors",
-          open && "border-primary-1 ring-3 ring-primary-1/10",
-        )}
-      >
-        <span className="truncate whitespace-nowrap">
-          {selectedOption?.label ?? ""}
-        </span>
-        <Icon
-          icon={altArrowDownLinear}
-          width="12"
-          aria-hidden="true"
-          className={cn(
-            "pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-text-4 transition-transform",
-            open && "rotate-180",
-          )}
-        />
-      </button>
-
-      {open ? (
-        <div className="absolute left-0 top-[calc(100%+4px)] z-[200] min-w-full overflow-hidden rounded-lg border border-border-3 bg-background-1 shadow-[0_4px_16px_rgba(0,0,0,0.1)]">
-          <div
-            id={listboxId}
-            role="listbox"
-            aria-label={ariaLabel}
-            className="py-0.5"
-          >
-            {options.map((option, index) => {
-              const isSelected = option.value === value;
-
-              return (
-                <button
-                  key={option.value}
-                  ref={(node) => {
-                    optionRefs.current[index] = node;
-                  }}
-                  type="button"
-                  role="option"
-                  aria-selected={isSelected}
-                  tabIndex={index === activeIndex ? 0 : -1}
-                  onClick={() => selectValue(option.value)}
-                  onFocus={() => setActiveIndex(index)}
-                  onKeyDown={(event) => {
-                    if (event.key === "ArrowDown") {
-                      event.preventDefault();
-                      moveActive(index + 1);
-                    } else if (event.key === "ArrowUp") {
-                      event.preventDefault();
-                      moveActive(index - 1);
-                    } else if (event.key === "Home") {
-                      event.preventDefault();
-                      moveActive(0);
-                    } else if (event.key === "End") {
-                      event.preventDefault();
-                      moveActive(options.length - 1);
-                    } else if (event.key === "Escape") {
-                      event.preventDefault();
-                      closeList();
-                    } else if (event.key === "Tab") {
-                      setOpen(false);
-                    } else if (event.key === " " || event.key === "Enter") {
-                      event.preventDefault();
-                      selectValue(option.value);
-                    }
-                  }}
-                  className={cn(
-                    "flex w-full items-center whitespace-nowrap px-3 py-2 text-left text-[12px] leading-none text-text-1 transition-colors hover:bg-background-2",
-                    isSelected && "font-medium text-primary-1",
-                  )}
-                  style={{
-                    paddingLeft: option.depth
-                      ? `${12 + option.depth * 16}px`
-                      : undefined,
-                  }}
-                >
-                  {option.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      ) : null}
-    </div>
-  );
-}
 
 function buildCategoryTree(
   categories: Category[],
@@ -356,7 +179,7 @@ export function BulkActions({
 
         {tab === "active" ? (
           <div className="flex flex-1 flex-wrap items-center gap-2">
-            <BulkSelect
+            <CustomSelect
               value={categoryId ? String(categoryId) : ""}
               onChange={(value) =>
                 setCategoryId(value ? Number(value) : undefined)
@@ -364,9 +187,13 @@ export function BulkActions({
               options={categoryOptions}
               ariaLabel="일괄 카테고리 변경"
               className="min-w-[8rem]"
+              triggerClassName="h-8 rounded-md px-2.5 py-[5px] pr-7 text-[12px] font-normal leading-none"
+              optionClassName="text-[12px] leading-none"
+              iconClassName="right-2"
+              iconWidth="12"
             />
 
-            <BulkSelect
+            <CustomSelect
               value={commentStatus ?? ""}
               onChange={(value) =>
                 setCommentStatus(
@@ -376,6 +203,10 @@ export function BulkActions({
               options={commentStatusOptions}
               ariaLabel="일괄 댓글 상태 변경"
               className="min-w-[8rem]"
+              triggerClassName="h-8 rounded-md px-2.5 py-[5px] pr-7 text-[12px] font-normal leading-none"
+              optionClassName="text-[12px] leading-none"
+              iconClassName="right-2"
+              iconWidth="12"
             />
 
             <button
