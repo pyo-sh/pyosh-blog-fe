@@ -6,7 +6,7 @@ import documentTextLinear from "@iconify-icons/solar/document-text-linear";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { PostListItem } from "./post-list-item";
-import { PostListItemSkeleton } from "./post-list-item-skeleton";
+import { PostListSkeleton } from "./post-list-skeleton";
 import type { PaginatedResponse } from "@shared/api";
 import {
   fetchPosts,
@@ -19,18 +19,6 @@ interface PostListProps {
   initialData: PaginatedResponse<PostListEntry>;
   initialPage: number;
   basePath?: string;
-}
-
-const SKELETON_COUNT = 10;
-
-function PostListSkeleton() {
-  return (
-    <div className="grid gap-3">
-      {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
-        <PostListItemSkeleton key={i} />
-      ))}
-    </div>
-  );
 }
 
 function PostListEmptyState() {

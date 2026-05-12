@@ -26,7 +26,7 @@ import {
 } from "@entities/comment";
 import { getErrorMessage } from "@shared/lib/get-error-message";
 import { cn } from "@shared/lib/style-utils";
-import { EmptyState, Skeleton } from "@shared/ui/libs";
+import { EmptyState, TableSkeleton } from "@shared/ui/libs";
 
 const PAGE_SIZE = 10;
 const EMPTY_COMMENT_ROWS: AdminCommentItem[] = [];
@@ -494,23 +494,22 @@ export function AdminCommentsPage() {
         ) : null}
 
         {isPending ? (
-          <div className="mt-4 overflow-hidden rounded-2xl border border-border-4 bg-background-1">
-            <div className="grid grid-cols-8 gap-3 border-b border-border-4 bg-background-2 px-4 py-3.5">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <Skeleton key={i} />
-              ))}
-            </div>
-            <div className="space-y-3 px-4 py-4">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton
-                  key={i}
-                  variant="rect"
-                  height="3.25rem"
-                  className="rounded-[0.9rem]"
-                />
-              ))}
-            </div>
-          </div>
+          <TableSkeleton
+            rows={6}
+            rowHeight="3.25rem"
+            containerClassName="mt-4"
+            columns={[
+              { width: "2.5rem" },
+              { width: "10rem" },
+              { width: "5rem" },
+              { width: "22rem" },
+              { width: "12rem" },
+              { width: "4rem", className: "text-center" },
+              { width: "6rem" },
+              { width: "7rem" },
+              { width: "4rem", className: "text-center" },
+            ]}
+          />
         ) : null}
 
         {!isPending && isError ? (

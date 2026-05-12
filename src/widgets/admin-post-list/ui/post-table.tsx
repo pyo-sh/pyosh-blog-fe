@@ -18,7 +18,7 @@ import type { AdminPostTab } from "./post-filters";
 import type { FetchAdminPostsParams, PostListItem } from "@entities/post";
 import { cn } from "@shared/lib/style-utils";
 import { ConfirmDialog } from "@shared/ui/confirm-dialog";
-import { EmptyState, Skeleton } from "@shared/ui/libs";
+import { EmptyState, TableSkeleton } from "@shared/ui/libs";
 
 export type SortField = NonNullable<FetchAdminPostsParams["sort"]>;
 export type SortOrder = "asc" | "desc";
@@ -274,23 +274,26 @@ export function PostTable({
 
   if (isPending) {
     return (
-      <div className="overflow-hidden rounded-xl border border-border-4 bg-background-1">
-        <div className="grid grid-cols-6 gap-4 border-b border-border-4 px-4 py-4">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <Skeleton key={index} />
-          ))}
-        </div>
-        <div className="space-y-3 px-4 py-4">
-          {Array.from({ length: 7 }).map((_, index) => (
-            <Skeleton
-              key={index}
-              variant="rect"
-              height="4.25rem"
-              className="rounded-lg"
-            />
-          ))}
-        </div>
-      </div>
+      <TableSkeleton
+        rows={7}
+        rowHeight="4.25rem"
+        containerClassName="rounded-xl"
+        columns={[
+          { width: "2.5rem", className: "text-center" },
+          { width: "2.5rem", className: "text-center" },
+          { width: "19rem" },
+          { width: "7rem" },
+          { width: "6rem" },
+          { width: "6rem" },
+          { width: "7rem" },
+          { width: "7rem" },
+          { width: "7rem" },
+          { width: "5rem" },
+          { width: "5rem" },
+          { width: "3rem" },
+          { width: "3rem" },
+        ]}
+      />
     );
   }
 

@@ -12,5 +12,6 @@ export { Modal } from "./modal";
 export { Pagination } from "./pagination";
 export { Skeleton } from "./skeleton";
 export { Spinner } from "./spinner";
+export { TableSkeleton } from "./table-skeleton";
 export { Text } from "./text";
 export { SlideInPanel } from "./slide-in-panel";

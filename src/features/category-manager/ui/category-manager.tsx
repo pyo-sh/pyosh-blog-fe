@@ -211,14 +211,61 @@ export function CategoryManager() {
         <div>
           {categoriesQuery.isPending ? (
             <div className="space-y-4">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <Skeleton
-                  key={index}
-                  variant="rect"
-                  height="6rem"
-                  className="rounded-[1.25rem]"
-                />
-              ))}
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Skeleton
+                    height="2.5rem"
+                    width="7rem"
+                    className="rounded-lg"
+                  />
+                  <Skeleton
+                    height="2.5rem"
+                    width="7rem"
+                    className="rounded-lg"
+                  />
+                  <Skeleton
+                    height="2.5rem"
+                    width="6rem"
+                    className="rounded-lg"
+                  />
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Skeleton
+                    height="2.5rem"
+                    width="6rem"
+                    className="rounded-lg"
+                  />
+                  <Skeleton
+                    height="2.5rem"
+                    width="6rem"
+                    className="rounded-lg"
+                  />
+                </div>
+              </div>
+              <div className="overflow-hidden rounded-xl border border-border-4 bg-background-2">
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="border-b border-border-4 px-4 py-3 last:border-b-0"
+                  >
+                    <div
+                      className="flex h-7 items-center gap-2"
+                      style={{ paddingLeft: `${(index % 3) * 24}px` }}
+                    >
+                      <Skeleton height="1.5rem" width="1.5rem" />
+                      <Skeleton
+                        height="0.875rem"
+                        width={index % 3 === 0 ? "10rem" : "8rem"}
+                      />
+                      <Skeleton
+                        height="1rem"
+                        width="5rem"
+                        className="ml-auto rounded"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           ) : null}
 

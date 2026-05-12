@@ -30,7 +30,7 @@ import {
   updateGuestbookSettings,
 } from "@entities/guestbook";
 import { getErrorMessage } from "@shared/lib/get-error-message";
-import { Skeleton, Spinner } from "@shared/ui/libs";
+import { Skeleton, Spinner, TableSkeleton } from "@shared/ui/libs";
 import { ToggleSwitch } from "@shared/ui/toggle-switch";
 
 const PAGE_SIZE = 10;
@@ -465,7 +465,7 @@ export function GuestbookManager() {
       >
         {guestbookQuery.isLoading && !guestbookQuery.data ? (
           <div className="space-y-4">
-            <div className="flex gap-3">
+            <div className="flex flex-wrap items-end justify-start gap-3">
               {Array.from({ length: 4 }).map((_, index) => (
                 <Skeleton
                   key={index}
@@ -474,17 +474,25 @@ export function GuestbookManager() {
                   className="w-32 rounded-[0.8rem]"
                 />
               ))}
+              <Skeleton
+                variant="rect"
+                height="2.5rem"
+                className="min-w-72 flex-1 rounded-[0.8rem]"
+              />
             </div>
-            <div className="space-y-3">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <Skeleton
-                  key={index}
-                  variant="rect"
-                  height="3.25rem"
-                  className="rounded-[0.9rem]"
-                />
-              ))}
-            </div>
+            <TableSkeleton
+              rows={6}
+              rowHeight="3.25rem"
+              columns={[
+                { width: "2.5rem" },
+                { width: "12rem" },
+                { width: "28rem" },
+                { width: "4rem", className: "text-center" },
+                { width: "6rem" },
+                { width: "7rem" },
+                { width: "4rem", className: "text-center" },
+              ]}
+            />
           </div>
         ) : null}
 
