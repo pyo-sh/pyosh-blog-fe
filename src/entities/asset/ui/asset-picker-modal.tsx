@@ -15,7 +15,7 @@ import type { Asset, AssetCategory } from "../model";
 import { normalizeAssetUrl, toCanonicalAssetUrl } from "@shared/lib/asset-url";
 import { getErrorMessage } from "@shared/lib/get-error-message";
 import { cn } from "@shared/lib/style-utils";
-import { Modal } from "@shared/ui/libs";
+import { DropSelect, Modal } from "@shared/ui/libs";
 
 const PAGE_SIZE = 18;
 
@@ -166,23 +166,20 @@ export function AssetPickerModal({
               placeholder="별명 또는 파일명 검색"
               className="h-10 rounded-[0.75rem] border border-border-3 bg-background-1 px-3 text-sm text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
             />
-            <select
-              value={categoryId ?? ""}
-              onChange={(event) =>
-                setCategoryId(
-                  event.target.value ? Number(event.target.value) : null,
-                )
-              }
-              className="h-10 rounded-[0.75rem] border border-border-3 bg-background-1 px-3 text-sm text-text-2 outline-none transition-colors focus:border-primary-1"
-              aria-label="에셋 카테고리"
-            >
-              <option value="">전체 카테고리</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
+            <DropSelect
+              value={categoryId === null ? "" : String(categoryId)}
+              onChange={(value) => setCategoryId(value ? Number(value) : null)}
+              className="w-full"
+              triggerClassName="h-10 rounded-[0.75rem] text-sm text-text-2"
+              ariaLabel="에셋 카테고리"
+              options={[
+                { label: "전체 카테고리", value: "" },
+                ...categories.map((category) => ({
+                  label: category.name,
+                  value: String(category.id),
+                })),
+              ]}
+            />
             <label className="inline-flex h-10 items-center gap-2 rounded-[0.75rem] border border-border-3 px-3 text-sm text-text-2">
               <input
                 type="checkbox"

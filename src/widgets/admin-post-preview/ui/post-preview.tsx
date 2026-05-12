@@ -17,6 +17,7 @@ import {
 import { getErrorMessage } from "@shared/lib/get-error-message";
 import { cn } from "@shared/lib/style-utils";
 import { ConfirmDialog } from "@shared/ui/confirm-dialog";
+import { DropSelect } from "@shared/ui/libs";
 import { ToggleSwitch } from "@shared/ui/toggle-switch";
 
 const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
@@ -223,11 +224,10 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
 
         <div className="flex items-center gap-2 text-sm text-text-2">
           <span>상태</span>
-          <select
+          <DropSelect
             value={currentPost.status}
             disabled={isUpdating}
-            onChange={(e) => {
-              const value = e.target.value as PostDetail["status"];
+            onChange={(value) => {
               const prev = currentPost.status;
               setCurrentPost((p) => ({ ...p, status: value }));
               updateMutation.mutate(
@@ -238,14 +238,10 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
                 },
               );
             }}
-            className="rounded-[0.75rem] border border-border-3 bg-background-1 px-3 py-2 text-sm text-text-1 outline-none transition-colors focus:border-primary-1 disabled:opacity-50"
-          >
-            {statusOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            ariaLabel="글 상태"
+            triggerClassName="h-auto rounded-[0.75rem] px-3 py-2 text-sm text-text-1 disabled:opacity-50"
+            options={statusOptions}
+          />
         </div>
 
         <p className="text-sm text-text-3">

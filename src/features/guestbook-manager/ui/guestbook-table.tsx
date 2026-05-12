@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  useEffect,
-  useRef,
-  useState,
-  type FormEvent,
-  type KeyboardEvent,
-} from "react";
+import { useEffect, useRef, type FormEvent } from "react";
 import { Icon } from "@iconify/react/offline";
 import chatRoundDotsLinear from "@iconify-icons/solar/chat-round-dots-linear";
 import closeCircleLinear from "@iconify-icons/solar/close-circle-linear";
@@ -18,7 +12,7 @@ import type {
   AdminGuestbookItem,
 } from "@entities/guestbook";
 import { cn } from "@shared/lib/style-utils";
-import { EmptyState } from "@shared/ui/libs";
+import { DropSelect, EmptyState } from "@shared/ui/libs";
 
 interface GuestbookTableProps {
   items: AdminGuestbookItem[];
@@ -57,22 +51,22 @@ export type GuestbookPeriodFilter = "all" | "7d" | "30d" | "90d";
 
 const STATUS_OPTIONS: Array<SelectOption<AdminGuestbookFilterStatus>> = [
   { label: "전체", value: "all", triggerLabel: "상태" },
-  { label: "정상", value: "active", triggerLabel: "상태" },
-  { label: "숨김", value: "hidden", triggerLabel: "상태" },
-  { label: "삭제됨", value: "deleted", triggerLabel: "상태" },
+  { label: "정상", value: "active" },
+  { label: "숨김", value: "hidden" },
+  { label: "삭제됨", value: "deleted" },
 ];
 
 const AUTHOR_OPTIONS: Array<SelectOption<AdminGuestbookAuthorType | "all">> = [
   { label: "전체", value: "all", triggerLabel: "작성자 타입" },
-  { label: "OAuth", value: "oauth", triggerLabel: "작성자 타입" },
-  { label: "게스트", value: "guest", triggerLabel: "작성자 타입" },
+  { label: "OAuth", value: "oauth" },
+  { label: "게스트", value: "guest" },
 ];
 
 const PERIOD_OPTIONS: Array<SelectOption<GuestbookPeriodFilter>> = [
   { label: "전체 기간", value: "all", triggerLabel: "전체 기간" },
-  { label: "최근 7일", value: "7d", triggerLabel: "전체 기간" },
-  { label: "최근 30일", value: "30d", triggerLabel: "전체 기간" },
-  { label: "최근 90일", value: "90d", triggerLabel: "전체 기간" },
+  { label: "최근 7일", value: "7d" },
+  { label: "최근 30일", value: "30d" },
+  { label: "최근 90일", value: "90d" },
 ];
 
 const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
@@ -97,195 +91,6 @@ function getStatusTone(status: AdminGuestbookItem["status"]) {
 
 function getBodyPreview(item: AdminGuestbookItem) {
   return item.body || "삭제된 방명록입니다.";
-}
-
-function FilterCustomSelect<T extends string>({
-  label,
-  value,
-  options,
-  onChange,
-  triggerClassName,
-}: {
-  label: string;
-  value: T;
-  options: Array<SelectOption<T>>;
-  onChange: (value: T) => void;
-  triggerClassName?: string;
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(-1);
-  const rootRef = useRef<HTMLDivElement | null>(null);
-  const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const listboxIdRef = useRef(
-    `guestbook-filter-select-${Math.random().toString(36).slice(2)}`,
-  );
-  const selected = options.find((option) => option.value === value);
-  const selectedIndex = options.findIndex((option) => option.value === value);
-
-  useEffect(() => {
-    optionRefs.current = [];
-  }, [options]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      setActiveIndex(-1);
-
-      return;
-    }
-
-    setActiveIndex(selectedIndex >= 0 ? selectedIndex : 0);
-  }, [isOpen, selectedIndex]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handlePointerDown = (event: MouseEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handlePointerDown);
-
-    return () => document.removeEventListener("mousedown", handlePointerDown);
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!isOpen || activeIndex < 0) return;
-    optionRefs.current[activeIndex]?.focus();
-  }, [activeIndex, isOpen]);
-
-  function commitSelection(index: number) {
-    const option = options[index];
-    if (!option) return;
-    onChange(option.value);
-    setIsOpen(false);
-  }
-
-  function handleTriggerKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
-    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-      event.preventDefault();
-      setIsOpen(true);
-      setActiveIndex(selectedIndex >= 0 ? selectedIndex : 0);
-
-      return;
-    }
-
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      setIsOpen((current) => !current);
-    }
-  }
-
-  function handleOptionKeyDown(
-    event: KeyboardEvent<HTMLButtonElement>,
-    index: number,
-  ) {
-    if (event.key === "ArrowDown") {
-      event.preventDefault();
-      setActiveIndex((index + 1) % options.length);
-
-      return;
-    }
-
-    if (event.key === "ArrowUp") {
-      event.preventDefault();
-      setActiveIndex((index - 1 + options.length) % options.length);
-
-      return;
-    }
-
-    if (event.key === "Home") {
-      event.preventDefault();
-      setActiveIndex(0);
-
-      return;
-    }
-
-    if (event.key === "End") {
-      event.preventDefault();
-      setActiveIndex(options.length - 1);
-
-      return;
-    }
-
-    if (event.key === "Escape") {
-      event.preventDefault();
-      setIsOpen(false);
-
-      return;
-    }
-
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      commitSelection(index);
-    }
-  }
-
-  return (
-    <div ref={rootRef} className="relative">
-      <button
-        type="button"
-        onClick={() => setIsOpen((current) => !current)}
-        onKeyDown={handleTriggerKeyDown}
-        role="combobox"
-        aria-autocomplete="none"
-        aria-expanded={isOpen}
-        aria-controls={listboxIdRef.current}
-        aria-haspopup="listbox"
-        className={cn(
-          "relative flex h-10 items-center whitespace-nowrap rounded-[0.8rem] border border-border-3 bg-background-1 px-3 pr-8 text-left text-sm leading-none text-text-2 outline-none transition-colors hover:border-border-2 focus-visible:border-primary-1",
-          triggerClassName,
-        )}
-      >
-        <span className="truncate">
-          {selected?.value === "all"
-            ? (selected?.triggerLabel ?? label)
-            : (selected?.label ?? "")}
-        </span>
-        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-text-4">
-          ▾
-        </span>
-      </button>
-
-      {isOpen ? (
-        <div
-          id={listboxIdRef.current}
-          role="listbox"
-          className="absolute left-0 top-full z-20 mt-2 min-w-full overflow-hidden rounded-[1rem] border border-border-3 bg-background-1 shadow-[0px_16px_40px_0px_rgba(0,0,0,0.12)]"
-        >
-          <div className="max-h-60 overflow-y-auto py-1">
-            {options.map((option, index) => {
-              const isSelected = option.value === value;
-
-              return (
-                <button
-                  key={option.value}
-                  ref={(node) => {
-                    optionRefs.current[index] = node;
-                  }}
-                  type="button"
-                  role="option"
-                  aria-selected={isSelected}
-                  onClick={() => commitSelection(index)}
-                  onKeyDown={(event) => handleOptionKeyDown(event, index)}
-                  className={cn(
-                    "flex w-full items-center justify-between px-4 py-3 text-left text-sm leading-none outline-none transition-colors hover:bg-background-2 focus:bg-background-2",
-                    isSelected ? "text-primary-1" : "text-text-1",
-                  )}
-                >
-                  <span>{option.label}</span>
-                  {isSelected ? (
-                    <span className="text-[11px] text-primary-1">선택됨</span>
-                  ) : null}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      ) : null}
-    </div>
-  );
 }
 
 export function GuestbookTable({
@@ -330,28 +135,31 @@ export function GuestbookTable({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-end justify-start gap-3">
-        <FilterCustomSelect
-          label="상태"
+        <DropSelect
+          ariaLabel="상태"
           value={status}
           options={STATUS_OPTIONS}
           onChange={onStatusChange}
           triggerClassName="w-[8em]"
+          showSelectedIndicator
         />
 
-        <FilterCustomSelect
-          label="작성자 타입"
+        <DropSelect
+          ariaLabel="작성자 타입"
           value={authorType}
           options={AUTHOR_OPTIONS}
           onChange={onAuthorTypeChange}
           triggerClassName="w-[9em]"
+          showSelectedIndicator
         />
 
-        <FilterCustomSelect
-          label="전체 기간"
+        <DropSelect
+          ariaLabel="전체 기간"
           value={period}
           options={PERIOD_OPTIONS}
           onChange={onPeriodChange}
           triggerClassName="w-[9em]"
+          showSelectedIndicator
         />
 
         <div className="flex items-center gap-2">

@@ -1,15 +1,13 @@
 "use client";
 
-import type { KeyboardEvent as ReactKeyboardEvent } from "react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type {
   Category,
   CreateCategoryBody,
   UpdateCategoryBody,
 } from "@entities/category";
 import { useImeSafeText } from "@shared/hooks/use-ime-safe-text";
-import { cn } from "@shared/lib/style-utils";
-import { Modal, Spinner } from "@shared/ui/libs";
+import { DropSelect, Modal, Spinner } from "@shared/ui/libs";
 import { ToggleSwitch } from "@shared/ui/toggle-switch";
 
 interface CategoryFormModalProps {
@@ -41,212 +39,6 @@ function getInitialValues(category: Category | null): CategoryFormValues {
     parentId: category?.parentId ?? null,
     isVisible: category?.isVisible ?? true,
   };
-}
-
-function InlineCustomSelect({
-  value,
-  options,
-  onChange,
-  placeholder,
-  disabled,
-}: {
-  value: number | null;
-  options: CategoryOption[];
-  onChange: (value: number | null) => void;
-  placeholder?: string;
-  disabled?: boolean;
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(-1);
-  const rootRef = useRef<HTMLDivElement | null>(null);
-  const listboxIdRef = useRef(
-    `inline-select-${Math.random().toString(36).slice(2)}`,
-  );
-  const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const normalizedOptions = [{ id: -1, label: placeholder ?? "" }, ...options];
-  const selectedIndex = normalizedOptions.findIndex((option) =>
-    option.id === -1 ? value === null : option.id === value,
-  );
-  const selected = selectedIndex >= 0 ? normalizedOptions[selectedIndex] : null;
-
-  useEffect(() => {
-    optionRefs.current = [];
-  }, [options]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      setActiveIndex(-1);
-
-      return;
-    }
-
-    setActiveIndex(selectedIndex >= 0 ? selectedIndex : 0);
-  }, [isOpen, selectedIndex]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    const handlePointerDown = (event: MouseEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handlePointerDown);
-
-    return () => document.removeEventListener("mousedown", handlePointerDown);
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!isOpen || activeIndex < 0) {
-      return;
-    }
-
-    optionRefs.current[activeIndex]?.focus();
-  }, [activeIndex, isOpen]);
-
-  const commitSelection = (index: number) => {
-    const option = normalizedOptions[index];
-    if (!option) {
-      return;
-    }
-
-    onChange(option.id === -1 ? null : option.id);
-    setIsOpen(false);
-  };
-
-  const handleTriggerKeyDown = (
-    event: ReactKeyboardEvent<HTMLButtonElement>,
-  ) => {
-    if (disabled) {
-      return;
-    }
-
-    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-      event.preventDefault();
-      setIsOpen(true);
-      setActiveIndex(selectedIndex >= 0 ? selectedIndex : 0);
-
-      return;
-    }
-
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      setIsOpen((current) => !current);
-    }
-  };
-
-  const handleOptionKeyDown = (
-    event: ReactKeyboardEvent<HTMLButtonElement>,
-    index: number,
-  ) => {
-    if (event.key === "ArrowDown") {
-      event.preventDefault();
-      setActiveIndex((index + 1) % normalizedOptions.length);
-
-      return;
-    }
-
-    if (event.key === "ArrowUp") {
-      event.preventDefault();
-      setActiveIndex(
-        (index - 1 + normalizedOptions.length) % normalizedOptions.length,
-      );
-
-      return;
-    }
-
-    if (event.key === "Home") {
-      event.preventDefault();
-      setActiveIndex(0);
-
-      return;
-    }
-
-    if (event.key === "End") {
-      event.preventDefault();
-      setActiveIndex(normalizedOptions.length - 1);
-
-      return;
-    }
-
-    if (event.key === "Escape") {
-      event.preventDefault();
-      setIsOpen(false);
-
-      return;
-    }
-
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      commitSelection(index);
-    }
-  };
-
-  return (
-    <div ref={rootRef} className="relative w-full">
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={() => setIsOpen((current) => !current)}
-        onKeyDown={handleTriggerKeyDown}
-        role="combobox"
-        aria-autocomplete="none"
-        aria-expanded={isOpen}
-        aria-controls={listboxIdRef.current}
-        aria-haspopup="listbox"
-        className="flex h-10 w-full items-center rounded-[0.75rem] border border-border-3 bg-background-1 px-3 pr-8 text-left text-[13px] text-text-2 outline-none transition-colors focus-visible:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        <span className="truncate">{selected?.label ?? placeholder ?? ""}</span>
-        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-text-4">
-          ▾
-        </span>
-      </button>
-
-      {isOpen ? (
-        <div
-          id={listboxIdRef.current}
-          role="listbox"
-          aria-activedescendant={
-            activeIndex >= 0
-              ? `${listboxIdRef.current}-option-${activeIndex}`
-              : undefined
-          }
-          className="absolute left-0 top-[calc(100%+0.25rem)] z-30 min-w-full overflow-hidden rounded-[0.5rem] border border-border-3 bg-background-1 shadow-[0px_8px_24px_rgba(15,23,42,0.08)]"
-        >
-          {normalizedOptions.map((option, index) => {
-            const isSelected =
-              option.id === -1 ? value === null : option.id === value;
-
-            return (
-              <button
-                key={`${option.id}-${option.label}`}
-                id={`${listboxIdRef.current}-option-${index}`}
-                ref={(element) => {
-                  optionRefs.current[index] = element;
-                }}
-                type="button"
-                role="option"
-                aria-selected={isSelected}
-                tabIndex={activeIndex === index ? 0 : -1}
-                onKeyDown={(event) => handleOptionKeyDown(event, index)}
-                onFocus={() => setActiveIndex(index)}
-                onClick={() => commitSelection(index)}
-                className={cn(
-                  "flex w-full items-center px-3 py-2 text-left text-[13px] transition-colors hover:bg-background-2",
-                  isSelected ? "font-medium text-primary-1" : "text-text-2",
-                )}
-              >
-                <span className="truncate">{option.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      ) : null}
-    </div>
-  );
 }
 
 export function CategoryFormModal({
@@ -343,17 +135,25 @@ export function CategoryFormModal({
 
         <label className="flex flex-col gap-2 text-sm text-text-2">
           <span className="font-medium text-text-1">부모 카테고리</span>
-          <InlineCustomSelect
-            value={values.parentId}
-            options={parentOptions}
+          <DropSelect
+            value={values.parentId === null ? "" : String(values.parentId)}
+            options={[
+              { label: "최상위 카테고리", value: "" },
+              ...parentOptions.map((option) => ({
+                label: option.label,
+                value: String(option.id),
+              })),
+            ]}
             onChange={(nextValue) =>
               setValues((current) => ({
                 ...current,
-                parentId: nextValue,
+                parentId: nextValue ? Number(nextValue) : null,
               }))
             }
-            placeholder="최상위 카테고리"
             disabled={isSubmitting}
+            ariaLabel="부모 카테고리"
+            className="w-full"
+            triggerClassName="h-10 rounded-[0.75rem] text-[13px] text-text-2"
           />
         </label>
 

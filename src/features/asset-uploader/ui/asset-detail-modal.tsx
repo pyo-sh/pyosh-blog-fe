@@ -17,7 +17,7 @@ import {
   getAssetFilename,
 } from "@entities/asset";
 import { cn } from "@shared/lib/style-utils";
-import { Modal } from "@shared/ui/libs";
+import { DropSelect, Modal } from "@shared/ui/libs";
 
 interface AssetDetailModalProps {
   assets: Asset[];
@@ -215,22 +215,23 @@ export function AssetDetailModal({
               </label>
               <label className="grid gap-1.5">
                 <span className="text-[12px] text-text-3">카테고리</span>
-                <select
-                  value={categoryIdDraft ?? ""}
-                  onChange={(event) =>
-                    setCategoryIdDraft(
-                      event.target.value ? Number(event.target.value) : null,
-                    )
+                <DropSelect
+                  value={
+                    categoryIdDraft === null ? "" : String(categoryIdDraft)
+                  }
+                  onChange={(value) =>
+                    setCategoryIdDraft(value ? Number(value) : null)
                   }
                   disabled={isSavingMetadata}
-                  className="h-10 rounded-[0.75rem] border border-border-3 bg-background-1 px-3 text-sm text-text-2 outline-none transition-colors focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
+                  ariaLabel="카테고리"
+                  className="w-full"
+                  triggerClassName="h-10 rounded-[0.75rem] text-sm text-text-2"
+                  placeholder="카테고리 선택"
+                  options={categories.map((category) => ({
+                    label: category.name,
+                    value: String(category.id),
+                  }))}
+                />
               </label>
             </div>
             <div className="mt-4 flex justify-end">

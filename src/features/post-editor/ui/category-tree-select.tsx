@@ -1,6 +1,7 @@
 "use client";
 
 import type { Category } from "@entities/category";
+import { DropSelect } from "@shared/ui/libs";
 
 interface CategoryTreeSelectProps {
   categories: Category[];
@@ -46,25 +47,25 @@ export function CategoryTreeSelect({
   const options = flattenCategoryTree(categories);
 
   return (
-    <select
+    <DropSelect
       id="categoryId"
       name="categoryId"
-      value={value ?? ""}
-      onChange={(event) =>
-        onChange(event.target.value ? Number(event.target.value) : null)
-      }
+      value={value === null ? "" : String(value)}
+      onChange={(nextValue) => onChange(nextValue ? Number(nextValue) : null)}
       disabled={disabled}
-      aria-label="카테고리"
-      className="h-10 rounded-[0.75rem] border border-border-3 bg-background-1 px-3 text-[13px] text-text-2 outline-none transition-colors focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
-    >
-      <option value="">
-        {disabled ? "카테고리 불러오는 중..." : "카테고리 선택"}
-      </option>
-      {options.map((option) => (
-        <option key={option.id} value={option.id}>
-          {formatCategoryLabel(option)}
-        </option>
-      ))}
-    </select>
+      ariaLabel="카테고리"
+      className="w-full"
+      triggerClassName="h-10 rounded-[0.75rem] text-[13px] text-text-2"
+      options={[
+        {
+          label: disabled ? "카테고리 불러오는 중..." : "카테고리 선택",
+          value: "",
+        },
+        ...options.map((option) => ({
+          label: formatCategoryLabel(option),
+          value: String(option.id),
+        })),
+      ]}
+    />
   );
 }

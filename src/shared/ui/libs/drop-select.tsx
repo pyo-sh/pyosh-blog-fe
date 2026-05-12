@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
   useEffect,
   useId,
@@ -23,14 +24,19 @@ interface DropSelectProps<T extends string | number> {
   options: Array<DropSelectOption<T>>;
   onChange: (value: T) => void;
   ariaLabel: string;
+  id?: string;
+  name?: string;
   placeholder?: string;
   disabled?: boolean;
   className?: string;
   triggerClassName?: string;
+  triggerStyle?: CSSProperties;
   optionClassName?: string;
   listboxClassName?: string;
   iconClassName?: string;
   iconWidth?: string;
+  showSelectedIndicator?: boolean;
+  selectedIndicatorLabel?: string;
 }
 
 export function DropSelect<T extends string | number>({
@@ -38,14 +44,19 @@ export function DropSelect<T extends string | number>({
   options,
   onChange,
   ariaLabel,
+  id,
+  name,
   placeholder,
   disabled,
   className,
   triggerClassName,
+  triggerStyle,
   optionClassName,
   listboxClassName,
   iconClassName,
   iconWidth = "14",
+  showSelectedIndicator = false,
+  selectedIndicatorLabel = "선택됨",
 }: DropSelectProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -203,7 +214,11 @@ export function DropSelect<T extends string | number>({
 
   return (
     <div ref={rootRef} className={cn("relative inline-flex", className)}>
+      {name ? (
+        <input type="hidden" name={name} value={value === null ? "" : value} />
+      ) : null}
       <button
+        id={id}
         ref={triggerRef}
         type="button"
         disabled={disabled}
@@ -222,6 +237,7 @@ export function DropSelect<T extends string | number>({
           isOpen && "border-primary-1 ring-3 ring-primary-1/10",
           triggerClassName,
         )}
+        style={triggerStyle}
       >
         <span className="truncate whitespace-nowrap">{visibleLabel}</span>
         <Icon
@@ -267,6 +283,7 @@ export function DropSelect<T extends string | number>({
                   onKeyDown={(event) => handleOptionKeyDown(event, index)}
                   className={cn(
                     "flex w-full items-center whitespace-nowrap px-3 py-2 text-left text-[14px] leading-5 text-text-1 transition-colors hover:bg-background-2",
+                    showSelectedIndicator && "justify-between gap-3",
                     isSelected && "font-medium text-primary-1",
                     optionClassName,
                   )}
@@ -277,6 +294,11 @@ export function DropSelect<T extends string | number>({
                   }}
                 >
                   <span className="truncate">{option.label}</span>
+                  {showSelectedIndicator && isSelected ? (
+                    <span className="shrink-0 text-[11px] text-primary-1">
+                      {selectedIndicatorLabel}
+                    </span>
+                  ) : null}
                 </button>
               );
             })}

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Category, DeleteCategoryOptions } from "@entities/category";
 import { cn } from "@shared/lib/style-utils";
-import { Modal, Spinner } from "@shared/ui/libs";
+import { DropSelect, Modal, Spinner } from "@shared/ui/libs";
 
 interface CategoryBulkDeleteModalProps {
   isOpen: boolean;
@@ -184,30 +184,31 @@ export function CategoryBulkDeleteModal({
                     </span>
                   </span>
 
-                  <select
-                    value={moveTo ?? ""}
-                    onChange={(event) =>
-                      setMoveTo(
-                        event.target.value ? Number(event.target.value) : null,
-                      )
+                  <DropSelect
+                    value={moveTo === null ? "" : String(moveTo)}
+                    onChange={(value) =>
+                      setMoveTo(value ? Number(value) : null)
                     }
                     disabled={
                       isDeleting || mode !== "move" || moveOptions.length === 0
                     }
-                    aria-label="이동 대상 카테고리"
-                    className="w-full rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    <option value="">
-                      {moveOptions.length > 0
-                        ? "이동할 카테고리를 선택하세요"
-                        : "이동 가능한 카테고리가 없습니다"}
-                    </option>
-                    {moveOptions.map((option) => (
-                      <option key={option.id} value={option.id}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
+                    ariaLabel="이동 대상 카테고리"
+                    className="w-full"
+                    triggerClassName="h-auto rounded-[0.9rem] px-4 py-3 text-sm text-text-1"
+                    options={[
+                      {
+                        label:
+                          moveOptions.length > 0
+                            ? "이동할 카테고리를 선택하세요"
+                            : "이동 가능한 카테고리가 없습니다",
+                        value: "",
+                      },
+                      ...moveOptions.map((option) => ({
+                        label: option.label,
+                        value: String(option.id),
+                      })),
+                    ]}
+                  />
                 </span>
               </label>
 

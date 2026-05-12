@@ -9,7 +9,7 @@ import trashBinMinimalisticLinear from "@iconify-icons/solar/trash-bin-minimalis
 import uploadMinimalisticLinear from "@iconify-icons/solar/upload-minimalistic-linear";
 import type { AssetCategory } from "@entities/asset";
 import { cn } from "@shared/lib/style-utils";
-import { Spinner } from "@shared/ui/libs";
+import { DropSelect, Spinner } from "@shared/ui/libs";
 
 export interface PendingUploadFile {
   id: string;
@@ -96,36 +96,33 @@ export function UploadZone({
                 </span>
               ) : null}
             </div>
-            <p className="mt-1 text-[12px] text-text-4">
-              기본 카테고리는 이후 추가되는 파일에 적용됩니다.
-            </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <label className="flex min-w-52 items-center gap-2">
+            <div className="flex min-w-52 items-center gap-2">
               <span className="shrink-0 text-[12px] text-text-4">
-                새 파일 기본
+                기본 카테고리
               </span>
-              <select
-                value={defaultCategoryId ?? ""}
-                onChange={(event) =>
-                  onDefaultCategoryChange(
-                    event.target.value ? Number(event.target.value) : null,
-                  )
+              <DropSelect
+                value={
+                  defaultCategoryId === null ? "" : String(defaultCategoryId)
+                }
+                onChange={(value) =>
+                  onDefaultCategoryChange(value ? Number(value) : null)
                 }
                 disabled={isDefaultCategoryDisabled}
-                className="h-8 min-w-0 flex-1 rounded-lg border border-border-3 bg-background-1 px-2 text-[13px] text-text-2 outline-none transition-colors focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
-                aria-label="새 파일 기본 카테고리"
-              >
-                {categories.length === 0 ? (
-                  <option value="">기본</option>
-                ) : null}
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+                ariaLabel="새 파일 기본 카테고리"
+                className="min-w-0 flex-1"
+                triggerClassName="h-8 rounded-lg px-2 pr-8 text-[13px] text-text-2"
+                options={
+                  categories.length === 0
+                    ? [{ label: "기본", value: "" }]
+                    : categories.map((category) => ({
+                        label: category.name,
+                        value: String(category.id),
+                      }))
+                }
+              />
+            </div>
             <button
               type="button"
               onClick={onOpenCategoryManager}
@@ -237,26 +234,27 @@ export function UploadZone({
                   placeholder="별명"
                   className="h-9 min-w-0 rounded-lg border border-border-3 bg-background-1 px-3 text-[13px] text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
                 />
-                <select
-                  value={item.categoryId ?? ""}
-                  onChange={(event) =>
+                <DropSelect
+                  value={
+                    item.categoryId === null ? "" : String(item.categoryId)
+                  }
+                  onChange={(value) =>
                     onUpdateFileMetadata(item.id, {
-                      categoryId: event.target.value
-                        ? Number(event.target.value)
-                        : null,
+                      categoryId: value ? Number(value) : null,
                     })
                   }
                   disabled={isUploading}
-                  aria-label={`${item.file.name} 카테고리`}
-                  className="h-9 min-w-0 rounded-lg border border-border-3 bg-background-1 px-3 text-[13px] text-text-2 outline-none transition-colors focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  <option value="">기본</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
+                  ariaLabel={`${item.file.name} 카테고리`}
+                  className="min-w-0"
+                  triggerClassName="h-9 rounded-lg text-[13px] text-text-2"
+                  options={[
+                    { label: "기본", value: "" },
+                    ...categories.map((category) => ({
+                      label: category.name,
+                      value: String(category.id),
+                    })),
+                  ]}
+                />
                 {isUploading ? (
                   <Spinner size="sm" className="shrink-0 text-primary-1" />
                 ) : (

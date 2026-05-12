@@ -1,4 +1,5 @@
 import type { AssetCategory } from "@entities/asset";
+import { DropSelect } from "@shared/ui/libs";
 
 interface AssetBulkActionBarProps {
   selectedCount: number;
@@ -34,24 +35,23 @@ export function AssetBulkActionBar({
           선택됨 {selectedCount}개
         </span>
         <div className="ml-auto flex flex-wrap items-center gap-2">
-          <select
-            value={bulkCategoryId ?? ""}
-            onChange={(event) =>
-              onBulkCategoryChange(
-                event.target.value ? Number(event.target.value) : null,
-              )
+          <DropSelect
+            value={bulkCategoryId === null ? "" : String(bulkCategoryId)}
+            onChange={(value) =>
+              onBulkCategoryChange(value ? Number(value) : null)
             }
             disabled={selectedCount === 0 || isApplyingCategory}
-            className="h-9 rounded-[0.7rem] border border-border-3 bg-background-1 px-2 text-sm text-text-2 outline-none disabled:cursor-not-allowed disabled:opacity-50"
-            aria-label="선택 에셋 카테고리"
-          >
-            <option value="">카테고리 변경</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
+            ariaLabel="선택 에셋 카테고리"
+            className="min-w-36"
+            triggerClassName="h-9 rounded-[0.7rem] px-2 pr-8 text-sm text-text-2 disabled:opacity-50"
+            options={[
+              { label: "카테고리 변경", value: "" },
+              ...categories.map((category) => ({
+                label: category.name,
+                value: String(category.id),
+              })),
+            ]}
+          />
           <button
             type="button"
             onClick={onApplyCategory}
