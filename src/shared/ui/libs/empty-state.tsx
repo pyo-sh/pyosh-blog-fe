@@ -17,9 +17,9 @@ const variantClasses: Record<
 > = {
   default:
     "rounded-3xl border border-dashed border-border-3 bg-background-1 px-6 py-12 text-center text-sm",
-  page: "rounded-4xl border border-border-3 bg-background-2/90 px-8 py-14 text-center shadow-[0_16px_48px_rgba(0,0,0,0.06)]",
+  page: "rounded-4xl border border-border-3 bg-background-2/90 px-8 py-14 text-center",
   "admin-page":
-    "rounded-[1.75rem] border border-border-3 bg-background-2/90 px-8 py-14 text-center shadow-[0_16px_48px_rgba(0,0,0,0.06)]",
+    "rounded-[1.75rem] border border-border-3 bg-background-2/90 px-8 py-14 text-center",
 };
 
 export function EmptyState({

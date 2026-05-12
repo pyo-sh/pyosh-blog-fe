@@ -245,7 +245,7 @@ export function CommentForm<TPayload extends CommentFormPayload>({
       <form
         onSubmit={handleSubmit}
         className={cn(
-          "rounded-3xl border border-border-3 bg-background-2 p-5 sm:p-6",
+          "rounded-3xl border border-border-3 bg-background-2 p-3 sm:p-6",
           className,
         )}
       >
@@ -340,7 +340,7 @@ export function CommentForm<TPayload extends CommentFormPayload>({
           />
         </label>
 
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+        <div className="mt-1 flex flex-wrap items-end justify-between gap-3">
           <label
             className={cn(
               "inline-flex cursor-pointer items-center gap-2 text-[0.8125rem] leading-4.5 transition-colors",
@@ -361,7 +361,7 @@ export function CommentForm<TPayload extends CommentFormPayload>({
             비밀글
           </label>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-end gap-4">
             <span
               className={cn(
                 "text-xs leading-4 text-text-4",
