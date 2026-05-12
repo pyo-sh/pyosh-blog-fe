@@ -25,7 +25,11 @@ interface UploadZoneProps {
   uploadProgress: number | null;
   errorMessage: string | null;
   categories: AssetCategory[];
+  defaultCategoryId: number | null;
+  isDefaultCategoryDisabled: boolean;
   onFilesAdded: (files: FileList | File[]) => void;
+  onDefaultCategoryChange: (categoryId: number | null) => void;
+  onOpenCategoryManager: () => void;
   onUpdateFileMetadata: (
     id: string,
     metadata: { displayName?: string; categoryId?: number | null },
@@ -41,7 +45,11 @@ export function UploadZone({
   uploadProgress,
   errorMessage,
   categories,
+  defaultCategoryId,
+  isDefaultCategoryDisabled,
   onFilesAdded,
+  onDefaultCategoryChange,
+  onOpenCategoryManager,
   onUpdateFileMetadata,
   onRemoveFile,
   onClear,
@@ -76,18 +84,55 @@ export function UploadZone({
       />
 
       <div className="rounded-xl bg-background-2 p-4">
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-[13px] font-medium leading-none text-text-2">
-              업로드 큐 ({files.length}개)
-            </span>
-            {isUploading && uploadProgress !== null ? (
-              <span className="text-[11px] leading-none text-text-4">
-                {uploadProgress}%
+        <div className="mb-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[13px] font-medium leading-none text-text-2">
+                업로드 큐 ({files.length}개)
               </span>
-            ) : null}
+              {isUploading && uploadProgress !== null ? (
+                <span className="text-[11px] leading-none text-text-4">
+                  {uploadProgress}%
+                </span>
+              ) : null}
+            </div>
+            <p className="mt-1 text-[12px] text-text-4">
+              기본 카테고리는 이후 추가되는 파일에 적용됩니다.
+            </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <label className="flex min-w-52 items-center gap-2">
+              <span className="shrink-0 text-[12px] text-text-4">
+                새 파일 기본
+              </span>
+              <select
+                value={defaultCategoryId ?? ""}
+                onChange={(event) =>
+                  onDefaultCategoryChange(
+                    event.target.value ? Number(event.target.value) : null,
+                  )
+                }
+                disabled={isDefaultCategoryDisabled}
+                className="h-8 min-w-0 flex-1 rounded-lg border border-border-3 bg-background-1 px-2 text-[13px] text-text-2 outline-none transition-colors focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+                aria-label="새 파일 기본 카테고리"
+              >
+                {categories.length === 0 ? (
+                  <option value="">기본</option>
+                ) : null}
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button
+              type="button"
+              onClick={onOpenCategoryManager}
+              className="inline-flex h-8 cursor-pointer items-center justify-center rounded-lg border border-border-3 px-3 text-[13px] font-normal leading-none text-text-2 transition-colors hover:bg-background-1"
+            >
+              카테고리 관리
+            </button>
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
@@ -126,7 +171,7 @@ export function UploadZone({
         </div>
 
         {errorMessage ? (
-          <div className="mt-4 rounded-[1rem] border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-sm text-negative-1">
+          <div className="mt-4 rounded-2xl border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-sm text-negative-1">
             {errorMessage}
           </div>
         ) : null}
@@ -147,7 +192,7 @@ export function UploadZone({
             files.map((item) => (
               <div
                 key={item.id}
-                className="grid gap-3 rounded-lg border border-border-4 bg-background-1 px-3 py-3 md:grid-cols-[auto_minmax(0,1fr)_9rem_auto] md:items-center"
+                className="grid gap-3 rounded-lg border border-border-4 bg-background-1 px-3 py-3 md:grid-cols-[auto_minmax(0,1fr)_minmax(10rem,14rem)_10rem_auto] md:items-center"
               >
                 <div className="flex h-12 w-16 shrink-0 items-center justify-center overflow-hidden rounded bg-background-3">
                   {item.previewUrl ? (
@@ -164,14 +209,14 @@ export function UploadZone({
                   )}
                 </div>
                 <div className="flex min-w-0 flex-col gap-0.5">
-                  <span className="max-w-[12rem] truncate text-[13px] font-medium leading-none text-text-1">
+                  <span className="max-w-48 truncate text-[13px] font-medium leading-none text-text-1">
                     {item.file.name}
                   </span>
                   <span className="text-[12px] leading-none text-text-4">
                     {formatFileSize(item.file.size)}
                   </span>
                   {isUploading && uploadProgress !== null ? (
-                    <div className="mt-1 h-1.5 w-full min-w-[8rem] overflow-hidden rounded-full bg-background-3">
+                    <div className="mt-1 h-1.5 w-full min-w-32 overflow-hidden rounded-full bg-background-3">
                       <div
                         className="h-full rounded-full bg-primary-1 transition-all duration-150"
                         style={{ width: `${uploadProgress}%` }}
