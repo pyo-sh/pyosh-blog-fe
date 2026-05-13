@@ -260,6 +260,7 @@ export function DropSelect<T extends string | number>({
 
     if (event.key === "Escape") {
       event.preventDefault();
+      event.stopPropagation();
       closeList({ focusTrigger: true });
 
       return;
