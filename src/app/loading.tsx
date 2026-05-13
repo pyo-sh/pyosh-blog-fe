@@ -1,59 +1,30 @@
+import { PostListSkeleton } from "@features/post-list/ui/post-list-skeleton";
 import { Skeleton } from "@shared/ui/libs";
-
-const placeholderItems = Array.from({ length: 5 }, (_, index) => index);
 
 export default function Loading() {
   return (
-    <main
-      aria-busy="true"
-      className="mx-auto flex min-h-[100dvh] w-full max-w-[67.5rem] flex-col gap-8 px-4 pb-16 pt-8 md:px-6"
-    >
-      <div className="motion-reveal rounded-[2rem] border border-border-3 bg-background-2/90 p-6 shadow-[0_16px_48px_rgba(0,0,0,0.06)] md:p-8">
-        <div className="space-y-3">
-          <Skeleton height="1rem" width="7rem" tone="soft" />
-          <Skeleton
-            height="2.5rem"
-            className="max-w-[20rem] rounded-[1rem]"
-            tone="strong"
-          />
-          <Skeleton
-            height="1rem"
-            className="max-w-[32rem] rounded-full"
-            repeat={2}
-            tone="soft"
-          />
+    <div className="mx-auto flex min-h-[100dvh] w-full max-w-[67.5rem] px-4 md:px-6">
+      <aside aria-hidden="true" className="hidden w-[240px] shrink-0 lg:block">
+        <div className="border-r border-border-3 pt-8 pb-16 pr-8">
+          <div className="space-y-8">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className="space-y-3">
+                <Skeleton height="0.75rem" width="4rem" tone="soft" />
+                <Skeleton repeat={3} height="0.875rem" tone="soft" />
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      </aside>
 
-      <ul className="space-y-4">
-        {placeholderItems.map((item) => (
-          <li
-            key={item}
-            className="rounded-[1.5rem] border border-border-3 bg-background-2/90 p-5 shadow-[0_12px_32px_rgba(0,0,0,0.04)] sm:p-6"
-          >
-            <div className="mb-4 flex items-center gap-3">
-              <Skeleton
-                height="1.5rem"
-                width="5rem"
-                className="rounded-md"
-                tone="soft"
-              />
-              <Skeleton height="0.875rem" width="4.5rem" tone="soft" />
-            </div>
-            <div className="mb-3">
-              <Skeleton
-                height="1.75rem"
-                className="max-w-[26rem] rounded-[0.875rem]"
-                tone="strong"
-              />
-            </div>
-            <div className="space-y-2">
-              <Skeleton repeat={2} tone="soft" />
-              <Skeleton width="70%" tone="soft" />
-            </div>
-          </li>
-        ))}
-      </ul>
-    </main>
+      <main aria-busy="true" className="min-w-0 flex-1 pt-8 pb-16 lg:pl-8">
+        <div className="flex w-full flex-col gap-3">
+          <header className="pb-1">
+            <Skeleton height="1.938rem" width="6rem" className="rounded-lg" />
+          </header>
+          <PostListSkeleton />
+        </div>
+      </main>
+    </div>
   );
 }

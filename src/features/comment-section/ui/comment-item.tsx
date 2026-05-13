@@ -1,6 +1,7 @@
 "use client";
 
 import type { Comment } from "@entities/comment";
+import { ChevronIcon } from "@shared/ui/icons";
 
 interface CommentItemProps {
   comment: Comment;
@@ -42,23 +43,6 @@ function LockIcon() {
   );
 }
 
-function ChevronIcon({ expanded }: { expanded: boolean }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="h-3.5 w-3.5"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      {expanded ? <path d="m6 15 6-6 6 6" /> : <path d="m6 9 6 6 6-6" />}
-    </svg>
-  );
-}
-
 export function CommentItem({
   comment,
   body,
@@ -87,7 +71,10 @@ export function CommentItem({
               className="inline-flex items-center gap-1 text-ui-sm text-text-3 transition-colors hover:text-text-1"
             >
               답글 {replyCount}개
-              <ChevronIcon expanded={repliesExpanded} />
+              <ChevronIcon
+                direction={repliesExpanded ? "up" : "down"}
+                size="14"
+              />
             </button>
           </div>
         ) : null}
@@ -149,7 +136,10 @@ export function CommentItem({
             className="inline-flex items-center gap-1 text-ui-sm text-text-3 transition-colors hover:text-text-1"
           >
             답글 {replyCount}개
-            <ChevronIcon expanded={repliesExpanded} />
+            <ChevronIcon
+              direction={repliesExpanded ? "up" : "down"}
+              size="14"
+            />
           </button>
         </div>
       ) : null}

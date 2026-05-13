@@ -213,7 +213,7 @@ export function CommentDetailModal({
       onClose={onClose}
       withBackground
       aria-label={mode === "thread" ? "댓글 스레드 보기" : "댓글 상세 보기"}
-      className="w-full max-w-xl overflow-hidden rounded-[1.5rem] border border-border-3 bg-background-2 text-left"
+      className="w-full max-w-xl overflow-hidden rounded-3xl border border-border-3 bg-background-2 text-left"
     >
       <div className="relative flex max-h-[85vh] flex-col">
         <div className="flex items-center justify-between px-6 py-5">
@@ -494,7 +494,7 @@ function DetailView({
           type="button"
           onClick={onOpenThread}
           disabled={threadLoading}
-          className="w-full cursor-pointer rounded-[0.75rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full cursor-pointer rounded-xl border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {threadLoading
             ? "스레드 불러오는 중..."
@@ -511,7 +511,7 @@ function DetailView({
               type="button"
               onClick={() => onSelectAction("hard_delete")}
               disabled={isAnyPending}
-              className="inline-flex min-w-fit items-center justify-center gap-1 whitespace-nowrap rounded-[0.75rem] bg-negative-1 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex min-w-fit items-center justify-center gap-1 whitespace-nowrap rounded-xl bg-negative-1 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Icon
                 icon={trashBinMinimalisticLinear}
@@ -523,7 +523,7 @@ function DetailView({
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex min-w-fit items-center justify-center whitespace-nowrap rounded-[0.75rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+              className="inline-flex min-w-fit items-center justify-center whitespace-nowrap rounded-xl border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
             >
               닫기
             </button>
@@ -665,7 +665,7 @@ function ThreadView({
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex min-w-fit items-center justify-center whitespace-nowrap rounded-[0.75rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+            className="inline-flex min-w-fit items-center justify-center whitespace-nowrap rounded-xl border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
           >
             닫기
           </button>

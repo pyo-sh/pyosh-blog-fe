@@ -25,7 +25,7 @@ import {
   type PostListItem,
 } from "@entities/post";
 import { getErrorMessage } from "@shared/lib/get-error-message";
-import { Modal, Spinner } from "@shared/ui/libs";
+import { DropSelect, Modal, Spinner } from "@shared/ui/libs";
 import {
   BulkActions,
   PostFilters,
@@ -688,7 +688,7 @@ export default function ManagePostsPage() {
         withBackground
         aria-label="복원 카테고리 선택"
       >
-        <div className="w-full max-w-xl rounded-[1.5rem] bg-background-1 p-6 text-left">
+        <div className="w-full max-w-xl rounded-3xl bg-background-1 p-6 text-left">
           <div className="space-y-2">
             <p className="text-xs uppercase tracking-[0.24em] text-text-4">
               Restore
@@ -709,26 +709,29 @@ export default function ManagePostsPage() {
             >
               복원할 카테고리
             </label>
-            <select
+            <DropSelect
               id="restore-category"
-              value={restoreCategoryId ?? ""}
-              onChange={(event) =>
-                setRestoreCategoryId(
-                  event.target.value ? Number(event.target.value) : null,
-                )
+              value={
+                restoreCategoryId === null ? "" : String(restoreCategoryId)
+              }
+              onChange={(value) =>
+                setRestoreCategoryId(value ? Number(value) : null)
               }
               disabled={isRestoreCategoryPending}
-              className="w-full rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <option value="">
-                {UNCATEGORIZED_LABEL} 글의 카테고리를 선택하세요
-              </option>
-              {flatCategories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {`${"— ".repeat(category.depth)}${category.name}`}
-                </option>
-              ))}
-            </select>
+              ariaLabel="복원할 카테고리"
+              className="w-full"
+              triggerClassName="h-auto rounded-[0.9rem] px-4 py-3 text-sm text-text-1"
+              options={[
+                {
+                  label: `${UNCATEGORIZED_LABEL} 글의 카테고리를 선택하세요`,
+                  value: "",
+                },
+                ...flatCategories.map((category) => ({
+                  label: `${"— ".repeat(category.depth)}${category.name}`,
+                  value: String(category.id),
+                })),
+              ]}
+            />
             <p className="text-xs text-text-4">
               선택한 카테고리가 카테고리 없는 글에 일괄 적용된 뒤 복원이
               진행됩니다.

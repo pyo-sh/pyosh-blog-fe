@@ -174,7 +174,7 @@ export function GuestbookDetailModal({
                 onClick={() => onSelectAction(action.value)}
                 disabled={isPending}
                 className={cn(
-                  "inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-[0.75rem] px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+                  "inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
                   action.tone === "danger"
                     ? "bg-negative-1 text-white hover:opacity-90"
                     : "border border-border-3 text-text-2 hover:border-border-2 hover:text-text-1",

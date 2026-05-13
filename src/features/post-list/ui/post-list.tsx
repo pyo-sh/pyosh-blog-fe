@@ -6,7 +6,7 @@ import documentTextLinear from "@iconify-icons/solar/document-text-linear";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { PostListItem } from "./post-list-item";
-import { PostListItemSkeleton } from "./post-list-item-skeleton";
+import { PostListSkeleton } from "./post-list-skeleton";
 import type { PaginatedResponse } from "@shared/api";
 import {
   fetchPosts,
@@ -21,22 +21,10 @@ interface PostListProps {
   basePath?: string;
 }
 
-const SKELETON_COUNT = 10;
-
-function PostListSkeleton() {
-  return (
-    <div className="grid gap-3">
-      {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
-        <PostListItemSkeleton key={i} />
-      ))}
-    </div>
-  );
-}
-
 function PostListEmptyState() {
   return (
     <section
-      className="motion-reveal rounded-[2rem] border-2 border-dashed border-border-3 bg-background-2 px-8 py-16 text-center"
+      className="motion-reveal rounded-4xl border-2 border-dashed border-border-3 bg-background-2 px-8 py-16 text-center"
       style={{ animationDelay: "160ms" }}
     >
       <div className="mb-4 flex justify-center">
@@ -55,7 +43,7 @@ function PostListEmptyState() {
 function PostListErrorState() {
   return (
     <section
-      className="motion-reveal rounded-[2rem] border-2 border-dashed border-border-3 bg-background-2 px-8 py-16 text-center"
+      className="motion-reveal rounded-4xl border-2 border-dashed border-border-3 bg-background-2 px-8 py-16 text-center"
       style={{ animationDelay: "160ms" }}
     >
       <div className="mb-4 flex justify-center">

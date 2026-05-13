@@ -90,7 +90,7 @@ export function GuestbookActionModal({
             <label
               key={option.value}
               className={cn(
-                "flex cursor-pointer gap-4 rounded-[1rem] border px-4 py-4 transition-colors",
+                "flex cursor-pointer gap-4 rounded-2xl border px-4 py-4 transition-colors",
                 selectedAction === option.value
                   ? "border-primary-1 bg-primary-1/5"
                   : "border-border-3 bg-background-1 hover:border-border-2",
@@ -120,7 +120,7 @@ export function GuestbookActionModal({
             type="button"
             onClick={handleClose}
             disabled={isPending}
-            className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center justify-center rounded-xl border border-border-3 px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
           >
             취소
           </button>
@@ -133,7 +133,7 @@ export function GuestbookActionModal({
             }}
             disabled={!selectedOption || isPending}
             className={cn(
-              "inline-flex items-center justify-center rounded-[0.75rem] px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50",
+              "inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50",
               selectedOption?.tone === "danger"
                 ? "bg-negative-1"
                 : "bg-primary-1",

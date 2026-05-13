@@ -27,9 +27,9 @@ export function RelatedPosts({ posts }: RelatedPostsProps) {
           <Link
             key={post.id}
             href={buildPostHref(post.slug)}
-            className="group block w-[11.75rem] shrink-0 overflow-hidden rounded-[0.75rem] border border-border-3 bg-background-2 text-decoration-none transition-all duration-[300ms] ease-[cubic-bezier(0.16,1,0.3,1)] [scroll-snap-align:start] hover:-translate-y-[3px] hover:border-primary-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)]"
+            className="group block w-[11.75rem] shrink-0 overflow-hidden rounded-xl border border-border-3 bg-background-2 text-decoration-none transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] [scroll-snap-align:start] hover:-translate-y-[3px] hover:border-primary-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)]"
           >
-            <div className="aspect-[16/10] overflow-hidden bg-background-3">
+            <div className="aspect-16/10 overflow-hidden bg-background-3">
               {post.thumbnailUrl ? (
                 <Image
                   src={post.thumbnailUrl}
@@ -37,7 +37,7 @@ export function RelatedPosts({ posts }: RelatedPostsProps) {
                   width={180}
                   height={113}
                   sizes="180px"
-                  className="h-full w-full object-cover transition-transform duration-[500ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105"
+                  className="h-full w-full object-cover transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105"
                 />
               ) : (
                 <div className="h-full w-full bg-background-3" />

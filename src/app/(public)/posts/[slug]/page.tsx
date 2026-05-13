@@ -209,7 +209,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
     : [];
 
   return (
-    <main className="w-full pt-8 pb-16">
+    <div className="w-full">
       {siteUrl && post.searchIndexable ? (
         <JsonLd data={buildBlogPostingJsonLd(post, siteUrl)} />
       ) : null}
@@ -219,8 +219,8 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
       <ViewCounter postId={post.id} />
       <article className="motion-reveal">
         {post.thumbnailUrl && (
-          <div className="mb-6 overflow-hidden rounded-[1.5rem] bg-background-3">
-            <div className="relative aspect-[16/9] w-full">
+          <div className="mb-6 overflow-hidden rounded-3xl bg-background-3">
+            <div className="relative aspect-video w-full">
               <Image
                 src={post.thumbnailUrl}
                 alt={post.title}
@@ -257,7 +257,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
             </div>
 
             <h1
-              className="font-serif-content break-keep text-[1.5rem] leading-[1.95rem] text-text-1 md:text-h1"
+              className="font-serif-content break-keep text-2xl leading-[1.95rem] text-text-1 md:text-h1"
               style={{ fontWeight: 700 }}
             >
               {post.title}
@@ -275,7 +275,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
                   <Link
                     key={tag.id}
                     href={`/tags/${tag.slug}`}
-                    className="inline-flex rounded-full border border-border-3 px-2.5 py-1 text-ui-xs font-medium text-text-3 transition-all duration-[200ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-primary-1 hover:bg-primary-1/6 hover:text-primary-1"
+                    className="inline-flex rounded-full border border-border-3 px-2.5 py-1 text-ui-xs font-medium text-text-3 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-primary-1 hover:bg-primary-1/6 hover:text-primary-1"
                   >
                     #{tag.name}
                   </Link>
@@ -325,7 +325,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
         />
       ) : null}
       <ScrollToTop />
-    </main>
+    </div>
   );
 }
 

@@ -43,17 +43,17 @@ export async function HomePage({ searchParams }: HomePageProps) {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-270 flex-col gap-3 pb-16 pt-8">
+    <div className="flex w-full flex-col gap-3">
       <header
         className="motion-reveal pb-1"
         style={{ animationDelay: "100ms" }}
       >
-        <h1 className="break-keep text-[1.5rem] leading-[1.938rem] font-bold tracking-tight text-text-1 md:text-[1.875rem] md:leading-9.5">
+        <h1 className="break-keep text-2xl leading-[1.938rem] font-bold tracking-tight text-text-1 md:text-3xl md:leading-9.5">
           최근 글
         </h1>
       </header>
 
       <PostList initialData={initialData} initialPage={page} />
-    </main>
+    </div>
   );
 }

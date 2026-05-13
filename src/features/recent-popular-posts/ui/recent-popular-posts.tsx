@@ -88,7 +88,7 @@ export function RecentPopularPosts({
                     setSelectedPopularDays(option.days);
                   }}
                   className={cn(
-                    "inline-flex min-h-5 rounded-full border px-2 py-[2px] text-[0.688rem] leading-3.5 font-normal transition-colors",
+                    "inline-flex min-h-5 rounded-full border px-2 py-0.5 text-[0.688rem] leading-3.5 font-normal transition-colors",
                     isActive
                       ? "border-primary-1 bg-primary-1/6 text-primary-1"
                       : "border-border-3 text-text-3 hover:border-primary-1 hover:bg-primary-1/6 hover:text-primary-1",
@@ -114,7 +114,7 @@ export function RecentPopularPosts({
                 <Link
                   href={buildPostHref(post.slug)}
                   onClick={onItemClick}
-                  className="group block min-h-[3rem] rounded-md px-0.5 py-1 transition-colors hover:text-primary-1"
+                  className="group block min-h-12 rounded-md px-0.5 py-1 transition-colors hover:text-primary-1"
                 >
                   <span className="line-clamp-2 block text-ui-sm font-medium leading-[1.4] text-text-2 transition-colors group-hover:text-primary-1">
                     {post.title}

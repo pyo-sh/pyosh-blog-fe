@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Category, DeleteCategoryOptions } from "@entities/category";
 import { cn } from "@shared/lib/style-utils";
-import { Modal, Spinner } from "@shared/ui/libs";
+import { DropSelect, Modal, Spinner } from "@shared/ui/libs";
 
 interface CategoryDeleteModalProps {
   category: Category | null;
@@ -127,7 +127,7 @@ export function CategoryDeleteModal({
 
               <label
                 className={cn(
-                  "flex cursor-pointer gap-4 rounded-[1rem] border px-4 py-4 transition-colors",
+                  "flex cursor-pointer gap-4 rounded-2xl border px-4 py-4 transition-colors",
                   mode === "move"
                     ? "border-primary-1 bg-primary-1/5"
                     : "border-border-3 bg-background-1 hover:border-border-2",
@@ -152,30 +152,29 @@ export function CategoryDeleteModal({
                     </span>
                   </span>
 
-                  <select
-                    value={moveTo ?? ""}
-                    onChange={(event) =>
-                      setMoveTo(
-                        event.target.value ? Number(event.target.value) : null,
-                      )
+                  <DropSelect
+                    value={moveTo === null ? "" : String(moveTo)}
+                    onChange={(value) =>
+                      setMoveTo(value ? Number(value) : null)
                     }
                     disabled={isDeleting || mode !== "move"}
-                    aria-label="이동 대상 카테고리"
-                    className="w-full rounded-[0.9rem] border border-border-3 bg-background-1 px-4 py-3 text-sm text-text-1 outline-none transition-colors focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    <option value="">이동할 카테고리를 선택하세요</option>
-                    {moveOptions.map((option) => (
-                      <option key={option.id} value={option.id}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
+                    ariaLabel="이동 대상 카테고리"
+                    className="w-full"
+                    triggerClassName="h-auto rounded-[0.9rem] px-4 py-3 text-sm text-text-1"
+                    options={[
+                      { label: "이동할 카테고리를 선택하세요", value: "" },
+                      ...moveOptions.map((option) => ({
+                        label: option.label,
+                        value: String(option.id),
+                      })),
+                    ]}
+                  />
                 </span>
               </label>
 
               <label
                 className={cn(
-                  "flex cursor-pointer gap-4 rounded-[1rem] border px-4 py-4 transition-colors",
+                  "flex cursor-pointer gap-4 rounded-2xl border px-4 py-4 transition-colors",
                   mode === "trash"
                     ? "border-negative-1/40 bg-negative-1/5"
                     : "border-border-3 bg-background-1 hover:border-border-2",
@@ -210,7 +209,7 @@ export function CategoryDeleteModal({
           type="button"
           onClick={onCancel}
           disabled={isDeleting}
-          className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-4 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center justify-center rounded-xl border border-border-3 px-4 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {hasChildren ? "확인" : "취소"}
         </button>
@@ -233,7 +232,7 @@ export function CategoryDeleteModal({
               onConfirm({ action: "trash" });
             }}
             disabled={isConfirmDisabled}
-            className="inline-flex items-center justify-center rounded-[0.75rem] bg-negative-1 px-4 py-2 text-sm font-medium text-text-1 transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center justify-center rounded-xl bg-negative-1 px-4 py-2 text-sm font-medium text-text-1 transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isDeleting ? (
               <>

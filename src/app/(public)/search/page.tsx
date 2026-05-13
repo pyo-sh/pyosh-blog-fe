@@ -76,7 +76,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   if (!query) {
     return (
-      <main className="mx-auto flex min-h-[100dvh] w-full max-w-[67.5rem] flex-col gap-6 px-4 pb-16 pt-8 md:px-6">
+      <div className="flex flex-col gap-6">
         <Suspense>
           <SearchForm currentFilter={filter} initialQuery="" />
         </Suspense>
@@ -85,7 +85,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           title="검색어를 입력해 주세요"
           description="제목, 내용, 태그, 카테고리, 댓글로 검색할 수 있습니다"
         />
-      </main>
+      </div>
     );
   }
 
@@ -95,7 +95,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const { meta } = response;
 
   return (
-    <main className="mx-auto flex min-h-[100dvh] w-full max-w-[67.5rem] flex-col gap-6 px-4 pb-16 pt-8 md:px-6">
+    <div className="flex flex-col gap-6">
       <Suspense>
         <SearchForm currentFilter={filter} initialQuery={query} />
       </Suspense>
@@ -129,6 +129,6 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         />
       )}
       <ScrollToTop />
-    </main>
+    </div>
   );
 }

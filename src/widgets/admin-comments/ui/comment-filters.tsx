@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   DayPicker,
   useDayPicker,
@@ -17,6 +17,7 @@ import { ko } from "date-fns/locale";
 import type { PostListItem } from "@entities/post";
 import { fetchAdminPosts } from "@entities/post";
 import { cn } from "@shared/lib/style-utils";
+import { DropSelect } from "@shared/ui/libs";
 
 export type CommentStatusFilter = "all" | "active" | "deleted" | "hidden";
 export type CommentAuthorTypeFilter = "all" | "oauth" | "guest";
@@ -42,15 +43,15 @@ interface SelectOption<T extends string> {
 
 const STATUS_OPTIONS: Array<SelectOption<CommentStatusFilter>> = [
   { label: "전체", value: "all", triggerLabel: "상태" },
-  { label: "정상", value: "active", triggerLabel: "상태" },
-  { label: "삭제됨", value: "deleted", triggerLabel: "상태" },
-  { label: "숨김", value: "hidden", triggerLabel: "상태" },
+  { label: "정상", value: "active" },
+  { label: "삭제됨", value: "deleted" },
+  { label: "숨김", value: "hidden" },
 ];
 
 const AUTHOR_TYPE_OPTIONS: Array<SelectOption<CommentAuthorTypeFilter>> = [
   { label: "전체", value: "all", triggerLabel: "작성자" },
-  { label: "OAuth", value: "oauth", triggerLabel: "작성자" },
-  { label: "게스트", value: "guest", triggerLabel: "작성자" },
+  { label: "OAuth", value: "oauth" },
+  { label: "게스트", value: "guest" },
 ];
 
 type DateRangePresetValue = "all" | "7d" | "30d" | "90d" | "custom";
@@ -139,210 +140,6 @@ function getSelectTriggerWidthCh<T extends string>(
   }, label.length);
 
   return `${Math.max(longest + 4, 7)}em`;
-}
-
-function FilterCustomSelect<T extends string>({
-  label,
-  value,
-  options,
-  onChange,
-  className,
-  triggerClassName,
-}: {
-  label: string;
-  value: T;
-  options: Array<SelectOption<T>>;
-  onChange: (value: T) => void;
-  className?: string;
-  triggerClassName?: string;
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(-1);
-  const rootRef = useRef<HTMLDivElement | null>(null);
-  const listboxIdRef = useRef(
-    `comment-filter-select-${Math.random().toString(36).slice(2)}`,
-  );
-  const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const selected = options.find((option) => option.value === value);
-  const selectedIndex = options.findIndex((option) => option.value === value);
-  const triggerWidth = getSelectTriggerWidthCh(label, options);
-
-  useEffect(() => {
-    optionRefs.current = [];
-  }, [options]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      setActiveIndex(-1);
-
-      return;
-    }
-
-    setActiveIndex(selectedIndex >= 0 ? selectedIndex : 0);
-  }, [isOpen, selectedIndex]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    const handlePointerDown = (event: MouseEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handlePointerDown);
-
-    return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-    };
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!isOpen || activeIndex < 0) {
-      return;
-    }
-
-    optionRefs.current[activeIndex]?.focus();
-  }, [activeIndex, isOpen]);
-
-  function commitSelection(index: number) {
-    const option = options[index];
-
-    if (!option) {
-      return;
-    }
-
-    onChange(option.value);
-    setIsOpen(false);
-  }
-
-  function handleTriggerKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
-    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-      event.preventDefault();
-      setIsOpen(true);
-      setActiveIndex(selectedIndex >= 0 ? selectedIndex : 0);
-
-      return;
-    }
-
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      setIsOpen((current) => !current);
-    }
-  }
-
-  function handleOptionKeyDown(
-    event: KeyboardEvent<HTMLButtonElement>,
-    index: number,
-  ) {
-    if (event.key === "ArrowDown") {
-      event.preventDefault();
-      setActiveIndex((index + 1) % options.length);
-
-      return;
-    }
-
-    if (event.key === "ArrowUp") {
-      event.preventDefault();
-      setActiveIndex((index - 1 + options.length) % options.length);
-
-      return;
-    }
-
-    if (event.key === "Home") {
-      event.preventDefault();
-      setActiveIndex(0);
-
-      return;
-    }
-
-    if (event.key === "End") {
-      event.preventDefault();
-      setActiveIndex(options.length - 1);
-
-      return;
-    }
-
-    if (event.key === "Escape") {
-      event.preventDefault();
-      setIsOpen(false);
-
-      return;
-    }
-
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      commitSelection(index);
-    }
-  }
-
-  return (
-    <div ref={rootRef} className={cn("relative", className)}>
-      <button
-        type="button"
-        onClick={() => setIsOpen((current) => !current)}
-        onKeyDown={handleTriggerKeyDown}
-        role="combobox"
-        aria-autocomplete="none"
-        aria-expanded={isOpen}
-        aria-controls={listboxIdRef.current}
-        aria-haspopup="listbox"
-        className={cn(
-          "relative flex h-10 w-fit items-center whitespace-nowrap rounded-[0.8rem] border border-border-3 bg-background-1 px-3 pr-8 text-left text-sm leading-none text-text-2 outline-none transition-colors hover:border-border-2 focus-visible:border-primary-1",
-          triggerClassName,
-        )}
-        style={triggerClassName ? undefined : { width: triggerWidth }}
-      >
-        <span className="truncate">
-          {selected?.value === "all"
-            ? (selected?.triggerLabel ?? label)
-            : (selected?.label ?? "")}
-        </span>
-        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-text-4">
-          ▾
-        </span>
-      </button>
-
-      {isOpen ? (
-        <div
-          id={listboxIdRef.current}
-          role="listbox"
-          className="absolute left-0 top-full z-20 mt-2 min-w-full overflow-hidden rounded-[1rem] border border-border-3 bg-background-1 shadow-[0px_16px_40px_0px_rgba(0,0,0,0.12)]"
-        >
-          <div className="max-h-60 overflow-y-auto py-1">
-            {options.map((option, index) => {
-              const isSelected = option.value === value;
-
-              return (
-                <button
-                  key={option.value}
-                  ref={(node) => {
-                    optionRefs.current[index] = node;
-                  }}
-                  type="button"
-                  role="option"
-                  aria-selected={isSelected}
-                  onClick={() => commitSelection(index)}
-                  onKeyDown={(event) => handleOptionKeyDown(event, index)}
-                  className={cn(
-                    "flex w-full items-center justify-between px-4 py-3 text-left text-sm leading-none outline-none transition-colors hover:bg-background-2 focus:bg-background-2",
-                    isSelected ? "text-primary-1" : "text-text-1",
-                  )}
-                >
-                  <span>{option.label}</span>
-                  {isSelected ? (
-                    <span className="text-[11px] text-primary-1">선택됨</span>
-                  ) : null}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      ) : null}
-    </div>
-  );
 }
 
 function DateRangePicker({
@@ -499,19 +296,19 @@ function DateRangePicker({
               week: "grid grid-cols-7",
               day: "h-10 w-10 p-0 text-sm leading-none",
               day_button:
-                "h-10 w-10 cursor-pointer rounded-[0.75rem] text-sm leading-none text-text-2 transition-colors hover:bg-background-2 hover:text-text-1",
+                "h-10 w-10 cursor-pointer rounded-xl text-sm leading-none text-text-2 transition-colors hover:bg-background-2 hover:text-text-1",
               selected:
                 "[&>button]:bg-primary-1 [&>button]:text-white [&>button]:hover:bg-primary-1",
               range_start: cn(
                 "[&>button]:bg-primary-1 [&>button]:text-white [&>button]:hover:bg-primary-1",
                 isSingleDaySelection
-                  ? "[&>button]:rounded-[0.75rem]"
+                  ? "[&>button]:rounded-xl"
                   : "[&>button]:rounded-r-none",
               ),
               range_end: cn(
                 "[&>button]:bg-primary-1 [&>button]:text-white [&>button]:hover:bg-primary-1",
                 isSingleDaySelection
-                  ? "[&>button]:rounded-[0.75rem]"
+                  ? "[&>button]:rounded-xl"
                   : "[&>button]:rounded-l-none",
               ),
               range_middle:
@@ -550,10 +347,10 @@ export function CommentFilters({
   const activePreset = detectPreset(startDate, endDate);
   const dateRangeOptions: Array<SelectOption<DateRangePresetValue>> = [
     { label: "전체", value: "all", triggerLabel: "기간" },
-    { label: "7일", value: "7d", triggerLabel: "기간" },
-    { label: "30일", value: "30d", triggerLabel: "기간" },
-    { label: "90일", value: "90d", triggerLabel: "기간" },
-    { label: "사용자 지정", value: "custom", triggerLabel: "기간" },
+    { label: "7일", value: "7d" },
+    { label: "30일", value: "30d" },
+    { label: "90일", value: "90d" },
+    { label: "사용자 지정", value: "custom" },
   ];
 
   useEffect(() => {
@@ -648,7 +445,7 @@ export function CommentFilters({
           type="button"
           onClick={handlePostInputFocus}
           className={cn(
-            "inline-flex h-10 min-w-[12rem] items-center gap-2 rounded-[0.8rem] border px-3 text-sm leading-none text-text-2 transition-colors",
+            "inline-flex h-10 min-w-48 items-center gap-2 rounded-[0.8rem] border px-3 text-sm leading-none text-text-2 transition-colors",
             selectedPostTitle
               ? "border-primary-1/30 bg-primary-1/8 text-text-1"
               : "border-border-3 bg-background-1 hover:border-border-2",
@@ -660,7 +457,7 @@ export function CommentFilters({
         </button>
 
         {postDropdownOpen ? (
-          <div className="absolute left-0 top-full z-20 mt-2 w-[20rem] overflow-hidden rounded-[1rem] border border-border-3 bg-background-1 shadow-[0px_16px_40px_0px_rgba(0,0,0,0.12)]">
+          <div className="absolute left-0 top-full z-20 mt-2 w-80 overflow-hidden rounded-2xl border border-border-3 bg-background-1 shadow-[0px_16px_40px_0px_rgba(0,0,0,0.12)]">
             <div className="border-b border-border-3 p-3">
               <div className="relative">
                 <Icon
@@ -734,26 +531,35 @@ export function CommentFilters({
         ) : null}
       </div>
 
-      <FilterCustomSelect
-        label="상태"
+      <DropSelect
+        ariaLabel="상태"
         value={status}
         options={STATUS_OPTIONS}
         onChange={onStatusChange}
         triggerClassName="w-[8em]"
+        showSelectedIndicator
       />
 
-      <FilterCustomSelect
-        label="작성자"
+      <DropSelect
+        ariaLabel="작성자"
         value={authorType}
         options={AUTHOR_TYPE_OPTIONS}
         onChange={onAuthorTypeChange}
+        triggerStyle={{
+          width: getSelectTriggerWidthCh("작성자", AUTHOR_TYPE_OPTIONS),
+        }}
+        showSelectedIndicator
       />
 
-      <FilterCustomSelect
-        label="기간"
+      <DropSelect
+        ariaLabel="기간"
         value={activePreset}
         options={dateRangeOptions}
         onChange={handlePresetChange}
+        triggerStyle={{
+          width: getSelectTriggerWidthCh("기간", dateRangeOptions),
+        }}
+        showSelectedIndicator
       />
 
       <DateRangePicker

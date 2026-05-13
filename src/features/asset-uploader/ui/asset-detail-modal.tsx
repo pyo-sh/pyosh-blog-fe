@@ -17,7 +17,7 @@ import {
   getAssetFilename,
 } from "@entities/asset";
 import { cn } from "@shared/lib/style-utils";
-import { Modal } from "@shared/ui/libs";
+import { DropSelect, Modal } from "@shared/ui/libs";
 
 interface AssetDetailModalProps {
   assets: Asset[];
@@ -105,7 +105,7 @@ export function AssetDetailModal({
       aria-label="에셋 상세 보기"
       className="w-[min(94vw,42rem)] p-0 text-left"
     >
-      <div className="flex max-h-[90vh] flex-col overflow-hidden rounded-[1.5rem] bg-background-1">
+      <div className="flex max-h-[90vh] flex-col overflow-hidden rounded-3xl bg-background-1">
         <div className="flex items-center justify-between gap-4 border-b border-border-3 px-6 py-4">
           <h3 className="truncate text-lg font-bold text-text-1">
             {getAssetDisplayName(asset)}
@@ -162,7 +162,7 @@ export function AssetDetailModal({
             </button>
           </div>
 
-          <dl className="mb-6 grid grid-cols-2 gap-x-6 gap-y-3">
+          <dl className="mb-4 grid grid-cols-2 gap-x-6 gap-y-3">
             <InfoRow label="별명" value={asset.displayName ?? "-"} />
             <InfoRow label="카테고리" value={asset.category.name} />
             <InfoRow label="파일명" value={getAssetFilename(asset.url)} />
@@ -181,83 +181,6 @@ export function AssetDetailModal({
             />
           </dl>
 
-          <div className="mb-6 rounded-[1rem] border border-border-3 bg-background-2 p-4">
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-text-4">
-                  Metadata
-                </p>
-                <p className="mt-1 text-sm text-text-3">
-                  별명과 카테고리는 검색과 필터에만 사용됩니다.
-                </p>
-              </div>
-              <span
-                className={cn(
-                  "rounded-full border px-2 py-1 text-[11px] font-semibold",
-                  getAssetCategoryTone(asset.category),
-                )}
-              >
-                {asset.category.name}
-              </span>
-            </div>
-            <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_12rem]">
-              <label className="grid gap-1.5">
-                <span className="text-[12px] text-text-3">별명</span>
-                <input
-                  type="text"
-                  value={displayNameDraft}
-                  maxLength={200}
-                  onChange={(event) => setDisplayNameDraft(event.target.value)}
-                  disabled={isSavingMetadata}
-                  className="h-10 rounded-[0.75rem] border border-border-3 bg-background-1 px-3 text-sm text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
-                  placeholder={getAssetFilename(asset.url)}
-                />
-              </label>
-              <label className="grid gap-1.5">
-                <span className="text-[12px] text-text-3">카테고리</span>
-                <select
-                  value={categoryIdDraft ?? ""}
-                  onChange={(event) =>
-                    setCategoryIdDraft(
-                      event.target.value ? Number(event.target.value) : null,
-                    )
-                  }
-                  disabled={isSavingMetadata}
-                  className="h-10 rounded-[0.75rem] border border-border-3 bg-background-1 px-3 text-sm text-text-2 outline-none transition-colors focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-            <div className="mt-4 flex justify-end">
-              <button
-                type="button"
-                onClick={() => {
-                  if (categoryIdDraft === null) {
-                    return;
-                  }
-
-                  onUpdateMetadata(asset, {
-                    displayName: displayNameDraft.trim() || null,
-                    categoryId: categoryIdDraft,
-                  });
-                }}
-                disabled={
-                  isSavingMetadata ||
-                  !isMetadataChanged ||
-                  categoryIdDraft === null
-                }
-                className="inline-flex h-9 items-center justify-center rounded-[0.75rem] bg-primary-1 px-4 text-sm font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isSavingMetadata ? "저장 중" : "저장"}
-              </button>
-            </div>
-          </div>
-
           <div className="space-y-4">
             <CodeInfoBlock
               label="URL"
@@ -275,7 +198,71 @@ export function AssetDetailModal({
             />
           </div>
 
-          <div className="mt-6 flex justify-end">
+          <div className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_12rem]">
+            <label className="grid gap-1.5">
+              <span className="text-[12px] text-text-3">별명</span>
+              <input
+                type="text"
+                value={displayNameDraft}
+                maxLength={200}
+                onChange={(event) => setDisplayNameDraft(event.target.value)}
+                disabled={isSavingMetadata}
+                className="h-10 rounded-xl border border-border-3 bg-background-1 px-3 text-sm text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+                placeholder={getAssetFilename(asset.url)}
+              />
+            </label>
+            <label className="grid gap-1.5">
+              <div>
+                <span className="text-[12px] text-text-3 mr-1">카테고리</span>
+                <span
+                  className={cn(
+                    "rounded-full border px-2 py-1 text-[11px] font-semibold",
+                    getAssetCategoryTone(asset.category),
+                  )}
+                >
+                  {asset.category.name}
+                </span>
+              </div>
+              <DropSelect
+                value={categoryIdDraft === null ? "" : String(categoryIdDraft)}
+                onChange={(value) =>
+                  setCategoryIdDraft(value ? Number(value) : null)
+                }
+                disabled={isSavingMetadata}
+                ariaLabel="카테고리"
+                className="w-full"
+                triggerClassName="h-10 rounded-xl text-sm text-text-2"
+                placeholder="카테고리 선택"
+                options={categories.map((category) => ({
+                  label: category.name,
+                  value: String(category.id),
+                }))}
+              />
+            </label>
+          </div>
+
+          <div className="mt-6 flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                if (categoryIdDraft === null) {
+                  return;
+                }
+
+                onUpdateMetadata(asset, {
+                  displayName: displayNameDraft.trim() || null,
+                  categoryId: categoryIdDraft,
+                });
+              }}
+              disabled={
+                isSavingMetadata ||
+                !isMetadataChanged ||
+                categoryIdDraft === null
+              }
+              className="inline-flex h-9 items-center justify-center rounded-xl bg-primary-1 px-4 text-sm font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isSavingMetadata ? "저장 중" : "저장"}
+            </button>
             <button
               type="button"
               onClick={() => onRequestDelete(asset)}
@@ -307,9 +294,7 @@ function CodeInfoBlock({
   return (
     <div>
       <div className="mb-2 flex items-center justify-between gap-3">
-        <p className="text-[12px] font-normal leading-none text-text-3">
-          {label}
-        </p>
+        <p className="text-xs font-normal leading-none text-text-3">{label}</p>
         <button
           type="button"
           onClick={onCopy}
@@ -329,10 +314,10 @@ function CodeInfoBlock({
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="mb-1.5 text-[12px] font-normal leading-none text-text-3">
+      <dt className="mb-1.5 text-xs font-normal leading-none text-text-3">
         {label}
       </dt>
-      <dd className="pl-2 text-[14px] font-normal leading-[1.25rem] text-text-1">
+      <dd className="pl-2 text-sm font-normal leading-5 text-text-1">
         {value}
       </dd>
     </div>
@@ -348,7 +333,7 @@ function AssetPreview({ asset }: { asset: Asset }) {
 
   if (hasError) {
     return (
-      <div className="flex min-h-[18rem] items-center justify-center px-6 py-10 text-sm text-text-4">
+      <div className="flex min-h-72 items-center justify-center px-6 py-10 text-sm text-text-4">
         이미지를 불러오지 못했습니다.
       </div>
     );

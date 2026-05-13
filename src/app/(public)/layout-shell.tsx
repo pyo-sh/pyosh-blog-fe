@@ -88,7 +88,7 @@ export function PublicLayoutShell({
         </aside>
 
         {/* Page content */}
-        <div className="min-w-0 flex-1 lg:pl-8">{children}</div>
+        <main className="min-w-0 flex-1 pt-8 pb-16 lg:pl-8">{children}</main>
       </div>
 
       {/* Mobile slide-in sidebar */}

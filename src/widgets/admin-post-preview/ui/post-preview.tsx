@@ -17,6 +17,7 @@ import {
 import { getErrorMessage } from "@shared/lib/get-error-message";
 import { cn } from "@shared/lib/style-utils";
 import { ConfirmDialog } from "@shared/ui/confirm-dialog";
+import { DropSelect } from "@shared/ui/libs";
 import { ToggleSwitch } from "@shared/ui/toggle-switch";
 
 const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
@@ -106,7 +107,7 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
         <Link
           href="/manage/posts"
           prefetch={false}
-          className="inline-flex items-center gap-1.5 rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+          className="inline-flex items-center gap-1.5 rounded-xl border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
         >
           ← 목록
         </Link>
@@ -114,7 +115,7 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
         <Link
           href={`/manage/posts/${currentPost.id}/edit`}
           prefetch={false}
-          className="inline-flex items-center rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+          className="inline-flex items-center rounded-xl border border-border-3 px-3 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
         >
           수정
         </Link>
@@ -123,7 +124,7 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
           type="button"
           onClick={() => setShowDeleteDialog(true)}
           disabled={deleteMutation.isPending}
-          className="inline-flex items-center rounded-[0.75rem] border border-negative-1/30 px-3 py-2 text-sm font-medium text-negative-1 transition-colors hover:bg-negative-1/10 disabled:opacity-50"
+          className="inline-flex items-center rounded-xl border border-negative-1/30 px-3 py-2 text-sm font-medium text-negative-1 transition-colors hover:bg-negative-1/10 disabled:opacity-50"
         >
           삭제
         </button>
@@ -210,7 +211,7 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
             );
           }}
           className={cn(
-            "inline-flex items-center gap-1.5 rounded-[0.75rem] border px-3 py-2 text-sm font-medium transition-colors",
+            "inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium transition-colors",
             "disabled:cursor-not-allowed disabled:opacity-50",
             currentPost.isPinned
               ? "border-primary-1/30 text-primary-1 hover:bg-primary-1/10"
@@ -223,11 +224,10 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
 
         <div className="flex items-center gap-2 text-sm text-text-2">
           <span>상태</span>
-          <select
+          <DropSelect
             value={currentPost.status}
             disabled={isUpdating}
-            onChange={(e) => {
-              const value = e.target.value as PostDetail["status"];
+            onChange={(value) => {
               const prev = currentPost.status;
               setCurrentPost((p) => ({ ...p, status: value }));
               updateMutation.mutate(
@@ -238,14 +238,10 @@ export function PostPreview({ post, renderedContent }: PostPreviewProps) {
                 },
               );
             }}
-            className="rounded-[0.75rem] border border-border-3 bg-background-1 px-3 py-2 text-sm text-text-1 outline-none transition-colors focus:border-primary-1 disabled:opacity-50"
-          >
-            {statusOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            ariaLabel="글 상태"
+            triggerClassName="h-auto rounded-xl px-3 py-2 text-sm text-text-1 disabled:opacity-50"
+            options={statusOptions}
+          />
         </div>
 
         <p className="text-sm text-text-3">

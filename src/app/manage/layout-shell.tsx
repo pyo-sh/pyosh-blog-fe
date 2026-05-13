@@ -52,8 +52,17 @@ function getPageTitle(pathname: string) {
   return PAGE_TITLES.find((entry) => entry.match(pathname))?.title ?? "관리자";
 }
 
+function hasMainPadding(pathname: string) {
+  return (
+    pathname !== "/manage/posts/new" &&
+    !/^\/manage\/posts\/[^/]+\/edit$/.test(pathname)
+  );
+}
+
 export function ManageLayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const mainHasPadding = hasMainPadding(pathname);
+  const mainHeight = `calc(100dvh - ${ADMIN_CHROME_HEIGHT})`;
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
@@ -93,7 +102,7 @@ export function ManageLayoutShell({ children }: { children: React.ReactNode }) {
       >
         <header
           className={cn(
-            "sticky top-0 z-10 box-border flex items-center gap-4 border-b border-border-4 bg-[rgba(249,249,250,0.8)] px-4 backdrop-blur-[16px] backdrop-saturate-[1.4] dark:bg-[rgba(19,20,21,0.85)] md:px-6",
+            "sticky top-0 z-10 box-border flex items-center gap-4 border-b border-border-4 bg-[rgba(249,249,250,0.8)] px-4 backdrop-blur-lg backdrop-saturate-[1.4] dark:bg-[rgba(19,20,21,0.85)] md:px-6",
             ADMIN_CHROME_HEIGHT_CLASS,
           )}
           style={ADMIN_CHROME_STYLE}
@@ -123,8 +132,13 @@ export function ManageLayoutShell({ children }: { children: React.ReactNode }) {
         </header>
 
         <main
-          className="px-4 py-6 md:px-6"
-          style={{ minHeight: `calc(100dvh - ${ADMIN_CHROME_HEIGHT})` }}
+          className={cn(
+            mainHasPadding ? "px-4 py-6 md:px-6" : "overflow-hidden",
+          )}
+          style={{
+            minHeight: mainHeight,
+            height: mainHasPadding ? undefined : mainHeight,
+          }}
         >
           {children}
         </main>

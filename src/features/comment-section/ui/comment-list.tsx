@@ -732,7 +732,7 @@ export function CommentList({
           </span>
         </h2>
         {isLocked ? (
-          <p className="mt-3 rounded-[0.75rem] border border-border-3 bg-background-2 px-4 py-3 text-body-sm text-text-3">
+          <p className="mt-3 rounded-xl border border-border-3 bg-background-2 px-4 py-3 text-body-sm text-text-3">
             댓글이 잠겼습니다. 기존 댓글만 확인할 수 있습니다.
           </p>
         ) : null}
@@ -754,14 +754,14 @@ export function CommentList({
         {loadError ? (
           <div
             role="status"
-            className="mb-5 rounded-[0.75rem] border border-border-3 bg-background-2 px-4 py-3 text-body-sm text-text-3"
+            className="mb-5 rounded-xl border border-border-3 bg-background-2 px-4 py-3 text-body-sm text-text-3"
           >
             {loadError}
           </div>
         ) : null}
 
         {isLoadingPage ? (
-          <div className="flex min-h-48 items-center justify-center rounded-[1rem] border border-dashed border-border-3 bg-background-2 px-5 py-8 text-body-md text-text-3">
+          <div className="flex min-h-48 items-center justify-center rounded-2xl border border-dashed border-border-3 bg-background-2 px-5 py-8 text-body-md text-text-3">
             <Spinner size="sm" />
             <span className="ml-3">댓글을 불러오는 중입니다.</span>
           </div>
@@ -865,7 +865,7 @@ export function CommentList({
             })}
           </ul>
         ) : (
-          <div className="rounded-[1rem] border border-dashed border-border-3 bg-background-2 px-5 py-8 text-body-md text-text-3">
+          <div className="rounded-2xl border border-dashed border-border-3 bg-background-2 px-5 py-8 text-body-md text-text-3">
             첫 댓글을 남겨 보세요.
           </div>
         )}
@@ -880,7 +880,7 @@ export function CommentList({
             type="button"
             onClick={() => loadPage(Math.max(1, currentPage - 1))}
             disabled={isLoadingPage || currentPage <= 1}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-[0.5rem] text-sm text-text-3 transition-colors hover:bg-background-3 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-sm text-text-3 transition-colors hover:bg-background-3 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
           >
             &lsaquo;
           </button>
@@ -903,8 +903,8 @@ export function CommentList({
                   aria-current={page === currentPage ? "page" : undefined}
                   className={
                     page === currentPage
-                      ? "inline-flex h-8 min-w-8 items-center justify-center rounded-[0.5rem] bg-primary-1 px-2 text-sm font-semibold text-white"
-                      : "inline-flex h-8 min-w-8 items-center justify-center rounded-[0.5rem] px-2 text-sm text-text-3 transition-colors hover:bg-background-3 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
+                      ? "inline-flex h-8 min-w-8 items-center justify-center rounded-lg bg-primary-1 px-2 text-sm font-semibold text-white"
+                      : "inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-sm text-text-3 transition-colors hover:bg-background-3 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
                   }
                 >
                   {page}
@@ -917,7 +917,7 @@ export function CommentList({
               loadPage(Math.min(safeMeta.totalPages, currentPage + 1))
             }
             disabled={isLoadingPage || currentPage >= safeMeta.totalPages}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-[0.5rem] text-sm text-text-3 transition-colors hover:bg-background-3 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-sm text-text-3 transition-colors hover:bg-background-3 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
           >
             &rsaquo;
           </button>
@@ -954,7 +954,7 @@ export function CommentList({
           </p>
 
           {deleteTarget && deleteTarget.replies.length > 0 ? (
-            <div className="mt-4 rounded-[1rem] border border-warning-1/30 bg-warning-1/5 px-4 py-3 text-body-sm text-warning-1">
+            <div className="mt-4 rounded-2xl border border-warning-1/30 bg-warning-1/5 px-4 py-3 text-body-sm text-warning-1">
               <p className="font-medium">대댓글이 있는 댓글입니다.</p>
               <p className="mt-1">
                 삭제 후에도 대댓글 {deleteTarget.replies.length}개는 유지됩니다.
@@ -974,7 +974,7 @@ export function CommentList({
                 value={deletePassword}
                 onChange={(event) => setDeletePassword(event.target.value)}
                 disabled={deleteBusy}
-                className="mt-2 w-full rounded-[1rem] border border-border-3 bg-background-1 px-4 py-3 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-2 w-full rounded-2xl border border-border-3 bg-background-1 px-4 py-3 text-body-sm text-text-1 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
                 minLength={4}
                 required
               />
@@ -984,7 +984,7 @@ export function CommentList({
           {deleteError ? (
             <div
               role="alert"
-              className="mt-4 rounded-[1rem] border border-negative-1/30 bg-negative-1/5 px-4 py-3 text-body-sm text-negative-1"
+              className="mt-4 rounded-2xl border border-negative-1/30 bg-negative-1/5 px-4 py-3 text-body-sm text-negative-1"
             >
               {deleteError}
             </div>
@@ -999,7 +999,7 @@ export function CommentList({
                 (deleteTarget?.author.type !== "oauth" &&
                   deletePassword.trim().length < 4)
               }
-              className="inline-flex items-center justify-center rounded-[1rem] bg-negative-1 px-5 py-3 text-body-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center rounded-2xl bg-negative-1 px-5 py-3 text-body-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {deleteBusy ? (
                 <>
@@ -1021,7 +1021,7 @@ export function CommentList({
                 setDeleteError(null);
               }}
               disabled={deleteBusy}
-              className="inline-flex items-center justify-center rounded-[1rem] border border-border-3 px-5 py-3 text-body-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center rounded-2xl border border-border-3 px-5 py-3 text-body-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-60"
             >
               취소
             </button>

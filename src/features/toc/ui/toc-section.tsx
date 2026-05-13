@@ -5,6 +5,7 @@ import { Icon } from "@iconify/react/offline";
 import listLinear from "@iconify-icons/solar/list-linear";
 import type { TocItem } from "@shared/lib/markdown";
 import { cn } from "@shared/lib/style-utils";
+import { ChevronIcon } from "@shared/ui/icons";
 
 const DESKTOP_BREAKPOINT = 1080;
 const DESKTOP_MEDIA_QUERY = `(min-width: ${DESKTOP_BREAKPOINT}px)`;
@@ -66,7 +67,11 @@ export function TocSection({ headings, onItemClick }: TocSectionProps) {
           aria-label={isOpen ? "목차 접기" : "목차 펼치기"}
           className="rounded-md p-1 text-text-4 transition-colors hover:text-primary-1"
         >
-          <ChevronIcon isOpen={isOpen} />
+          <ChevronIcon
+            direction="down"
+            size="18"
+            className={cn("transition-transform", isOpen && "rotate-180")}
+          />
         </button>
       </div>
 
@@ -78,7 +83,7 @@ export function TocSection({ headings, onItemClick }: TocSectionProps) {
                 href={`#${item.id}`}
                 onClick={(event) => handleHeadingClick(event, item.id)}
                 className={cn(
-                  "block truncate py-[2px] text-[0.688rem] font-medium leading-4 transition-colors hover:text-primary-1",
+                  "block truncate py-0.5 text-[0.688rem] font-medium leading-4 transition-colors hover:text-primary-1",
                   item.level === 1 && "pl-0 text-text-3",
                   item.level === 2 && "pl-2.5 text-text-3",
                   item.level === 3 && "pl-5 text-text-4",
@@ -92,25 +97,5 @@ export function TocSection({ headings, onItemClick }: TocSectionProps) {
         </ol>
       )}
     </nav>
-  );
-}
-
-function ChevronIcon({ isOpen }: { isOpen: boolean }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={cn("transition-transform", isOpen && "rotate-180")}
-      aria-hidden="true"
-    >
-      <path d="m6 9 6 6 6-6" />
-    </svg>
   );
 }

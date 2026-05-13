@@ -18,7 +18,7 @@ import type { AdminPostTab } from "./post-filters";
 import type { FetchAdminPostsParams, PostListItem } from "@entities/post";
 import { cn } from "@shared/lib/style-utils";
 import { ConfirmDialog } from "@shared/ui/confirm-dialog";
-import { EmptyState, Skeleton } from "@shared/ui/libs";
+import { EmptyState, TableSkeleton } from "@shared/ui/libs";
 
 export type SortField = NonNullable<FetchAdminPostsParams["sort"]>;
 export type SortOrder = "asc" | "desc";
@@ -94,7 +94,7 @@ function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-md px-2 py-0.5 text-[12px] font-medium leading-4 whitespace-nowrap",
+        "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium leading-4 whitespace-nowrap",
         tone === "category" && "bg-primary-1/12 text-primary-1",
         tone === "published" && "bg-primary-1/12 text-primary-1",
         tone === "draft" && "bg-warning-1/12 text-warning-1",
@@ -274,23 +274,26 @@ export function PostTable({
 
   if (isPending) {
     return (
-      <div className="overflow-hidden rounded-xl border border-border-4 bg-background-1">
-        <div className="grid grid-cols-6 gap-4 border-b border-border-4 px-4 py-4">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <Skeleton key={index} />
-          ))}
-        </div>
-        <div className="space-y-3 px-4 py-4">
-          {Array.from({ length: 7 }).map((_, index) => (
-            <Skeleton
-              key={index}
-              variant="rect"
-              height="4.25rem"
-              className="rounded-lg"
-            />
-          ))}
-        </div>
-      </div>
+      <TableSkeleton
+        rows={7}
+        rowHeight="4.25rem"
+        containerClassName="rounded-xl"
+        columns={[
+          { width: "2.5rem", className: "text-center" },
+          { width: "2.5rem", className: "text-center" },
+          { width: "19rem" },
+          { width: "7rem" },
+          { width: "6rem" },
+          { width: "6rem" },
+          { width: "7rem" },
+          { width: "7rem" },
+          { width: "7rem" },
+          { width: "5rem" },
+          { width: "5rem" },
+          { width: "3rem" },
+          { width: "3rem" },
+        ]}
+      />
     );
   }
 
@@ -397,17 +400,17 @@ export function PostTable({
                       />
                     </td>
                     <td className="border-b border-border-4 px-3 py-3 align-middle">
-                      <span className="truncate whitespace-nowrap text-[14px] font-medium leading-4 text-text-1">
+                      <span className="truncate whitespace-nowrap text-sm font-medium leading-4 text-text-1">
                         {post.title}
                       </span>
                     </td>
                     <td className="border-b border-border-4 px-3 py-3 align-middle">
                       {post.category ? (
-                        <span className="whitespace-nowrap text-[14px] leading-4 text-text-4">
+                        <span className="whitespace-nowrap text-sm leading-4 text-text-4">
                           {post.category.name}
                         </span>
                       ) : (
-                        <span className="whitespace-nowrap text-[14px] leading-4 text-text-4">
+                        <span className="whitespace-nowrap text-sm leading-4 text-text-4">
                           (카테고리 없음)
                         </span>
                       )}
@@ -421,7 +424,7 @@ export function PostTable({
                           type="button"
                           onClick={() => onRestore(post.id)}
                           disabled={deleteId === post.id}
-                          className="inline-flex h-8 items-center justify-center rounded-md border border-border-3 px-3 text-[12px] font-medium leading-none text-text-2 transition-colors hover:bg-background-3 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="inline-flex h-8 items-center justify-center rounded-md border border-border-3 px-3 text-xs font-medium leading-none text-text-2 transition-colors hover:bg-background-3 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           복원
                         </button>
@@ -429,7 +432,7 @@ export function PostTable({
                           type="button"
                           onClick={() => setHardDeleteTarget(post)}
                           disabled={deleteId === post.id}
-                          className="inline-flex h-8 items-center justify-center rounded-md border border-negative-1 bg-negative-1 px-3 text-[12px] font-medium leading-none text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="inline-flex h-8 items-center justify-center rounded-md border border-negative-1 bg-negative-1 px-3 text-xs font-medium leading-none text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           영구 삭제
                         </button>
@@ -621,7 +624,7 @@ export function PostTable({
                       </button>
                     </td>
                     <td className="border-b border-border-4 px-3 py-3 align-middle">
-                      <div className="flex max-w-[20rem] items-center gap-3">
+                      <div className="flex max-w-xs items-center gap-3">
                         {post.thumbnailUrl ? (
                           <Image
                             src={post.thumbnailUrl}
@@ -636,7 +639,7 @@ export function PostTable({
                         )}
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="block truncate whitespace-nowrap text-[14px] font-medium leading-4 text-text-1">
+                            <span className="block truncate whitespace-nowrap text-sm font-medium leading-4 text-text-1">
                               {post.title}
                             </span>
                             {post.category ? (
@@ -653,7 +656,7 @@ export function PostTable({
                             )}
                           </div>
                           {post.summary ? (
-                            <p className="mt-0.5 line-clamp-1 whitespace-nowrap text-[12px] leading-4 text-text-4">
+                            <p className="mt-0.5 line-clamp-1 whitespace-nowrap text-xs leading-4 text-text-4">
                               {post.summary}
                             </p>
                           ) : null}
@@ -695,7 +698,7 @@ export function PostTable({
                           {commentStatusLabelMap[post.commentStatus]}
                         </Badge>
                       ) : (
-                        <span className="whitespace-nowrap text-[14px] leading-5 text-text-4">
+                        <span className="whitespace-nowrap text-sm leading-5 text-text-4">
                           -
                         </span>
                       )}
@@ -723,7 +726,7 @@ export function PostTable({
                         />
                         <span
                           className={cn(
-                            "whitespace-nowrap text-[12px] font-medium leading-4",
+                            "whitespace-nowrap text-xs font-medium leading-4",
                             post.visibility === "public"
                               ? "text-primary-1"
                               : "text-text-4",
@@ -734,7 +737,7 @@ export function PostTable({
                       </div>
                     </td>
                     <td
-                      className="min-w-[112px] border-b border-border-4 px-3 py-3 align-middle"
+                      className="min-w-28 border-b border-border-4 px-3 py-3 align-middle"
                       onClick={(event) => event.stopPropagation()}
                     >
                       <div className="flex items-center gap-2">
@@ -746,7 +749,7 @@ export function PostTable({
                         />
                         <span
                           className={cn(
-                            "whitespace-nowrap text-[12px] font-medium leading-4",
+                            "whitespace-nowrap text-xs font-medium leading-4",
                             !isPrivate && post.searchIndexable
                               ? "text-primary-1"
                               : "text-text-4",

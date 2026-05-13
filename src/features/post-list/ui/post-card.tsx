@@ -25,7 +25,7 @@ export function PostCard({ post, className }: PostCardProps) {
     <Link
       href={buildPostHref(post.slug)}
       className={cn(
-        "group flex overflow-hidden rounded-[1.5rem] border border-border-3 bg-background-1 transition-colors hover:border-border-2",
+        "group flex overflow-hidden rounded-3xl border border-border-3 bg-background-1 transition-colors hover:border-border-2",
         className,
       )}
     >

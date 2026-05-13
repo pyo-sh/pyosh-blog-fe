@@ -42,17 +42,17 @@ export function PostCardPreview({
   return (
     <>
       {compact ? (
-        <div className="overflow-hidden rounded-[1rem] border border-border-3 bg-background-1">
+        <div className="overflow-hidden rounded-2xl border border-border-3 bg-background-1">
           <div className="overflow-hidden bg-background-3">
             {displayThumbnailUrl ? (
               // eslint-disable-next-line @next/next/no-img-element -- arbitrary admin preview URLs are allowed
               <img
                 src={displayThumbnailUrl}
                 alt={title || "썸네일 미리보기"}
-                className="aspect-[8/5] w-full object-cover"
+                className="aspect-8/5 w-full object-cover"
               />
             ) : (
-              <div className="flex aspect-[8/5] w-full items-center justify-center text-sm text-text-4">
+              <div className="flex aspect-8/5 w-full items-center justify-center text-sm text-text-4">
                 썸네일 미리보기
               </div>
             )}
@@ -72,18 +72,18 @@ export function PostCardPreview({
           </div>
         </div>
       ) : (
-        <div className="rounded-[1rem] border border-border-3 bg-background-1 p-4">
+        <div className="rounded-2xl border border-border-3 bg-background-1 p-4">
           <div className="flex gap-4">
-            <div className="w-[11rem] shrink-0 overflow-hidden rounded-[0.9rem] bg-background-3">
+            <div className="w-44 shrink-0 overflow-hidden rounded-[0.9rem] bg-background-3">
               {displayThumbnailUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element -- arbitrary admin preview URLs are allowed
                 <img
                   src={displayThumbnailUrl}
                   alt={title || "썸네일 미리보기"}
-                  className="aspect-[4/3] w-full object-cover"
+                  className="aspect-4/3 w-full object-cover"
                 />
               ) : (
-                <div className="flex aspect-[4/3] w-full items-center justify-center text-sm text-text-4">
+                <div className="flex aspect-4/3 w-full items-center justify-center text-sm text-text-4">
                   썸네일
                 </div>
               )}

@@ -9,7 +9,7 @@ import trashBinMinimalisticLinear from "@iconify-icons/solar/trash-bin-minimalis
 import uploadMinimalisticLinear from "@iconify-icons/solar/upload-minimalistic-linear";
 import type { AssetCategory } from "@entities/asset";
 import { cn } from "@shared/lib/style-utils";
-import { Spinner } from "@shared/ui/libs";
+import { DropSelect, Spinner } from "@shared/ui/libs";
 
 export interface PendingUploadFile {
   id: string;
@@ -25,7 +25,11 @@ interface UploadZoneProps {
   uploadProgress: number | null;
   errorMessage: string | null;
   categories: AssetCategory[];
+  defaultCategoryId: number | null;
+  isDefaultCategoryDisabled: boolean;
   onFilesAdded: (files: FileList | File[]) => void;
+  onDefaultCategoryChange: (categoryId: number | null) => void;
+  onOpenCategoryManager: () => void;
   onUpdateFileMetadata: (
     id: string,
     metadata: { displayName?: string; categoryId?: number | null },
@@ -41,7 +45,11 @@ export function UploadZone({
   uploadProgress,
   errorMessage,
   categories,
+  defaultCategoryId,
+  isDefaultCategoryDisabled,
   onFilesAdded,
+  onDefaultCategoryChange,
+  onOpenCategoryManager,
   onUpdateFileMetadata,
   onRemoveFile,
   onClear,
@@ -76,18 +84,52 @@ export function UploadZone({
       />
 
       <div className="rounded-xl bg-background-2 p-4">
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-[13px] font-medium leading-none text-text-2">
-              업로드 큐 ({files.length}개)
-            </span>
-            {isUploading && uploadProgress !== null ? (
-              <span className="text-[11px] leading-none text-text-4">
-                {uploadProgress}%
+        <div className="mb-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[13px] font-medium leading-none text-text-2">
+                업로드 큐 ({files.length}개)
               </span>
-            ) : null}
+              {isUploading && uploadProgress !== null ? (
+                <span className="text-[11px] leading-none text-text-4">
+                  {uploadProgress}%
+                </span>
+              ) : null}
+            </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <div className="flex min-w-52 items-center gap-2">
+              <span className="shrink-0 text-[12px] text-text-4">
+                기본 카테고리
+              </span>
+              <DropSelect
+                value={
+                  defaultCategoryId === null ? "" : String(defaultCategoryId)
+                }
+                onChange={(value) =>
+                  onDefaultCategoryChange(value ? Number(value) : null)
+                }
+                disabled={isDefaultCategoryDisabled}
+                ariaLabel="새 파일 기본 카테고리"
+                className="min-w-0 flex-1"
+                triggerClassName="h-8 rounded-lg px-2 pr-8 text-[13px] text-text-2"
+                options={
+                  categories.length === 0
+                    ? [{ label: "기본", value: "" }]
+                    : categories.map((category) => ({
+                        label: category.name,
+                        value: String(category.id),
+                      }))
+                }
+              />
+            </div>
+            <button
+              type="button"
+              onClick={onOpenCategoryManager}
+              className="inline-flex h-8 cursor-pointer items-center justify-center rounded-lg border border-border-3 px-3 text-[13px] font-normal leading-none text-text-2 transition-colors hover:bg-background-1"
+            >
+              카테고리 관리
+            </button>
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
@@ -126,7 +168,7 @@ export function UploadZone({
         </div>
 
         {errorMessage ? (
-          <div className="mt-4 rounded-[1rem] border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-sm text-negative-1">
+          <div className="mt-4 rounded-2xl border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-sm text-negative-1">
             {errorMessage}
           </div>
         ) : null}
@@ -147,7 +189,7 @@ export function UploadZone({
             files.map((item) => (
               <div
                 key={item.id}
-                className="grid gap-3 rounded-lg border border-border-4 bg-background-1 px-3 py-3 md:grid-cols-[auto_minmax(0,1fr)_9rem_auto] md:items-center"
+                className="grid gap-3 rounded-lg border border-border-4 bg-background-1 px-3 py-3 md:grid-cols-[auto_minmax(0,1fr)_minmax(10rem,14rem)_10rem_auto] md:items-center"
               >
                 <div className="flex h-12 w-16 shrink-0 items-center justify-center overflow-hidden rounded bg-background-3">
                   {item.previewUrl ? (
@@ -164,14 +206,14 @@ export function UploadZone({
                   )}
                 </div>
                 <div className="flex min-w-0 flex-col gap-0.5">
-                  <span className="max-w-[12rem] truncate text-[13px] font-medium leading-none text-text-1">
+                  <span className="max-w-48 truncate text-[13px] font-medium leading-none text-text-1">
                     {item.file.name}
                   </span>
-                  <span className="text-[12px] leading-none text-text-4">
+                  <span className="text-xs leading-none text-text-4">
                     {formatFileSize(item.file.size)}
                   </span>
                   {isUploading && uploadProgress !== null ? (
-                    <div className="mt-1 h-1.5 w-full min-w-[8rem] overflow-hidden rounded-full bg-background-3">
+                    <div className="mt-1 h-1.5 w-full min-w-32 overflow-hidden rounded-full bg-background-3">
                       <div
                         className="h-full rounded-full bg-primary-1 transition-all duration-150"
                         style={{ width: `${uploadProgress}%` }}
@@ -192,26 +234,27 @@ export function UploadZone({
                   placeholder="별명"
                   className="h-9 min-w-0 rounded-lg border border-border-3 bg-background-1 px-3 text-[13px] text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
                 />
-                <select
-                  value={item.categoryId ?? ""}
-                  onChange={(event) =>
+                <DropSelect
+                  value={
+                    item.categoryId === null ? "" : String(item.categoryId)
+                  }
+                  onChange={(value) =>
                     onUpdateFileMetadata(item.id, {
-                      categoryId: event.target.value
-                        ? Number(event.target.value)
-                        : null,
+                      categoryId: value ? Number(value) : null,
                     })
                   }
                   disabled={isUploading}
-                  aria-label={`${item.file.name} 카테고리`}
-                  className="h-9 min-w-0 rounded-lg border border-border-3 bg-background-1 px-3 text-[13px] text-text-2 outline-none transition-colors focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  <option value="">기본</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
+                  ariaLabel={`${item.file.name} 카테고리`}
+                  className="min-w-0"
+                  triggerClassName="h-9 rounded-lg text-[13px] text-text-2"
+                  options={[
+                    { label: "기본", value: "" },
+                    ...categories.map((category) => ({
+                      label: category.name,
+                      value: String(category.id),
+                    })),
+                  ]}
+                />
                 {isUploading ? (
                   <Spinner size="sm" className="shrink-0 text-primary-1" />
                 ) : (
@@ -219,7 +262,7 @@ export function UploadZone({
                     type="button"
                     onClick={() => onRemoveFile(item.id)}
                     disabled={isUploading}
-                    className="inline-flex h-8 cursor-pointer items-center justify-center rounded-lg border border-border-3 px-3 text-[12px] font-normal leading-none text-text-2 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex h-8 cursor-pointer items-center justify-center rounded-lg border border-border-3 px-3 text-xs font-normal leading-none text-text-2 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     제거
                   </button>
@@ -300,15 +343,15 @@ function DropArea({
       <div className="flex flex-col items-center gap-2">
         <Icon icon={cloudUploadLinear} width="48" className="text-primary-1" />
         {isDragging ? (
-          <p className="text-[14px] font-medium leading-none text-primary-1">
+          <p className="text-sm font-medium leading-none text-primary-1">
             놓으면 대기열에 추가됩니다
           </p>
         ) : (
-          <p className="text-[14px] font-medium leading-none text-text-2">
+          <p className="text-sm font-medium leading-none text-text-2">
             이미지를 드래그하거나 클릭하여 업로드
           </p>
         )}
-        <p className="text-[12px] leading-none text-text-4">
+        <p className="text-xs leading-none text-text-4">
           JPEG, PNG, GIF, WebP, SVG / 최대 10MB / 5개까지 동시 업로드
         </p>
       </div>

@@ -6,6 +6,7 @@ export interface IIconProps {
 
 export { ArrowUpIcon } from "./arrow-up-icon";
 export { BrushIcon } from "./brush-icon";
+export { ChevronIcon } from "./chevron-icon";
 export { GithubIcon } from "./github-icon";
 export { HomeIcon } from "./home-icon";
 export { MailIcon } from "./mail-icon";

@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import type { SearchFilter } from "@entities/post";
+import { DropSelect } from "@shared/ui/libs";
 
 const FILTER_OPTIONS: Array<{ value: SearchFilter; label: string }> = [
   { value: "title_content", label: "제목 + 내용" },
@@ -24,9 +25,9 @@ export function SearchFilterDropdown({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleChange = (value: SearchFilter) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set("filter", event.target.value);
+    params.set("filter", value);
     params.set("page", "1");
     if (query) {
       params.set("q", query);
@@ -35,40 +36,13 @@ export function SearchFilterDropdown({
   };
 
   return (
-    <div className="relative">
-      <select
-        value={currentFilter}
-        onChange={handleChange}
-        aria-label="검색 필터"
-        className="h-[2.625rem] appearance-none rounded-[0.625rem] border border-border-3 bg-background-2 py-0 pl-[0.875rem] pr-9 text-ui-sm text-text-1 outline-none transition-[border-color,box-shadow] focus:border-primary-1"
-      >
-        {FILTER_OPTIONS.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-      <ChevronDownIcon className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-text-3" />
-    </div>
-  );
-}
-
-function ChevronDownIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      width="16"
-      height="16"
-      aria-hidden="true"
-      className={className}
-    >
-      <polyline points="6 9 12 15 18 9" />
-    </svg>
+    <DropSelect
+      value={currentFilter}
+      onChange={handleChange}
+      ariaLabel="검색 필터"
+      triggerClassName="h-[2.625rem] rounded-[0.625rem] border-border-3 bg-background-2 py-0 pl-3.5 pr-9 text-ui-sm text-text-1"
+      iconClassName="text-text-3"
+      options={FILTER_OPTIONS}
+    />
   );
 }

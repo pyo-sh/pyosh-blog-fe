@@ -1,6 +1,7 @@
 export { ArchiveHeader } from "./archive-header";
 export { ArchiveTagBadge } from "./archive-tag-badge";
 export { Button } from "./button";
+export { DropSelect, type DropSelectOption } from "./drop-select";
 export { EmptyState } from "./empty-state";
 export { ErrorContent } from "./error-content";
 export { ScrollToTop } from "./scroll-to-top";
@@ -11,5 +12,6 @@ export { Modal } from "./modal";
 export { Pagination } from "./pagination";
 export { Skeleton } from "./skeleton";
 export { Spinner } from "./spinner";
+export { TableSkeleton } from "./table-skeleton";
 export { Text } from "./text";
 export { SlideInPanel } from "./slide-in-panel";

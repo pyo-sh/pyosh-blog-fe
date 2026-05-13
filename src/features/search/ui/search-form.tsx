@@ -5,6 +5,7 @@ import { Icon } from "@iconify/react/offline";
 import magniferLinear from "@iconify-icons/solar/magnifer-linear";
 import { useRouter } from "next/navigation";
 import type { SearchFilter } from "@entities/post";
+import { DropSelect } from "@shared/ui/libs";
 
 const FILTER_OPTIONS: Array<{ value: SearchFilter; label: string }> = [
   { value: "title_content", label: "제목 + 내용" },
@@ -58,23 +59,18 @@ export function SearchForm({ currentFilter, initialQuery }: SearchFormProps) {
       className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center"
       onSubmit={handleSubmit}
     >
-      <div className="relative shrink-0">
-        <select
-          value={filter}
-          onChange={(event) => setFilter(event.target.value as SearchFilter)}
-          aria-label="검색 필터"
-          className="h-[2.625rem] w-full appearance-none rounded-[0.625rem] border border-border-3 bg-background-2 py-0 pl-[0.875rem] pr-9 text-ui-sm text-text-1 outline-none transition-[border-color,box-shadow] focus:border-primary-1 sm:w-auto sm:min-w-[7.5rem]"
-        >
-          {FILTER_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-        <ChevronDownIcon className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-text-3" />
-      </div>
+      <DropSelect
+        value={filter}
+        onChange={setFilter}
+        ariaLabel="검색 필터"
+        className="w-full shrink-0 sm:w-auto"
+        triggerClassName="h-[2.625rem] rounded-[0.625rem] border-border-3 bg-background-2 py-0 pl-3.5 pr-9 text-ui-sm text-text-1 sm:min-w-[7.5rem]"
+        iconClassName="text-text-3"
+        iconWidth="12"
+        options={FILTER_OPTIONS}
+      />
 
-      <label className="flex h-[2.625rem] flex-1 items-center gap-2 rounded-[0.625rem] border border-border-3 bg-background-2 px-[0.875rem] transition-[border-color,box-shadow] focus-within:border-primary-1 focus-within:shadow-[0_0_0_3px_rgba(138,111,224,0.12)]">
+      <label className="flex h-[2.625rem] flex-1 items-center gap-2 rounded-[0.625rem] border border-border-3 bg-background-2 px-3.5 transition-[border-color,box-shadow] focus-within:border-primary-1 focus-within:shadow-[0_0_0_3px_rgba(138,111,224,0.12)]">
         <Icon
           icon={magniferLinear}
           width="16"
@@ -88,7 +84,7 @@ export function SearchForm({ currentFilter, initialQuery }: SearchFormProps) {
           onChange={(event) => setQuery(event.target.value)}
           placeholder="검색어를 입력해 주세요"
           aria-label="검색어 입력"
-          className="h-full w-full min-w-0 bg-transparent text-[0.875rem] leading-normal text-text-1 outline-none placeholder:text-text-4"
+          className="h-full w-full min-w-0 bg-transparent text-sm leading-normal text-text-1 outline-none placeholder:text-text-4"
         />
       </label>
 
@@ -100,25 +96,5 @@ export function SearchForm({ currentFilter, initialQuery }: SearchFormProps) {
         <Icon icon={magniferLinear} width="18" aria-hidden="true" />
       </button>
     </form>
-  );
-}
-
-function ChevronDownIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      width="12"
-      height="12"
-      aria-hidden="true"
-      className={className}
-    >
-      <polyline points="6 9 12 15 18 9" />
-    </svg>
   );
 }

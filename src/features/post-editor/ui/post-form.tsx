@@ -1,10 +1,6 @@
 "use client";
 
-import type {
-  FormEvent,
-  KeyboardEvent as ReactKeyboardEvent,
-  ReactNode,
-} from "react";
+import type { FormEvent, ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@iconify/react/offline";
 import archiveLinear from "@iconify-icons/solar/archive-linear";
@@ -60,7 +56,7 @@ import {
 import { normalizeAssetUrl, toCanonicalAssetUrl } from "@shared/lib/asset-url";
 import { getErrorMessage } from "@shared/lib/get-error-message";
 import { cn } from "@shared/lib/style-utils";
-import { Spinner } from "@shared/ui/libs";
+import { DropSelect, Spinner, type DropSelectOption } from "@shared/ui/libs";
 
 type EditorTab = "all" | "info" | "editor-split" | "editor-only";
 type SubmitIntent =
@@ -77,12 +73,6 @@ interface PostFormProps {
   cancelLabel?: string;
   onCancel?: () => void;
   onSuccess?: (post: PostDetail) => void;
-}
-
-interface InlineSelectOption<T extends string | number> {
-  label: string;
-  triggerLabel?: string;
-  value: T;
 }
 
 const DEFAULT_VALUES: PostFormValues = {
@@ -116,12 +106,13 @@ const TABS: Array<{ id: EditorTab; label: string }> = [
 ];
 
 const REMOVED_PENDING_IMAGE_TTL_MS = 30_000;
+const EDITOR_INLINE_PREVIEW_MEDIA_QUERY = "(min-width: 67.5rem)";
 const PAGE_TAB_CLASS =
-  "inline-flex h-8 items-center justify-center rounded-[0.375rem] px-[0.875rem] border-none bg-transparent text-[13px] font-medium leading-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-1/20";
+  "inline-flex h-8 items-center justify-center rounded-md px-3.5 border-none bg-transparent text-[13px] font-medium leading-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-1/20";
 const SECONDARY_BUTTON_CLASS =
-  "inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-[0.5rem] border border-border-3 bg-transparent px-4 text-sm font-medium text-text-2 transition-[background-color,transform] hover:bg-background-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-1/20 disabled:opacity-60";
+  "inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border-3 bg-transparent px-4 text-sm font-medium text-text-2 transition-[background-color,transform] hover:bg-background-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-1/20 disabled:opacity-60";
 const PRIMARY_BUTTON_CLASS =
-  "inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-[0.5rem] bg-primary-1 px-4 text-sm font-medium text-white transition-[opacity,transform] hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-1/20 disabled:opacity-60";
+  "inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-primary-1 px-4 text-sm font-medium text-white transition-[opacity,transform] hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-1/20 disabled:opacity-60";
 
 function createInitialValues(
   initialValues?: Partial<PostFormValues>,
@@ -183,7 +174,7 @@ function sortCategories(categories: Category[]): Category[] {
 function flattenCategoryOptions(
   categories: Category[],
   depth = 0,
-): Array<{ label: string; triggerLabel?: string; value: number }> {
+): Array<DropSelectOption<number>> {
   return categories.flatMap((category) => {
     const prefix = depth === 0 ? "" : `\u3000`.repeat(depth);
 
@@ -286,211 +277,6 @@ function SearchIndexableToggle({
         )}
       />
     </button>
-  );
-}
-
-function InlineCustomSelect<T extends string | number>({
-  value,
-  options,
-  onChange,
-  placeholder,
-  disabled,
-  className,
-}: {
-  value: T | null;
-  options: Array<InlineSelectOption<T>>;
-  onChange: (value: T) => void;
-  placeholder?: string;
-  disabled?: boolean;
-  className?: string;
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(-1);
-  const rootRef = useRef<HTMLDivElement | null>(null);
-  const listboxIdRef = useRef(
-    `inline-select-${Math.random().toString(36).slice(2)}`,
-  );
-  const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const selected = options.find((option) => option.value === value);
-  const selectedIndex = options.findIndex((option) => option.value === value);
-
-  useEffect(() => {
-    optionRefs.current = [];
-  }, [options]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      setActiveIndex(-1);
-
-      return;
-    }
-
-    setActiveIndex(selectedIndex >= 0 ? selectedIndex : 0);
-  }, [isOpen, selectedIndex]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    const handlePointerDown = (event: MouseEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handlePointerDown);
-
-    return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-    };
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!isOpen || activeIndex < 0) {
-      return;
-    }
-
-    optionRefs.current[activeIndex]?.focus();
-  }, [activeIndex, isOpen]);
-
-  const commitSelection = (index: number) => {
-    const option = options[index];
-
-    if (!option) {
-      return;
-    }
-
-    onChange(option.value);
-    setIsOpen(false);
-  };
-
-  const handleTriggerKeyDown = (
-    event: ReactKeyboardEvent<HTMLButtonElement>,
-  ) => {
-    if (disabled) {
-      return;
-    }
-
-    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-      event.preventDefault();
-      setIsOpen(true);
-      setActiveIndex(selectedIndex >= 0 ? selectedIndex : 0);
-
-      return;
-    }
-
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      setIsOpen((current) => !current);
-    }
-  };
-
-  const handleOptionKeyDown = (
-    event: ReactKeyboardEvent<HTMLButtonElement>,
-    index: number,
-  ) => {
-    if (event.key === "ArrowDown") {
-      event.preventDefault();
-      setActiveIndex((index + 1) % options.length);
-
-      return;
-    }
-
-    if (event.key === "ArrowUp") {
-      event.preventDefault();
-      setActiveIndex((index - 1 + options.length) % options.length);
-
-      return;
-    }
-
-    if (event.key === "Home") {
-      event.preventDefault();
-      setActiveIndex(0);
-
-      return;
-    }
-
-    if (event.key === "End") {
-      event.preventDefault();
-      setActiveIndex(options.length - 1);
-
-      return;
-    }
-
-    if (event.key === "Escape") {
-      event.preventDefault();
-      setIsOpen(false);
-
-      return;
-    }
-
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      commitSelection(index);
-    }
-  };
-
-  return (
-    <div ref={rootRef} className={cn("relative w-full", className)}>
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={() => setIsOpen((current) => !current)}
-        onKeyDown={handleTriggerKeyDown}
-        role="combobox"
-        aria-autocomplete="none"
-        aria-expanded={isOpen}
-        aria-controls={listboxIdRef.current}
-        aria-haspopup="listbox"
-        className="flex h-10 w-full items-center rounded-[0.5rem] border border-border-3 bg-background-1 px-3 pr-8 text-left text-[13px] text-text-2 outline-none transition-colors focus-visible:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        <span className="truncate">
-          {selected?.triggerLabel ?? selected?.label ?? placeholder ?? ""}
-        </span>
-        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-text-4">
-          ▾
-        </span>
-      </button>
-
-      {isOpen ? (
-        <div
-          id={listboxIdRef.current}
-          role="listbox"
-          aria-activedescendant={
-            activeIndex >= 0
-              ? `${listboxIdRef.current}-option-${activeIndex}`
-              : undefined
-          }
-          className="absolute left-0 top-[calc(100%+0.25rem)] z-30 min-w-full overflow-hidden rounded-[0.5rem] border border-border-3 bg-background-1 shadow-[0px_8px_24px_rgba(15,23,42,0.08)]"
-        >
-          {options.map((option, index) => (
-            <button
-              key={String(option.value)}
-              id={`${listboxIdRef.current}-option-${index}`}
-              ref={(element) => {
-                optionRefs.current[index] = element;
-              }}
-              type="button"
-              role="option"
-              aria-selected={option.value === value}
-              tabIndex={activeIndex === index ? 0 : -1}
-              onKeyDown={(event) => handleOptionKeyDown(event, index)}
-              onFocus={() => setActiveIndex(index)}
-              onClick={() => commitSelection(index)}
-              className={cn(
-                "flex w-full items-center px-3 py-2 text-left text-[13px] transition-colors hover:bg-background-2",
-                option.value === value
-                  ? "font-medium text-primary-1"
-                  : "text-text-2",
-              )}
-            >
-              <span className="truncate">{option.label}</span>
-            </button>
-          ))}
-        </div>
-      ) : null}
-    </div>
   );
 }
 
@@ -609,7 +395,7 @@ export function PostForm({
       return;
     }
 
-    const mediaQuery = window.matchMedia("(min-width: 1024px)");
+    const mediaQuery = window.matchMedia(EDITOR_INLINE_PREVIEW_MEDIA_QUERY);
     const updateViewport = () => {
       setIsDesktopPreview(mediaQuery.matches);
     };
@@ -1007,13 +793,13 @@ export function PostForm({
         ) : null}
 
         {submitError ? (
-          <div className="mx-5 mt-5 rounded-[1rem] border border-negative-1/20 bg-negative-1/5 px-4 py-3 text-sm text-negative-1 md:mx-6">
+          <div className="mx-5 mt-5 rounded-2xl border border-negative-1/20 bg-negative-1/5 px-4 py-3 text-sm text-negative-1 md:mx-6">
             {submitError}
           </div>
         ) : null}
 
         {categoriesQuery.isError ? (
-          <div className="mx-5 mt-5 rounded-[1rem] border border-negative-1/20 bg-negative-1/5 px-4 py-3 text-sm text-negative-1 md:mx-6">
+          <div className="mx-5 mt-5 rounded-2xl border border-negative-1/20 bg-negative-1/5 px-4 py-3 text-sm text-negative-1 md:mx-6">
             {getErrorMessage(
               categoriesQuery.error,
               "카테고리 목록을 불러오지 못했습니다.",
@@ -1022,7 +808,7 @@ export function PostForm({
         ) : null}
 
         {!categoriesQuery.isPending && categories.length === 0 ? (
-          <div className="mx-5 mt-5 rounded-[1rem] border border-warning-1/20 bg-warning-2 px-4 py-3 text-sm text-warning-1 md:mx-6">
+          <div className="mx-5 mt-5 rounded-2xl border border-warning-1/20 bg-warning-2 px-4 py-3 text-sm text-warning-1 md:mx-6">
             카테고리를 먼저 생성하세요.
           </div>
         ) : null}
@@ -1039,16 +825,20 @@ export function PostForm({
             <section className="border-b border-border-4 px-6 py-3">
               <div className="flex flex-wrap items-center gap-4">
                 <CompactMetaLabel label="카테고리">
-                  <div className="min-w-[10rem]">
-                    <InlineCustomSelect
+                  <div className="min-w-40">
+                    <DropSelect
                       value={values.categoryId}
                       options={categoryOptions}
                       disabled={categoriesQuery.isPending}
+                      ariaLabel="카테고리"
                       placeholder={
                         categoriesQuery.isPending
                           ? "카테고리 불러오는 중..."
                           : "카테고리 선택"
                       }
+                      className="w-full"
+                      triggerClassName="rounded-lg text-[13px] text-text-2 focus-visible:border-primary-1"
+                      optionClassName="text-[13px] text-text-2"
                       onChange={(value) =>
                         handleFieldChange("categoryId", value)
                       }
@@ -1057,7 +847,7 @@ export function PostForm({
                 </CompactMetaLabel>
 
                 <CompactMetaLabel label="태그">
-                  <div className="min-w-[16rem] flex-1">
+                  <div className="min-w-64 flex-1">
                     <TagChipInput
                       value={values.tags}
                       showHelperText={false}
@@ -1160,10 +950,14 @@ export function PostForm({
                 </CompactMetaLabel>
 
                 <CompactMetaLabel label="댓글 상태">
-                  <div className="min-w-[7rem]">
-                    <InlineCustomSelect
+                  <div className="min-w-28">
+                    <DropSelect
                       value={values.commentStatus}
                       options={commentStatusOptions}
+                      ariaLabel="댓글 상태"
+                      className="w-full"
+                      triggerClassName="rounded-lg text-[13px] text-text-2 focus-visible:border-primary-1"
+                      optionClassName="text-[13px] text-text-2"
                       onChange={(value) =>
                         handleFieldChange(
                           "commentStatus",
@@ -1182,15 +976,19 @@ export function PostForm({
               <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_20rem]">
                 <div className="space-y-5">
                   <MetaFormRow label="카테고리">
-                    <InlineCustomSelect
+                    <DropSelect
                       value={values.categoryId}
                       options={categoryOptions}
                       disabled={categoriesQuery.isPending}
+                      ariaLabel="카테고리"
                       placeholder={
                         categoriesQuery.isPending
                           ? "카테고리 불러오는 중..."
                           : "카테고리 선택"
                       }
+                      className="w-full"
+                      triggerClassName="rounded-lg text-[13px] text-text-2 focus-visible:border-primary-1"
+                      optionClassName="text-[13px] text-text-2"
                       onChange={(value) =>
                         handleFieldChange("categoryId", value)
                       }
@@ -1255,9 +1053,13 @@ export function PostForm({
                     }: ${getCommentStatusDescription(values.commentStatus)}`}
                   >
                     <div className="max-w-[14rem]">
-                      <InlineCustomSelect
+                      <DropSelect
                         value={values.commentStatus}
                         options={commentStatusOptions}
+                        ariaLabel="댓글 상태"
+                        className="w-full"
+                        triggerClassName="rounded-lg text-[13px] text-text-2 focus-visible:border-primary-1"
+                        optionClassName="text-[13px] text-text-2"
                         onChange={(value) =>
                           handleFieldChange(
                             "commentStatus",
@@ -1289,7 +1091,7 @@ export function PostForm({
                       }
                       placeholder="글 목록에 표시될 요약문을 입력하세요"
                       aria-label="Summary"
-                      className="w-full rounded-[0.75rem] border border-border-3 bg-background-1 px-3 py-2.5 text-[13px] text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
+                      className="w-full rounded-xl border border-border-3 bg-background-1 px-3 py-2.5 text-[13px] text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
                     />
                     <div className="mt-1.5 text-right text-[11px] text-text-4">
                       {values.summary.length} / 200자
@@ -1308,7 +1110,7 @@ export function PostForm({
                       }
                       placeholder="검색엔진에 표시될 설명을 입력하세요"
                       aria-label="Description"
-                      className="w-full rounded-[0.75rem] border border-border-3 bg-background-1 px-3 py-2.5 text-[13px] text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
+                      className="w-full rounded-xl border border-border-3 bg-background-1 px-3 py-2.5 text-[13px] text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
                     />
                     <div className="mt-1.5 text-right text-[11px] text-text-4">
                       {values.description.length} / 300자

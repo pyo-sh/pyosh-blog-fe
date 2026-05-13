@@ -15,7 +15,7 @@ import type { Asset, AssetCategory } from "../model";
 import { normalizeAssetUrl, toCanonicalAssetUrl } from "@shared/lib/asset-url";
 import { getErrorMessage } from "@shared/lib/get-error-message";
 import { cn } from "@shared/lib/style-utils";
-import { Modal } from "@shared/ui/libs";
+import { DropSelect, Modal } from "@shared/ui/libs";
 
 const PAGE_SIZE = 18;
 
@@ -124,7 +124,7 @@ export function AssetPickerModal({
       aria-label="에셋 선택"
       className="w-[min(94vw,72rem)] p-0 text-left max-sm:w-screen max-sm:max-w-none"
     >
-      <div className="flex h-[min(88vh,56rem)] flex-col overflow-hidden rounded-[1.5rem] bg-background-1 max-sm:h-dvh max-sm:rounded-none">
+      <div className="flex h-[min(88vh,56rem)] flex-col overflow-hidden rounded-3xl bg-background-1 max-sm:h-dvh max-sm:rounded-none">
         <div className="border-b border-border-3 px-6 py-5">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -164,26 +164,23 @@ export function AssetPickerModal({
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="별명 또는 파일명 검색"
-              className="h-10 rounded-[0.75rem] border border-border-3 bg-background-1 px-3 text-sm text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
+              className="h-10 rounded-xl border border-border-3 bg-background-1 px-3 text-sm text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
             />
-            <select
-              value={categoryId ?? ""}
-              onChange={(event) =>
-                setCategoryId(
-                  event.target.value ? Number(event.target.value) : null,
-                )
-              }
-              className="h-10 rounded-[0.75rem] border border-border-3 bg-background-1 px-3 text-sm text-text-2 outline-none transition-colors focus:border-primary-1"
-              aria-label="에셋 카테고리"
-            >
-              <option value="">전체 카테고리</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-            <label className="inline-flex h-10 items-center gap-2 rounded-[0.75rem] border border-border-3 px-3 text-sm text-text-2">
+            <DropSelect
+              value={categoryId === null ? "" : String(categoryId)}
+              onChange={(value) => setCategoryId(value ? Number(value) : null)}
+              className="w-full"
+              triggerClassName="h-10 rounded-xl text-sm text-text-2"
+              ariaLabel="에셋 카테고리"
+              options={[
+                { label: "전체 카테고리", value: "" },
+                ...categories.map((category) => ({
+                  label: category.name,
+                  value: String(category.id),
+                })),
+              ]}
+            />
+            <label className="inline-flex h-10 items-center gap-2 rounded-xl border border-border-3 px-3 text-sm text-text-2">
               <input
                 type="checkbox"
                 checked={currentPostFirst}
@@ -198,7 +195,7 @@ export function AssetPickerModal({
 
         <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
           {categoriesQuery.isError ? (
-            <div className="mb-4 rounded-[1rem] border border-warning-1/20 bg-warning-1/10 px-4 py-3 text-sm text-warning-1">
+            <div className="mb-4 rounded-2xl border border-warning-1/20 bg-warning-1/10 px-4 py-3 text-sm text-warning-1">
               {getErrorMessage(
                 categoriesQuery.error,
                 "에셋 카테고리를 불러오지 못했습니다.",
@@ -211,14 +208,14 @@ export function AssetPickerModal({
               {Array.from({ length: 6 }).map((_, index) => (
                 <div
                   key={index}
-                  className="aspect-[4/3] animate-pulse rounded-[1.25rem] bg-background-2"
+                  className="aspect-4/3 animate-pulse rounded-[1.25rem] bg-background-2"
                 />
               ))}
             </div>
           ) : null}
 
           {assetsQuery.isError ? (
-            <div className="rounded-[1rem] border border-negative-1/20 bg-negative-1/5 px-4 py-3 text-sm text-negative-1">
+            <div className="rounded-2xl border border-negative-1/20 bg-negative-1/5 px-4 py-3 text-sm text-negative-1">
               {getErrorMessage(
                 assetsQuery.error,
                 "에셋 목록을 불러오지 못했습니다.",
@@ -272,7 +269,7 @@ export function AssetPickerModal({
               type="button"
               onClick={() => setPage((current) => Math.max(1, current - 1))}
               disabled={!meta || meta.page <= 1}
-              className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center justify-center rounded-xl border border-border-3 px-3 py-2 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
             >
               이전
             </button>
@@ -287,14 +284,14 @@ export function AssetPickerModal({
                 )
               }
               disabled={!meta || meta.page >= meta.totalPages}
-              className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-3 py-2 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center justify-center rounded-xl border border-border-3 px-3 py-2 text-sm text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
             >
               다음
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-4 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
+              className="inline-flex items-center justify-center rounded-xl border border-border-3 px-4 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
             >
               취소
             </button>
@@ -302,7 +299,7 @@ export function AssetPickerModal({
               type="button"
               onClick={() => selectedAsset && onSelect(selectedAsset.url)}
               disabled={!selectedAsset}
-              className="inline-flex items-center justify-center rounded-[0.75rem] bg-primary-1 px-4 py-2 text-sm font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center rounded-xl bg-primary-1 px-4 py-2 text-sm font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
             >
               선택
             </button>
@@ -372,15 +369,15 @@ function CategoryChips({
 function SelectedAssetSummary({ asset }: { asset: Asset | null }) {
   if (!asset) {
     return (
-      <div className="flex min-h-16 items-center rounded-[1rem] border border-border-4 bg-background-2 px-4 text-sm text-text-4">
+      <div className="flex min-h-16 items-center rounded-2xl border border-border-4 bg-background-2 px-4 text-sm text-text-4">
         선택된 에셋이 없습니다.
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-16 items-center gap-3 rounded-[1rem] border border-border-4 bg-background-2 p-3">
-      <div className="h-12 w-16 shrink-0 overflow-hidden rounded-[0.75rem] bg-background-3">
+    <div className="flex min-h-16 items-center gap-3 rounded-2xl border border-border-4 bg-background-2 p-3">
+      <div className="h-12 w-16 shrink-0 overflow-hidden rounded-xl bg-background-3">
         {/* eslint-disable-next-line @next/next/no-img-element -- arbitrary admin asset hosts are allowed */}
         <img
           src={normalizeAssetUrl(asset.url)}
@@ -425,7 +422,7 @@ function AssetPickerCard({
       )}
       aria-pressed={isSelected}
     >
-      <div className="relative aspect-[4/3] overflow-hidden bg-background-3">
+      <div className="relative aspect-4/3 overflow-hidden bg-background-3">
         {hasError ? (
           <div className="flex h-full items-center justify-center px-4 text-sm text-text-4">
             미리보기 실패

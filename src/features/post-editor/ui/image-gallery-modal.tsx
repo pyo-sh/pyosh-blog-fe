@@ -39,7 +39,7 @@ export function ImageGalleryModal({
       withBackground
       aria-label="이미지 삽입"
     >
-      <div className="flex h-[min(88vh,52rem)] w-[min(92vw,64rem)] flex-col overflow-hidden rounded-[1.5rem] bg-background-1 text-left">
+      <div className="flex h-[min(88vh,52rem)] w-[min(92vw,64rem)] flex-col overflow-hidden rounded-3xl bg-background-1 text-left">
         <div className="border-b border-border-3 px-6 py-5">
           <p className="text-xs uppercase tracking-[0.24em] text-text-4">
             Images
@@ -84,7 +84,7 @@ export function ImageGalleryModal({
           ) : null}
 
           {assetsQuery.isError ? (
-            <div className="rounded-[1rem] border border-negative-1/20 bg-negative-1/5 px-4 py-3 text-sm text-negative-1">
+            <div className="rounded-2xl border border-negative-1/20 bg-negative-1/5 px-4 py-3 text-sm text-negative-1">
               {getErrorMessage(
                 assetsQuery.error,
                 "에셋 목록을 불러오지 못했습니다.",
@@ -95,7 +95,7 @@ export function ImageGalleryModal({
           {!assetsQuery.isPending &&
           !assetsQuery.isError &&
           (assetsQuery.data?.data.length ?? 0) === 0 ? (
-            <div className="rounded-[1rem] border border-border-3 bg-background-2 px-4 py-6 text-sm text-text-3">
+            <div className="rounded-2xl border border-border-3 bg-background-2 px-4 py-6 text-sm text-text-3">
               표시할 에셋이 없습니다. 위 버튼으로 이미지를 선택해 주세요.
             </div>
           ) : null}
@@ -111,7 +111,7 @@ export function ImageGalleryModal({
                   onClick={() => onSelectAsset(asset)}
                   className="overflow-hidden rounded-[1.25rem] border border-border-3 bg-background-2 text-left transition-colors hover:border-primary-1"
                 >
-                  <div className="aspect-[4/3] bg-background-3">
+                  <div className="aspect-4/3 bg-background-3">
                     {/* eslint-disable-next-line @next/next/no-img-element -- arbitrary admin asset hosts are allowed */}
                     <img
                       src={asset.url}

@@ -3,9 +3,14 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { AssetBulkActionBar } from "./asset-bulk-action-bar";
 import { AssetCategoryManagerModal } from "./asset-category-manager-modal";
 import { AssetDetailModal } from "./asset-detail-modal";
 import { AssetGrid } from "./asset-grid";
+import { AssetGridSkeleton } from "./asset-grid-skeleton";
+import { AssetPagination } from "./asset-pagination";
+import { AssetToolbar } from "./asset-toolbar";
+import { DeleteAssetsModal } from "./delete-assets-modal";
 import { type PendingUploadFile, UploadZone } from "./upload-zone";
 import {
   adminAssetKeys,
@@ -27,7 +32,6 @@ import {
 } from "@entities/asset";
 import { toCanonicalAssetUrl } from "@shared/lib/asset-url";
 import { getErrorMessage } from "@shared/lib/get-error-message";
-import { Modal, Spinner } from "@shared/ui/libs";
 
 const PAGE_SIZE = 18;
 const MAX_FILES = 5;
@@ -40,27 +44,6 @@ const ACCEPTED_TYPES = new Set([
   "image/svg+xml",
 ]);
 const EMPTY_ASSETS: Asset[] = [];
-
-function generatePageNumbers(
-  currentPage: number,
-  totalPages: number,
-  windowSize: number,
-): Array<number | "..."> {
-  if (totalPages <= 1) return [1];
-
-  const windowStart = Math.max(2, currentPage - windowSize);
-  const windowEnd = Math.min(totalPages - 1, currentPage + windowSize);
-  const pages: Array<number | "..."> = [1];
-
-  if (windowStart > 2) pages.push("...");
-  for (let index = windowStart; index <= windowEnd; index += 1) {
-    pages.push(index);
-  }
-  if (windowEnd < totalPages - 1) pages.push("...");
-  pages.push(totalPages);
-
-  return pages;
-}
 
 export function AssetUploader() {
   const queryClient = useQueryClient();
@@ -75,6 +58,7 @@ export function AssetUploader() {
   const [pendingCategoryId, setPendingCategoryId] = useState<number | null>(
     null,
   );
+  const [isUploadPanelOpen, setIsUploadPanelOpen] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<PendingUploadFile[]>([]);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [selectionMode, setSelectionMode] = useState(false);
@@ -149,6 +133,39 @@ export function AssetUploader() {
     findAssetCategoryByKey(categories, "default") ?? categories[0] ?? null;
   const selectedUploadCategoryId =
     defaultUploadCategoryId ?? fallbackDefaultCategory?.id ?? null;
+  const shouldShowUploadPanel =
+    isUploadPanelOpen || pendingFiles.length > 0 || uploadMutation.isPending;
+  const isUploadPanelPinned =
+    pendingFiles.length > 0 || uploadMutation.isPending;
+
+  const uploadZone = (
+    <UploadZone
+      files={pendingFiles}
+      isUploading={uploadMutation.isPending}
+      uploadProgress={uploadProgress}
+      errorMessage={null}
+      categories={categories}
+      defaultCategoryId={selectedUploadCategoryId}
+      isDefaultCategoryDisabled={
+        categoriesQuery.isPending || uploadMutation.isPending
+      }
+      onFilesAdded={addFiles}
+      onDefaultCategoryChange={setDefaultUploadCategoryId}
+      onOpenCategoryManager={() => setIsCategoryManagerOpen(true)}
+      onUpdateFileMetadata={updatePendingFileMetadata}
+      onRemoveFile={removePendingFile}
+      onClear={clearPendingFiles}
+      onUpload={() => {
+        if (pendingFiles.length === 0) {
+          toast.error("업로드할 파일을 먼저 선택하세요.");
+
+          return;
+        }
+
+        uploadMutation.mutate(pendingFiles);
+      }}
+    />
+  );
 
   const deleteMutation = useMutation({
     mutationFn: async (ids: number[]) => {
@@ -367,8 +384,6 @@ export function AssetUploader() {
     return () => window.clearTimeout(timeout);
   }, [copiedState]);
 
-  const pageNumbers = meta ? generatePageNumbers(page, meta.totalPages, 2) : [];
-
   function clearPendingFiles() {
     setPendingFiles((current) => {
       current.forEach((item) => {
@@ -572,66 +587,6 @@ export function AssetUploader() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[1rem] border border-border-4 bg-background-2 p-4">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="text-sm font-semibold text-text-1">업로드 기본값</p>
-            <p className="mt-1 text-xs text-text-4">
-              에셋 관리에서 직접 추가하는 파일은 선택한 카테고리로 대기열에
-              들어갑니다.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <select
-              value={selectedUploadCategoryId ?? ""}
-              onChange={(event) =>
-                setDefaultUploadCategoryId(
-                  event.target.value ? Number(event.target.value) : null,
-                )
-              }
-              disabled={categoriesQuery.isPending || uploadMutation.isPending}
-              className="h-10 min-w-[12rem] rounded-[0.75rem] border border-border-3 bg-background-1 px-3 text-sm text-text-2 outline-none transition-colors focus:border-primary-1 disabled:cursor-not-allowed disabled:opacity-60"
-              aria-label="업로드 기본 카테고리"
-            >
-              {categories.length === 0 ? <option value="">기본</option> : null}
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-            <button
-              type="button"
-              onClick={() => setIsCategoryManagerOpen(true)}
-              className="inline-flex h-10 items-center justify-center rounded-[0.75rem] border border-border-3 px-3 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
-            >
-              카테고리 관리
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <UploadZone
-        files={pendingFiles}
-        isUploading={uploadMutation.isPending}
-        uploadProgress={uploadProgress}
-        errorMessage={null}
-        categories={categories}
-        onFilesAdded={addFiles}
-        onUpdateFileMetadata={updatePendingFileMetadata}
-        onRemoveFile={removePendingFile}
-        onClear={clearPendingFiles}
-        onUpload={() => {
-          if (pendingFiles.length === 0) {
-            toast.error("업로드할 파일을 먼저 선택하세요.");
-
-            return;
-          }
-
-          uploadMutation.mutate(pendingFiles);
-        }}
-      />
-
       {assetsQuery.isPending ? <AssetGridSkeleton /> : null}
 
       {!assetsQuery.isPending && assetsQuery.isError ? (
@@ -645,7 +600,7 @@ export function AssetUploader() {
           <button
             type="button"
             onClick={() => void assetsQuery.refetch()}
-            className="mt-4 inline-flex rounded-[0.75rem] border border-negative-1/20 px-4 py-2 text-sm font-medium text-negative-1 transition-colors hover:bg-negative-1/10"
+            className="mt-4 inline-flex rounded-xl border border-negative-1/20 px-4 py-2 text-sm font-medium text-negative-1 transition-colors hover:bg-negative-1/10"
           >
             다시 시도
           </button>
@@ -654,44 +609,27 @@ export function AssetUploader() {
 
       {!assetsQuery.isPending && !assetsQuery.isError ? (
         <>
-          <section className="rounded-[1rem] border border-border-4 bg-background-2 p-4">
-            <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_14rem_auto]">
-              <input
-                type="search"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="별명 또는 파일명 검색"
-                className="h-10 rounded-[0.75rem] border border-border-3 bg-background-1 px-3 text-sm text-text-2 outline-none transition-colors placeholder:text-text-4 focus:border-primary-1"
-              />
-              <select
-                value={categoryFilterId ?? ""}
-                onChange={(event) =>
-                  setCategoryFilterId(
-                    event.target.value ? Number(event.target.value) : null,
-                  )
-                }
-                className="h-10 rounded-[0.75rem] border border-border-3 bg-background-1 px-3 text-sm text-text-2 outline-none transition-colors focus:border-primary-1"
-                aria-label="카테고리 필터"
-              >
-                <option value="">전체 카테고리</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-              <button
-                type="button"
-                onClick={() => {
-                  setSearch("");
-                  setCategoryFilterId(null);
-                }}
-                className="inline-flex h-10 items-center justify-center rounded-[0.75rem] border border-border-3 px-3 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1"
-              >
-                필터 초기화
-              </button>
-            </div>
-          </section>
+          <AssetToolbar
+            search={search}
+            categoryFilterId={categoryFilterId}
+            categories={categories}
+            isUploadPanelOpen={shouldShowUploadPanel}
+            uploadQueueCount={pendingFiles.length}
+            isUploadPanelPinned={isUploadPanelPinned}
+            onToggleUploadPanel={() =>
+              setIsUploadPanelOpen((current) => !current)
+            }
+            onSearchChange={setSearch}
+            onCategoryFilterChange={setCategoryFilterId}
+            onResetFilters={() => {
+              setSearch("");
+              setCategoryFilterId(null);
+            }}
+          />
+
+          {shouldShowUploadPanel ? (
+            <div id="asset-upload-panel">{uploadZone}</div>
+          ) : null}
 
           <AssetGrid
             assets={assets}
@@ -710,175 +648,45 @@ export function AssetUploader() {
           />
           <div className="flex flex-col gap-4">
             {selectionMode ? (
-              <div className="fixed bottom-0 left-0 right-0 z-20 md:left-[var(--admin-sidebar-offset)]">
-                <div className="flex flex-wrap items-center gap-3 border-t border-border-3 bg-[rgba(241,242,243,0.95)] px-4 py-3 backdrop-blur-[12px] md:px-6 dark:bg-[rgba(19,20,21,0.94)]">
-                  <span className="text-sm font-medium text-text-1">
-                    선택됨 {selectedIds.length}개
-                  </span>
-                  <div className="ml-auto flex flex-wrap items-center gap-2">
-                    <select
-                      value={bulkCategoryId ?? ""}
-                      onChange={(event) =>
-                        setBulkCategoryId(
-                          event.target.value
-                            ? Number(event.target.value)
-                            : null,
-                        )
-                      }
-                      disabled={
-                        selectedIds.length === 0 ||
-                        bulkCategoryMutation.isPending
-                      }
-                      className="h-9 rounded-[0.7rem] border border-border-3 bg-background-1 px-2 text-sm text-text-2 outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                      aria-label="선택 에셋 카테고리"
-                    >
-                      <option value="">카테고리 변경</option>
-                      {categories.map((category) => (
-                        <option key={category.id} value={category.id}>
-                          {category.name}
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (bulkCategoryId === null) {
-                          toast.error("변경할 카테고리를 선택하세요.");
+              <AssetBulkActionBar
+                selectedCount={selectedIds.length}
+                categories={categories}
+                bulkCategoryId={bulkCategoryId}
+                isApplyingCategory={bulkCategoryMutation.isPending}
+                isDeleting={deleteMutation.isPending}
+                isPageFullySelected={
+                  assets.length > 0 &&
+                  assets.every((asset) => selectedIds.includes(asset.id))
+                }
+                onBulkCategoryChange={setBulkCategoryId}
+                onApplyCategory={() => {
+                  if (bulkCategoryId === null) {
+                    toast.error("변경할 카테고리를 선택하세요.");
 
-                          return;
-                        }
+                    return;
+                  }
 
-                        bulkCategoryMutation.mutate({
-                          ids: selectedIds,
-                          categoryId: bulkCategoryId,
-                        });
-                      }}
-                      disabled={
-                        selectedIds.length === 0 ||
-                        bulkCategoryId === null ||
-                        bulkCategoryMutation.isPending
-                      }
-                      className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] border border-border-3 px-3 text-sm text-text-2 transition-colors hover:bg-background-1 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      {bulkCategoryMutation.isPending
-                        ? "변경 중"
-                        : "카테고리 적용"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        selectAll(
-                          !assets.every((asset) =>
-                            selectedIds.includes(asset.id),
-                          ),
-                        )
-                      }
-                      className="cursor-pointer px-2 py-1.5 text-sm text-primary-1 transition-colors hover:text-primary-1/80"
-                    >
-                      {assets.length > 0 &&
-                      assets.every((asset) => selectedIds.includes(asset.id))
-                        ? "전체 해제"
-                        : "전체 선택"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => requestDelete(selectedIds)}
-                      disabled={
-                        selectedIds.length === 0 || deleteMutation.isPending
-                      }
-                      className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] border border-negative-1/30 px-3 text-sm text-negative-1 transition-colors hover:bg-negative-1/10 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      삭제
-                    </button>
-                    <button
-                      type="button"
-                      onClick={exitSelectionMode}
-                      className="inline-flex h-9 cursor-pointer items-center rounded-[0.7rem] bg-primary-1 px-3 text-sm text-white transition-opacity hover:opacity-90"
-                    >
-                      완료
-                    </button>
-                  </div>
-                </div>
-              </div>
+                  bulkCategoryMutation.mutate({
+                    ids: selectedIds,
+                    categoryId: bulkCategoryId,
+                  });
+                }}
+                onToggleSelectAll={() =>
+                  selectAll(
+                    !assets.every((asset) => selectedIds.includes(asset.id)),
+                  )
+                }
+                onRequestDelete={() => requestDelete(selectedIds)}
+                onDone={exitSelectionMode}
+              />
             ) : null}
             {meta ? (
-              <nav
-                aria-label="관리자 에셋 페이지네이션"
-                className="flex items-center justify-center gap-0.5"
-              >
-                <button
-                  type="button"
-                  onClick={() => handlePageChange(Math.max(1, page - 5))}
-                  disabled={page <= 5}
-                  className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:text-text-4"
-                  aria-label="5 pages back"
-                >
-                  &laquo;
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handlePageChange(Math.max(1, page - 1))}
-                  disabled={page === 1}
-                  className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:text-text-4"
-                  aria-label="Previous page"
-                >
-                  &lsaquo;
-                </button>
-                {pageNumbers.map((pageNumber, index) =>
-                  pageNumber === "..." ? (
-                    <span
-                      key={`ellipsis-${index}`}
-                      className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-4"
-                      aria-hidden="true"
-                    >
-                      &hellip;
-                    </span>
-                  ) : (
-                    <button
-                      key={pageNumber}
-                      type="button"
-                      onClick={() => handlePageChange(pageNumber)}
-                      disabled={pageNumber === page}
-                      className={
-                        pageNumber === page
-                          ? "pointer-events-none inline-flex min-w-[2rem] items-center justify-center rounded bg-primary-1 px-2.5 py-1.5 text-sm font-semibold text-white"
-                          : "inline-flex min-w-[2rem] items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2"
-                      }
-                      aria-current={pageNumber === page ? "page" : undefined}
-                      aria-label={`Page ${pageNumber}`}
-                    >
-                      {pageNumber}
-                    </button>
-                  ),
-                )}
-                <button
-                  type="button"
-                  onClick={() =>
-                    handlePageChange(Math.min(meta.totalPages, page + 1))
-                  }
-                  disabled={page === meta.totalPages}
-                  className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:text-text-4"
-                  aria-label="Next page"
-                >
-                  &rsaquo;
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    handlePageChange(Math.min(meta.totalPages, page + 5))
-                  }
-                  disabled={page + 5 > meta.totalPages}
-                  className="inline-flex items-center justify-center rounded px-2.5 py-1.5 text-sm text-text-1 transition-colors hover:bg-background-2 disabled:cursor-not-allowed disabled:text-text-4"
-                  aria-label="5 pages forward"
-                >
-                  &raquo;
-                </button>
-              </nav>
-            ) : null}
-            {assetsQuery.isFetching && !assetsQuery.isPending ? (
-              <p className="text-center text-sm text-text-3">
-                목록을 새로 불러오는 중...
-              </p>
+              <AssetPagination
+                page={page}
+                totalPages={meta.totalPages}
+                isFetching={assetsQuery.isFetching && !assetsQuery.isPending}
+                onPageChange={handlePageChange}
+              />
             ) : null}
           </div>
         </>
@@ -930,94 +738,5 @@ export function AssetUploader() {
         onDelete={handleDeleteCategory}
       />
     </div>
-  );
-}
-
-function DeleteAssetsModal({
-  ids,
-  isDeleting,
-  onCancel,
-  onConfirm,
-}: {
-  ids: number[];
-  isDeleting: boolean;
-  onCancel: () => void;
-  onConfirm: () => void;
-}) {
-  return (
-    <Modal
-      isOpen={ids.length > 0}
-      onClose={onCancel}
-      withBackground
-      aria-label={ids.length === 1 ? "에셋 삭제 확인" : "에셋 일괄 삭제 확인"}
-      className="w-[min(100%,30rem)] p-0 text-left"
-    >
-      <div className="border-b border-border-3 px-6 py-5">
-        <p className="text-body-xs uppercase tracking-[0.2em] text-text-4">
-          Delete assets
-        </p>
-        <h2 className="mt-2 text-xl font-semibold text-text-1">
-          {ids.length === 1
-            ? "이 에셋을 삭제할까요?"
-            : `${ids.length}개의 에셋을 삭제할까요?`}
-        </h2>
-      </div>
-
-      <div className="space-y-3 px-6 py-5 text-sm text-text-3">
-        <p>
-          삭제된 에셋은 복구되지 않으며, 에디터에서 이미 사용 중인 경우 깨진
-          이미지가 생길 수 있습니다.
-        </p>
-        <p className="rounded-[1rem] border border-negative-1/20 bg-negative-1/10 px-4 py-3 text-negative-1">
-          선택된 항목: {ids.join(", ")}
-        </p>
-      </div>
-
-      <div className="flex flex-wrap justify-end gap-3 border-t border-border-3 px-6 py-5">
-        <button
-          type="button"
-          onClick={onCancel}
-          disabled={isDeleting}
-          className="inline-flex items-center justify-center rounded-[0.75rem] border border-border-3 px-4 py-2 text-sm font-medium text-text-2 transition-colors hover:border-border-2 hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          취소
-        </button>
-        <button
-          type="button"
-          onClick={onConfirm}
-          disabled={isDeleting}
-          className="inline-flex items-center justify-center rounded-[0.75rem] bg-negative-1 px-4 py-2 text-sm font-medium text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isDeleting ? (
-            <>
-              <Spinner size="sm" /> 삭제 중
-            </>
-          ) : (
-            "삭제"
-          )}
-        </button>
-      </div>
-    </Modal>
-  );
-}
-
-function AssetGridSkeleton() {
-  return (
-    <section className="rounded-[1.75rem] border border-border-3 bg-background-2 p-6">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, index) => (
-          <div
-            key={index}
-            className="overflow-hidden rounded-[1.4rem] border border-border-3 bg-background-1"
-          >
-            <div className="aspect-[4/3] animate-pulse bg-background-3" />
-            <div className="space-y-3 p-4">
-              <div className="h-4 w-2/3 animate-pulse rounded bg-background-3" />
-              <div className="h-3 w-1/2 animate-pulse rounded bg-background-3" />
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
   );
 }

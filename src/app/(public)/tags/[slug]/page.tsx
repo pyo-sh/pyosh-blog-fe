@@ -102,7 +102,7 @@ export default async function TagPostsPage({
   ];
 
   return (
-    <main className="flex min-h-screen flex-col pt-8 pb-16">
+    <div className="flex flex-col">
       {siteUrl ? (
         <JsonLd data={buildBreadcrumbJsonLd(breadcrumbItems, siteUrl)} />
       ) : null}
@@ -140,6 +140,6 @@ export default async function TagPostsPage({
         />
       </div>
       <ScrollToTop />
-    </main>
+    </div>
   );
 }
